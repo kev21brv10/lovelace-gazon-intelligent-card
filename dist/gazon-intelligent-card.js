@@ -270,11 +270,13 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   getGridOptions() {
+    const compact = Boolean(this._config?.compact);
     return {
-      rows: this.getCardSize(),
+      rows: compact ? 2 : 3,
       columns: 6,
-      min_rows: this._config?.compact ? 2 : 3,
+      min_rows: 2,
       min_columns: 3,
+      max_rows: compact ? 4 : 5,
     };
   }
 
@@ -833,7 +835,7 @@ class GazonIntelligentCard extends HTMLElement {
 
         .decision-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
           gap: 10px;
           margin: 8px 0 14px;
         }
@@ -868,13 +870,13 @@ class GazonIntelligentCard extends HTMLElement {
 
         .tiles {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
           gap: 10px;
           margin-top: 8px;
         }
 
         .tiles--compact {
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         }
 
         .tile {
@@ -954,6 +956,11 @@ class GazonIntelligentCard extends HTMLElement {
 
           .header__badges {
             justify-content: flex-start;
+          }
+
+          .decision-grid,
+          .tiles {
+            grid-template-columns: 1fr;
           }
         }
       </style>

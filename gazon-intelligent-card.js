@@ -1063,7 +1063,7 @@ class GazonIntelligentCard extends HTMLElement {
         .hero {
           display: grid;
           min-width: 0;
-          grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+          grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
           gap: 8px;
           align-items: stretch;
           margin: 2px 0 6px;
@@ -1111,7 +1111,7 @@ class GazonIntelligentCard extends HTMLElement {
         .hero__metrics {
           display: grid;
           min-width: 0;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
           gap: 6px;
           align-content: start;
         }
@@ -1234,7 +1234,7 @@ class GazonIntelligentCard extends HTMLElement {
 
         .decision-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
           gap: 8px;
           margin: 4px 0 10px;
         }
@@ -1272,26 +1272,26 @@ class GazonIntelligentCard extends HTMLElement {
         .tiles {
           display: grid;
           min-width: 0;
-          grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
           gap: 6px;
           margin-top: 4px;
         }
 
         .tiles--overview {
-          grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
         }
 
         .tiles--watering,
         .tiles--mowing {
-          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(124px, 1fr));
         }
 
         .tiles--details {
-          grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
         }
 
         .tiles--compact {
-          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
         }
 
         .tile {

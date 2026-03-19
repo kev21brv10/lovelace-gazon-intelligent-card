@@ -107,7 +107,7 @@ show_background: true
 compact: false
 theme_mode: auto
 accent_color: ""
-card_height: 0
+card_height: ""
 icon_size: 24
 border_radius: 24
 background_style: solid
@@ -116,6 +116,8 @@ show_secondary_info: true
 tap_action:
   action: more-info
 hold_action:
+  action: none
+double_tap_action:
   action: none
 entity_phase: sensor.gazon_intelligent_phase_dominante
 entity_sous_phase: sensor.gazon_intelligent_sous_phase
@@ -156,6 +158,7 @@ entity_risque: sensor.gazon_intelligent_risque_gazon
 - `accent_color`
 - `tap_action`
 - `hold_action`
+- `double_tap_action`
 - `card_height`
 - `icon_size`
 - `border_radius`
@@ -179,8 +182,8 @@ Pour les réglages avancés, l’édition YAML reste la voie la plus directe.
 ## 🚀 Développement local
 
 ```bash
-npm run build
-npm run validate
+python3 scripts/build.py
+python3 scripts/validate.py
 ```
 
 Le fichier distribué est généré dans :
@@ -196,8 +199,8 @@ dist/gazon-intelligent-card.js
 Process simple :
 
 1. mettre à jour la version dans `package.json`
-2. lancer `npm run build`
-3. vérifier `npm run validate`
+2. lancer `python3 scripts/build.py`
+3. vérifier `python3 scripts/validate.py`
 4. créer une release GitHub
 
 Le workflow CI valide la carte à chaque push et construit l’artefact pour les tags de release.
@@ -207,4 +210,3 @@ Le workflow CI valide la carte à chaque push et construit l’artefact pour les
 ## 📄 Licence
 
 MIT
-

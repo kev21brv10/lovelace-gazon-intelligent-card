@@ -12,6 +12,9 @@ if package.get("main") != "dist/gazon-intelligent-card.js":
 if hacs.get("filename") != "dist/gazon-intelligent-card.js":
     raise SystemExit("hacs.json filename must point to dist/gazon-intelligent-card.js")
 
+if hacs.get("content_in_root") is not False:
+    raise SystemExit("hacs.json content_in_root must be false")
+
 src = (ROOT / "src" / "gazon-intelligent-card.js").read_text(encoding="utf-8")
 dist = (ROOT / "dist" / "gazon-intelligent-card.js").read_text(encoding="utf-8")
 

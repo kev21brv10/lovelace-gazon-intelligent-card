@@ -18,6 +18,7 @@ const DEFAULT_CONFIG = {
   show_secondary_info: true,
   tap_action: { action: "more-info" },
   hold_action: { action: "none" },
+  double_tap_action: { action: "none" },
 };
 
 const ENTITY_KEYS = [
@@ -225,8 +226,11 @@ class GazonIntelligentCard extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this._config = null;
     this._hass = null;
+    this._tapTimer = null;
     this._onClick = this._onClick.bind(this);
     this._onContextMenu = this._onContextMenu.bind(this);
+    this._onDoubleClick = this._onDoubleClick.bind(this);
+    this._onKeyDown = this._onKeyDown.bind(this);
   }
 
   static getStubConfig() {
@@ -268,7 +272,9 @@ class GazonIntelligentCard extends HTMLElement {
   getGridOptions() {
     return {
       rows: this.getCardSize(),
-      columns: this._config?.compact ? 4 : 6,
+      columns: 6,
+      min_rows: this._config?.compact ? 2 : 3,
+      min_columns: 3,
     };
   }
 
@@ -281,8 +287,14 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   disconnectedCallback() {
+    if (this._tapTimer) {
+      clearTimeout(this._tapTimer);
+      this._tapTimer = null;
+    }
     this.shadowRoot?.removeEventListener("click", this._onClick);
     this.shadowRoot?.removeEventListener("contextmenu", this._onContextMenu);
+    this.shadowRoot?.removeEventListener("dblclick", this._onDoubleClick);
+    this.shadowRoot?.removeEventListener("keydown", this._onKeyDown);
   }
 
   _entity(entityKey) {
@@ -610,7 +622,8 @@ class GazonIntelligentCard extends HTMLElement {
     const background = this._config.show_background ? "true" : "false";
     const backgroundStyle = this._config.background_style || "solid";
     const themeMode = this._config.theme_mode || "auto";
-    const height = isEmpty(this._config.card_height) ? "" : `${this._config.card_height}px`;
+    const numericHeight = asNumber(this._config.card_height);
+    const height = numericHeight && numericHeight > 0 ? `${numericHeight}px` : "";
     const borderRadius = `${this._config.border_radius ?? 24}px`;
     const iconSize = `${this._config.icon_size ?? 24}px`;
 
@@ -634,6 +647,7 @@ class GazonIntelligentCard extends HTMLElement {
           --gazon-card-height: ${height || "auto"};
           --gazon-card-gap: ${this._config.compact ? "10px" : "16px"};
           --gazon-card-padding: ${this._config.compact ? "12px" : "18px"};
+          --ha-card-border-radius: var(--gazon-border-radius);
         }
 
         * {
@@ -641,6 +655,7 @@ class GazonIntelligentCard extends HTMLElement {
         }
 
         .card {
+          display: block;
           min-height: var(--gazon-card-height);
           border-radius: var(--gazon-border-radius);
           color: var(--primary-text-color);
@@ -943,10 +958,14 @@ class GazonIntelligentCard extends HTMLElement {
         }
       </style>
 
-      <article
+      <ha-card
         class="${rootClass}"
+        tabindex="0"
+        role="button"
+        aria-label="${escapeHtml(this._config.title || DEFAULT_CONFIG.title)}"
         data-background="${background}"
         data-tone="${this._primaryTone()}"
+        data-action-target="primary"
         style="${this._config.show_background ? `--gazon-accent-color:${accent};` : ""}"
       >
         ${this._buildHeader()}
@@ -954,13 +973,17 @@ class GazonIntelligentCard extends HTMLElement {
         ${this._buildDecisionBlocks()}
         ${this._buildTiles()}
         ${this._buildFooter()}
-      </article>
+      </ha-card>
     `;
 
     this.shadowRoot.removeEventListener("click", this._onClick);
     this.shadowRoot.removeEventListener("contextmenu", this._onContextMenu);
+    this.shadowRoot.removeEventListener("dblclick", this._onDoubleClick);
+    this.shadowRoot.removeEventListener("keydown", this._onKeyDown);
     this.shadowRoot.addEventListener("click", this._onClick);
     this.shadowRoot.addEventListener("contextmenu", this._onContextMenu);
+    this.shadowRoot.addEventListener("dblclick", this._onDoubleClick);
+    this.shadowRoot.addEventListener("keydown", this._onKeyDown);
   }
 
   _accentColorFromTone(tone) {
@@ -984,7 +1007,13 @@ class GazonIntelligentCard extends HTMLElement {
       return;
     }
     event.preventDefault();
-    this._performAction(this._config?.tap_action, this._primaryEntityId());
+    if (this._tapTimer) {
+      clearTimeout(this._tapTimer);
+    }
+    this._tapTimer = setTimeout(() => {
+      this._tapTimer = null;
+      this._performAction(this._config?.tap_action, this._primaryEntityId());
+    }, 220);
   }
 
   _onContextMenu(event) {
@@ -994,6 +1023,35 @@ class GazonIntelligentCard extends HTMLElement {
     }
     event.preventDefault();
     this._performAction(this._config?.hold_action, this._primaryEntityId());
+  }
+
+  _onDoubleClick(event) {
+    const target = event.target.closest("[data-action-target]");
+    if (!target) {
+      return;
+    }
+    event.preventDefault();
+    if (this._tapTimer) {
+      clearTimeout(this._tapTimer);
+      this._tapTimer = null;
+    }
+    this._performAction(this._config?.double_tap_action, this._primaryEntityId());
+  }
+
+  _onKeyDown(event) {
+    const target = event.target.closest("[data-action-target]");
+    if (!target) {
+      return;
+    }
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+    event.preventDefault();
+    if (this._tapTimer) {
+      clearTimeout(this._tapTimer);
+      this._tapTimer = null;
+    }
+    this._performAction(this._config?.tap_action, this._primaryEntityId());
   }
 
   _performAction(action, fallbackEntityId) {

@@ -861,6 +861,9 @@ class GazonIntelligentCard extends HTMLElement {
       <style>
         :host {
           display: block;
+          width: 100%;
+          max-width: 100%;
+          min-width: 0;
           --gazon-accent-color: ${accent};
           --gazon-section-accent: ${sectionAccent};
           --gazon-danger-color: ${STATUS_COLORS.danger};
@@ -901,6 +904,13 @@ class GazonIntelligentCard extends HTMLElement {
           padding: var(--gazon-card-padding);
           position: relative;
           isolation: isolate;
+        }
+
+        ha-card {
+          display: block;
+          width: 100%;
+          max-width: 100%;
+          min-width: 0;
         }
 
         .card > * {
@@ -1183,6 +1193,7 @@ class GazonIntelligentCard extends HTMLElement {
           display: inline-flex;
           align-items: center;
           gap: 6px;
+          min-width: 0;
           border: 1px solid rgba(127, 127, 127, 0.12);
           background: var(--secondary-background-color);
           color: var(--secondary-text-color);

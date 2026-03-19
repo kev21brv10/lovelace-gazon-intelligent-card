@@ -15,11 +15,11 @@ if hacs.get("filename") != "dist/gazon-intelligent-card.js":
 if hacs.get("content_in_root") is not False:
     raise SystemExit("hacs.json content_in_root must be false")
 
-src = (ROOT / "src" / "gazon-intelligent-card.js").read_text(encoding="utf-8")
+src = (ROOT / "gazon-intelligent-card.js").read_text(encoding="utf-8")
 dist = (ROOT / "dist" / "gazon-intelligent-card.js").read_text(encoding="utf-8")
 
 if src != dist:
-    raise SystemExit("dist/gazon-intelligent-card.js does not match src/gazon-intelligent-card.js")
+    raise SystemExit("dist/gazon-intelligent-card.js does not match gazon-intelligent-card.js")
 
 for marker in ("customElements.define", "getConfigForm", "window.customCards"):
     if marker not in src:

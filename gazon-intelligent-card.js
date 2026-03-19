@@ -68,6 +68,21 @@ const SECTION_FIELDS = {
   details: ENTITY_KEYS.map((field) => field.key),
 };
 
+const SECTION_ACCENTS = {
+  overview: "#4f8f3a",
+  watering: "#2b8c7c",
+  mowing: "#5f8f3d",
+  details: "#607d8b",
+};
+
+const STATUS_COLORS = {
+  danger: "#c62828",
+  warning: "#7e9a3c",
+  success: "#4f8f3a",
+  neutral: "#607d8b",
+  accent: "#2b8c7c",
+};
+
 const TONE_MAP = {
   danger: "danger",
   warning: "warning",
@@ -226,6 +241,14 @@ function iconForTone(tone) {
     default:
       return "mdi:information-outline";
   }
+}
+
+function toneToColor(tone) {
+  return STATUS_COLORS[tone] || STATUS_COLORS.neutral;
+}
+
+function sectionToAccent(section) {
+  return SECTION_ACCENTS[section] || SECTION_ACCENTS.overview;
 }
 
 function iconForField(field) {
@@ -417,6 +440,10 @@ class GazonIntelligentCard extends HTMLElement {
     return phaseTone(this._entityState("entity_phase"));
   }
 
+  _sectionAccent(section = this._activeSection) {
+    return sectionToAccent(section);
+  }
+
   _primaryTone() {
     const actionTone = computeActionTone(this._entityState("entity_niveau"));
     const tonteTone = computeTonteTone(this._entityState("entity_tonte"));
@@ -461,6 +488,26 @@ class GazonIntelligentCard extends HTMLElement {
     this._render();
   }
 
+  _fieldSection(fieldKey) {
+    if (["entity_phase", "entity_sous_phase", "entity_conseil", "entity_action", "entity_avoid", "entity_niveau", "entity_risque"].includes(fieldKey)) {
+      return "overview";
+    }
+    if (["entity_arrosage_recommande", "entity_objectif_arrosage", "entity_type_arrosage"].includes(fieldKey)) {
+      return "watering";
+    }
+    if (["entity_tonte", "entity_hauteur"].includes(fieldKey)) {
+      return "mowing";
+    }
+    return "details";
+  }
+
+  _fieldAccent(fieldKey, tone = "neutral") {
+    if (tone && tone !== "neutral") {
+      return toneToColor(tone);
+    }
+    return this._sectionAccent(this._fieldSection(fieldKey));
+  }
+
   _renderBadge(label, value, tone = "neutral", icon = null) {
     if (isEmpty(value)) {
       return "";
@@ -501,9 +548,10 @@ class GazonIntelligentCard extends HTMLElement {
     const tone = this._toneForField(field, entity);
     const secondary = this._secondaryFieldText(field, entity);
     const icon = this._config?.show_icons ? iconForField(field) : null;
+    const accent = this._fieldAccent(field.key, tone);
 
     return `
-      <section class="tile tile--${tone}">
+      <section class="tile tile--${tone}" style="--gazon-tile-accent:${escapeHtml(accent)};">
         ${icon ? `<div class="tile__icon"><ha-icon icon="${escapeHtml(icon)}"></ha-icon></div>` : ""}
         <div class="tile__content">
           <div class="tile__label">${escapeHtml(field.label)}</div>
@@ -547,12 +595,16 @@ class GazonIntelligentCard extends HTMLElement {
     const arrosage = this._entityState("entity_arrosage_recommande", null);
     const hauteur = this._entityState("entity_hauteur", null);
     const conseil = this._entityState("entity_conseil", null);
+    const sectionAccent = this._sectionAccent("overview");
 
     return `
-      <section class="hero">
+      <section class="hero" style="--gazon-section-accent:${escapeHtml(sectionAccent)};">
         <div class="hero__lead ${this._primaryTone() === "danger" ? "hero__lead--danger" : ""}" data-action-target="primary">
-          <div class="hero__label">Conseil principal</div>
-          <div class="hero__value">${escapeHtml(conseil || "Non configuré.")}</div>
+          <div class="hero__lead-icon">${this._config.show_icons ? '<ha-icon icon="mdi:leaf"></ha-icon>' : ""}</div>
+          <div class="hero__lead-content">
+            <div class="hero__label">Conseil principal</div>
+            <div class="hero__value">${escapeHtml(conseil || "Non configuré.")}</div>
+          </div>
         </div>
         <div class="hero__metrics">
           ${this._renderMetric("Phase", phase, phaseTone(phase), "mdi:grass")}
@@ -735,6 +787,7 @@ class GazonIntelligentCard extends HTMLElement {
     }
 
     const accent = this._config.accent_color || this._accentColorFromTone(this._primaryTone());
+    const sectionAccent = this._sectionAccent(this._activeSection);
     const background = this._config.show_background ? "true" : "false";
     const backgroundStyle = this._config.background_style || "solid";
     const themeMode = this._config.theme_mode || "auto";
@@ -758,6 +811,12 @@ class GazonIntelligentCard extends HTMLElement {
         :host {
           display: block;
           --gazon-accent-color: ${accent};
+          --gazon-section-accent: ${sectionAccent};
+          --gazon-danger-color: ${STATUS_COLORS.danger};
+          --gazon-warning-color: ${STATUS_COLORS.warning};
+          --gazon-success-color: ${STATUS_COLORS.success};
+          --gazon-neutral-color: ${STATUS_COLORS.neutral};
+          --gazon-accent-tone-color: ${STATUS_COLORS.accent};
           --gazon-border-radius: ${borderRadius};
           --gazon-icon-size: ${iconSize};
           --gazon-card-height: ${height || "auto"};
@@ -776,10 +835,10 @@ class GazonIntelligentCard extends HTMLElement {
           border-radius: var(--gazon-border-radius);
           color: var(--primary-text-color);
           background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-accent-color) 14%, transparent) 0%, transparent 38%),
-            radial-gradient(circle at bottom left, color-mix(in srgb, var(--gazon-accent-color) 8%, transparent) 0%, transparent 34%),
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-section-accent) 14%, transparent) 0%, transparent 38%),
+            radial-gradient(circle at bottom left, color-mix(in srgb, var(--gazon-section-accent) 8%, transparent) 0%, transparent 34%),
             var(--card-background-color, var(--ha-card-background, transparent));
-          border: 1px solid color-mix(in srgb, var(--gazon-accent-color) 18%, var(--divider-color));
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 18%, var(--divider-color));
           box-shadow:
             0 12px 30px rgba(0, 0, 0, 0.10),
             0 1px 0 rgba(255, 255, 255, 0.04) inset,
@@ -807,7 +866,7 @@ class GazonIntelligentCard extends HTMLElement {
           position: absolute;
           inset: 0 0 auto 0;
           height: 4px;
-          background: linear-gradient(90deg, transparent 0%, var(--gazon-accent-color) 15%, var(--gazon-accent-color) 85%, transparent 100%);
+          background: linear-gradient(90deg, transparent 0%, var(--gazon-section-accent) 15%, var(--gazon-section-accent) 85%, transparent 100%);
           opacity: 0.95;
           z-index: 0;
         }
@@ -821,7 +880,7 @@ class GazonIntelligentCard extends HTMLElement {
           background: linear-gradient(
             180deg,
             transparent 0%,
-            color-mix(in srgb, var(--gazon-accent-color) 10%, transparent) 100%
+            color-mix(in srgb, var(--gazon-section-accent) 10%, transparent) 100%
           );
           opacity: 0.8;
           z-index: 0;
@@ -871,18 +930,18 @@ class GazonIntelligentCard extends HTMLElement {
           align-items: center;
           justify-content: center;
           color: white;
-          background: linear-gradient(145deg, color-mix(in srgb, var(--gazon-accent-color) 86%, white), var(--gazon-accent-color));
+          background: linear-gradient(145deg, color-mix(in srgb, var(--gazon-section-accent) 86%, white), var(--gazon-section-accent));
           box-shadow:
-            0 10px 24px color-mix(in srgb, var(--gazon-accent-color) 28%, transparent),
+            0 10px 24px color-mix(in srgb, var(--gazon-section-accent) 28%, transparent),
             inset 0 1px 0 rgba(255, 255, 255, 0.22);
           flex: none;
         }
 
-        .header__icon--warning { background: var(--warning-color, #ffa000); }
-        .header__icon--danger { background: var(--error-color, #d32f2f); }
-        .header__icon--success { background: var(--success-color, #2e7d32); }
-        .header__icon--neutral { background: var(--secondary-text-color, #9e9e9e); }
-        .header__icon--accent { background: var(--primary-color, #03a9f4); }
+        .header__icon--warning { background: var(--gazon-warning-color, #7e9a3c); }
+        .header__icon--danger { background: var(--gazon-danger-color, #c62828); }
+        .header__icon--success { background: var(--gazon-success-color, #4f8f3a); }
+        .header__icon--neutral { background: var(--gazon-neutral-color, #607d8b); }
+        .header__icon--accent { background: var(--gazon-accent-tone-color, #2b8c7c); }
 
         .header__titles {
           min-width: 0;
@@ -901,10 +960,6 @@ class GazonIntelligentCard extends HTMLElement {
           line-height: 1.2;
         }
 
-        .header__badges {
-          display: none;
-        }
-
         .hero {
           display: grid;
           grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
@@ -916,9 +971,9 @@ class GazonIntelligentCard extends HTMLElement {
         .hero__lead {
           border-radius: 16px;
           padding: 10px 11px;
-          border: 1px solid color-mix(in srgb, var(--gazon-accent-color) 12%, var(--divider-color));
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-accent-color) 8%, transparent) 0%, transparent 100%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 8%, transparent) 0%, transparent 100%),
             color-mix(in srgb, var(--secondary-background-color) 88%, transparent);
           box-shadow: none;
           cursor: pointer;
@@ -945,7 +1000,7 @@ class GazonIntelligentCard extends HTMLElement {
         }
 
         .hero__lead--danger {
-          color: var(--error-color, #d32f2f);
+          color: var(--gazon-danger-color, #c62828);
         }
 
         .hero__metrics {
@@ -976,8 +1031,8 @@ class GazonIntelligentCard extends HTMLElement {
           align-items: center;
           justify-content: center;
           flex: none;
-          background: color-mix(in srgb, var(--gazon-accent-color) 12%, transparent);
-          color: var(--gazon-accent-color);
+          background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
+          color: var(--gazon-section-accent);
         }
 
         .metric__icon ha-icon {
@@ -1003,10 +1058,10 @@ class GazonIntelligentCard extends HTMLElement {
           line-height: 1.16;
         }
 
-        .hero__metrics .metric--danger { border-color: color-mix(in srgb, var(--error-color, #d32f2f) 20%, transparent); }
-        .hero__metrics .metric--warning { border-color: color-mix(in srgb, var(--warning-color, #ffa000) 20%, transparent); }
-        .hero__metrics .metric--success { border-color: color-mix(in srgb, var(--success-color, #2e7d32) 20%, transparent); }
-        .hero__metrics .metric--accent { border-color: color-mix(in srgb, var(--primary-color, #03a9f4) 20%, transparent); }
+        .hero__metrics .metric--danger { border-color: color-mix(in srgb, var(--gazon-danger-color) 20%, transparent); }
+        .hero__metrics .metric--warning { border-color: color-mix(in srgb, var(--gazon-warning-color) 20%, transparent); }
+        .hero__metrics .metric--success { border-color: color-mix(in srgb, var(--gazon-success-color) 20%, transparent); }
+        .hero__metrics .metric--accent { border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 20%, transparent); }
 
         .section-nav {
           display: flex;
@@ -1039,7 +1094,7 @@ class GazonIntelligentCard extends HTMLElement {
         }
 
         .section-nav__item:hover {
-          background: color-mix(in srgb, var(--secondary-background-color) 88%, var(--gazon-accent-color) 12%);
+          background: color-mix(in srgb, var(--secondary-background-color) 88%, var(--gazon-section-accent) 12%);
         }
 
         .section-nav__item ha-icon {
@@ -1049,9 +1104,9 @@ class GazonIntelligentCard extends HTMLElement {
 
         .section-nav__item--active {
           color: var(--primary-text-color);
-          border-color: color-mix(in srgb, var(--gazon-accent-color) 22%, var(--divider-color));
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 22%, var(--divider-color));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-accent-color) 14%, transparent) 0%, transparent 100%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 14%, transparent) 0%, transparent 100%),
             var(--secondary-background-color);
           box-shadow: none;
         }
@@ -1062,7 +1117,7 @@ class GazonIntelligentCard extends HTMLElement {
         }
 
         .lead--danger {
-          color: var(--error-color, #d32f2f);
+          color: var(--gazon-danger-color, #c62828);
         }
 
         .decision-grid {
@@ -1082,11 +1137,11 @@ class GazonIntelligentCard extends HTMLElement {
         }
 
         .decision--action {
-          border-color: color-mix(in srgb, var(--success-color, #2e7d32) 20%, transparent);
+          border-color: color-mix(in srgb, var(--gazon-success-color) 20%, transparent);
         }
 
         .decision--avoid {
-          border-color: color-mix(in srgb, var(--error-color, #d32f2f) 18%, transparent);
+          border-color: color-mix(in srgb, var(--gazon-danger-color) 18%, transparent);
         }
 
         .decision__label {
@@ -1146,7 +1201,7 @@ class GazonIntelligentCard extends HTMLElement {
           align-items: center;
           justify-content: center;
           flex: none;
-          color: var(--gazon-accent-color);
+          color: var(--gazon-tile-accent, var(--gazon-section-accent));
         }
 
         .tile__icon ha-icon {
@@ -1180,10 +1235,10 @@ class GazonIntelligentCard extends HTMLElement {
           color: var(--secondary-text-color);
         }
 
-        .tile--danger { border-color: color-mix(in srgb, var(--error-color, #d32f2f) 22%, transparent); }
-        .tile--warning { border-color: color-mix(in srgb, var(--warning-color, #ffa000) 22%, transparent); }
-        .tile--success { border-color: color-mix(in srgb, var(--success-color, #2e7d32) 22%, transparent); }
-        .tile--accent { border-color: color-mix(in srgb, var(--primary-color, #03a9f4) 22%, transparent); }
+        .tile--danger { border-color: color-mix(in srgb, var(--gazon-danger-color) 22%, transparent); }
+        .tile--warning { border-color: color-mix(in srgb, var(--gazon-warning-color) 22%, transparent); }
+        .tile--success { border-color: color-mix(in srgb, var(--gazon-success-color) 22%, transparent); }
+        .tile--accent { border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 22%, transparent); }
 
         .footer {
           margin-top: 8px;
@@ -1201,10 +1256,6 @@ class GazonIntelligentCard extends HTMLElement {
         @media (max-width: 600px) {
           .header {
             flex-direction: column;
-          }
-
-          .header__badges {
-            justify-content: flex-start;
           }
 
           .hero {
@@ -1234,7 +1285,7 @@ class GazonIntelligentCard extends HTMLElement {
         data-background="${background}"
         data-tone="${this._primaryTone()}"
         data-action-target="primary"
-        style="${this._config.show_background ? `--gazon-accent-color:${accent};` : ""}"
+        style="${this._config.show_background ? `--gazon-accent-color:${accent}; --gazon-section-accent:${sectionAccent};` : ""}"
       >
         ${this._buildHeader()}
         ${this._renderSectionNav()}
@@ -1258,15 +1309,15 @@ class GazonIntelligentCard extends HTMLElement {
   _accentColorFromTone(tone) {
     switch (tone) {
       case "danger":
-        return "var(--error-color, #d32f2f)";
+        return "var(--gazon-danger-color, #c62828)";
       case "warning":
-        return "var(--warning-color, #ffa000)";
+        return "var(--gazon-warning-color, #7e9a3c)";
       case "success":
-        return "var(--success-color, #2e7d32)";
+        return "var(--gazon-success-color, #4f8f3a)";
       case "accent":
-        return "var(--primary-color, #03a9f4)";
+        return "var(--gazon-accent-tone-color, #2b8c7c)";
       default:
-        return "var(--primary-color, #03a9f4)";
+        return "var(--gazon-success-color, #4f8f3a)";
     }
   }
 

@@ -8,6 +8,7 @@ const DEFAULT_CONFIG = {
   show_header: true,
   show_background: true,
   compact: false,
+  minimal_mode: false,
   theme_mode: "auto",
   accent_color: "",
   card_height: "",
@@ -308,6 +309,7 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "show_icons", selector: { boolean: {} } },
         { name: "show_background", selector: { boolean: {} } },
         { name: "compact", selector: { boolean: {} } },
+        { name: "minimal_mode", selector: { boolean: {} } },
         { name: "show_secondary_info", selector: { boolean: {} } },
         { name: "entity_phase", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_sous_phase", selector: { entity: { domain: ["sensor"] } } },
@@ -342,6 +344,9 @@ class GazonIntelligentCard extends HTMLElement {
   getCardSize() {
     if (!this._config) {
       return 3;
+    }
+    if (this._isMinimalMode()) {
+      return this._config.show_header ? 3 : 2;
     }
     const fields = this._visibleFields().length;
     const base = this._config.show_header ? 1 : 0;
@@ -508,6 +513,45 @@ class GazonIntelligentCard extends HTMLElement {
     return this._sectionAccent(this._fieldSection(fieldKey));
   }
 
+  _isMinimalMode() {
+    return Boolean(this._config?.minimal_mode);
+  }
+
+  _heroMetricIcon(fieldKey, value) {
+    const normalized = String(value ?? "").toLowerCase();
+
+    if (fieldKey === "entity_phase") {
+      if (normalized.includes("sursem")) return "mdi:sprout";
+      if (normalized.includes("hivern")) return "mdi:snowflake";
+      if (normalized.includes("trait")) return "mdi:flask-outline";
+      if (normalized.includes("fert")) return "mdi:leaf";
+      return "mdi:grass";
+    }
+
+    if (fieldKey === "entity_sous_phase") {
+      if (normalized.includes("germin")) return "mdi:seed";
+      if (normalized.includes("enracin")) return "mdi:sprout";
+      if (normalized.includes("reprise")) return "mdi:autorenew";
+      return "mdi:sprout";
+    }
+
+    if (fieldKey === "entity_tonte") {
+      if (normalized.includes("interdit")) return "mdi:content-cut";
+      if (normalized.includes("surveil") || normalized.includes("prud")) return "mdi:content-cut";
+      return "mdi:content-cut";
+    }
+
+    if (fieldKey === "entity_arrosage_recommande") {
+      return ["on", "true", "yes", "1", "oui"].includes(normalized) ? "mdi:water-check" : "mdi:water-off";
+    }
+
+    if (fieldKey === "entity_hauteur") {
+      return "mdi:ruler-square";
+    }
+
+    return "mdi:information-outline";
+  }
+
   _renderBadge(label, value, tone = "neutral", icon = null) {
     if (isEmpty(value)) {
       return "";
@@ -567,6 +611,9 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _renderSectionNav() {
+    if (this._isMinimalMode()) {
+      return "";
+    }
     return `
       <nav class="section-nav" aria-label="Sections de la carte">
         ${SECTION_DEFS.map((section) => {
@@ -607,11 +654,11 @@ class GazonIntelligentCard extends HTMLElement {
           </div>
         </div>
         <div class="hero__metrics">
-          ${this._renderMetric("Phase", phase, phaseTone(phase), "mdi:grass")}
-          ${this._renderMetric("Sous-phase", subPhase, phaseTone(phase), "mdi:sprout")}
-          ${this._renderMetric("Tonte", tonte, computeTonteTone(tonte), "mdi:content-cut")}
-          ${this._renderMetric("Arrosage", formatBoolState(arrosage), arrosage === "on" ? "success" : "neutral", "mdi:water-check")}
-          ${this._renderMetric("Hauteur", formatCm(hauteur), this._phaseTone(), "mdi:ruler-square")}
+          ${this._renderMetric("Phase", phase, phaseTone(phase), this._heroMetricIcon("entity_phase", phase))}
+          ${this._renderMetric("Sous-phase", subPhase, phaseTone(phase), this._heroMetricIcon("entity_sous_phase", subPhase))}
+          ${this._renderMetric("Tonte", tonte, computeTonteTone(tonte), this._heroMetricIcon("entity_tonte", tonte))}
+          ${this._renderMetric("Arrosage", formatBoolState(arrosage), arrosage === "on" ? "success" : "neutral", this._heroMetricIcon("entity_arrosage_recommande", arrosage))}
+          ${this._renderMetric("Hauteur", formatCm(hauteur), this._phaseTone(), this._heroMetricIcon("entity_hauteur", hauteur))}
         </div>
       </section>
     `;
@@ -683,6 +730,9 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _visibleFields(section = this._activeSection) {
+    if (this._isMinimalMode()) {
+      section = "overview";
+    }
     const wanted = SECTION_FIELDS[section] || SECTION_FIELDS.overview;
     return ENTITY_KEYS.filter((field) => this._config?.[field.key] && wanted.includes(field.key));
   }
@@ -716,7 +766,7 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _buildDecisionBlocks(section = this._activeSection) {
-    if (section !== "details") {
+    if (section !== "details" || this._isMinimalMode()) {
       return "";
     }
     const action = this._entityState("entity_action", null);
@@ -747,19 +797,20 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _buildContent() {
-    const tiles = this._visibleFields().map((field) => this._renderTile(field)).filter(Boolean);
+    const section = this._isMinimalMode() ? "overview" : this._activeSection;
+    const tiles = this._visibleFields(section).map((field) => this._renderTile(field)).filter(Boolean);
     if (tiles.length === 0) {
       return "";
     }
     return `
-      <section class="tiles tiles--${this._activeSection} ${this._config.compact ? "tiles--compact" : ""}">
+      <section class="tiles tiles--${section} ${this._config.compact ? "tiles--compact" : ""} ${this._isMinimalMode() ? "tiles--minimal" : ""}">
         ${tiles.join("")}
       </section>
     `;
   }
 
   _buildFooter(section = this._activeSection) {
-    if (section !== "details") {
+    if (section !== "details" || this._isMinimalMode()) {
       return "";
     }
     const phaseSource = this._entity("entity_phase")?.attributes?.phase_dominante_source;
@@ -914,6 +965,30 @@ class GazonIntelligentCard extends HTMLElement {
           cursor: pointer;
         }
 
+        .header,
+        .hero__lead,
+        .metric,
+        .section-nav__item,
+        .decision,
+        .tile {
+          transition:
+            transform 160ms ease,
+            border-color 160ms ease,
+            background 160ms ease,
+            box-shadow 160ms ease,
+            color 160ms ease;
+        }
+
+        @media (hover: hover) {
+          .hero__lead:hover,
+          .metric:hover,
+          .section-nav__item:hover,
+          .decision:hover,
+          .tile:hover {
+            transform: translateY(-1px);
+          }
+        }
+
         .header__title-wrap {
           display: flex;
           gap: 10px;
@@ -960,6 +1035,18 @@ class GazonIntelligentCard extends HTMLElement {
           line-height: 1.2;
         }
 
+        .header__subtitle::before {
+          content: "";
+          display: inline-block;
+          width: 7px;
+          height: 7px;
+          border-radius: 999px;
+          margin-right: 6px;
+          vertical-align: middle;
+          background: var(--gazon-section-accent);
+          box-shadow: 0 0 0 3px color-mix(in srgb, var(--gazon-section-accent) 14%, transparent);
+        }
+
         .hero {
           display: grid;
           grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
@@ -970,7 +1057,7 @@ class GazonIntelligentCard extends HTMLElement {
 
         .hero__lead {
           border-radius: 16px;
-          padding: 10px 11px;
+          padding: 11px 12px;
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 8%, transparent) 0%, transparent 100%),
@@ -982,7 +1069,7 @@ class GazonIntelligentCard extends HTMLElement {
         }
 
         .hero__label {
-          font-size: 0.66rem;
+          font-size: 0.63rem;
           text-transform: uppercase;
           letter-spacing: 0.04em;
           color: var(--secondary-text-color);
@@ -990,9 +1077,9 @@ class GazonIntelligentCard extends HTMLElement {
         }
 
         .hero__value {
-          font-size: 0.84rem;
+          font-size: clamp(0.9rem, 1.3vw, 1.02rem);
           font-weight: 700;
-          line-height: 1.18;
+          line-height: 1.22;
           display: -webkit-box;
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
@@ -1015,7 +1102,7 @@ class GazonIntelligentCard extends HTMLElement {
           gap: 8px;
           align-items: center;
           border-radius: 14px;
-          padding: 7px 8px;
+          padding: 8px 9px;
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, var(--secondary-background-color) 100%);
           border: 1px solid rgba(127, 127, 127, 0.15);
@@ -1045,7 +1132,7 @@ class GazonIntelligentCard extends HTMLElement {
         }
 
         .metric__label {
-          font-size: 0.62rem;
+          font-size: 0.61rem;
           text-transform: uppercase;
           letter-spacing: 0.03em;
           color: var(--secondary-text-color);
@@ -1053,7 +1140,7 @@ class GazonIntelligentCard extends HTMLElement {
         }
 
         .metric__value {
-          font-size: 0.78rem;
+          font-size: 0.8rem;
           font-weight: 700;
           line-height: 1.16;
         }
@@ -1086,7 +1173,7 @@ class GazonIntelligentCard extends HTMLElement {
           background: var(--secondary-background-color);
           color: var(--secondary-text-color);
           border-radius: 12px;
-          padding: 6px 10px;
+          padding: 7px 10px;
           font-size: 0.78rem;
           cursor: pointer;
           transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
@@ -1129,7 +1216,7 @@ class GazonIntelligentCard extends HTMLElement {
 
         .decision {
           border-radius: 14px;
-          padding: 9px 10px;
+          padding: 10px 11px;
           border: 1px solid rgba(127, 127, 127, 0.15);
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, var(--secondary-background-color) 100%);
@@ -1185,7 +1272,7 @@ class GazonIntelligentCard extends HTMLElement {
           display: flex;
           gap: 8px;
           align-items: flex-start;
-          padding: 8px 9px;
+          padding: 9px 10px;
           border-radius: 14px;
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, var(--secondary-background-color) 100%);
@@ -1215,7 +1302,7 @@ class GazonIntelligentCard extends HTMLElement {
         }
 
         .tile__label {
-          font-size: 0.62rem;
+          font-size: 0.61rem;
           text-transform: uppercase;
           letter-spacing: 0.025em;
           color: var(--secondary-text-color);
@@ -1223,7 +1310,7 @@ class GazonIntelligentCard extends HTMLElement {
         }
 
         .tile__value {
-          font-size: 0.8rem;
+          font-size: 0.82rem;
           line-height: 1.18;
           font-weight: 700;
           word-break: break-word;
@@ -1696,6 +1783,7 @@ class GazonIntelligentCardEditor extends HTMLElement {
             ${this._renderCheckbox("show_icons", "Afficher les icônes")}
             ${this._renderCheckbox("show_background", "Afficher le fond")}
             ${this._renderCheckbox("compact", "Mode compact")}
+            ${this._renderCheckbox("minimal_mode", "Mode minimal")}
             ${this._renderCheckbox("show_secondary_info", "Afficher les infos secondaires")}
             ${this._renderCheckbox("use_gradient", "Utiliser un dégradé")}
           </div>

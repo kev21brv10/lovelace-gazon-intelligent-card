@@ -48,6 +48,12 @@ Gazon Intelligent Card affiche dans Home Assistant les décisions métier les pl
 
 ### Ressource Lovelace
 
+La ressource réellement utilisée par cette carte via HACS est :
+
+```yaml
+/hacsfiles/lovelace-gazon-intelligent-card/dist/gazon-intelligent-card.js
+```
+
 Si tu l’ajoutes manuellement :
 
 ```yaml
@@ -170,7 +176,7 @@ entity_risque: sensor.gazon_intelligent_risque_gazon
 
 ## 🖊️ Éditeur visuel
 
-La carte expose un éditeur visuel simple dans Home Assistant pour :
+La carte expose un éditeur visuel natif dans Home Assistant pour :
 - le titre
 - les principales entités
 - les options visuelles de base

@@ -21,7 +21,7 @@ dist = (ROOT / "dist" / "gazon-intelligent-card.js").read_text(encoding="utf-8")
 if src != dist:
     raise SystemExit("dist/gazon-intelligent-card.js does not match src/gazon-intelligent-card.js")
 
-for marker in ("customElements.define", "getConfigElement", "window.customCards"):
+for marker in ("customElements.define", "getConfigForm", "window.customCards"):
     if marker not in src:
         raise SystemExit(f"Missing expected marker: {marker}")
 

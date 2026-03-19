@@ -244,6 +244,31 @@ class GazonIntelligentCard extends HTMLElement {
     };
   }
 
+  static getConfigForm() {
+    return {
+      schema: [
+        { name: "title", selector: { text: {} } },
+        { name: "show_header", selector: { boolean: {} } },
+        { name: "show_icons", selector: { boolean: {} } },
+        { name: "show_background", selector: { boolean: {} } },
+        { name: "compact", selector: { boolean: {} } },
+        { name: "show_secondary_info", selector: { boolean: {} } },
+        { name: "entity_phase", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_sous_phase", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_conseil", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_action", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_avoid", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_niveau", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_tonte", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_hauteur", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_arrosage_recommande", selector: { entity: { domain: ["binary_sensor"] } } },
+        { name: "entity_objectif_arrosage", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_type_arrosage", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_risque", selector: { entity: { domain: ["sensor"] } } },
+      ],
+    };
+  }
+
   setConfig(config) {
     if (!config || config.type !== `custom:${CARD_TYPE}`) {
       throw new Error(`Invalid configuration for ${CARD_NAME}.`);

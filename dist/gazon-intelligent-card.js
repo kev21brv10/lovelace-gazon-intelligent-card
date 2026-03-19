@@ -348,17 +348,18 @@ class GazonIntelligentCard extends HTMLElement {
     if (this._isMinimalMode()) {
       return this._config.show_header ? 5 : 4;
     }
-    return this._config.compact ? 8 : 9;
+    return this._config.compact ? 9 : 11;
   }
 
   getGridOptions() {
     const minimal = this._isMinimalMode();
+    const compact = Boolean(this._config?.compact);
     return {
-      rows: minimal ? 5 : 9,
+      rows: minimal ? 5 : compact ? 9 : 11,
       columns: 6,
-      min_rows: minimal ? 4 : 8,
+      min_rows: minimal ? 4 : compact ? 8 : 10,
       min_columns: 3,
-      max_rows: minimal ? 5 : 9,
+      max_rows: minimal ? 5 : compact ? 9 : 11,
     };
   }
 

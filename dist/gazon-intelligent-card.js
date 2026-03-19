@@ -882,6 +882,9 @@ class GazonIntelligentCard extends HTMLElement {
 
         .card {
           display: block;
+          width: 100%;
+          max-width: 100%;
+          min-width: 0;
           min-height: var(--gazon-card-height);
           border-radius: var(--gazon-border-radius);
           color: var(--primary-text-color);
@@ -1049,6 +1052,7 @@ class GazonIntelligentCard extends HTMLElement {
 
         .hero {
           display: grid;
+          min-width: 0;
           grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
           gap: 8px;
           align-items: stretch;
@@ -1056,6 +1060,7 @@ class GazonIntelligentCard extends HTMLElement {
         }
 
         .hero__lead {
+          min-width: 0;
           border-radius: 16px;
           padding: 11px 12px;
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
@@ -1080,6 +1085,9 @@ class GazonIntelligentCard extends HTMLElement {
           font-size: clamp(0.9rem, 1.3vw, 1.02rem);
           font-weight: 700;
           line-height: 1.22;
+          min-width: 0;
+          overflow-wrap: anywhere;
+          hyphens: auto;
           display: -webkit-box;
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
@@ -1092,6 +1100,7 @@ class GazonIntelligentCard extends HTMLElement {
 
         .hero__metrics {
           display: grid;
+          min-width: 0;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 6px;
           align-content: start;
@@ -1101,6 +1110,7 @@ class GazonIntelligentCard extends HTMLElement {
           display: flex;
           gap: 8px;
           align-items: center;
+          min-width: 0;
           border-radius: 14px;
           padding: 8px 9px;
           background:
@@ -1143,6 +1153,9 @@ class GazonIntelligentCard extends HTMLElement {
           font-size: 0.8rem;
           font-weight: 700;
           line-height: 1.16;
+          min-width: 0;
+          overflow-wrap: anywhere;
+          hyphens: auto;
         }
 
         .hero__metrics .metric--danger { border-color: color-mix(in srgb, var(--gazon-danger-color) 20%, transparent); }
@@ -1155,6 +1168,7 @@ class GazonIntelligentCard extends HTMLElement {
           gap: 5px;
           flex-wrap: nowrap;
           overflow-x: auto;
+          max-width: 100%;
           scrollbar-width: none;
           margin: 4px 0 8px;
           padding-bottom: 2px;
@@ -1246,6 +1260,7 @@ class GazonIntelligentCard extends HTMLElement {
 
         .tiles {
           display: grid;
+          min-width: 0;
           grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
           gap: 6px;
           margin-top: 4px;
@@ -1272,6 +1287,7 @@ class GazonIntelligentCard extends HTMLElement {
           display: flex;
           gap: 8px;
           align-items: flex-start;
+          min-width: 0;
           padding: 9px 10px;
           border-radius: 14px;
           background:
@@ -1313,6 +1329,9 @@ class GazonIntelligentCard extends HTMLElement {
           font-size: 0.82rem;
           line-height: 1.18;
           font-weight: 700;
+          min-width: 0;
+          overflow-wrap: anywhere;
+          hyphens: auto;
           word-break: break-word;
         }
 

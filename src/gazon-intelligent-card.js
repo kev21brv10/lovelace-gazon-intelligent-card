@@ -36,6 +36,39 @@ const ENTITY_KEYS = [
   { key: "entity_risque", label: "Risque gazon", icon: "mdi:shield-alert-outline", domain: ["sensor"] },
 ];
 
+const SECTION_DEFS = [
+  { key: "overview", label: "Résumé", icon: "mdi:view-dashboard" },
+  { key: "watering", label: "Arrosage", icon: "mdi:water" },
+  { key: "mowing", label: "Tonte", icon: "mdi:content-cut" },
+  { key: "details", label: "Détails", icon: "mdi:dots-horizontal" },
+];
+
+const SECTION_FIELDS = {
+  overview: [
+    "entity_hauteur",
+    "entity_arrosage_recommande",
+    "entity_objectif_arrosage",
+    "entity_type_arrosage",
+  ],
+  watering: [
+    "entity_arrosage_recommande",
+    "entity_objectif_arrosage",
+    "entity_type_arrosage",
+    "entity_niveau",
+    "entity_risque",
+    "entity_phase",
+  ],
+  mowing: [
+    "entity_tonte",
+    "entity_hauteur",
+    "entity_niveau",
+    "entity_phase",
+    "entity_sous_phase",
+    "entity_risque",
+  ],
+  details: ENTITY_KEYS.map((field) => field.key),
+};
+
 const TONE_MAP = {
   danger: "danger",
   warning: "warning",
@@ -227,6 +260,7 @@ class GazonIntelligentCard extends HTMLElement {
     this._config = null;
     this._hass = null;
     this._tapTimer = null;
+    this._activeSection = "overview";
     this._onClick = this._onClick.bind(this);
     this._onContextMenu = this._onContextMenu.bind(this);
     this._onDoubleClick = this._onDoubleClick.bind(this);
@@ -274,6 +308,7 @@ class GazonIntelligentCard extends HTMLElement {
       throw new Error(`Invalid configuration for ${CARD_NAME}.`);
     }
     this._config = mergeConfig(DEFAULT_CONFIG, config);
+    this._activeSection = "overview";
     this._render();
   }
 
@@ -288,10 +323,12 @@ class GazonIntelligentCard extends HTMLElement {
     }
     const fields = this._visibleFields().length;
     const base = this._config.show_header ? 2 : 1;
-    const tiles = this._config.show_secondary_info ? Math.ceil(fields / 2) : Math.ceil(fields / 3);
-    const actions = 2;
+    const hero = 2;
+    const sectionBar = 1;
+    const tiles = this._config.show_secondary_info ? Math.ceil(fields / 3) : Math.ceil(fields / 4);
+    const actions = 1;
     const compactOffset = this._config.compact ? 1 : 0;
-    return Math.max(3, base + tiles + actions - compactOffset);
+    return Math.max(3, base + hero + sectionBar + tiles + actions - compactOffset);
   }
 
   getGridOptions() {
@@ -418,6 +455,14 @@ class GazonIntelligentCard extends HTMLElement {
     );
   }
 
+  _setActiveSection(section) {
+    if (!SECTION_FIELDS[section] || this._activeSection === section) {
+      return;
+    }
+    this._activeSection = section;
+    this._render();
+  }
+
   _renderBadge(label, value, tone = "neutral", icon = null) {
     if (isEmpty(value)) {
       return "";
@@ -428,6 +473,22 @@ class GazonIntelligentCard extends HTMLElement {
         ${iconHtml}
         <span class="badge__label">${escapeHtml(label)}</span>
         <strong class="badge__value">${escapeHtml(value)}</strong>
+      </div>
+    `;
+  }
+
+  _renderMetric(label, value, tone = "neutral", icon = null) {
+    if (isEmpty(value)) {
+      return "";
+    }
+    const iconHtml = this._config?.show_icons && icon ? `<ha-icon icon="${escapeHtml(icon)}"></ha-icon>` : "";
+    return `
+      <div class="metric metric--${tone}">
+        ${iconHtml ? `<div class="metric__icon">${iconHtml}</div>` : ""}
+        <div class="metric__content">
+          <div class="metric__label">${escapeHtml(label)}</div>
+          <div class="metric__value">${escapeHtml(value)}</div>
+        </div>
       </div>
     `;
   }
@@ -454,6 +515,53 @@ class GazonIntelligentCard extends HTMLElement {
               ? `<div class="tile__secondary">${escapeHtml(secondary)}</div>`
               : ""
           }
+        </div>
+      </section>
+    `;
+  }
+
+  _renderSectionNav() {
+    return `
+      <nav class="section-nav" aria-label="Sections de la carte">
+        ${SECTION_DEFS.map((section) => {
+          const active = section.key === this._activeSection;
+          const iconHtml = this._config?.show_icons ? `<ha-icon icon="${escapeHtml(section.icon)}"></ha-icon>` : "";
+          return `
+            <button
+              type="button"
+              class="section-nav__item ${active ? "section-nav__item--active" : ""}"
+              data-section="${escapeHtml(section.key)}"
+              aria-pressed="${active ? "true" : "false"}"
+            >
+              ${iconHtml}
+              <span>${escapeHtml(section.label)}</span>
+            </button>
+          `;
+        }).join("")}
+      </nav>
+    `;
+  }
+
+  _renderHero() {
+    const phase = this._entityState("entity_phase", null);
+    const subPhase = this._entityState("entity_sous_phase", null);
+    const tonte = this._entityState("entity_tonte", null);
+    const arrosage = this._entityState("entity_arrosage_recommande", null);
+    const hauteur = this._entityState("entity_hauteur", null);
+    const conseil = this._entityState("entity_conseil", null);
+
+    return `
+      <section class="hero">
+        <div class="hero__lead ${this._primaryTone() === "danger" ? "hero__lead--danger" : ""}" data-action-target="primary">
+          <div class="hero__label">Conseil principal</div>
+          <div class="hero__value">${escapeHtml(conseil || "Non configuré.")}</div>
+        </div>
+        <div class="hero__metrics">
+          ${this._renderMetric("Phase", phase, phaseTone(phase), "mdi:grass")}
+          ${this._renderMetric("Sous-phase", subPhase, phaseTone(phase), "mdi:sprout")}
+          ${this._renderMetric("Tonte", tonte, computeTonteTone(tonte), "mdi:content-cut")}
+          ${this._renderMetric("Arrosage", formatBoolState(arrosage), arrosage === "on" ? "success" : "neutral", "mdi:water-check")}
+          ${this._renderMetric("Hauteur", formatCm(hauteur), this._phaseTone(), "mdi:ruler-square")}
         </div>
       </section>
     `;
@@ -524,8 +632,9 @@ class GazonIntelligentCard extends HTMLElement {
     return "";
   }
 
-  _visibleFields() {
-    return ENTITY_KEYS.filter((field) => this._config?.[field.key]);
+  _visibleFields(section = this._activeSection) {
+    const wanted = SECTION_FIELDS[section] || SECTION_FIELDS.overview;
+    return ENTITY_KEYS.filter((field) => this._config?.[field.key] && wanted.includes(field.key));
   }
 
   _buildHeader() {
@@ -564,24 +673,6 @@ class GazonIntelligentCard extends HTMLElement {
     `;
   }
 
-  _buildLead() {
-    const conseil = this._entityState("entity_conseil", null);
-    if (isEmpty(conseil)) {
-      return `
-        <section class="lead lead--empty">
-          <div class="lead__label">Conseil principal</div>
-          <div class="lead__value">Non configuré.</div>
-        </section>
-      `;
-    }
-    return `
-      <section class="lead ${this._primaryTone() === "danger" ? "lead--danger" : ""}" data-action-target="primary">
-        <div class="lead__label">Conseil principal</div>
-        <div class="lead__value">${escapeHtml(conseil)}</div>
-      </section>
-    `;
-  }
-
   _buildDecisionBlocks() {
     const action = this._entityState("entity_action", null);
     const avoid = this._entityState("entity_avoid", null);
@@ -610,13 +701,13 @@ class GazonIntelligentCard extends HTMLElement {
     `;
   }
 
-  _buildTiles() {
+  _buildContent() {
     const tiles = this._visibleFields().map((field) => this._renderTile(field)).filter(Boolean);
     if (tiles.length === 0) {
       return "";
     }
     return `
-      <section class="tiles ${this._config.compact ? "tiles--compact" : ""}">
+      <section class="tiles tiles--${this._activeSection} ${this._config.compact ? "tiles--compact" : ""}">
         ${tiles.join("")}
       </section>
     `;
@@ -867,20 +958,28 @@ class GazonIntelligentCard extends HTMLElement {
           font-weight: 700;
         }
 
-        .lead {
-          border-radius: 22px;
-          padding: 14px 16px 15px;
-          margin: 4px 0 12px;
+        .hero {
+          display: grid;
+          grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr);
+          gap: 12px;
+          align-items: stretch;
+          margin: 4px 0 10px;
+        }
+
+        .hero__lead {
+          border-radius: 24px;
+          padding: 16px 16px 18px;
           border: 1px solid color-mix(in srgb, var(--gazon-accent-color) 16%, var(--divider-color));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-accent-color) 7%, transparent) 0%, transparent 100%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-accent-color) 8%, transparent) 0%, transparent 100%),
             color-mix(in srgb, var(--secondary-background-color) 88%, transparent);
           box-shadow:
             0 8px 24px rgba(0, 0, 0, 0.05),
             inset 0 1px 0 rgba(255, 255, 255, 0.04);
+          cursor: pointer;
         }
 
-        .lead__label {
+        .hero__label {
           font-size: 0.73rem;
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -888,10 +987,112 @@ class GazonIntelligentCard extends HTMLElement {
           margin-bottom: 6px;
         }
 
-        .lead__value {
-          font-size: 1.04rem;
+        .hero__value {
+          font-size: 1.03rem;
           font-weight: 700;
           line-height: 1.5;
+        }
+
+        .hero__lead--danger {
+          color: var(--error-color, #d32f2f);
+        }
+
+        .hero__metrics {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .metric {
+          display: flex;
+          gap: 10px;
+          align-items: center;
+          border-radius: 20px;
+          padding: 11px 12px;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, var(--secondary-background-color) 100%);
+          border: 1px solid rgba(127, 127, 127, 0.15);
+          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+          min-height: 68px;
+        }
+
+        .metric__icon {
+          width: 34px;
+          height: 34px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex: none;
+          background: color-mix(in srgb, var(--gazon-accent-color) 12%, transparent);
+          color: var(--gazon-accent-color);
+        }
+
+        .metric__icon ha-icon {
+          width: 20px;
+          height: 20px;
+        }
+
+        .metric__content {
+          min-width: 0;
+        }
+
+        .metric__label {
+          font-size: 0.72rem;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          color: var(--secondary-text-color);
+          margin-bottom: 4px;
+        }
+
+        .metric__value {
+          font-size: 0.96rem;
+          font-weight: 700;
+          line-height: 1.35;
+        }
+
+        .hero__metrics .metric--danger { border-color: color-mix(in srgb, var(--error-color, #d32f2f) 20%, transparent); }
+        .hero__metrics .metric--warning { border-color: color-mix(in srgb, var(--warning-color, #ffa000) 20%, transparent); }
+        .hero__metrics .metric--success { border-color: color-mix(in srgb, var(--success-color, #2e7d32) 20%, transparent); }
+        .hero__metrics .metric--accent { border-color: color-mix(in srgb, var(--primary-color, #03a9f4) 20%, transparent); }
+
+        .section-nav {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin: 8px 0 12px;
+        }
+
+        .section-nav__item {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          border: 1px solid rgba(127, 127, 127, 0.18);
+          background: var(--secondary-background-color);
+          color: var(--secondary-text-color);
+          border-radius: 999px;
+          padding: 8px 12px;
+          font-size: 0.84rem;
+          cursor: pointer;
+          transition: transform 140ms ease, background 140ms ease, color 140ms ease, border-color 140ms ease;
+        }
+
+        .section-nav__item:hover {
+          transform: translateY(-1px);
+        }
+
+        .section-nav__item ha-icon {
+          width: 18px;
+          height: 18px;
+        }
+
+        .section-nav__item--active {
+          color: var(--primary-text-color);
+          border-color: color-mix(in srgb, var(--gazon-accent-color) 22%, var(--divider-color));
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-accent-color) 14%, transparent) 0%, transparent 100%),
+            var(--secondary-background-color);
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
         }
 
         .lead--empty {
@@ -945,6 +1146,19 @@ class GazonIntelligentCard extends HTMLElement {
           grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
           gap: 10px;
           margin-top: 8px;
+        }
+
+        .tiles--overview {
+          grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        }
+
+        .tiles--watering,
+        .tiles--mowing {
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+
+        .tiles--details {
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         }
 
         .tiles--compact {
@@ -1032,7 +1246,15 @@ class GazonIntelligentCard extends HTMLElement {
             justify-content: flex-start;
           }
 
-          .lead {
+          .hero {
+            grid-template-columns: 1fr;
+          }
+
+          .hero__metrics {
+            grid-template-columns: 1fr;
+          }
+
+          .hero__lead {
             padding: 13px 14px 14px;
           }
 
@@ -1054,9 +1276,10 @@ class GazonIntelligentCard extends HTMLElement {
         style="${this._config.show_background ? `--gazon-accent-color:${accent};` : ""}"
       >
         ${this._buildHeader()}
-        ${this._buildLead()}
+        ${this._renderSectionNav()}
+        ${this._renderHero()}
         ${this._buildDecisionBlocks()}
-        ${this._buildTiles()}
+        ${this._buildContent()}
         ${this._buildFooter()}
       </ha-card>
     `;
@@ -1087,6 +1310,13 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _onClick(event) {
+    const sectionTarget = event.target.closest("[data-section]");
+    if (sectionTarget) {
+      event.preventDefault();
+      event.stopPropagation();
+      this._setActiveSection(sectionTarget.dataset.section);
+      return;
+    }
     const target = event.target.closest("[data-action-target]");
     if (!target) {
       return;

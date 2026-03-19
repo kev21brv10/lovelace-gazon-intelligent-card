@@ -1,0 +1,37 @@
+{
+  "name": "lovelace-gazon-intelligent-card",
+  "version": "0.1.0",
+  "description": "Lovelace card for Home Assistant integration Gazon Intelligent",
+  "license": "MIT",
+  "private": false,
+  "main": "dist/gazon-intelligent-card.js",
+  "files": [
+    "dist",
+    "README.md",
+    "hacs.json",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "python3 scripts/build.py",
+    "validate": "python3 scripts/validate.py",
+    "release": "python3 scripts/build.py && python3 scripts/validate.py"
+  },
+  "keywords": [
+    "home-assistant",
+    "lovelace",
+    "card",
+    "hacs",
+    "gazon"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kev21brv10/lovelace-gazon-intelligent-card.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kev21brv10/lovelace-gazon-intelligent-card/issues"
+  },
+  "homepage": "https://github.com/kev21brv10/lovelace-gazon-intelligent-card#readme",
+  "engines": {
+    "node": ">=20"
+  }
+}

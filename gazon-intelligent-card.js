@@ -343,28 +343,22 @@ class GazonIntelligentCard extends HTMLElement {
 
   getCardSize() {
     if (!this._config) {
-      return 3;
+      return 8;
     }
     if (this._isMinimalMode()) {
-      return this._config.show_header ? 3 : 2;
+      return this._config.show_header ? 5 : 4;
     }
-    const fields = this._visibleFields().length;
-    const base = this._config.show_header ? 1 : 0;
-    const hero = 1;
-    const sectionBar = 1;
-    const tiles = this._config.show_secondary_info ? Math.ceil(fields / 4) : Math.ceil(fields / 5);
-    const compactOffset = this._config.compact ? 1 : 0;
-    return Math.max(3, base + hero + sectionBar + tiles - compactOffset);
+    return this._config.compact ? 8 : 9;
   }
 
   getGridOptions() {
-    const compact = Boolean(this._config?.compact);
+    const minimal = this._isMinimalMode();
     return {
-      rows: compact ? 2 : 3,
+      rows: minimal ? 5 : 9,
       columns: 6,
-      min_rows: 2,
+      min_rows: minimal ? 4 : 8,
       min_columns: 3,
-      max_rows: compact ? 4 : 5,
+      max_rows: minimal ? 5 : 9,
     };
   }
 

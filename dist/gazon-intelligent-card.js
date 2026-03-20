@@ -1522,7 +1522,7 @@ class GazonIntelligentCard extends HTMLElement {
     }
     const iconHtml = this._config?.show_icons ? renderIconBox(icon, "sm") : "";
     return `
-      <div class="gi-row badge badge--${tone}">
+      <div class="gi-pill badge badge--${tone}">
         ${iconHtml}
         <span class="badge__label">${escapeHtml(label)}</span>
         <strong class="badge__value">${escapeHtml(value)}</strong>

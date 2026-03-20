@@ -160,7 +160,7 @@ function renderIconBox(icon, size = "md") {
   if (!icon) {
     return "";
   }
-  const sizeClass = size === "sm" ? "gi-icon--sm" : "";
+  const sizeClass = size === "sm" ? "gi-icon--sm" : size === "pill" ? "gi-icon--pill" : "";
   return `<span class="gi-icon ${sizeClass}"><ha-icon icon="${escapeHtml(icon)}"></ha-icon></span>`;
 }
 
@@ -1056,9 +1056,9 @@ class GazonIntelligentCard extends HTMLElement {
     if (isEmpty(value)) {
       return "";
     }
-    const iconHtml = this._config?.show_icons ? renderIconBox(icon, "sm") : "";
+    const iconHtml = this._config?.show_icons ? renderIconBox(icon, "pill") : "";
     return `
-      <div class="gi-row gi-pill gi-info gi-info--secondary gi-badge pill pill--${tone}">
+      <div class="gi-pill pill pill--${tone}">
         ${iconHtml}
         <span class="pill__label">${escapeHtml(label)}</span>
         <strong class="pill__value">${escapeHtml(value)}</strong>
@@ -1070,9 +1070,9 @@ class GazonIntelligentCard extends HTMLElement {
     if (isEmpty(value)) {
       return "";
     }
-    const iconHtml = this._config?.show_icons ? renderIconBox(icon, "sm") : "";
+    const iconHtml = this._config?.show_icons ? renderIconBox(icon, "pill") : "";
     return `
-      <div class="gi-row gi-pill gi-info gi-info--secondary gi-badge gi-status-pill context-pill context-pill--${tone}">
+      <div class="gi-pill gi-status-pill context-pill context-pill--${tone}">
         ${iconHtml}
         <span class="context-pill__label">${escapeHtml(label)}</span>
         <strong class="context-pill__value">${escapeHtml(value)}</strong>
@@ -1194,7 +1194,7 @@ class GazonIntelligentCard extends HTMLElement {
             <div class="tab-panel__eyebrow">Configuration</div>
             <div class="tab-panel__title">Autorisation, débits et hauteurs</div>
           </div>
-          <div class="gi-row gi-pill gi-info gi-info--secondary gi-status-pill tab-panel__status tab-panel__status--${switchState.tone}">
+          <div class="gi-pill gi-status-pill tab-panel__status tab-panel__status--${switchState.tone}">
             ${switchIconHtml}
             <span>${escapeHtml(switchState.label)}</span>
           </div>
@@ -1235,7 +1235,7 @@ class GazonIntelligentCard extends HTMLElement {
             <div class="tab-panel__eyebrow">Gazon</div>
             <div class="tab-panel__title">Phase, sous-phase et risque</div>
           </div>
-          <div class="gi-row gi-pill gi-info gi-info--secondary gi-status-pill tab-panel__status tab-panel__status--${computeActionTone(action)}">
+          <div class="gi-pill gi-status-pill tab-panel__status tab-panel__status--${computeActionTone(action)}">
             ${gazonStatusIcon}
             <span>${escapeHtml(formatStatusLabel(action))}</span>
           </div>
@@ -1280,7 +1280,7 @@ class GazonIntelligentCard extends HTMLElement {
             <div class="tab-panel__eyebrow">Tonte</div>
             <div class="tab-panel__title">État, hauteur et créneau</div>
           </div>
-          <div class="gi-row gi-pill gi-info gi-info--secondary gi-status-pill tab-panel__status tab-panel__status--${computeTonteTone(tonteValue)}">
+          <div class="gi-pill gi-status-pill tab-panel__status tab-panel__status--${computeTonteTone(tonteValue)}">
             ${mowingStatusIcon}
             <span>${escapeHtml(tonteValue)}</span>
           </div>
@@ -1343,7 +1343,7 @@ class GazonIntelligentCard extends HTMLElement {
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${tone}">
           <div class="tab-panel__hero-top">
             <div class="tab-panel__hero-summary">${escapeHtml(windowState.summary || "Arrosage prévu")}</div>
-            <div class="gi-row gi-pill gi-info gi-info--secondary gi-status-pill tab-panel__hero-status tab-panel__hero-status--${tone}">
+            <div class="gi-pill gi-status-pill tab-panel__hero-status tab-panel__hero-status--${tone}">
               ${windowStatusIcon}
               <span>${escapeHtml(windowState.statusLabel)}</span>
             </div>
@@ -1938,6 +1938,12 @@ class GazonIntelligentCard extends HTMLElement {
           height: 20px;
         }
 
+        .gi-icon--pill {
+          width: 18px;
+          height: 18px;
+          overflow: visible;
+        }
+
         .gi-icon ha-icon,
         .gi-icon svg {
           display: block;
@@ -1951,6 +1957,13 @@ class GazonIntelligentCard extends HTMLElement {
           width: 14px;
           height: 14px;
           transform: translateY(-0.5px);
+        }
+
+        .gi-icon--pill ha-icon,
+        .gi-icon--pill svg {
+          width: 14px;
+          height: 14px;
+          transform: none;
         }
 
         .gi-tabs,
@@ -2098,10 +2111,10 @@ class GazonIntelligentCard extends HTMLElement {
         .gi-status-pill {
           display: flex;
           align-items: center;
-          justify-content: center;
-          gap: 6px;
-          min-height: 24px;
-          padding: 0 8px;
+          justify-content: flex-start;
+          gap: 8px;
+          min-height: 28px;
+          padding: 2px 10px;
           border-radius: 999px;
           font-size: 0.76rem;
           font-weight: 700;
@@ -2110,12 +2123,12 @@ class GazonIntelligentCard extends HTMLElement {
           color: var(--primary-text-color);
         }
 
-        .tab-panel__hero-status .gi-icon,
-        .tab-panel__status .gi-icon,
-        .gi-pill .gi-icon,
-        .gi-status-pill .gi-icon {
-          width: 20px;
-          height: 20px;
+        .tab-panel__hero-status .gi-icon--pill,
+        .tab-panel__status .gi-icon--pill,
+        .gi-pill .gi-icon--pill,
+        .gi-status-pill .gi-icon--pill {
+          width: 18px;
+          height: 18px;
         }
 
         .tab-panel__hero-status--danger,
@@ -2742,14 +2755,26 @@ class GazonIntelligentCard extends HTMLElement {
         .context-pill {
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: flex-start;
           gap: 6px;
-          min-height: 24px;
-          padding: 0 8px;
+          min-height: 28px;
+          padding: 2px 10px;
           border-radius: 999px;
           border: 1px solid rgba(127, 127, 127, 0.15);
           background: rgba(127, 127, 127, 0.04);
           min-width: 0;
+        }
+
+        .gi-pill .gi-icon--pill,
+        .gi-badge .gi-icon--pill,
+        .gi-status-pill .gi-icon--pill,
+        .pill .gi-icon--pill,
+        .context-pill .gi-icon--pill {
+          width: 18px;
+          height: 18px;
+          flex: none;
+          overflow: visible;
+          color: var(--gazon-card-accent);
         }
 
         .gi-pill .gi-icon,
@@ -2757,9 +2782,11 @@ class GazonIntelligentCard extends HTMLElement {
         .gi-status-pill .gi-icon,
         .pill .gi-icon,
         .context-pill .gi-icon {
-          width: 20px;
-          height: 20px;
-          color: var(--gazon-card-accent);
+          flex: none;
+        }
+
+        .gi-status-pill {
+          gap: 8px;
         }
 
         .pill__label,

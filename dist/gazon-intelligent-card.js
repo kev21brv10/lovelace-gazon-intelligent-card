@@ -1516,20 +1516,6 @@ class GazonIntelligentCard extends HTMLElement {
     return "mdi:information-outline";
   }
 
-  _renderBadge(label, value, tone = "neutral", icon = null) {
-    if (isEmpty(value)) {
-      return "";
-    }
-    const iconHtml = this._config?.show_icons ? renderIconBox(icon, "sm") : "";
-    return `
-      <div class="gi-pill badge badge--${tone}">
-        ${iconHtml}
-        <span class="badge__label">${escapeHtml(label)}</span>
-        <strong class="badge__value">${escapeHtml(value)}</strong>
-      </div>
-    `;
-  }
-
   _renderMetric(label, value, tone = "neutral", icon = null) {
     if (isEmpty(value)) {
       return "";
@@ -1900,7 +1886,6 @@ class GazonIntelligentCard extends HTMLElement {
         .gi-panel,
         .gi-tab,
         .gi-tile,
-        .gi-badge,
         .gi-primary-action,
         .gi-progress__bar,
         .gi-status-pill {
@@ -2750,7 +2735,6 @@ class GazonIntelligentCard extends HTMLElement {
         }
 
         .gi-pill,
-        .gi-badge,
         .pill,
         .context-pill {
           display: flex;
@@ -2766,7 +2750,6 @@ class GazonIntelligentCard extends HTMLElement {
         }
 
         .gi-pill .gi-icon--pill,
-        .gi-badge .gi-icon--pill,
         .gi-status-pill .gi-icon--pill,
         .pill .gi-icon--pill,
         .context-pill .gi-icon--pill {
@@ -2778,7 +2761,6 @@ class GazonIntelligentCard extends HTMLElement {
         }
 
         .gi-pill .gi-icon,
-        .gi-badge .gi-icon,
         .gi-status-pill .gi-icon,
         .pill .gi-icon,
         .context-pill .gi-icon {
@@ -3024,7 +3006,6 @@ class GazonIntelligentCard extends HTMLElement {
         .tab-nav__item,
         .gi-info,
         .gi-tile,
-        .gi-badge,
         .gi-status-pill,
         .gi-panel,
         .gi-primary-action,
@@ -3598,7 +3579,6 @@ class GazonIntelligentCard extends HTMLElement {
         .card--editor-preview .gi-panel,
         .card--editor-preview .gi-tab,
         .card--editor-preview .gi-tile,
-        .card--editor-preview .gi-badge,
         .card--editor-preview .gi-status-pill,
         .card--editor-preview .gi-action,
         .card--editor-preview .gi-info,
@@ -3619,7 +3599,6 @@ class GazonIntelligentCard extends HTMLElement {
           .section-nav__item,
           .gi-tile,
           .tile,
-          .gi-badge,
           .pill,
           .context-pill,
           .gi-status-pill,

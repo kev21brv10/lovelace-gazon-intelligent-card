@@ -1021,7 +1021,7 @@ class GazonIntelligentCard extends HTMLElement {
     }
     const iconHtml = this._config?.show_icons && icon ? `<ha-icon class="gi-icon gi-icon--sm" icon="${escapeHtml(icon)}"></ha-icon>` : "";
     return `
-      <div class="gi-row gi-badge pill pill--${tone}">
+      <div class="gi-row gi-info gi-info--secondary gi-badge pill pill--${tone}">
         ${iconHtml}
         <span class="pill__label">${escapeHtml(label)}</span>
         <strong class="pill__value">${escapeHtml(value)}</strong>
@@ -1035,7 +1035,7 @@ class GazonIntelligentCard extends HTMLElement {
     }
     const iconHtml = this._config?.show_icons && icon ? `<ha-icon class="gi-icon gi-icon--sm" icon="${escapeHtml(icon)}"></ha-icon>` : "";
     return `
-      <div class="gi-row gi-badge gi-status-pill context-pill context-pill--${tone}">
+      <div class="gi-row gi-info gi-info--secondary gi-badge gi-status-pill context-pill context-pill--${tone}">
         ${iconHtml}
         <span class="context-pill__label">${escapeHtml(label)}</span>
         <strong class="context-pill__value">${escapeHtml(value)}</strong>
@@ -1056,7 +1056,7 @@ class GazonIntelligentCard extends HTMLElement {
           return `
             <button
               type="button"
-              class="gi-row tab-nav__item ${active ? "tab-nav__item--active" : ""}"
+              class="gi-row gi-action tab-nav__item ${active ? "tab-nav__item--active" : ""}"
               data-tab="${escapeHtml(tab.key)}"
               aria-pressed="${active ? "true" : "false"}"
             >
@@ -1072,7 +1072,7 @@ class GazonIntelligentCard extends HTMLElement {
   _renderStatCard(label, value, tone = "neutral", icon = null, secondary = "") {
     const iconHtml = this._config?.show_icons && icon ? `<ha-icon class="gi-icon gi-icon--sm" icon="${escapeHtml(icon)}"></ha-icon>` : "";
     return `
-      <section class="gi-row gi-tile tab-stat tab-stat--${tone}">
+      <section class="gi-row gi-info gi-info--secondary gi-tile tab-stat tab-stat--${tone}">
         <div class="gi-row tab-stat__main">
           ${iconHtml ? `<div class="tab-stat__icon">${iconHtml}</div>` : ""}
           <div class="tab-stat__content">
@@ -1162,7 +1162,7 @@ class GazonIntelligentCard extends HTMLElement {
             <div class="tab-panel__eyebrow">Configuration</div>
             <div class="tab-panel__title">Autorisation, débits et hauteurs</div>
           </div>
-          <div class="gi-row gi-status-pill tab-panel__status tab-panel__status--${switchState.tone}">
+          <div class="gi-row gi-info gi-info--secondary gi-status-pill tab-panel__status tab-panel__status--${switchState.tone}">
             ${switchIconHtml}
             <span>${escapeHtml(switchState.label)}</span>
           </div>
@@ -1203,7 +1203,7 @@ class GazonIntelligentCard extends HTMLElement {
             <div class="tab-panel__eyebrow">Gazon</div>
             <div class="tab-panel__title">Phase, sous-phase et risque</div>
           </div>
-          <div class="gi-row gi-status-pill tab-panel__status tab-panel__status--${computeActionTone(action)}">
+          <div class="gi-row gi-info gi-info--secondary gi-status-pill tab-panel__status tab-panel__status--${computeActionTone(action)}">
             ${gazonStatusIcon}
             <span>${escapeHtml(formatStatusLabel(action))}</span>
           </div>
@@ -1248,7 +1248,7 @@ class GazonIntelligentCard extends HTMLElement {
             <div class="tab-panel__eyebrow">Tonte</div>
             <div class="tab-panel__title">État, hauteur et créneau</div>
           </div>
-          <div class="gi-row gi-status-pill tab-panel__status tab-panel__status--${computeTonteTone(tonteValue)}">
+          <div class="gi-row gi-info gi-info--secondary gi-status-pill tab-panel__status tab-panel__status--${computeTonteTone(tonteValue)}">
             ${mowingStatusIcon}
             <span>${escapeHtml(tonteValue)}</span>
           </div>
@@ -1308,10 +1308,10 @@ class GazonIntelligentCard extends HTMLElement {
 
     return `
       <section class="tab-panel gi-panel tab-panel--watering">
-        <div class="tab-panel__hero tab-panel__hero--${tone}">
+        <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${tone}">
           <div class="tab-panel__hero-top">
             <div class="tab-panel__hero-summary">${escapeHtml(windowState.summary || "Arrosage prévu")}</div>
-            <div class="gi-row gi-status-pill tab-panel__hero-status tab-panel__hero-status--${tone}">
+          <div class="gi-row gi-info gi-info--secondary gi-status-pill tab-panel__hero-status tab-panel__hero-status--${tone}">
               ${windowStatusIcon}
               <span>${escapeHtml(windowState.statusLabel)}</span>
             </div>
@@ -1330,7 +1330,7 @@ class GazonIntelligentCard extends HTMLElement {
 
         ${
           manualButtonVisible
-            ? `<section class="tab-panel__action tab-panel__action--${tone}">
+            ? `<section class="gi-info gi-info--main tab-panel__action tab-panel__action--${tone}">
                 <div class="tab-panel__action-content">
                   <div class="tab-panel__eyebrow">Action principale</div>
                   <div class="tab-panel__action-title">Arrosage manuel immédiat</div>
@@ -1338,7 +1338,7 @@ class GazonIntelligentCard extends HTMLElement {
                 </div>
                 <button
                   type="button"
-                  class="gi-primary-action tab-panel__action-button ${manualButtonVisible ? "gi-primary-action--active" : ""} ${this._actionTone() === "critical" ? "gi-alert--critical" : ""}"
+                class="gi-primary-action gi-action gi-action--primary tab-panel__action-button ${manualButtonVisible ? "gi-primary-action--active" : ""} ${this._actionTone() === "critical" ? "gi-alert--critical" : ""}"
                   data-gazon-action="manual-irrigation"
                   aria-label="Arrosage manuel immédiat"
                 >
@@ -1346,7 +1346,7 @@ class GazonIntelligentCard extends HTMLElement {
                   <span>Arrosage manuel immédiat</span>
                 </button>
               </section>`
-            : `<section class="tab-panel__block tab-panel__block--${windowState.status === "bloque" ? "danger" : "neutral"}">
+            : `<section class="gi-info gi-info--secondary tab-panel__block tab-panel__block--${windowState.status === "bloque" ? "danger" : "neutral"}">
                 <div class="tab-panel__eyebrow">Blocage</div>
                 <div class="tab-panel__block-value">${escapeHtml(blockText || "Aucune action disponible")}</div>
                 ${
@@ -1357,7 +1357,7 @@ class GazonIntelligentCard extends HTMLElement {
               </section>`
         }
 
-        <section class="tab-panel__section">
+        <section class="gi-info gi-info--main tab-panel__section">
           <div class="tab-panel__section-head">
             <div class="tab-panel__eyebrow">Résumé du plan</div>
             <div class="tab-panel__section-meta">${escapeHtml(planState.durationHuman)} · ${escapeHtml(planTypeLabel)}</div>
@@ -1370,7 +1370,7 @@ class GazonIntelligentCard extends HTMLElement {
           }
         </section>
 
-        <section class="tab-panel__section">
+        <section class="gi-info gi-info--main tab-panel__section">
           <div class="tab-panel__eyebrow">Contexte</div>
           <div class="tab-panel__grid">
             ${contextPills.join("")}
@@ -1508,7 +1508,7 @@ class GazonIntelligentCard extends HTMLElement {
     }
     const iconHtml = this._config?.show_icons && icon ? `<ha-icon class="gi-icon gi-icon--sm" icon="${escapeHtml(icon)}"></ha-icon>` : "";
     return `
-      <div class="gi-row metric metric--${tone}">
+      <div class="gi-row gi-info gi-info--secondary metric metric--${tone}">
         ${iconHtml ? `<div class="gi-row gi-icon metric__icon">${iconHtml}</div>` : ""}
         <div class="metric__content">
           <div class="metric__label">${escapeHtml(label)}</div>
@@ -1531,7 +1531,7 @@ class GazonIntelligentCard extends HTMLElement {
     const accent = this._fieldAccent(field.key, tone);
 
     return `
-      <section class="gi-row gi-tile tile tile--${tone}" style="--gazon-tile-accent:${escapeHtml(accent)};">
+      <section class="gi-row gi-info gi-info--main gi-tile tile tile--${tone}" style="--gazon-tile-accent:${escapeHtml(accent)};">
         ${icon ? `<div class="gi-row gi-icon tile__icon"><ha-icon class="gi-icon gi-icon--sm" icon="${escapeHtml(icon)}"></ha-icon></div>` : ""}
         <div class="tile__content">
           <div class="tile__label">${escapeHtml(field.label)}</div>
@@ -1558,7 +1558,7 @@ class GazonIntelligentCard extends HTMLElement {
           return `
             <button
               type="button"
-              class="gi-row gi-tab section-nav__item ${active ? "section-nav__item--active gi-tab--active" : ""}"
+              class="gi-row gi-action gi-tab section-nav__item ${active ? "section-nav__item--active gi-tab--active" : ""}"
               data-section="${escapeHtml(section.key)}"
               aria-pressed="${active ? "true" : "false"}"
             >
@@ -1582,7 +1582,7 @@ class GazonIntelligentCard extends HTMLElement {
 
     return `
       <section class="hero" style="--gazon-section-accent:${escapeHtml(sectionAccent)};">
-        <div class="gi-row hero__lead ${this._primaryTone() === "danger" ? "hero__lead--danger" : ""}" data-action-target="primary">
+        <div class="gi-row gi-action hero__lead ${this._primaryTone() === "danger" ? "hero__lead--danger" : ""}" data-action-target="primary">
           <div class="gi-row gi-icon hero__lead-icon">${this._config.show_icons ? '<ha-icon class="gi-icon" icon="mdi:leaf"></ha-icon>' : ""}</div>
           <div class="hero__lead-content">
             <div class="hero__label">Conseil principal</div>
@@ -1683,7 +1683,7 @@ class GazonIntelligentCard extends HTMLElement {
     const primaryEntity = this._primaryEntityId();
 
     return `
-      <header class="gi-row header ${primaryEntity ? "header--clickable" : ""}" data-action-target="primary">
+      <header class="gi-row gi-action header ${primaryEntity ? "header--clickable" : ""}" data-action-target="primary">
         <div class="gi-row header__title-wrap">
           <div class="gi-row gi-icon header__icon header__icon--${tone}">
             ${this._config.show_icons ? '<ha-icon class="gi-icon" icon="mdi:grass"></ha-icon>' : ""}
@@ -1714,7 +1714,7 @@ class GazonIntelligentCard extends HTMLElement {
       <section class="decision-grid">
         ${
           action
-            ? `<div class="decision decision--action">
+              ? `<div class="gi-info gi-info--secondary decision decision--action">
                 <div class="decision__label">Action recommandée</div>
                 <div class="decision__value">${escapeHtml(action)}</div>
               </div>`
@@ -1722,7 +1722,7 @@ class GazonIntelligentCard extends HTMLElement {
         }
         ${
           avoid
-            ? `<div class="decision decision--avoid">
+            ? `<div class="gi-info gi-info--secondary decision decision--avoid">
                 <div class="decision__label">Action à éviter</div>
                 <div class="decision__value">${escapeHtml(avoid)}</div>
               </div>`
@@ -1761,7 +1761,7 @@ class GazonIntelligentCard extends HTMLElement {
     if (parts.length === 0) {
       return "";
     }
-    return `<footer class="footer">${parts.map((part) => `<span>${escapeHtml(part)}</span>`).join(" · ")}</footer>`;
+    return `<footer class="gi-info gi-info--secondary footer">${parts.map((part) => `<span>${escapeHtml(part)}</span>`).join(" · ")}</footer>`;
   }
 
   _render() {
@@ -1945,8 +1945,9 @@ class GazonIntelligentCard extends HTMLElement {
           align-items: center;
           gap: 6px;
           min-width: 0;
-          border: 1px solid rgba(127, 127, 127, 0.12);
-          background: var(--secondary-background-color);
+          border: 1px solid color-mix(in srgb, var(--gazon-card-tone-color) 18%, var(--divider-color));
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-tone-color) 8%, var(--secondary-background-color)) 0%, var(--secondary-background-color) 100%);
           color: var(--secondary-text-color);
           border-radius: 12px;
           padding: 7px 10px;
@@ -1954,6 +1955,7 @@ class GazonIntelligentCard extends HTMLElement {
           cursor: pointer;
           user-select: none;
           -webkit-tap-highlight-color: transparent;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
           transition:
             transform var(--gi-motion-fast) var(--gi-ease-standard),
             background-color var(--gi-motion-fast) var(--gi-ease-standard),
@@ -1967,7 +1969,9 @@ class GazonIntelligentCard extends HTMLElement {
         .tab-nav__item:hover,
         .section-nav__item:hover {
           transform: translateY(-1px);
-          background: color-mix(in srgb, var(--secondary-background-color) 88%, var(--gazon-section-accent) 12%);
+          background: color-mix(in srgb, var(--secondary-background-color) 78%, var(--gazon-section-accent) 22%);
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 34%, var(--divider-color));
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.09);
         }
 
         .gi-tab .gi-icon,
@@ -2284,16 +2288,16 @@ class GazonIntelligentCard extends HTMLElement {
           display: flex;
           align-items: center;
           gap: 8px;
-          border: 0;
+          border: 1px solid color-mix(in srgb, var(--gazon-card-accent) 30%, var(--divider-color));
           border-radius: 16px;
           padding: 11px 14px;
           cursor: pointer;
           color: white;
           font: inherit;
           font-weight: 800;
-          background: linear-gradient(145deg, color-mix(in srgb, var(--gazon-card-accent) 88%, white), var(--gazon-card-accent));
+          background: linear-gradient(145deg, color-mix(in srgb, var(--gazon-card-accent) 90%, white), var(--gazon-card-accent));
           box-shadow:
-            0 10px 24px color-mix(in srgb, var(--gazon-card-accent) 25%, transparent),
+            0 12px 26px color-mix(in srgb, var(--gazon-card-accent) 28%, transparent),
             inset 0 1px 0 rgba(255, 255, 255, 0.18);
         }
 
@@ -2321,6 +2325,42 @@ class GazonIntelligentCard extends HTMLElement {
             0 12px 28px rgba(0, 0, 0, 0.22),
             0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 20%, transparent),
             0 0 24px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
+        }
+
+        .gi-action {
+          cursor: pointer;
+          user-select: none;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .gi-action .gi-icon {
+          width: 16px;
+          height: 16px;
+        }
+
+        .gi-action--primary .gi-icon,
+        .gi-primary-action .gi-icon {
+          width: 18px;
+          height: 18px;
+        }
+
+        .gi-info {
+          border: 1px solid rgba(127, 127, 127, 0.14);
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 96%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 88%, white) 100%);
+          box-shadow: none;
+        }
+
+        .gi-info--main {
+          border-color: color-mix(in srgb, var(--gazon-card-accent) 16%, var(--divider-color));
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, white) 100%);
+        }
+
+        .gi-info--secondary {
+          border-color: rgba(127, 127, 127, 0.12);
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, white) 100%);
         }
 
         .gi-alert--critical {
@@ -2774,12 +2814,12 @@ class GazonIntelligentCard extends HTMLElement {
         .card,
         .gi-card,
         .header,
+        .gi-action,
         .hero__lead,
-        .metric,
         .section-nav__item,
-        .decision,
-        .tile,
         .gi-tab,
+        .tab-nav__item,
+        .gi-info,
         .gi-tile,
         .gi-badge,
         .gi-status-pill,
@@ -2796,15 +2836,13 @@ class GazonIntelligentCard extends HTMLElement {
 
         @media (hover: hover) {
           .hero__lead:hover,
-          .metric:hover,
+          .gi-action:hover,
           .section-nav__item:hover,
-          .decision:hover,
-          .tile:hover,
           .gi-tab:hover,
-          .gi-tile:hover,
-          .gi-badge:hover,
-          .gi-status-pill:hover,
-          .gi-primary-action:hover {
+          .tab-nav__item:hover,
+          .gi-primary-action:hover,
+          .tab-panel__action-button:hover,
+          .decision-action__button:hover {
             transform: translateY(-1px);
           }
         }
@@ -2886,11 +2924,11 @@ class GazonIntelligentCard extends HTMLElement {
           min-width: 0;
           border-radius: 16px;
           padding: 11px 12px;
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 22%, var(--divider-color));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 8%, transparent) 0%, transparent 100%),
-            color-mix(in srgb, var(--secondary-background-color) 88%, transparent);
-          box-shadow: none;
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 12%, transparent) 0%, transparent 100%),
+            color-mix(in srgb, var(--secondary-background-color) 84%, transparent);
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -3171,6 +3209,25 @@ class GazonIntelligentCard extends HTMLElement {
         .tile--success { border-color: color-mix(in srgb, var(--gazon-success-color) 22%, transparent); }
         .tile--accent { border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 22%, transparent); }
 
+        .gi-info {
+          border: 1px solid rgba(127, 127, 127, 0.12);
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, white) 100%);
+          box-shadow: none;
+        }
+
+        .gi-info--main {
+          border-color: color-mix(in srgb, var(--gazon-card-accent) 16%, var(--divider-color));
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 5%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 95%, white) 100%);
+        }
+
+        .gi-info--secondary {
+          border-color: rgba(127, 127, 127, 0.10);
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 99%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, white) 100%);
+        }
+
         .footer {
           margin-top: 8px;
           color: var(--secondary-text-color);
@@ -3189,6 +3246,8 @@ class GazonIntelligentCard extends HTMLElement {
         .card--editor-preview .gi-tile,
         .card--editor-preview .gi-badge,
         .card--editor-preview .gi-status-pill,
+        .card--editor-preview .gi-action,
+        .card--editor-preview .gi-info,
         .card--editor-preview .gi-primary-action,
         .card--editor-preview .gi-progress__bar,
         .card--editor-preview .tab-panel__action-button,
@@ -3210,6 +3269,8 @@ class GazonIntelligentCard extends HTMLElement {
           .pill,
           .context-pill,
           .gi-status-pill,
+          .gi-action,
+          .gi-info,
           .gi-primary-action,
           .tab-panel__action-button,
           .decision-action__button,

@@ -164,6 +164,39 @@ function renderIconBox(icon, size = "md") {
   return `<span class="gi-icon ${sizeClass}"><ha-icon icon="${escapeHtml(icon)}"></ha-icon></span>`;
 }
 
+function renderCardCore({
+  kind,
+  label,
+  value,
+  tone = "neutral",
+  icon = null,
+  iconSize = "sm",
+  secondary = "",
+  className = "",
+}) {
+  const classes = ["gi-card-core", `gi-card-core--${kind}`];
+  if (tone) {
+    classes.push(`gi-card-core--${tone}`);
+  }
+  if (className) {
+    classes.push(className);
+  }
+  const iconHtml = icon ? renderIconBox(icon, iconSize) : "";
+  const secondaryValue = isEmpty(secondary) ? "&nbsp;" : escapeHtml(secondary);
+  return `
+    <section class="${classes.join(" ")}">
+      <div class="gi-card-core__icon ${iconHtml ? "" : "gi-card-core__icon--empty"}">
+        ${iconHtml || ""}
+      </div>
+      <div class="gi-card-core__content">
+        <div class="gi-card-core__label">${escapeHtml(label)}</div>
+        <div class="gi-card-core__value">${escapeHtml(value)}</div>
+        <div class="gi-card-core__secondary ${isEmpty(secondary) ? "gi-card-core__secondary--empty" : ""}">${secondaryValue}</div>
+      </div>
+    </section>
+  `;
+}
+
 function asNumber(value) {
   if (typeof value === "number" && Number.isFinite(value)) {
     return value;
@@ -1078,19 +1111,16 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _renderStatCard(label, value, tone = "neutral", icon = null, secondary = "") {
-    const iconHtml = this._config?.show_icons ? renderIconBox(icon, "sm") : "";
-    return `
-      <section class="gi-row gi-info gi-info--secondary gi-tile tab-stat tab-stat--${tone}">
-        <div class="gi-row tab-stat__main">
-          ${iconHtml ? `<div class="tab-stat__icon">${iconHtml}</div>` : ""}
-          <div class="tab-stat__content">
-            <div class="tab-stat__label">${escapeHtml(label)}</div>
-            <div class="tab-stat__value">${escapeHtml(value)}</div>
-            ${secondary ? `<div class="tab-stat__secondary">${escapeHtml(secondary)}</div>` : ""}
-          </div>
-        </div>
-      </section>
-    `;
+    return renderCardCore({
+      kind: "stat",
+      label,
+      value,
+      tone,
+      icon: this._config?.show_icons ? icon : null,
+      iconSize: "sm",
+      secondary,
+      className: "gi-row gi-info gi-info--secondary gi-tile tab-stat tab-stat--surface",
+    });
   }
 
   _planTypeTone(planType) {
@@ -1514,16 +1544,16 @@ class GazonIntelligentCard extends HTMLElement {
     if (isEmpty(value)) {
       return "";
     }
-    const iconHtml = this._config?.show_icons ? renderIconBox(icon, "sm") : "";
-    return `
-      <div class="gi-row gi-info gi-info--secondary metric metric--${tone}">
-        ${iconHtml ? `<div class="metric__icon">${iconHtml}</div>` : ""}
-        <div class="metric__content">
-          <div class="metric__label">${escapeHtml(label)}</div>
-          <div class="metric__value">${escapeHtml(value)}</div>
-        </div>
-      </div>
-    `;
+    return renderCardCore({
+      kind: "metric",
+      label,
+      value,
+      tone,
+      icon: this._config?.show_icons ? icon : null,
+      iconSize: "sm",
+      secondary: "",
+      className: "gi-row gi-info gi-info--secondary metric metric--surface",
+    });
   }
 
   _renderTile(field) {
@@ -1538,20 +1568,16 @@ class GazonIntelligentCard extends HTMLElement {
     const icon = this._config?.show_icons ? iconForField(field) : null;
     const accent = this._fieldAccent(field.key, tone);
 
-    return `
-      <section class="gi-row gi-info gi-info--main gi-tile tile tile--${tone}" style="--gazon-tile-accent:${escapeHtml(accent)};">
-        ${icon ? `<div class="tile__icon">${renderIconBox(icon, "sm")}</div>` : ""}
-        <div class="tile__content">
-          <div class="tile__label">${escapeHtml(field.label)}</div>
-          <div class="tile__value">${escapeHtml(value)}</div>
-          ${
-            this._config?.show_secondary_info && secondary
-              ? `<div class="tile__secondary">${escapeHtml(secondary)}</div>`
-              : ""
-          }
-        </div>
-      </section>
-    `;
+    return renderCardCore({
+      kind: "tile",
+      label: field.label,
+      value,
+      tone,
+      icon: this._config?.show_icons ? icon : null,
+      iconSize: "sm",
+      secondary: this._config?.show_secondary_info ? secondary : "",
+      className: "gi-row gi-info gi-info--main gi-tile tile tile--surface",
+    });
   }
 
   _renderSectionNav() {
@@ -2315,15 +2341,15 @@ class GazonIntelligentCard extends HTMLElement {
           display: flex;
           flex-direction: column;
           align-items: stretch;
-          gap: 10px;
-          border: 1px solid color-mix(in srgb, var(--gazon-card-accent) 20%, var(--divider-color));
+          gap: 12px;
+          border: 2px solid color-mix(in srgb, var(--gazon-card-accent) 34%, var(--divider-color));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 7%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 12%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 95%, white) 100%);
           box-shadow:
-            0 10px 24px rgba(0, 0, 0, 0.10),
-            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 10%, transparent);
-          padding: 14px 16px;
-          border-radius: 20px;
+            0 16px 32px rgba(0, 0, 0, 0.14),
+            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
+          padding: 16px 18px;
+          border-radius: 22px;
         }
 
         .tab-panel__action-content {
@@ -2343,39 +2369,39 @@ class GazonIntelligentCard extends HTMLElement {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 10px;
-          border: 2px solid color-mix(in srgb, var(--gazon-card-accent) 74%, var(--divider-color));
-          border-radius: 17px;
-          padding: 18px 22px;
+          gap: 12px;
+          border: 2px solid color-mix(in srgb, var(--gazon-card-accent) 82%, var(--divider-color));
+          border-radius: 18px;
+          padding: 18px 24px;
           cursor: pointer;
           color: white;
           font: inherit;
           font-weight: 900;
-          font-size: 1.02rem;
+          font-size: 1.04rem;
           letter-spacing: 0.01em;
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 100%, white) 0%, color-mix(in srgb, var(--gazon-card-accent) 66%, #000) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 100%, white) 0%, color-mix(in srgb, var(--gazon-card-accent) 62%, #000) 100%);
           box-shadow:
-            0 24px 46px color-mix(in srgb, var(--gazon-card-accent) 42%, rgba(0, 0, 0, 0.22)),
-            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 34%, transparent),
+            0 26px 50px color-mix(in srgb, var(--gazon-card-accent) 46%, rgba(0, 0, 0, 0.24)),
+            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 38%, transparent),
             inset 0 1px 0 rgba(255, 255, 255, 0.24);
           text-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
         }
 
         .tab-panel__action-button {
           width: 100%;
-          min-height: 58px;
+          min-height: 66px;
           justify-content: flex-start;
           align-self: stretch;
           text-align: left;
           position: relative;
-          padding-inline: 18px 44px;
+          padding-inline: 20px 48px;
         }
 
         .tab-panel__action-button::after {
           content: "›";
           margin-left: auto;
-          font-size: 1.7rem;
+          font-size: 1.9rem;
           line-height: 1;
           opacity: 0.92;
           transform: translateY(-1px);
@@ -2385,10 +2411,10 @@ class GazonIntelligentCard extends HTMLElement {
         .gi-primary-action .gi-icon,
         .tab-panel__action-button .gi-icon,
         .decision-action__button .gi-icon {
-          width: 22px;
-          height: 22px;
+          width: 24px;
+          height: 24px;
           border-radius: 999px;
-          background: rgba(255, 255, 255, 0.14);
+          background: rgba(255, 255, 255, 0.18);
         }
 
         @media (hover: hover) {
@@ -3331,6 +3357,138 @@ class GazonIntelligentCard extends HTMLElement {
           border-color: rgba(127, 127, 127, 0.04);
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 100%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 100%, white) 100%);
+        }
+
+        .gi-card-core,
+        .tab-stat,
+        .tile,
+        .metric {
+          display: flex;
+          align-items: stretch;
+          gap: 10px;
+          width: 100%;
+          min-width: 0;
+          box-sizing: border-box;
+          border-radius: 16px;
+          min-height: 74px;
+          padding: 12px 14px;
+        }
+
+        .gi-card-core--metric,
+        .metric {
+          min-height: 58px;
+          padding: 10px 12px;
+        }
+
+        .gi-card-core--stat,
+        .gi-card-core--tile,
+        .tab-stat,
+        .tile {
+          min-height: 74px;
+        }
+
+        .gi-card-core__icon,
+        .tab-stat__icon,
+        .tile__icon,
+        .metric__icon {
+          width: 24px;
+          height: 24px;
+          border-radius: 999px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex: none;
+          overflow: hidden;
+          line-height: 0;
+          background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
+          color: var(--gazon-section-accent);
+        }
+
+        .gi-card-core__icon .gi-icon,
+        .tab-stat__icon .gi-icon,
+        .tile__icon .gi-icon,
+        .metric__icon .gi-icon {
+          width: 18px;
+          height: 18px;
+          display: block;
+          transform: translateY(-0.5px);
+        }
+
+        .gi-card-core--metric .gi-card-core__icon,
+        .metric__icon {
+          width: 22px;
+          height: 22px;
+        }
+
+        .gi-card-core--metric .gi-card-core__icon .gi-icon,
+        .metric__icon .gi-icon {
+          width: 14px;
+          height: 14px;
+        }
+
+        .gi-card-core__icon--empty {
+          background: transparent;
+        }
+
+        .gi-card-core__content,
+        .tab-stat__content,
+        .tile__content,
+        .metric__content {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 2px;
+        }
+
+        .gi-card-core__label,
+        .tab-stat__label,
+        .tile__label,
+        .metric__label {
+          font-size: 0.61rem;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
+          color: var(--secondary-text-color);
+          line-height: 1.1;
+          min-height: 1.1em;
+        }
+
+        .gi-card-core__value,
+        .tab-stat__value,
+        .tile__value,
+        .metric__value {
+          font-weight: 700;
+          min-width: 0;
+          overflow-wrap: anywhere;
+          hyphens: auto;
+        }
+
+        .gi-card-core__value,
+        .tab-stat__value,
+        .tile__value {
+          font-size: 0.82rem;
+          line-height: 1.18;
+        }
+
+        .metric__value {
+          font-size: 0.8rem;
+          line-height: 1.14;
+        }
+
+        .gi-card-core__secondary,
+        .tab-stat__secondary,
+        .tile__secondary {
+          font-size: 0.72rem;
+          line-height: 1.15;
+          color: var(--secondary-text-color);
+          min-height: 1.15em;
+        }
+
+        .gi-card-core__secondary--empty,
+        .tab-stat__secondary:empty,
+        .tile__secondary:empty {
+          visibility: hidden;
         }
 
         .footer {

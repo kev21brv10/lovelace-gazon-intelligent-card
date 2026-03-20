@@ -1916,6 +1916,8 @@ class GazonIntelligentCard extends HTMLElement {
           height: 22px;
           flex: none;
           flex-shrink: 0;
+          line-height: 0;
+          overflow: hidden;
         }
 
         .gi-icon--sm {
@@ -1925,6 +1927,7 @@ class GazonIntelligentCard extends HTMLElement {
 
         .gi-icon ha-icon,
         .gi-icon svg {
+          display: block;
           width: 18px;
           height: 18px;
         }
@@ -2311,10 +2314,14 @@ class GazonIntelligentCard extends HTMLElement {
           flex-direction: column;
           align-items: stretch;
           gap: 10px;
-          border: 0;
-          background: transparent;
-          box-shadow: none;
-          padding: 0;
+          border: 1px solid color-mix(in srgb, var(--gazon-card-accent) 20%, var(--divider-color));
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 7%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
+          box-shadow:
+            0 10px 24px rgba(0, 0, 0, 0.10),
+            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 10%, transparent);
+          padding: 14px 16px;
+          border-radius: 20px;
         }
 
         .tab-panel__action-content {
@@ -2335,9 +2342,9 @@ class GazonIntelligentCard extends HTMLElement {
           align-items: center;
           justify-content: center;
           gap: 10px;
-          border: 1px solid color-mix(in srgb, var(--gazon-card-accent) 72%, var(--divider-color));
-          border-radius: 16px;
-          padding: 18px 20px;
+          border: 2px solid color-mix(in srgb, var(--gazon-card-accent) 74%, var(--divider-color));
+          border-radius: 17px;
+          padding: 18px 22px;
           cursor: pointer;
           color: white;
           font: inherit;
@@ -2357,6 +2364,7 @@ class GazonIntelligentCard extends HTMLElement {
           width: 100%;
           min-height: 58px;
           justify-content: center;
+          align-self: stretch;
         }
 
         .gi-action--primary .gi-icon,
@@ -2629,6 +2637,7 @@ class GazonIntelligentCard extends HTMLElement {
         .context-pill {
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 6px;
           min-height: 24px;
           padding: 0 8px;
@@ -2996,23 +3005,6 @@ class GazonIntelligentCard extends HTMLElement {
           align-items: center;
           gap: 8px;
           flex: 1 1 260px;
-        }
-
-        .hero__lead-icon {
-          width: 22px;
-          height: 22px;
-          border-radius: 999px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex: none;
-          color: var(--gazon-section-accent);
-          background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
-        }
-
-        .hero__lead-icon .gi-icon {
-          width: 18px;
-          height: 18px;
         }
 
         .hero__lead-icon {

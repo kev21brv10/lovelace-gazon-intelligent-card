@@ -1205,8 +1205,8 @@ const CARD_STYLES = String.raw`
         }
 
         .header__icon {
-          width: calc(var(--gazon-icon-size) * 1.55);
-          height: calc(var(--gazon-icon-size) * 1.55);
+          width: calc(var(--gazon-icon-size) * 1.2);
+          height: calc(var(--gazon-icon-size) * 1.2);
           border-radius: 999px;
           display: flex;
           align-items: center;
@@ -1227,8 +1227,8 @@ const CARD_STYLES = String.raw`
         .header__icon--critical { background: var(--gazon-critical-color, #ff1744); }
 
         .header__icon .gi-icon {
-          width: 18px;
-          height: 18px;
+          width: 14px;
+          height: 14px;
         }
 
         .header__titles {
@@ -1286,8 +1286,8 @@ const CARD_STYLES = String.raw`
         }
 
         .hero__lead-icon {
-          width: 20px;
-          height: 20px;
+          width: 18px;
+          height: 18px;
           border-radius: 999px;
           display: flex;
           align-items: center;
@@ -1298,8 +1298,8 @@ const CARD_STYLES = String.raw`
         }
 
         .hero__lead-icon .gi-icon {
-          width: 16px;
-          height: 16px;
+          width: 12px;
+          height: 12px;
         }
 
         .hero__label {
@@ -1341,7 +1341,7 @@ const CARD_STYLES = String.raw`
           align-items: center;
           min-width: 0;
           border-radius: 14px;
-          padding: 9px 10px;
+          padding: 10px 12px;
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, var(--secondary-background-color) 100%);
           border: 1px solid rgba(127, 127, 127, 0.15);
@@ -1351,8 +1351,8 @@ const CARD_STYLES = String.raw`
         }
 
         .metric__icon {
-          width: 20px;
-          height: 20px;
+          width: 18px;
+          height: 18px;
           border-radius: 999px;
           display: flex;
           align-items: center;
@@ -1363,8 +1363,8 @@ const CARD_STYLES = String.raw`
         }
 
         .metric__icon .gi-icon {
-          width: 16px;
-          height: 16px;
+          width: 12px;
+          height: 12px;
         }
 
         .metric__content {
@@ -1431,8 +1431,8 @@ const CARD_STYLES = String.raw`
         }
 
         .section-nav__item .gi-icon {
-          width: 14px;
-          height: 14px;
+          width: 12px;
+          height: 12px;
         }
 
         .section-nav__item--active {
@@ -1511,13 +1511,13 @@ const CARD_STYLES = String.raw`
           gap: 10px;
           align-items: stretch;
           min-width: 0;
-          padding: 12px 14px;
+          padding: 13px 15px;
           border-radius: 14px;
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, var(--secondary-background-color) 100%);
           border: 1px solid rgba(127, 127, 127, 0.15);
           box-shadow: none;
-          min-height: 72px;
+          min-height: 78px;
           height: 100%;
           flex: 1 1 118px;
           transition:
@@ -1528,8 +1528,8 @@ const CARD_STYLES = String.raw`
         }
 
         .tile__icon {
-          width: 20px;
-          height: 20px;
+          width: 18px;
+          height: 18px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1538,8 +1538,8 @@ const CARD_STYLES = String.raw`
         }
 
         .tile__icon .gi-icon {
-          width: 16px;
-          height: 16px;
+          width: 12px;
+          height: 12px;
         }
 
         .tile__content {
@@ -1606,15 +1606,15 @@ const CARD_STYLES = String.raw`
           min-width: 0;
           box-sizing: border-box;
           border-radius: 16px;
-          min-height: 74px;
+          min-height: 78px;
           height: 100%;
           padding: 12px 14px;
         }
 
         .gi-card-core--metric,
         .metric {
-          min-height: 58px;
-          padding: 10px 12px;
+          min-height: 64px;
+          padding: 11px 13px;
         }
 
         .gi-card-core--stat,
@@ -1634,8 +1634,8 @@ const CARD_STYLES = String.raw`
         .tab-stat__icon,
         .tile__icon,
         .metric__icon {
-          width: 22px;
-          height: 22px;
+          width: 20px;
+          height: 20px;
           border-radius: 999px;
           display: flex;
           align-items: center;
@@ -1656,22 +1656,22 @@ const CARD_STYLES = String.raw`
         .tab-stat__icon .gi-icon,
         .tile__icon .gi-icon,
         .metric__icon .gi-icon {
-          width: 16px;
-          height: 16px;
+          width: 12px;
+          height: 12px;
           display: block;
           transform: translateY(-0.5px);
         }
 
         .gi-card-core--metric .gi-card-core__icon,
         .metric__icon {
-          width: 20px;
-          height: 20px;
+          width: 18px;
+          height: 18px;
         }
 
         .gi-card-core--metric .gi-card-core__icon .gi-icon,
         .metric__icon .gi-icon {
-          width: 13px;
-          height: 13px;
+          width: 11px;
+          height: 11px;
         }
 
         .gi-card-core__icon--empty {

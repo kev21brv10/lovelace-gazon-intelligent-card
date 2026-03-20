@@ -2269,7 +2269,9 @@ class GazonIntelligentCard extends HTMLElement {
           align-items: center;
           justify-content: space-between;
           gap: 12px;
-          border-color: color-mix(in srgb, var(--gazon-card-accent) 28%, var(--divider-color));
+          border-color: color-mix(in srgb, var(--gazon-card-accent) 16%, var(--divider-color));
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 100%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
         }
 
         .tab-panel__action-content {
@@ -2287,25 +2289,30 @@ class GazonIntelligentCard extends HTMLElement {
         .decision-action__button {
           display: flex;
           align-items: center;
-          gap: 8px;
-          border: 1px solid color-mix(in srgb, var(--gazon-card-accent) 30%, var(--divider-color));
-          border-radius: 16px;
-          padding: 11px 14px;
+          gap: 10px;
+          border: 1px solid color-mix(in srgb, var(--gazon-card-accent) 52%, var(--divider-color));
+          border-radius: 18px;
+          padding: 14px 18px;
           cursor: pointer;
           color: white;
           font: inherit;
-          font-weight: 800;
-          background: linear-gradient(145deg, color-mix(in srgb, var(--gazon-card-accent) 90%, white), var(--gazon-card-accent));
+          font-weight: 900;
+          font-size: 0.96rem;
+          letter-spacing: 0.01em;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 98%, white) 0%, color-mix(in srgb, var(--gazon-card-accent) 82%, #000) 100%);
           box-shadow:
-            0 12px 26px color-mix(in srgb, var(--gazon-card-accent) 28%, transparent),
-            inset 0 1px 0 rgba(255, 255, 255, 0.18);
+            0 16px 34px color-mix(in srgb, var(--gazon-card-accent) 34%, rgba(0, 0, 0, 0.18)),
+            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+          text-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
         }
 
         .gi-primary-action .gi-icon,
         .tab-panel__action-button .gi-icon,
         .decision-action__button .gi-icon {
-          width: 18px;
-          height: 18px;
+          width: 20px;
+          height: 20px;
         }
 
         @media (hover: hover) {
@@ -2322,9 +2329,9 @@ class GazonIntelligentCard extends HTMLElement {
 
         .gi-primary-action--active {
           box-shadow:
-            0 12px 28px rgba(0, 0, 0, 0.22),
-            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 20%, transparent),
-            0 0 24px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
+            0 18px 38px rgba(0, 0, 0, 0.24),
+            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 30%, transparent),
+            0 0 28px color-mix(in srgb, var(--gazon-card-accent) 24%, transparent);
         }
 
         .gi-action {
@@ -2340,27 +2347,27 @@ class GazonIntelligentCard extends HTMLElement {
 
         .gi-action--primary .gi-icon,
         .gi-primary-action .gi-icon {
-          width: 18px;
-          height: 18px;
+          width: 20px;
+          height: 20px;
         }
 
         .gi-info {
-          border: 1px solid rgba(127, 127, 127, 0.14);
+          border: 1px solid rgba(127, 127, 127, 0.08);
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 96%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 88%, white) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 100%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
           box-shadow: none;
         }
 
         .gi-info--main {
-          border-color: color-mix(in srgb, var(--gazon-card-accent) 16%, var(--divider-color));
+          border-color: color-mix(in srgb, var(--gazon-card-accent) 10%, var(--divider-color));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, white) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 3%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, white) 100%);
         }
 
         .gi-info--secondary {
-          border-color: rgba(127, 127, 127, 0.12);
+          border-color: rgba(127, 127, 127, 0.07);
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, white) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 100%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, white) 100%);
         }
 
         .gi-alert--critical {
@@ -3210,22 +3217,22 @@ class GazonIntelligentCard extends HTMLElement {
         .tile--accent { border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 22%, transparent); }
 
         .gi-info {
-          border: 1px solid rgba(127, 127, 127, 0.12);
+          border: 1px solid rgba(127, 127, 127, 0.08);
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, white) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 100%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
           box-shadow: none;
         }
 
         .gi-info--main {
-          border-color: color-mix(in srgb, var(--gazon-card-accent) 16%, var(--divider-color));
+          border-color: color-mix(in srgb, var(--gazon-card-accent) 10%, var(--divider-color));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 5%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 95%, white) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 3%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, white) 100%);
         }
 
         .gi-info--secondary {
-          border-color: rgba(127, 127, 127, 0.10);
+          border-color: rgba(127, 127, 127, 0.07);
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 99%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, white) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 100%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, white) 100%);
         }
 
         .footer {
@@ -3293,6 +3300,13 @@ class GazonIntelligentCard extends HTMLElement {
           .tab-panel__section-head,
           .tab-panel__action {
             flex-direction: column;
+          }
+
+          .gi-primary-action,
+          .tab-panel__action-button,
+          .decision-action__button {
+            width: 100%;
+            justify-content: center;
           }
 
           .hero__lead {

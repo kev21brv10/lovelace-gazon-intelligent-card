@@ -170,16 +170,12 @@ function renderCardCore({
   value,
   tone = "neutral",
   icon = null,
-  iconSize = "sm",
+  iconSize = "md",
   secondary = "",
-  className = "",
 }) {
   const classes = ["gi-card-core", `gi-card-core--${kind}`];
   if (tone) {
     classes.push(`gi-card-core--${tone}`);
-  }
-  if (className) {
-    classes.push(className);
   }
   const iconHtml = icon ? renderIconBox(icon, iconSize) : "";
   const secondaryValue = isEmpty(secondary) ? "&nbsp;" : escapeHtml(secondary);
@@ -1117,9 +1113,7 @@ class GazonIntelligentCard extends HTMLElement {
       value,
       tone,
       icon: this._config?.show_icons ? icon : null,
-      iconSize: "sm",
       secondary,
-      className: "gi-row gi-info gi-info--secondary gi-tile tab-stat tab-stat--surface",
     });
   }
 
@@ -1206,16 +1200,16 @@ class GazonIntelligentCard extends HTMLElement {
           </div>
         </div>
 
-        <div class="tab-panel__grid tab-panel__grid--config">
+        <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-top">
           ${this._renderStatCard("Arrosage automatique", switchState.label, switchState.tone, "mdi:switch")}
           ${this._renderStatCard("Mode du gazon", formatApplicationMode(mode), modeTone, "mdi:grass")}
           ${this._renderStatCard("Hauteur min tondeuse", heightMin.value, heightMin.tone, "mdi:ruler-square")}
           ${this._renderStatCard("Hauteur max tondeuse", heightMax.value, heightMax.tone, "mdi:ruler-square")}
         </div>
 
-        <div class="tab-panel__section">
+        <div class="tab-panel__section tab-panel__section--config-debits">
           <div class="tab-panel__section-title">Débits des zones</div>
-          <div class="tab-panel__grid tab-panel__grid--config">
+          <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">
             ${zoneCards || `<div class="tab-panel__empty">Débits non configurés.</div>`}
           </div>
         </div>
@@ -1368,22 +1362,18 @@ class GazonIntelligentCard extends HTMLElement {
 
         ${
           manualButtonVisible
-            ? `<section class="tab-panel__action tab-panel__action--${tone}">
-                <div class="tab-panel__action-content">
-                  <div class="tab-panel__eyebrow">Action principale</div>
-                  <div class="tab-panel__action-title">Arrosage manuel immédiat</div>
-                  <div class="tab-panel__action-subtitle">${escapeHtml(objectiveLabel)} à déclencher maintenant</div>
-                </div>
-                <button
-                  type="button"
-                  class="gi-primary-action gi-action gi-action--primary tab-panel__action-button ${manualButtonVisible ? "gi-primary-action--active" : ""} ${this._actionTone() === "critical" ? "gi-alert--critical" : ""}"
-                  data-gazon-action="manual-irrigation"
-                  aria-label="Arrosage manuel immédiat"
-                >
-                  ${this._config?.show_icons ? renderIconBox("mdi:water-pump", "md") : ""}
-                  <span>Arrosage manuel immédiat</span>
-                </button>
-              </section>`
+            ? `<button
+                type="button"
+                class="tab-panel__action tab-panel__action--${tone} gi-primary-action gi-action gi-action--primary ${manualButtonVisible ? "gi-primary-action--active" : ""} ${this._actionTone() === "critical" ? "gi-alert--critical" : ""}"
+                data-gazon-action="manual-irrigation"
+                aria-label="Arrosage manuel immédiat"
+              >
+                ${this._config?.show_icons ? renderIconBox("mdi:water-pump", "md") : ""}
+                <span class="tab-panel__action-content">
+                  <span class="tab-panel__action-title">Arrosage manuel immédiat</span>
+                  <span class="tab-panel__action-subtitle">${escapeHtml(objectiveLabel)} à déclencher maintenant</span>
+                </span>
+              </button>`
             : `<section class="gi-info gi-info--secondary tab-panel__block tab-panel__block--${windowState.status === "bloque" ? "danger" : "neutral"}">
                 <div class="tab-panel__eyebrow">Blocage</div>
                 <div class="tab-panel__block-value">${escapeHtml(blockText || "Aucune action disponible")}</div>
@@ -1552,7 +1542,6 @@ class GazonIntelligentCard extends HTMLElement {
       icon: this._config?.show_icons ? icon : null,
       iconSize: "sm",
       secondary: "",
-      className: "gi-row gi-info gi-info--secondary metric metric--surface",
     });
   }
 
@@ -1574,9 +1563,7 @@ class GazonIntelligentCard extends HTMLElement {
       value,
       tone,
       icon: this._config?.show_icons ? icon : null,
-      iconSize: "sm",
       secondary: this._config?.show_secondary_info ? secondary : "",
-      className: "gi-row gi-info gi-info--main gi-tile tile tile--surface",
     });
   }
 
@@ -2199,13 +2186,34 @@ class GazonIntelligentCard extends HTMLElement {
 
         .tab-panel__grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(172px, 1fr));
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 8px;
           align-items: stretch;
+          grid-auto-rows: 1fr;
+          align-content: start;
         }
 
         .tab-panel__grid--config {
-          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+        }
+
+        .tab-panel__grid--config-top,
+        .tab-panel__grid--config-debits {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-auto-rows: 1fr;
+          align-content: start;
+        }
+
+        .tab-panel__grid--config-top {
+          gap: 10px;
+        }
+
+        .tab-panel__grid--config-debits {
+          gap: 10px;
+        }
+
+        .tab-panel__section--config-debits {
           gap: 10px;
         }
 
@@ -2339,26 +2347,45 @@ class GazonIntelligentCard extends HTMLElement {
 
         .tab-panel__action {
           display: flex;
-          flex-direction: column;
-          align-items: stretch;
+          align-items: center;
           gap: 12px;
+          width: 100%;
+          min-height: 84px;
           border: 2px solid color-mix(in srgb, var(--gazon-card-accent) 34%, var(--divider-color));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 12%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 95%, white) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 16%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, white) 100%);
           box-shadow:
-            0 16px 32px rgba(0, 0, 0, 0.14),
+            0 18px 36px rgba(0, 0, 0, 0.16),
             0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
           padding: 16px 18px;
           border-radius: 22px;
+          cursor: pointer;
+          color: white;
+          font: inherit;
+          font-weight: 900;
+          text-align: left;
+          position: relative;
+          -webkit-tap-highlight-color: transparent;
+          user-select: none;
         }
 
         .tab-panel__action-content {
           min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          flex: 1;
         }
 
         .tab-panel__action-title {
-          font-size: 1rem;
-          font-weight: 800;
+          font-size: 1.04rem;
+          font-weight: 900;
+          line-height: 1.16;
+        }
+
+        .tab-panel__action-subtitle {
+          color: color-mix(in srgb, white 86%, transparent);
+          font-size: 0.84rem;
           line-height: 1.24;
         }
 
@@ -2386,6 +2413,28 @@ class GazonIntelligentCard extends HTMLElement {
             0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 38%, transparent),
             inset 0 1px 0 rgba(255, 255, 255, 0.24);
           text-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
+        }
+
+        .tab-panel__action.gi-action--primary,
+        .tab-panel__action.gi-primary-action {
+          justify-content: flex-start;
+          align-items: center;
+          padding-inline: 18px 20px;
+          padding-block: 16px;
+          gap: 12px;
+          min-height: 86px;
+          border-radius: 20px;
+        }
+
+        .tab-panel__action.gi-action--primary::after,
+        .tab-panel__action.gi-primary-action::after {
+          content: "›";
+          margin-left: auto;
+          font-size: 2rem;
+          line-height: 1;
+          opacity: 0.94;
+          transform: translateY(-1px);
+          flex: none;
         }
 
         .tab-panel__action-button {
@@ -2417,9 +2466,17 @@ class GazonIntelligentCard extends HTMLElement {
           background: rgba(255, 255, 255, 0.18);
         }
 
+        .tab-panel__action.gi-action--primary .gi-icon,
+        .tab-panel__action.gi-primary-action .gi-icon {
+          width: 26px;
+          height: 26px;
+          background: rgba(255, 255, 255, 0.2);
+        }
+
         @media (hover: hover) {
           .gi-action--primary:hover,
           .gi-primary-action:hover,
+          .tab-panel__action:hover,
           .tab-panel__action-button:hover,
           .decision-action__button:hover {
             transform: translateY(-1px);
@@ -2428,6 +2485,12 @@ class GazonIntelligentCard extends HTMLElement {
               0 14px 28px rgba(0, 0, 0, 0.22),
               0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
           }
+        }
+
+        .tab-panel__action:hover {
+          box-shadow:
+            0 22px 42px rgba(0, 0, 0, 0.22),
+            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 22%, transparent);
         }
 
         .gi-primary-action--active {
@@ -3371,6 +3434,7 @@ class GazonIntelligentCard extends HTMLElement {
           box-sizing: border-box;
           border-radius: 16px;
           min-height: 74px;
+          height: 100%;
           padding: 12px 14px;
         }
 
@@ -3572,6 +3636,11 @@ class GazonIntelligentCard extends HTMLElement {
           .decision-grid,
           .tiles {
             gap: 6px;
+          }
+
+          .tab-panel__grid,
+          .tab-panel__grid--config {
+            grid-template-columns: 1fr;
           }
         }
       </style>

@@ -426,6 +426,7 @@ class GazonIntelligentCard extends HTMLElement {
     this._config = null;
     this._hass = null;
     this._tapTimer = null;
+    this._lastRenderSignature = null;
     this._activeTab = "watering";
     this._activeSection = "overview";
     this._onClick = this._onClick.bind(this);
@@ -508,6 +509,7 @@ class GazonIntelligentCard extends HTMLElement {
       throw new Error(`Invalid configuration for ${CARD_NAME}.`);
     }
     this._config = mergeConfig(DEFAULT_CONFIG, config);
+    this._lastRenderSignature = null;
     this._activeTab = "watering";
     this._activeSection = "overview";
     this._render();
@@ -889,6 +891,115 @@ class GazonIntelligentCard extends HTMLElement {
 
   _canShowLegacyDetails() {
     return Boolean(this._config?.show_legacy_details);
+  }
+
+  _isPreviewMode() {
+    if (typeof window === "undefined") {
+      return false;
+    }
+    const pathname = String(window.location?.pathname || "");
+    return pathname.includes("/config/lovelace");
+  }
+
+  _renderSignature() {
+    if (!this._config) {
+      return "no-config";
+    }
+
+    const keys = new Set([
+      "entity_phase",
+      "entity_sous_phase",
+      "entity_tonte",
+      "entity_hauteur",
+      "entity_arrosage_recommande",
+      "entity_niveau",
+      "entity_risque",
+      "entity_conseil",
+      "entity_action",
+      "entity_avoid",
+      "entity_fenetre_optimale",
+      "entity_plan_arrosage",
+      "entity_dernier_arrosage",
+      "entity_derniere_application",
+      "entity_objectif_arrosage",
+      "entity_type_arrosage",
+      "entity_mode",
+      "entity_switch_arrosage_automatique",
+      "entity_debit_zone_1",
+      "entity_debit_zone_2",
+      "entity_debit_zone_3",
+      "entity_debit_zone_4",
+      "entity_debit_zone_5",
+      "entity_hauteur_min_tondeuse",
+      "entity_hauteur_max_tondeuse",
+    ]);
+
+    if (this._canShowLegacyDetails()) {
+      ENTITY_KEYS.forEach((field) => keys.add(field.key));
+    } else {
+      if (this._activeTab === "mowing") {
+        ["entity_tonte", "entity_hauteur", "entity_fenetre_optimale"].forEach((key) => keys.add(key));
+      } else if (this._activeTab === "gazon") {
+        ["entity_phase", "entity_sous_phase", "entity_niveau", "entity_risque"].forEach((key) => keys.add(key));
+      } else if (this._activeTab === "config") {
+        [
+          "entity_switch_arrosage_automatique",
+          "entity_mode",
+          "entity_debit_zone_1",
+          "entity_debit_zone_2",
+          "entity_debit_zone_3",
+          "entity_debit_zone_4",
+          "entity_debit_zone_5",
+          "entity_hauteur_min_tondeuse",
+          "entity_hauteur_max_tondeuse",
+        ].forEach((key) => keys.add(key));
+      } else {
+        [
+          "entity_fenetre_optimale",
+          "entity_plan_arrosage",
+          "entity_dernier_arrosage",
+          "entity_derniere_application",
+          "entity_objectif_arrosage",
+          "entity_type_arrosage",
+        ].forEach((key) => keys.add(key));
+      }
+    }
+
+    const snapshot = {
+      activeTab: this._activeTab,
+      activeSection: this._activeSection,
+      preview: this._isPreviewMode(),
+      config: {
+        title: this._config.title,
+        show_icons: Boolean(this._config.show_icons),
+        show_header: Boolean(this._config.show_header),
+        show_background: Boolean(this._config.show_background),
+        compact: Boolean(this._config.compact),
+        minimal_mode: Boolean(this._config.minimal_mode),
+        show_secondary_info: Boolean(this._config.show_secondary_info),
+        show_legacy_details: Boolean(this._config.show_legacy_details),
+        theme_mode: this._config.theme_mode,
+        accent_color: this._config.accent_color,
+        card_height: this._config.card_height,
+        icon_size: this._config.icon_size,
+        border_radius: this._config.border_radius,
+        background_style: this._config.background_style,
+        use_gradient: Boolean(this._config.use_gradient),
+      },
+      entities: {},
+    };
+
+    [...keys].sort().forEach((key) => {
+      const entity = this._entity(key);
+      snapshot.entities[key] = entity
+        ? {
+            state: entity.state,
+            attributes: entity.attributes,
+          }
+        : null;
+    });
+
+    return JSON.stringify(snapshot);
   }
 
   _statusIcon(status) {
@@ -1658,9 +1769,19 @@ class GazonIntelligentCard extends HTMLElement {
       return;
     }
     if (!this._config) {
+      if (this._lastRenderSignature === "no-config") {
+        return;
+      }
+      this._lastRenderSignature = "no-config";
       this.shadowRoot.innerHTML = `<div class="empty">Configuration manquante.</div>`;
       return;
     }
+
+    const renderSignature = this._renderSignature();
+    if (renderSignature === this._lastRenderSignature) {
+      return;
+    }
+    this._lastRenderSignature = renderSignature;
 
     const activeTone = this._cardTone();
     const accent = this._config.accent_color || this._accentColorFromTone(activeTone);
@@ -1674,6 +1795,7 @@ class GazonIntelligentCard extends HTMLElement {
     const iconSize = `${this._config.icon_size ?? 24}px`;
     const showLegacy = this._canShowLegacyDetails();
     const actionCritical = this._actionTone() === "critical";
+    const isPreview = this._isPreviewMode();
 
     const rootClass = [
       "card",
@@ -1682,6 +1804,7 @@ class GazonIntelligentCard extends HTMLElement {
       themeMode ? `card--theme-${themeMode}` : "",
       this._config.use_gradient ? "card--gradient" : "",
       actionCritical ? "card--pulse-critical" : "",
+      isPreview ? "card--editor-preview" : "",
     ]
       .filter(Boolean)
       .join(" ");
@@ -3059,6 +3182,18 @@ class GazonIntelligentCard extends HTMLElement {
           color: var(--secondary-text-color);
           border: 1px dashed var(--divider-color);
           border-radius: 16px;
+        }
+
+        .card--editor-preview .gi-panel,
+        .card--editor-preview .gi-tab,
+        .card--editor-preview .gi-tile,
+        .card--editor-preview .gi-badge,
+        .card--editor-preview .gi-status-pill,
+        .card--editor-preview .gi-primary-action,
+        .card--editor-preview .gi-progress__bar,
+        .card--editor-preview .tab-panel__action-button,
+        .card--editor-preview .decision-action__button {
+          animation: none !important;
         }
 
         @media (prefers-reduced-motion: reduce) {

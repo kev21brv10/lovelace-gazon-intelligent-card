@@ -1930,12 +1930,14 @@ class GazonIntelligentCard extends HTMLElement {
           display: block;
           width: 18px;
           height: 18px;
+          transform: translateY(-0.5px);
         }
 
         .gi-icon--sm ha-icon,
         .gi-icon--sm svg {
           width: 14px;
           height: 14px;
+          transform: translateY(-0.5px);
         }
 
         .gi-tabs,
@@ -2363,8 +2365,20 @@ class GazonIntelligentCard extends HTMLElement {
         .tab-panel__action-button {
           width: 100%;
           min-height: 58px;
-          justify-content: center;
+          justify-content: flex-start;
           align-self: stretch;
+          text-align: left;
+          position: relative;
+          padding-inline: 18px 44px;
+        }
+
+        .tab-panel__action-button::after {
+          content: "›";
+          margin-left: auto;
+          font-size: 1.7rem;
+          line-height: 1;
+          opacity: 0.92;
+          transform: translateY(-1px);
         }
 
         .gi-action--primary .gi-icon,
@@ -2373,6 +2387,8 @@ class GazonIntelligentCard extends HTMLElement {
         .decision-action__button .gi-icon {
           width: 22px;
           height: 22px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.14);
         }
 
         @media (hover: hover) {

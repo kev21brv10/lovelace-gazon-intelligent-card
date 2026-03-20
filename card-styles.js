@@ -912,6 +912,27 @@ export const CARD_STYLES = String.raw`
           border: 1px solid rgba(127, 127, 127, 0.15);
           background: rgba(127, 127, 127, 0.04);
           min-width: 0;
+          box-sizing: border-box;
+        }
+
+        .gi-pill--status {
+          gap: 8px;
+          min-height: 32px;
+          padding: 4px 12px 4px 8px;
+        }
+
+        .gi-pill__icon {
+          width: 18px;
+          height: 18px;
+          display: grid;
+          place-items: center;
+          flex: none;
+          overflow: visible;
+          line-height: 0;
+        }
+
+        .gi-pill__icon .gi-icon {
+          overflow: visible;
         }
 
         .gi-pill .gi-icon--pill,
@@ -925,15 +946,25 @@ export const CARD_STYLES = String.raw`
           color: var(--gazon-card-accent);
         }
 
+        .gi-pill--status .gi-icon--pill {
+          width: 12px;
+          height: 12px;
+          overflow: visible;
+          transform: none;
+        }
+
+        .gi-pill--status .gi-icon--pill ha-icon,
+        .gi-pill--status .gi-icon--pill svg {
+          width: 12px;
+          height: 12px;
+          transform: none;
+        }
+
         .gi-pill .gi-icon,
         .gi-status-pill .gi-icon,
         .pill .gi-icon,
         .context-pill .gi-icon {
           flex: none;
-        }
-
-        .gi-status-pill {
-          gap: 8px;
         }
 
         .pill__label,
@@ -951,6 +982,16 @@ export const CARD_STYLES = String.raw`
           font-weight: 700;
           line-height: 1.12;
           overflow-wrap: anywhere;
+        }
+
+        .gi-pill__text {
+          min-width: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          font-size: 0.8rem;
+          font-weight: 700;
+          line-height: 1.12;
         }
 
         .pill--danger,

@@ -182,6 +182,13 @@ function renderIconBox(icon, size = "md") {
   return `<span class="gi-icon ${sizeClass}"><ha-icon icon="${escapeHtml(icon)}"></ha-icon></span>`;
 }
 
+function renderPillIcon(icon) {
+  if (!icon) {
+    return "";
+  }
+  return `<span class="gi-pill__icon">${renderIconBox(icon, "pill")}</span>`;
+}
+
 function renderCardCore({
   kind,
   label,
@@ -209,6 +216,19 @@ function renderCardCore({
         <div class="gi-card-core__secondary ${isEmpty(secondary) ? "gi-card-core__secondary--empty" : ""}">${secondaryValue}</div>
       </div>
     </section>
+  `;
+}
+
+function renderStatusPill(text, tone = "neutral", icon = null, extraClass = "") {
+  const classes = ["gi-pill", "gi-pill--status", `gi-pill--${tone}`];
+  if (extraClass) {
+    classes.push(extraClass);
+  }
+  return `
+    <div class="${classes.join(" ")}">
+      ${renderPillIcon(icon)}
+      <span class="gi-pill__text">${escapeHtml(text)}</span>
+    </div>
   `;
 }
 
@@ -1201,7 +1221,7 @@ class GazonIntelligentCard extends HTMLElement {
     const switchState = this._configSwitchState();
     const mode = this._entityState("entity_mode", null);
     const modeTone = phaseTone(mode);
-    const switchIconHtml = this._config?.show_icons ? renderIconBox("mdi:switch", "sm") : "";
+    const switchIcon = this._config?.show_icons ? "mdi:switch" : null;
     const zoneCards = this._zoneDebitEntries()
       .map((entry) => {
         const config = this._renderConfigValue(entry.key, "mm/h");
@@ -1218,10 +1238,7 @@ class GazonIntelligentCard extends HTMLElement {
             <div class="tab-panel__eyebrow">Configuration</div>
             <div class="tab-panel__title">Autorisation, débits et hauteurs</div>
           </div>
-          <div class="gi-pill gi-status-pill tab-panel__status tab-panel__status--${switchState.tone}">
-            ${switchIconHtml}
-            <span>${escapeHtml(switchState.label)}</span>
-          </div>
+          ${renderStatusPill(switchState.label, switchState.tone, switchIcon, "tab-panel__status")}
         </div>
 
         <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-top">
@@ -1250,7 +1267,7 @@ class GazonIntelligentCard extends HTMLElement {
     const progressDetail = this._entity("entity_sous_phase")?.attributes?.sous_phase_detail || "";
     const progressLabel = progress === null ? "Progression non disponible" : `${formatNumber(progress, 0)} %`;
     const progressWidth = progress === null ? 0 : Math.max(0, Math.min(100, progress));
-    const gazonStatusIcon = this._config?.show_icons ? renderIconBox("mdi:grass", "sm") : "";
+    const gazonStatusIcon = this._config?.show_icons ? "mdi:grass" : null;
 
     return `
       <section class="tab-panel gi-panel tab-panel--gazon">
@@ -1259,10 +1276,7 @@ class GazonIntelligentCard extends HTMLElement {
             <div class="tab-panel__eyebrow">Gazon</div>
             <div class="tab-panel__title">Phase, sous-phase et risque</div>
           </div>
-          <div class="gi-pill gi-status-pill tab-panel__status tab-panel__status--${computeActionTone(action)}">
-            ${gazonStatusIcon}
-            <span>${escapeHtml(formatStatusLabel(action))}</span>
-          </div>
+          ${renderStatusPill(formatStatusLabel(action), computeActionTone(action), gazonStatusIcon, "tab-panel__status")}
         </div>
 
         <div class="tab-panel__grid">
@@ -1295,7 +1309,7 @@ class GazonIntelligentCard extends HTMLElement {
     const heightMax = asNumber(height?.attributes?.hauteur_tonte_max_cm);
     const heightSecondary = heightMin !== null && heightMax !== null ? `${formatCm(heightMin)} → ${formatCm(heightMax)}` : "";
     const windowSummary = windowState.entity ? windowState.summary : "Fenêtre optimale non disponible";
-    const mowingStatusIcon = this._config?.show_icons ? renderIconBox("mdi:content-cut", "sm") : "";
+    const mowingStatusIcon = this._config?.show_icons ? "mdi:content-cut" : null;
 
     return `
       <section class="tab-panel gi-panel tab-panel--mowing">
@@ -1304,10 +1318,7 @@ class GazonIntelligentCard extends HTMLElement {
             <div class="tab-panel__eyebrow">Tonte</div>
             <div class="tab-panel__title">État, hauteur et créneau</div>
           </div>
-          <div class="gi-pill gi-status-pill tab-panel__status tab-panel__status--${computeTonteTone(tonteValue)}">
-            ${mowingStatusIcon}
-            <span>${escapeHtml(tonteValue)}</span>
-          </div>
+          ${renderStatusPill(tonteValue, computeTonteTone(tonteValue), mowingStatusIcon, "tab-panel__status")}
         </div>
 
         <div class="tab-panel__grid">
@@ -1328,7 +1339,7 @@ class GazonIntelligentCard extends HTMLElement {
     const lastWatering = this._lastWateringState();
     const tone = windowState.tone;
     const windowIcon = this._statusIcon(windowState.status);
-    const windowStatusIcon = this._config?.show_icons ? renderIconBox(windowIcon, "sm") : "";
+    const windowStatusIcon = this._config?.show_icons ? windowIcon : null;
     const manualButtonVisible = windowState.showManualAction && objective > 0;
     const isBlocked = windowState.isBlocked;
     const noActionText = windowState.isNoActionRequired ? "Aucune irrigation nécessaire" : "";
@@ -1367,10 +1378,7 @@ class GazonIntelligentCard extends HTMLElement {
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${tone}">
           <div class="tab-panel__hero-top">
             <div class="tab-panel__hero-summary">${escapeHtml(windowState.summary || "Arrosage prévu")}</div>
-            <div class="gi-pill gi-status-pill tab-panel__hero-status tab-panel__hero-status--${tone}">
-              ${windowStatusIcon}
-              <span>${escapeHtml(windowState.statusLabel)}</span>
-            </div>
+            ${renderStatusPill(windowState.statusLabel, tone, windowStatusIcon, `tab-panel__hero-status tab-panel__hero-status--${tone}`)}
           </div>
           ${
             windowState.nextAction

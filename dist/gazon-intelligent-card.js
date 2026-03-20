@@ -99,14 +99,14 @@ const CARD_STYLES = String.raw`
           display: block;
           width: 16px;
           height: 16px;
-          transform: translateY(-0.5px);
+          transform: none;
         }
 
         .gi-icon--sm ha-icon,
         .gi-icon--sm svg {
           width: 13px;
           height: 13px;
-          transform: translateY(-0.5px);
+          transform: none;
         }
 
         .gi-icon--pill ha-icon,
@@ -203,8 +203,7 @@ const CARD_STYLES = String.raw`
 
         .tab-panel__hero,
         .tab-panel__section,
-        .tab-panel__block,
-        .tab-panel__action {
+        .tab-panel__block {
           display: flex;
           flex-direction: column;
           border: 1px solid rgba(127, 127, 127, 0.15);
@@ -253,57 +252,6 @@ const CARD_STYLES = String.raw`
           font-size: clamp(1rem, 1.6vw, 1.15rem);
           font-weight: 800;
           line-height: 1.22;
-        }
-
-        .tab-panel__hero-status,
-        .tab-panel__status,
-        .gi-pill,
-        .gi-status-pill {
-          display: flex;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 8px;
-          min-height: 28px;
-          padding: 2px 10px;
-          border-radius: 999px;
-          font-size: 0.76rem;
-          font-weight: 700;
-          white-space: nowrap;
-          background: color-mix(in srgb, var(--gazon-card-accent) 14%, transparent);
-          color: var(--primary-text-color);
-        }
-
-        .tab-panel__hero-status .gi-icon--pill,
-        .tab-panel__status .gi-icon--pill,
-        .gi-pill .gi-icon--pill,
-        .gi-status-pill .gi-icon--pill {
-          width: 16px;
-          height: 16px;
-        }
-
-        .tab-panel__hero-status--danger,
-        .tab-panel__status--danger {
-          background: color-mix(in srgb, var(--gazon-danger-color) 14%, transparent);
-        }
-
-        .tab-panel__hero-status--critical,
-        .tab-panel__status--critical {
-          background: color-mix(in srgb, var(--gazon-critical-color) 18%, transparent);
-        }
-
-        .tab-panel__hero-status--warning,
-        .tab-panel__status--warning {
-          background: color-mix(in srgb, var(--gazon-warning-color) 16%, transparent);
-        }
-
-        .tab-panel__hero-status--success,
-        .tab-panel__status--success {
-          background: color-mix(in srgb, var(--gazon-success-color) 16%, transparent);
-        }
-
-        .tab-panel__hero-status--neutral,
-        .tab-panel__status--neutral {
-          background: color-mix(in srgb, var(--gazon-neutral-color) 12%, transparent);
         }
 
         .tab-panel__hero-next,
@@ -508,30 +456,6 @@ const CARD_STYLES = String.raw`
           color: var(--secondary-text-color);
         }
 
-        .tab-panel__action {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          width: 100%;
-          min-height: 84px;
-          border: 2px solid color-mix(in srgb, var(--gazon-card-accent) 34%, var(--divider-color));
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 16%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, white) 100%);
-          box-shadow:
-            0 18px 36px rgba(0, 0, 0, 0.16),
-            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
-          padding: 16px 18px;
-          border-radius: 22px;
-          cursor: pointer;
-          color: white;
-          font: inherit;
-          font-weight: 900;
-          text-align: left;
-          position: relative;
-          -webkit-tap-highlight-color: transparent;
-          user-select: none;
-        }
-
         .tab-panel__action-content {
           min-width: 0;
           display: flex;
@@ -554,8 +478,7 @@ const CARD_STYLES = String.raw`
 
         .gi-action--primary,
         .gi-primary-action,
-        .tab-panel__action-button,
-        .decision-action__button {
+        .tab-panel__action {
           display: flex;
           align-items: center;
           justify-content: center;
@@ -578,19 +501,24 @@ const CARD_STYLES = String.raw`
           text-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
         }
 
-        .tab-panel__action.gi-action--primary,
-        .tab-panel__action.gi-primary-action {
+        .tab-panel__action {
           justify-content: flex-start;
           align-items: center;
+          width: 100%;
           padding-inline: 18px 20px;
           padding-block: 16px;
           gap: 12px;
-          min-height: 86px;
-          border-radius: 20px;
+          min-height: 84px;
+          border-radius: 22px;
+          border: 2px solid color-mix(in srgb, var(--gazon-card-accent) 34%, var(--divider-color));
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 16%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, white) 100%);
+          box-shadow:
+            0 18px 36px rgba(0, 0, 0, 0.16),
+            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
         }
 
-        .tab-panel__action.gi-action--primary::after,
-        .tab-panel__action.gi-primary-action::after {
+        .tab-panel__action::after {
           content: "›";
           margin-left: auto;
           font-size: 2rem;
@@ -600,37 +528,16 @@ const CARD_STYLES = String.raw`
           flex: none;
         }
 
-        .tab-panel__action-button {
-          width: 100%;
-          min-height: 66px;
-          justify-content: flex-start;
-          align-self: stretch;
-          text-align: left;
-          position: relative;
-          padding-inline: 20px 48px;
-        }
-
-        .tab-panel__action-button::after {
-          content: "›";
-          margin-left: auto;
-          font-size: 1.9rem;
-          line-height: 1;
-          opacity: 0.92;
-          transform: translateY(-1px);
-        }
-
         .gi-action--primary .gi-icon,
         .gi-primary-action .gi-icon,
-        .tab-panel__action-button .gi-icon,
-        .decision-action__button .gi-icon {
+        .tab-panel__action .gi-icon {
           width: 24px;
           height: 24px;
           border-radius: 999px;
           background: rgba(255, 255, 255, 0.18);
         }
 
-        .tab-panel__action.gi-action--primary .gi-icon,
-        .tab-panel__action.gi-primary-action .gi-icon {
+        .tab-panel__action .gi-icon {
           width: 26px;
           height: 26px;
           background: rgba(255, 255, 255, 0.2);
@@ -639,9 +546,7 @@ const CARD_STYLES = String.raw`
         @media (hover: hover) {
           .gi-action--primary:hover,
           .gi-primary-action:hover,
-          .tab-panel__action:hover,
-          .tab-panel__action-button:hover,
-          .decision-action__button:hover {
+          .tab-panel__action:hover {
             transform: translateY(-1px);
             border-color: color-mix(in srgb, var(--gazon-card-accent) 52%, var(--divider-color));
             box-shadow:
@@ -718,7 +623,6 @@ const CARD_STYLES = String.raw`
         }
 
         .decision-hero,
-        .decision-action,
         .decision-plan,
         .decision-context,
         .decision-block,
@@ -799,23 +703,6 @@ const CARD_STYLES = String.raw`
           line-height: 1.22;
         }
 
-        .decision-action {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          border-color: color-mix(in srgb, var(--gazon-card-accent) 28%, var(--divider-color));
-        }
-
-        .decision-action--pulse {
-          animation: gazonPulseSoft 3s ease-in-out infinite;
-        }
-
-        .decision-action__content {
-          min-width: 0;
-        }
-
-        .decision-action__label,
         .decision-plan__label,
         .decision-context__label,
         .decision-block__label {
@@ -824,41 +711,6 @@ const CARD_STYLES = String.raw`
           letter-spacing: 0.04em;
           color: var(--secondary-text-color);
           margin-bottom: 4px;
-        }
-
-        .decision-action__title {
-          font-size: 1rem;
-          font-weight: 800;
-          line-height: 1.24;
-        }
-
-        .decision-action__subtitle {
-          margin-top: 2px;
-          color: var(--secondary-text-color);
-          font-size: 0.82rem;
-          line-height: 1.3;
-        }
-
-        .decision-action__button {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          border: 0;
-          border-radius: 16px;
-          padding: 11px 14px;
-          cursor: pointer;
-          color: white;
-          font: inherit;
-          font-weight: 800;
-          background: linear-gradient(145deg, color-mix(in srgb, var(--gazon-card-accent) 88%, white), var(--gazon-card-accent));
-          box-shadow:
-            0 10px 24px color-mix(in srgb, var(--gazon-card-accent) 25%, transparent),
-            inset 0 1px 0 rgba(255, 255, 255, 0.18);
-        }
-
-        .decision-action__button .gi-icon {
-          width: 18px;
-          height: 18px;
         }
 
         .decision-plan {
@@ -900,6 +752,7 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-pill,
+        .gi-status-pill,
         .pill,
         .context-pill {
           display: flex;
@@ -919,6 +772,8 @@ const CARD_STYLES = String.raw`
           gap: 8px;
           min-height: 32px;
           padding: 4px 12px 4px 8px;
+          background: color-mix(in srgb, var(--gazon-card-accent) 14%, transparent);
+          color: var(--primary-text-color);
         }
 
         .gi-pill__icon {
@@ -935,32 +790,23 @@ const CARD_STYLES = String.raw`
           overflow: visible;
         }
 
-        .gi-pill .gi-icon--pill,
-        .gi-status-pill .gi-icon--pill,
-        .pill .gi-icon--pill,
-        .context-pill .gi-icon--pill {
-          width: 18px;
-          height: 18px;
+        .gi-pill__icon .gi-icon--pill {
+          width: 12px;
+          height: 12px;
           flex: none;
           overflow: visible;
+          transform: none;
           color: var(--gazon-card-accent);
         }
 
-        .gi-pill--status .gi-icon--pill {
-          width: 12px;
-          height: 12px;
-          overflow: visible;
-          transform: none;
-        }
-
-        .gi-pill--status .gi-icon--pill ha-icon,
-        .gi-pill--status .gi-icon--pill svg {
+        .gi-pill__icon .gi-icon--pill ha-icon,
+        .gi-pill__icon .gi-icon--pill svg {
           width: 12px;
           height: 12px;
           transform: none;
         }
 
-        .gi-pill .gi-icon,
+        .gi-pill__icon .gi-icon,
         .gi-status-pill .gi-icon,
         .pill .gi-icon,
         .context-pill .gi-icon {
@@ -994,29 +840,46 @@ const CARD_STYLES = String.raw`
           line-height: 1.12;
         }
 
+        .gi-pill--danger,
         .pill--danger,
         .context-pill--danger {
+          background: color-mix(in srgb, var(--gazon-danger-color) 14%, transparent);
           border-color: color-mix(in srgb, var(--gazon-danger-color) 22%, transparent);
         }
 
+        .gi-pill--critical,
         .pill--critical,
         .context-pill--critical {
+          background: color-mix(in srgb, var(--gazon-critical-color) 18%, transparent);
           border-color: color-mix(in srgb, var(--gazon-critical-color) 26%, transparent);
         }
 
+        .gi-pill--warning,
         .pill--warning,
         .context-pill--warning {
+          background: color-mix(in srgb, var(--gazon-warning-color) 16%, transparent);
           border-color: color-mix(in srgb, var(--gazon-warning-color) 22%, transparent);
         }
 
+        .gi-pill--success,
         .pill--success,
         .context-pill--success {
+          background: color-mix(in srgb, var(--gazon-success-color) 16%, transparent);
           border-color: color-mix(in srgb, var(--gazon-success-color) 22%, transparent);
         }
 
+        .gi-pill--accent,
         .pill--accent,
         .context-pill--accent {
+          background: color-mix(in srgb, var(--gazon-accent-tone-color) 14%, transparent);
           border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 22%, transparent);
+        }
+
+        .gi-pill--neutral,
+        .pill--neutral,
+        .context-pill--neutral {
+          background: rgba(127, 127, 127, 0.06);
+          border-color: rgba(127, 127, 127, 0.15);
         }
 
         .decision-context {
@@ -1231,8 +1094,7 @@ const CARD_STYLES = String.raw`
           .gi-tab:hover,
           .tab-nav__item:hover,
           .gi-primary-action:hover,
-          .tab-panel__action-button:hover,
-          .decision-action__button:hover {
+          .tab-panel__action:hover {
             transform: translateY(-1px);
           }
         }
@@ -1617,25 +1479,6 @@ const CARD_STYLES = String.raw`
         .tile--success { border-color: color-mix(in srgb, var(--gazon-success-color) 22%, transparent); }
         .tile--accent { border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 22%, transparent); }
 
-        .gi-info {
-          border: 1px solid rgba(127, 127, 127, 0.045);
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 100%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 99%, white) 100%);
-          box-shadow: none;
-        }
-
-        .gi-info--main {
-          border-color: color-mix(in srgb, var(--gazon-card-accent) 5%, var(--divider-color));
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 1.5%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 99%, white) 100%);
-        }
-
-        .gi-info--secondary {
-          border-color: rgba(127, 127, 127, 0.04);
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 100%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 100%, white) 100%);
-        }
-
         .gi-card-core,
         .tab-stat,
         .tile,
@@ -1800,9 +1643,7 @@ const CARD_STYLES = String.raw`
         .card--editor-preview .gi-action,
         .card--editor-preview .gi-info,
         .card--editor-preview .gi-primary-action,
-        .card--editor-preview .gi-progress__bar,
-        .card--editor-preview .tab-panel__action-button,
-        .card--editor-preview .decision-action__button {
+        .card--editor-preview .gi-progress__bar {
           animation: none !important;
         }
 
@@ -1822,8 +1663,6 @@ const CARD_STYLES = String.raw`
           .gi-action,
           .gi-info,
           .gi-primary-action,
-          .tab-panel__action-button,
-          .decision-action__button,
           .gi-progress__bar,
           .tab-progress__bar,
           .card--pulse-critical,
@@ -1846,8 +1685,7 @@ const CARD_STYLES = String.raw`
           }
 
           .gi-primary-action,
-          .tab-panel__action-button,
-          .decision-action__button {
+          .tab-panel__action {
             width: 100%;
             justify-content: center;
           }

@@ -32,7 +32,7 @@ Gazon Intelligent Card affiche dans Home Assistant les décisions métier les pl
 - reste lisible même si certaines entités sont absentes
 - s’adapte au thème clair ou sombre de Home Assistant
 - propose un éditeur visuel simple pour la configuration de base
-- garde un mode legacy optionnel pour retrouver les détails bruts si besoin
+- garde un mode avancé optionnel pour retrouver les détails bruts si besoin
 
 ---
 
@@ -63,8 +63,15 @@ resources:
 
 ## 🔧 Installation manuelle
 
-1. Copie le contenu du dépôt dans ton dossier `www` ou dans le dossier suivi par HACS si tu préfères le gérer manuellement.
-2. Ajoute la ressource Lovelace ci-dessus.
+1. Copie le fichier `dist/gazon-intelligent-card.js` dans `config/www/gazon-intelligent-card/gazon-intelligent-card.js`.
+2. Ajoute cette ressource Lovelace :
+
+```yaml
+resources:
+  - url: /local/gazon-intelligent-card/gazon-intelligent-card.js
+    type: module
+```
+
 3. Utilise la carte dans ton dashboard.
 
 ---
@@ -100,7 +107,7 @@ entity_debit_zone_4: number.gazon_intelligent_debit_zone_4
 entity_debit_zone_5: number.gazon_intelligent_debit_zone_5
 entity_hauteur_min_tondeuse: number.gazon_intelligent_hauteur_min_tondeuse
 entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
-show_legacy_details: false
+show_advanced_details: false
 ```
 
 ---
@@ -115,7 +122,7 @@ show_header: true
 show_background: true
 compact: false
 minimal_mode: false
-show_legacy_details: false
+show_advanced_details: false
 theme_mode: auto
 accent_color: ""
 card_height: ""
@@ -176,7 +183,7 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 - `show_background`
 - `compact`
 - `minimal_mode`
-- `show_legacy_details`
+- `show_advanced_details`
 - `theme_mode`
 - `accent_color`
 - `manual_action_service`
@@ -200,7 +207,7 @@ La carte expose un éditeur visuel natif dans Home Assistant pour :
 - le mode du gazon et le type d'arrosage
 - l’onglet Config avec le switch auto, les débits et les hauteurs
 - les options visuelles de base
-- l’affichage optionnel des détails legacy
+- l’affichage optionnel des détails avancés
 
 Par défaut, le switch d’autorisation pointe vers `switch.gazon_intelligent_arrosage_automatique`. Si ton instance expose un identifiant différent, ajuste `entity_switch_arrosage_automatique`.
 

@@ -1176,7 +1176,7 @@ class GazonIntelligentCard extends HTMLElement {
           </div>
         </div>
 
-        <div class="tab-panel__grid">
+        <div class="tab-panel__grid tab-panel__grid--config">
           ${this._renderStatCard("Arrosage automatique", switchState.label, switchState.tone, "mdi:switch")}
           ${this._renderStatCard("Mode du gazon", formatApplicationMode(mode), modeTone, "mdi:grass")}
           ${this._renderStatCard("Hauteur min tondeuse", heightMin.value, heightMin.tone, "mdi:ruler-square")}
@@ -1185,7 +1185,7 @@ class GazonIntelligentCard extends HTMLElement {
 
         <div class="tab-panel__section">
           <div class="tab-panel__section-title">Débits des zones</div>
-          <div class="tab-panel__grid">
+          <div class="tab-panel__grid tab-panel__grid--config">
             ${zoneCards || `<div class="tab-panel__empty">Débits non configurés.</div>`}
           </div>
         </div>
@@ -1338,7 +1338,7 @@ class GazonIntelligentCard extends HTMLElement {
 
         ${
           manualButtonVisible
-            ? `<section class="gi-info gi-info--main tab-panel__action tab-panel__action--${tone}">
+            ? `<section class="tab-panel__action tab-panel__action--${tone}">
                 <div class="tab-panel__action-content">
                   <div class="tab-panel__eyebrow">Action principale</div>
                   <div class="tab-panel__action-title">Arrosage manuel immédiat</div>
@@ -2166,26 +2166,35 @@ class GazonIntelligentCard extends HTMLElement {
           line-height: 1.28;
         }
 
-        .tab-panel__grid,
+        .tab-panel__grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(172px, 1fr));
+          gap: 8px;
+          align-items: stretch;
+        }
+
+        .tab-panel__grid--config {
+          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+          gap: 10px;
+        }
+
         .tab-panel__chips {
           display: flex;
           flex-wrap: wrap;
           align-items: center;
           align-content: flex-start;
           gap: 8px;
-        }
-
-        .tab-panel__chips {
           margin-top: 2px;
         }
 
         .tab-stat {
           display: flex;
-          align-items: center;
+          align-items: stretch;
           gap: 8px;
           border-radius: 14px;
-          padding: 11px 12px;
-          min-height: 66px;
+          padding: 12px 14px;
+          min-height: 72px;
+          height: 100%;
           border: 1px solid rgba(127, 127, 127, 0.15);
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, var(--secondary-background-color) 100%);
@@ -2208,6 +2217,8 @@ class GazonIntelligentCard extends HTMLElement {
           gap: 8px;
           align-items: center;
           min-width: 0;
+          width: 100%;
+          height: 100%;
         }
 
         .tab-stat__icon {
@@ -2232,6 +2243,7 @@ class GazonIntelligentCard extends HTMLElement {
           display: flex;
           flex-direction: column;
           justify-content: center;
+          gap: 1px;
         }
 
         .tab-stat__main,
@@ -2296,12 +2308,13 @@ class GazonIntelligentCard extends HTMLElement {
 
         .tab-panel__action {
           display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          border-color: color-mix(in srgb, var(--gazon-card-accent) 16%, var(--divider-color));
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 100%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
+          flex-direction: column;
+          align-items: stretch;
+          gap: 10px;
+          border: 0;
+          background: transparent;
+          box-shadow: none;
+          padding: 0;
         }
 
         .tab-panel__action-content {
@@ -2320,24 +2333,30 @@ class GazonIntelligentCard extends HTMLElement {
         .decision-action__button {
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 14px;
-          border: 1px solid color-mix(in srgb, var(--gazon-card-accent) 66%, var(--divider-color));
-          border-radius: 18px;
-          padding: 16px 20px;
+          justify-content: center;
+          gap: 10px;
+          border: 1px solid color-mix(in srgb, var(--gazon-card-accent) 72%, var(--divider-color));
+          border-radius: 16px;
+          padding: 18px 20px;
           cursor: pointer;
           color: white;
           font: inherit;
           font-weight: 900;
-          font-size: 1rem;
+          font-size: 1.02rem;
           letter-spacing: 0.01em;
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 100%, white) 0%, color-mix(in srgb, var(--gazon-card-accent) 70%, #000) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 100%, white) 0%, color-mix(in srgb, var(--gazon-card-accent) 66%, #000) 100%);
           box-shadow:
-            0 20px 44px color-mix(in srgb, var(--gazon-card-accent) 40%, rgba(0, 0, 0, 0.20)),
-            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 30%, transparent),
+            0 24px 46px color-mix(in srgb, var(--gazon-card-accent) 42%, rgba(0, 0, 0, 0.22)),
+            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 34%, transparent),
             inset 0 1px 0 rgba(255, 255, 255, 0.24);
           text-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
+        }
+
+        .tab-panel__action-button {
+          width: 100%;
+          min-height: 58px;
+          justify-content: center;
         }
 
         .gi-action--primary .gi-icon,
@@ -3219,16 +3238,17 @@ class GazonIntelligentCard extends HTMLElement {
         .gi-tile,
         .tile {
           display: flex;
-          gap: 8px;
-          align-items: center;
+          gap: 10px;
+          align-items: stretch;
           min-width: 0;
-          padding: 11px 12px;
+          padding: 12px 14px;
           border-radius: 14px;
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, var(--secondary-background-color) 100%);
           border: 1px solid rgba(127, 127, 127, 0.15);
           box-shadow: none;
-          min-height: 66px;
+          min-height: 72px;
+          height: 100%;
           flex: 1 1 118px;
           transition:
             transform var(--gi-motion-fast) var(--gi-ease-standard),

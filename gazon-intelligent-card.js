@@ -9,6 +9,7 @@ const DEFAULT_CONFIG = {
   show_background: true,
   compact: false,
   minimal_mode: false,
+  show_legacy_details: false,
   theme_mode: "auto",
   accent_color: "",
   card_height: "",
@@ -17,12 +18,27 @@ const DEFAULT_CONFIG = {
   background_style: "solid",
   use_gradient: true,
   show_secondary_info: true,
+  entity_fenetre_optimale: "sensor.gazon_intelligent_fenetre_optimale",
+  entity_plan_arrosage: "sensor.gazon_intelligent_plan_d_arrosage",
+  entity_dernier_arrosage: "sensor.gazon_intelligent_dernier_arrosage_detecte",
+  entity_derniere_application: "sensor.gazon_intelligent_derniere_application",
+  entity_mode: "select.gazon_intelligent_mode_du_gazon",
+  entity_arrosage_recommande: "binary_sensor.gazon_intelligent_arrosage_recommande",
+  entity_objectif_arrosage: "sensor.gazon_intelligent_objectif_d_arrosage",
+  entity_type_arrosage: "sensor.gazon_intelligent_type_d_arrosage",
+  entity_risque: "sensor.gazon_intelligent_risque_gazon",
+  manual_action_service: "gazon_intelligent.start_manual_irrigation",
   tap_action: { action: "more-info" },
   hold_action: { action: "none" },
   double_tap_action: { action: "none" },
 };
 
 const ENTITY_KEYS = [
+  { key: "entity_fenetre_optimale", label: "Fenêtre optimale", icon: "mdi:clock-outline", domain: ["sensor"] },
+  { key: "entity_plan_arrosage", label: "Plan d'arrosage", icon: "mdi:timer-outline", domain: ["sensor"] },
+  { key: "entity_dernier_arrosage", label: "Dernier arrosage détecté", icon: "mdi:water-check", domain: ["sensor"] },
+  { key: "entity_derniere_application", label: "Dernière application", icon: "mdi:spray-bottle", domain: ["sensor"] },
+  { key: "entity_mode", label: "Mode du gazon", icon: "mdi:grass", domain: ["select"] },
   { key: "entity_phase", label: "Phase dominante", icon: "mdi:grass", domain: ["sensor"] },
   { key: "entity_sous_phase", label: "Sous-phase", icon: "mdi:sprout", domain: ["sensor"] },
   { key: "entity_conseil", label: "Conseil principal", icon: "mdi:message-text-outline", domain: ["sensor"] },
@@ -90,6 +106,12 @@ const TONE_MAP = {
   success: "success",
   neutral: "neutral",
   accent: "accent",
+};
+
+const STATUS_LABELS = {
+  auto: "Auto",
+  en_attente: "En attente",
+  bloque: "Bloqué",
 };
 
 function isEmpty(value) {
@@ -276,6 +298,39 @@ function domainMatches(entity, acceptedDomains) {
   return acceptedDomains.includes(domain);
 }
 
+function formatDurationHuman(totalMinutes) {
+  const number = asNumber(totalMinutes);
+  if (number === null || number <= 0) {
+    return "0 min";
+  }
+  const totalSeconds = Math.max(0, Math.round(number * 60));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  if (seconds === 0) {
+    return `${minutes} min`;
+  }
+  return `${minutes} min ${String(seconds).padStart(2, "0")}`;
+}
+
+function formatStatusLabel(status) {
+  const normalized = String(status ?? "").trim().toLowerCase();
+  return STATUS_LABELS[normalized] || (isEmpty(status) ? "Non disponible" : String(status));
+}
+
+function statusTone(status) {
+  const normalized = String(status ?? "").trim().toLowerCase();
+  if (normalized === "bloque") {
+    return "danger";
+  }
+  if (normalized === "en_attente") {
+    return "warning";
+  }
+  if (normalized === "auto") {
+    return "success";
+  }
+  return "neutral";
+}
+
 class GazonIntelligentCard extends HTMLElement {
   constructor() {
     super();
@@ -298,6 +353,15 @@ class GazonIntelligentCard extends HTMLElement {
       show_header: DEFAULT_CONFIG.show_header,
       show_background: DEFAULT_CONFIG.show_background,
       compact: DEFAULT_CONFIG.compact,
+      entity_fenetre_optimale: DEFAULT_CONFIG.entity_fenetre_optimale,
+      entity_plan_arrosage: DEFAULT_CONFIG.entity_plan_arrosage,
+      entity_dernier_arrosage: DEFAULT_CONFIG.entity_dernier_arrosage,
+      entity_derniere_application: DEFAULT_CONFIG.entity_derniere_application,
+      entity_mode: DEFAULT_CONFIG.entity_mode,
+      entity_arrosage_recommande: DEFAULT_CONFIG.entity_arrosage_recommande,
+      entity_objectif_arrosage: DEFAULT_CONFIG.entity_objectif_arrosage,
+      entity_type_arrosage: DEFAULT_CONFIG.entity_type_arrosage,
+      entity_risque: DEFAULT_CONFIG.entity_risque,
     };
   }
 
@@ -311,6 +375,16 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "compact", selector: { boolean: {} } },
         { name: "minimal_mode", selector: { boolean: {} } },
         { name: "show_secondary_info", selector: { boolean: {} } },
+        { name: "show_legacy_details", selector: { boolean: {} } },
+        { name: "entity_fenetre_optimale", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_plan_arrosage", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_dernier_arrosage", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_derniere_application", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_mode", selector: { entity: { domain: ["select"] } } },
+        { name: "entity_arrosage_recommande", selector: { entity: { domain: ["binary_sensor"] } } },
+        { name: "entity_objectif_arrosage", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_type_arrosage", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_risque", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_phase", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_sous_phase", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_conseil", selector: { entity: { domain: ["sensor"] } } },
@@ -319,10 +393,7 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_niveau", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_tonte", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_hauteur", selector: { entity: { domain: ["sensor"] } } },
-        { name: "entity_arrosage_recommande", selector: { entity: { domain: ["binary_sensor"] } } },
-        { name: "entity_objectif_arrosage", selector: { entity: { domain: ["sensor"] } } },
-        { name: "entity_type_arrosage", selector: { entity: { domain: ["sensor"] } } },
-        { name: "entity_risque", selector: { entity: { domain: ["sensor"] } } },
+        { name: "manual_action_service", selector: { text: {} } },
       ],
     };
   }
@@ -343,23 +414,23 @@ class GazonIntelligentCard extends HTMLElement {
 
   getCardSize() {
     if (!this._config) {
-      return 8;
+      return 5;
     }
     if (this._isMinimalMode()) {
-      return this._config.show_header ? 5 : 4;
+      return this._config.show_header ? 4 : 3;
     }
-    return this._config.compact ? 9 : 11;
+    return this._config.compact ? 6 : 7;
   }
 
   getGridOptions() {
     const minimal = this._isMinimalMode();
     const compact = Boolean(this._config?.compact);
     return {
-      rows: minimal ? 5 : compact ? 9 : 11,
+      rows: minimal ? 4 : compact ? 6 : 7,
       columns: 6,
-      min_rows: minimal ? 4 : compact ? 8 : 10,
+      min_rows: minimal ? 3 : compact ? 5 : 6,
       min_columns: 3,
-      max_rows: minimal ? 5 : compact ? 9 : 11,
+      max_rows: minimal ? 4 : compact ? 6 : 7,
     };
   }
 
@@ -473,11 +544,317 @@ class GazonIntelligentCard extends HTMLElement {
 
   _primaryEntityId() {
     return (
+      this._entityId("entity_fenetre_optimale") ||
+      this._entityId("entity_plan_arrosage") ||
+      this._entityId("entity_objectif_arrosage") ||
       this._entityId("entity_phase") ||
       this._entityId("entity_conseil") ||
       this._entityId("entity_tonte") ||
       this._entityId("entity_hauteur")
     );
+  }
+
+  _windowEntity() {
+    return this._entity("entity_fenetre_optimale");
+  }
+
+  _planEntity() {
+    return this._entity("entity_plan_arrosage");
+  }
+
+  _lastWateringEntity() {
+    return this._entity("entity_dernier_arrosage");
+  }
+
+  _applicationEntity() {
+    return this._entity("entity_derniere_application");
+  }
+
+  _objectiveEntity() {
+    return this._entity("entity_objectif_arrosage");
+  }
+
+  _objectiveMm() {
+    return this._entityNumber("entity_objectif_arrosage");
+  }
+
+  _windowState() {
+    const entity = this._windowEntity();
+    const attrs = entity?.attributes || {};
+    const status = String(attrs.status || "").trim().toLowerCase();
+    const summary = String(attrs.summary || entity?.state || "Arrosage prévu").trim();
+    const nextAction = String(attrs.next_action || "").trim();
+    const objective = this._objectiveMm() ?? 0;
+    const showManualAction = objective > 0 && status !== "bloque";
+    return {
+      entity,
+      status,
+      summary,
+      nextAction,
+      objective,
+      showManualAction,
+      tone: statusTone(status),
+      statusLabel: formatStatusLabel(status),
+      rawStatus: attrs.status,
+      autoIrrigationEnabled: attrs.auto_irrigation_enabled,
+    };
+  }
+
+  _planState() {
+    const entity = this._planEntity();
+    const attrs = entity?.attributes || {};
+    const summary = String(attrs.summary || entity?.state || "").trim();
+    const durationHuman = String(attrs.duration_human || "").trim();
+    const zoneCount = asNumber(attrs.zone_count);
+    const objectiveMm = asNumber(attrs.objective_mm);
+    const planType = String(attrs.plan_type || "").trim();
+    const passages = asNumber(attrs.passages);
+    return {
+      entity,
+      summary: summary || "Aucun plan d'arrosage",
+      durationHuman: durationHuman || formatDurationHuman(attrs.total_duration_min ?? entity?.state),
+      zoneCount: zoneCount ?? 0,
+      objectiveMm: objectiveMm ?? 0,
+      planType: planType || "no_plan",
+      passages: passages ?? 1,
+      fractionation: Boolean(attrs.fractionation),
+    };
+  }
+
+  _lastWateringState() {
+    const entity = this._lastWateringEntity();
+    if (!entity) {
+      return {
+        label: "Aucun arrosage détecté",
+        detail: "Historique vide",
+        value: null,
+      };
+    }
+    const rawValue = asNumber(entity.state);
+    const source = String(entity.attributes?.source || "").trim();
+    const dateAction = String(entity.attributes?.date_action || entity.attributes?.detected_at || "").trim();
+    const zoneCount = asNumber(entity.attributes?.zone_count);
+    if (source === "none" || rawValue === null || rawValue <= 0) {
+      return {
+        label: "Aucun arrosage détecté",
+        detail: "Historique vide",
+        value: null,
+      };
+    }
+    const fragments = [];
+    if (dateAction) {
+      fragments.push(dateAction);
+    }
+    if (zoneCount !== null) {
+      fragments.push(`${zoneCount} zone${zoneCount > 1 ? "s" : ""}`);
+    }
+    return {
+      label: formatMm(rawValue),
+      detail: fragments.join(" · "),
+      value: rawValue,
+    };
+  }
+
+  _objectiveContext() {
+    const entity = this._objectiveEntity();
+    const temperature = asNumber(entity?.attributes?.temperature);
+    const etp = asNumber(entity?.attributes?.etp);
+    const risk = this._entityState("entity_risque", null);
+    const mode = this._entityState("entity_mode", null);
+    const typeArrosage = this._entityState("entity_type_arrosage", null);
+    return {
+      entity,
+      temperature,
+      etp,
+      risk,
+      mode,
+      typeArrosage,
+    };
+  }
+
+  _manualActionService() {
+    const service = String(this._config?.manual_action_service || "").trim();
+    if (!service) {
+      return "gazon_intelligent.start_manual_irrigation";
+    }
+    return service;
+  }
+
+  _canShowLegacyDetails() {
+    return Boolean(this._config?.show_legacy_details);
+  }
+
+  _statusIcon(status) {
+    switch (status) {
+      case "bloque":
+        return "mdi:cancel";
+      case "en_attente":
+        return "mdi:clock-outline";
+      case "auto":
+        return "mdi:check-circle-outline";
+      default:
+        return "mdi:information-outline";
+    }
+  }
+
+  _renderPill(label, value, tone = "neutral", icon = null) {
+    if (isEmpty(value)) {
+      return "";
+    }
+    const iconHtml = this._config?.show_icons && icon ? `<ha-icon icon="${escapeHtml(icon)}"></ha-icon>` : "";
+    return `
+      <div class="pill pill--${tone}">
+        ${iconHtml}
+        <span class="pill__label">${escapeHtml(label)}</span>
+        <strong class="pill__value">${escapeHtml(value)}</strong>
+      </div>
+    `;
+  }
+
+  _renderContextPill(label, value, tone = "neutral", icon = null) {
+    if (isEmpty(value)) {
+      return "";
+    }
+    const iconHtml = this._config?.show_icons && icon ? `<ha-icon icon="${escapeHtml(icon)}"></ha-icon>` : "";
+    return `
+      <div class="context-pill context-pill--${tone}">
+        ${iconHtml}
+        <span class="context-pill__label">${escapeHtml(label)}</span>
+        <strong class="context-pill__value">${escapeHtml(value)}</strong>
+      </div>
+    `;
+  }
+
+  _renderDecisionLayout() {
+    const windowState = this._windowState();
+    const planState = this._planState();
+    const objective = windowState.objective;
+    const objectiveLabel = formatMm(objective);
+    const context = this._objectiveContext();
+    const lastWatering = this._lastWateringState();
+    const tone = windowState.tone;
+    const windowIcon = this._statusIcon(windowState.status);
+    const manualButtonVisible = windowState.showManualAction && objective > 0;
+    const showLegacy = this._canShowLegacyDetails();
+    const noActionBlocked = windowState.status === "bloque" || objective <= 0;
+    const blockText = noActionBlocked
+      ? windowState.summary || "Aucune action possible"
+      : "";
+    const blockHint = noActionBlocked ? windowState.nextAction || "" : "";
+
+    const contextPills = [
+      this._renderContextPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
+      this._renderContextPill("Risque gazon", context.risk, computeRisqueTone(context.risk), "mdi:shield-alert-outline"),
+      this._renderContextPill(
+        "Température",
+        context.temperature === null ? "" : `${formatNumber(context.temperature, 1)} °C`,
+        context.temperature !== null && context.temperature >= 24 ? "warning" : "neutral",
+        "mdi:thermometer",
+      ),
+      this._renderContextPill(
+        "ETP",
+        context.etp === null ? "" : `${formatNumber(context.etp, 1)} mm`,
+        context.etp !== null && context.etp >= 4 ? "warning" : "neutral",
+        "mdi:weather-sunny",
+      ),
+    ].filter(Boolean);
+
+    const footerPills = [
+      this._renderPill("Mode", context.mode, phaseTone(context.mode), "mdi:grass"),
+      this._renderPill("Type", context.typeArrosage, computeActionTone(context.typeArrosage), "mdi:sprinkler"),
+    ].filter(Boolean);
+
+    return `
+      <section class="decision-layout">
+        <section class="decision-hero decision-hero--${tone} ${manualButtonVisible ? "decision-hero--pulse" : ""}" style="--gazon-card-accent:${escapeHtml(toneToColor(tone))};">
+          <div class="decision-hero__top">
+            <div class="decision-hero__summary">${escapeHtml(windowState.summary || "Arrosage prévu")}</div>
+            <div class="decision-status decision-status--${tone}">
+              <ha-icon icon="${escapeHtml(windowIcon)}"></ha-icon>
+              <span>${escapeHtml(windowState.statusLabel)}</span>
+            </div>
+          </div>
+          ${
+            windowState.nextAction
+              ? `<div class="decision-hero__next">${escapeHtml(windowState.nextAction)}</div>`
+              : ""
+          }
+          ${
+            windowState.status === "bloque" && blockHint
+              ? `<div class="decision-hero__hint">${escapeHtml(blockHint)}</div>`
+              : ""
+          }
+        </section>
+
+        ${
+          manualButtonVisible
+            ? `<section class="decision-action decision-action--${tone} ${tone !== "danger" ? "decision-action--pulse" : ""}">
+                <div class="decision-action__content">
+                  <div class="decision-action__label">Action principale</div>
+                  <div class="decision-action__title">Arrosage manuel immédiat</div>
+                  <div class="decision-action__subtitle">${escapeHtml(objectiveLabel)} à déclencher maintenant</div>
+                </div>
+                <button
+                  type="button"
+                  class="decision-action__button"
+                  data-gazon-action="manual-irrigation"
+                  aria-label="Arrosage manuel immédiat"
+                >
+                  <ha-icon icon="mdi:water-pump"></ha-icon>
+                  <span>Arrosage manuel immédiat</span>
+                </button>
+              </section>`
+            : `<section class="decision-block decision-block--${windowState.status === "bloque" ? "danger" : "neutral"}">
+                <div class="decision-block__label">Blocage</div>
+                <div class="decision-block__value">${escapeHtml(blockText || "Aucune action disponible")}</div>
+                ${
+                  blockHint
+                    ? `<div class="decision-block__hint">${escapeHtml(blockHint)}</div>`
+                    : ""
+                }
+              </section>`
+        }
+
+        <section class="decision-plan">
+          <div class="decision-plan__header">
+            <div class="decision-plan__label">Résumé du plan</div>
+            <div class="decision-plan__meta">${escapeHtml(planState.durationHuman)} · ${escapeHtml(planState.planType)}</div>
+          </div>
+          <div class="decision-plan__summary">${escapeHtml(planState.summary)}</div>
+          ${
+            this._config?.show_secondary_info
+              ? `<div class="decision-plan__chips">
+                  ${this._renderPill("Zones", planState.zoneCount ? `${planState.zoneCount}` : "0", "neutral", "mdi:pipe") || ""}
+                  ${this._renderPill("Passages", planState.passages ? `${planState.passages}` : "1", planState.fractionation ? "warning" : "neutral", "mdi:cached") || ""}
+                  ${this._renderPill("Objectif", objectiveLabel, objective > 0 ? "success" : "neutral", "mdi:water") || ""}
+                </div>`
+              : ""
+          }
+        </section>
+
+        <section class="decision-context">
+          <div class="decision-context__label">Contexte</div>
+          <div class="decision-context__grid">
+            ${contextPills.join("")}
+          </div>
+        </section>
+
+        <footer class="decision-footer">
+          ${footerPills.join("")}
+        </footer>
+
+        ${
+          showLegacy
+            ? `<section class="decision-legacy">
+                ${this._renderSectionNav()}
+                ${this._buildDecisionBlocks()}
+                ${this._buildContent()}
+                ${this._buildFooter()}
+              </section>`
+            : ""
+        }
+      </section>
+    `;
   }
 
   _setActiveSection(section) {
@@ -832,7 +1209,8 @@ class GazonIntelligentCard extends HTMLElement {
       return;
     }
 
-    const accent = this._config.accent_color || this._accentColorFromTone(this._primaryTone());
+    const windowState = this._windowState();
+    const accent = this._config.accent_color || this._accentColorFromTone(windowState.tone);
     const sectionAccent = this._sectionAccent(this._activeSection);
     const background = this._config.show_background ? "true" : "false";
     const backgroundStyle = this._config.background_style || "solid";
@@ -841,6 +1219,7 @@ class GazonIntelligentCard extends HTMLElement {
     const height = numericHeight && numericHeight > 0 ? `${numericHeight}px` : "";
     const borderRadius = `${this._config.border_radius ?? 24}px`;
     const iconSize = `${this._config.icon_size ?? 24}px`;
+    const showLegacy = this._canShowLegacyDetails();
 
     const rootClass = [
       "card",
@@ -872,6 +1251,305 @@ class GazonIntelligentCard extends HTMLElement {
           --gazon-card-gap: ${this._config.compact ? "10px" : "16px"};
           --gazon-card-padding: ${this._config.compact ? "12px" : "18px"};
           --ha-card-border-radius: var(--gazon-border-radius);
+        }
+
+        @keyframes gazonPulseSoft {
+          0% {
+            box-shadow: 0 0 0 0 color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
+          }
+          70% {
+            box-shadow: 0 0 0 10px color-mix(in srgb, var(--gazon-card-accent) 0%, transparent);
+          }
+          100% {
+            box-shadow: 0 0 0 0 color-mix(in srgb, var(--gazon-card-accent) 0%, transparent);
+          }
+        }
+
+        .decision-layout {
+          display: grid;
+          gap: 10px;
+          margin-top: 8px;
+        }
+
+        .decision-hero,
+        .decision-action,
+        .decision-plan,
+        .decision-context,
+        .decision-block,
+        .decision-footer {
+          border: 1px solid rgba(127, 127, 127, 0.15);
+          border-radius: 18px;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 8%, transparent) 0%, transparent 100%),
+            color-mix(in srgb, var(--secondary-background-color) 92%, white);
+          padding: 12px 14px;
+        }
+
+        .decision-hero {
+          display: grid;
+          gap: 7px;
+          border-color: color-mix(in srgb, var(--gazon-card-accent) 24%, var(--divider-color));
+        }
+
+        .decision-hero--pulse {
+          animation: gazonPulseSoft 2.8s ease-in-out infinite;
+        }
+
+        .decision-hero__top {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 10px;
+          min-width: 0;
+        }
+
+        .decision-hero__summary {
+          font-size: clamp(1rem, 1.6vw, 1.15rem);
+          font-weight: 800;
+          line-height: 1.22;
+          min-width: 0;
+          overflow-wrap: anywhere;
+        }
+
+        .decision-status {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 7px 10px;
+          border-radius: 999px;
+          font-size: 0.76rem;
+          font-weight: 700;
+          white-space: nowrap;
+          background: color-mix(in srgb, var(--gazon-card-accent) 14%, transparent);
+          color: var(--primary-text-color);
+        }
+
+        .decision-status ha-icon {
+          width: 16px;
+          height: 16px;
+        }
+
+        .decision-status--danger {
+          background: color-mix(in srgb, var(--gazon-danger-color) 14%, transparent);
+        }
+
+        .decision-status--warning {
+          background: color-mix(in srgb, var(--gazon-warning-color) 16%, transparent);
+        }
+
+        .decision-status--success {
+          background: color-mix(in srgb, var(--gazon-success-color) 16%, transparent);
+        }
+
+        .decision-status--neutral {
+          background: color-mix(in srgb, var(--gazon-neutral-color) 12%, transparent);
+        }
+
+        .decision-hero__next,
+        .decision-hero__hint {
+          color: var(--secondary-text-color);
+          font-size: 0.86rem;
+          line-height: 1.35;
+        }
+
+        .decision-action {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          border-color: color-mix(in srgb, var(--gazon-card-accent) 28%, var(--divider-color));
+        }
+
+        .decision-action--pulse {
+          animation: gazonPulseSoft 3s ease-in-out infinite;
+        }
+
+        .decision-action__content {
+          min-width: 0;
+        }
+
+        .decision-action__label,
+        .decision-plan__label,
+        .decision-context__label,
+        .decision-block__label {
+          font-size: 0.68rem;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          color: var(--secondary-text-color);
+          margin-bottom: 4px;
+        }
+
+        .decision-action__title {
+          font-size: 1rem;
+          font-weight: 800;
+          line-height: 1.24;
+        }
+
+        .decision-action__subtitle {
+          margin-top: 2px;
+          color: var(--secondary-text-color);
+          font-size: 0.82rem;
+          line-height: 1.3;
+        }
+
+        .decision-action__button {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          border: 0;
+          border-radius: 16px;
+          padding: 11px 14px;
+          cursor: pointer;
+          color: white;
+          font: inherit;
+          font-weight: 800;
+          background: linear-gradient(145deg, color-mix(in srgb, var(--gazon-card-accent) 88%, white), var(--gazon-card-accent));
+          box-shadow:
+            0 10px 24px color-mix(in srgb, var(--gazon-card-accent) 25%, transparent),
+            inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        }
+
+        .decision-action__button ha-icon {
+          width: 18px;
+          height: 18px;
+        }
+
+        .decision-plan {
+          display: grid;
+          gap: 8px;
+          border-color: color-mix(in srgb, var(--gazon-card-accent) 18%, var(--divider-color));
+        }
+
+        .decision-plan__header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          min-width: 0;
+        }
+
+        .decision-plan__meta {
+          font-size: 0.76rem;
+          color: var(--secondary-text-color);
+          white-space: nowrap;
+        }
+
+        .decision-plan__summary {
+          font-size: 0.94rem;
+          font-weight: 700;
+          line-height: 1.28;
+          min-width: 0;
+          overflow-wrap: anywhere;
+        }
+
+        .decision-plan__chips,
+        .decision-context__grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          gap: 8px;
+        }
+
+        .pill,
+        .context-pill {
+          display: grid;
+          gap: 2px;
+          align-content: start;
+          padding: 8px 10px;
+          border-radius: 14px;
+          border: 1px solid rgba(127, 127, 127, 0.15);
+          background: rgba(127, 127, 127, 0.04);
+          min-width: 0;
+        }
+
+        .pill {
+          grid-template-columns: auto 1fr;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .pill ha-icon,
+        .context-pill ha-icon {
+          width: 16px;
+          height: 16px;
+          color: var(--gazon-card-accent);
+        }
+
+        .pill__label,
+        .context-pill__label {
+          font-size: 0.61rem;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
+          color: var(--secondary-text-color);
+        }
+
+        .pill__value,
+        .context-pill__value {
+          grid-column: 1 / -1;
+          font-size: 0.8rem;
+          font-weight: 700;
+          line-height: 1.18;
+          overflow-wrap: anywhere;
+        }
+
+        .pill--danger,
+        .context-pill--danger {
+          border-color: color-mix(in srgb, var(--gazon-danger-color) 22%, transparent);
+        }
+
+        .pill--warning,
+        .context-pill--warning {
+          border-color: color-mix(in srgb, var(--gazon-warning-color) 22%, transparent);
+        }
+
+        .pill--success,
+        .context-pill--success {
+          border-color: color-mix(in srgb, var(--gazon-success-color) 22%, transparent);
+        }
+
+        .pill--accent,
+        .context-pill--accent {
+          border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 22%, transparent);
+        }
+
+        .decision-context {
+          display: grid;
+          gap: 8px;
+        }
+
+        .decision-block {
+          display: grid;
+          gap: 4px;
+        }
+
+        .decision-block--danger {
+          border-color: color-mix(in srgb, var(--gazon-danger-color) 22%, transparent);
+        }
+
+        .decision-block__value {
+          font-size: 0.92rem;
+          font-weight: 700;
+          line-height: 1.3;
+          overflow-wrap: anywhere;
+        }
+
+        .decision-block__hint {
+          color: var(--secondary-text-color);
+          font-size: 0.82rem;
+          line-height: 1.28;
+        }
+
+        .decision-footer {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          padding-top: 10px;
+          padding-bottom: 10px;
+        }
+
+        .decision-legacy {
+          display: grid;
+          gap: 8px;
+          margin-top: 2px;
         }
 
         * {
@@ -1395,16 +2073,23 @@ class GazonIntelligentCard extends HTMLElement {
         role="button"
         aria-label="${escapeHtml(this._config.title || DEFAULT_CONFIG.title)}"
         data-background="${background}"
-        data-tone="${this._primaryTone()}"
+        data-tone="${windowState.tone}"
         data-action-target="primary"
         style="${this._config.show_background ? `--gazon-accent-color:${accent}; --gazon-section-accent:${sectionAccent};` : ""}"
       >
         ${this._buildHeader()}
-        ${this._renderSectionNav()}
-        ${this._renderHero()}
-        ${this._buildDecisionBlocks()}
-        ${this._buildContent()}
-        ${this._buildFooter()}
+        ${this._renderDecisionLayout()}
+        ${
+          showLegacy
+            ? `
+              ${this._renderSectionNav()}
+              ${this._renderHero()}
+              ${this._buildDecisionBlocks()}
+              ${this._buildContent()}
+              ${this._buildFooter()}
+            `
+            : ""
+        }
       </ha-card>
     `;
 
@@ -1434,6 +2119,13 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _onClick(event) {
+    const manualTarget = event.target.closest("[data-gazon-action='manual-irrigation']");
+    if (manualTarget) {
+      event.preventDefault();
+      event.stopPropagation();
+      this._triggerManualIrrigation();
+      return;
+    }
     const sectionTarget = event.target.closest("[data-section]");
     if (sectionTarget) {
       event.preventDefault();
@@ -1491,6 +2183,23 @@ class GazonIntelligentCard extends HTMLElement {
       this._tapTimer = null;
     }
     this._performAction(this._config?.tap_action, this._primaryEntityId());
+  }
+
+  _triggerManualIrrigation() {
+    if (!this._hass) {
+      return;
+    }
+    const objective = this._objectiveMm();
+    if (objective === null || objective <= 0) {
+      return;
+    }
+    const service = splitServiceName(this._manualActionService());
+    if (!service) {
+      return;
+    }
+    this._hass.callService(service.domain, service.service, {
+      objectif_mm: objective,
+    });
   }
 
   _performAction(action, fallbackEntityId) {
@@ -1829,12 +2538,37 @@ class GazonIntelligentCardEditor extends HTMLElement {
             </label>
             <div class="hint">La carte reste compatible avec le thème clair / sombre de Home Assistant.</div>
           </div>
+          <div class="grid">
+            ${this._renderCheckbox("show_legacy_details", "Afficher les détails avancés (legacy)")}
+          </div>
         </section>
 
         <section class="section">
-          <h3>Entités principales</h3>
+          <h3>Décision principale</h3>
           <p>La carte fonctionne même si certaines entités sont absentes. Renseigne au moins les blocs que tu veux afficher.</p>
           <datalist id="gazon-intelligent-card-entities">${idList}</datalist>
+          <div class="grid">
+            ${this._renderEntityInput("entity_fenetre_optimale", "Fenêtre optimale")}
+            ${this._renderEntityInput("entity_plan_arrosage", "Plan d'arrosage")}
+            ${this._renderEntityInput("entity_objectif_arrosage", "Objectif d'arrosage")}
+            ${this._renderEntityInput("entity_arrosage_recommande", "Arrosage recommandé")}
+            ${this._renderEntityInput("entity_dernier_arrosage", "Dernier arrosage détecté")}
+            ${this._renderEntityInput("entity_derniere_application", "Dernière application")}
+          </div>
+        </section>
+
+        <section class="section">
+          <h3>Contexte</h3>
+          <div class="grid">
+            ${this._renderEntityInput("entity_mode", "Mode du gazon")}
+            ${this._renderEntityInput("entity_type_arrosage", "Type d'arrosage")}
+            ${this._renderEntityInput("entity_risque", "Risque gazon")}
+          </div>
+        </section>
+
+        <section class="section">
+          <h3>Détails avancés (legacy)</h3>
+          <p>Ces champs alimentent encore les détails historiques et les vues existantes si tu actives l'option correspondante.</p>
           <div class="grid">
             ${this._renderEntityInput("entity_phase", "Phase dominante")}
             ${this._renderEntityInput("entity_sous_phase", "Sous-phase")}
@@ -1844,10 +2578,9 @@ class GazonIntelligentCardEditor extends HTMLElement {
             ${this._renderEntityInput("entity_niveau", "Niveau d'action")}
             ${this._renderEntityInput("entity_tonte", "État de tonte")}
             ${this._renderEntityInput("entity_hauteur", "Hauteur de tonte conseillée")}
-            ${this._renderEntityInput("entity_arrosage_recommande", "Arrosage recommandé")}
-            ${this._renderEntityInput("entity_objectif_arrosage", "Objectif d'arrosage")}
-            ${this._renderEntityInput("entity_type_arrosage", "Type d'arrosage")}
-            ${this._renderEntityInput("entity_risque", "Risque gazon")}
+          </div>
+          <div class="grid">
+            ${this._renderEntityInput("manual_action_service", "Service du bouton manuel")}
           </div>
         </section>
       </div>

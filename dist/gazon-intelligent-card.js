@@ -23,15 +23,30 @@ const DEFAULT_CONFIG = {
   entity_dernier_arrosage: "sensor.gazon_intelligent_dernier_arrosage_detecte",
   entity_derniere_application: "sensor.gazon_intelligent_derniere_application",
   entity_mode: "select.gazon_intelligent_mode_du_gazon",
+  entity_switch_arrosage_automatique: "switch.gazon_intelligent_arrosage_automatique",
   entity_arrosage_recommande: "binary_sensor.gazon_intelligent_arrosage_recommande",
   entity_objectif_arrosage: "sensor.gazon_intelligent_objectif_d_arrosage",
   entity_type_arrosage: "sensor.gazon_intelligent_type_d_arrosage",
   entity_risque: "sensor.gazon_intelligent_risque_gazon",
+  entity_debit_zone_1: "number.gazon_intelligent_debit_zone_1",
+  entity_debit_zone_2: "number.gazon_intelligent_debit_zone_2",
+  entity_debit_zone_3: "number.gazon_intelligent_debit_zone_3",
+  entity_debit_zone_4: "number.gazon_intelligent_debit_zone_4",
+  entity_debit_zone_5: "number.gazon_intelligent_debit_zone_5",
+  entity_hauteur_min_tondeuse: "number.gazon_intelligent_hauteur_min_tondeuse",
+  entity_hauteur_max_tondeuse: "number.gazon_intelligent_hauteur_max_tondeuse",
   manual_action_service: "gazon_intelligent.start_manual_irrigation",
   tap_action: { action: "more-info" },
   hold_action: { action: "none" },
   double_tap_action: { action: "none" },
 };
+
+const TAB_DEFS = [
+  { key: "watering", label: "Arrosage", icon: "mdi:water" },
+  { key: "mowing", label: "Tonte", icon: "mdi:content-cut" },
+  { key: "gazon", label: "Gazon", icon: "mdi:grass" },
+  { key: "config", label: "Config", icon: "mdi:cog-outline" },
+];
 
 const ENTITY_KEYS = [
   { key: "entity_fenetre_optimale", label: "Fenêtre optimale", icon: "mdi:clock-outline", domain: ["sensor"] },
@@ -39,6 +54,7 @@ const ENTITY_KEYS = [
   { key: "entity_dernier_arrosage", label: "Dernier arrosage détecté", icon: "mdi:water-check", domain: ["sensor"] },
   { key: "entity_derniere_application", label: "Dernière application", icon: "mdi:spray-bottle", domain: ["sensor"] },
   { key: "entity_mode", label: "Mode du gazon", icon: "mdi:grass", domain: ["select"] },
+  { key: "entity_switch_arrosage_automatique", label: "Arrosage automatique", icon: "mdi:switch", domain: ["switch"] },
   { key: "entity_phase", label: "Phase dominante", icon: "mdi:grass", domain: ["sensor"] },
   { key: "entity_sous_phase", label: "Sous-phase", icon: "mdi:sprout", domain: ["sensor"] },
   { key: "entity_conseil", label: "Conseil principal", icon: "mdi:message-text-outline", domain: ["sensor"] },
@@ -51,6 +67,13 @@ const ENTITY_KEYS = [
   { key: "entity_objectif_arrosage", label: "Objectif d'arrosage", icon: "mdi:water-percent", domain: ["sensor"] },
   { key: "entity_type_arrosage", label: "Type d'arrosage", icon: "mdi:sprinkler", domain: ["sensor"] },
   { key: "entity_risque", label: "Risque gazon", icon: "mdi:shield-alert-outline", domain: ["sensor"] },
+  { key: "entity_debit_zone_1", label: "Débit zone 1", icon: "mdi:sprinkler", domain: ["number"] },
+  { key: "entity_debit_zone_2", label: "Débit zone 2", icon: "mdi:sprinkler", domain: ["number"] },
+  { key: "entity_debit_zone_3", label: "Débit zone 3", icon: "mdi:sprinkler", domain: ["number"] },
+  { key: "entity_debit_zone_4", label: "Débit zone 4", icon: "mdi:sprinkler", domain: ["number"] },
+  { key: "entity_debit_zone_5", label: "Débit zone 5", icon: "mdi:sprinkler", domain: ["number"] },
+  { key: "entity_hauteur_min_tondeuse", label: "Hauteur min tondeuse", icon: "mdi:ruler-square", domain: ["number"] },
+  { key: "entity_hauteur_max_tondeuse", label: "Hauteur max tondeuse", icon: "mdi:ruler-square", domain: ["number"] },
 ];
 
 const SECTION_DEFS = [
@@ -93,11 +116,12 @@ const SECTION_ACCENTS = {
 };
 
 const STATUS_COLORS = {
-  danger: "#c62828",
-  warning: "#7e9a3c",
-  success: "#4f8f3a",
+  danger: "#e53935",
+  warning: "#fb8c00",
+  success: "#43a047",
   neutral: "#607d8b",
-  accent: "#2b8c7c",
+  accent: "#fdd835",
+  critical: "#ff1744",
 };
 
 const TONE_MAP = {
@@ -202,6 +226,9 @@ function computeTonteTone(value) {
 
 function computeRisqueTone(value) {
   const normalized = String(value ?? "").toLowerCase();
+  if (normalized.includes("crit")) {
+    return "critical";
+  }
   if (normalized.includes("eleve") || normalized.includes("élev")) {
     return "danger";
   }
@@ -217,7 +244,7 @@ function computeRisqueTone(value) {
 function computeActionTone(value) {
   const normalized = String(value ?? "").toLowerCase();
   if (normalized.includes("crit")) {
-    return "danger";
+    return "critical";
   }
   if (normalized.includes("a_faire") || normalized.includes("à faire")) {
     return "warning";
@@ -261,6 +288,8 @@ function iconForTone(tone) {
       return "mdi:check-circle-outline";
     case "accent":
       return "mdi:star-circle-outline";
+    case "critical":
+      return "mdi:alert-octagon";
     default:
       return "mdi:information-outline";
   }
@@ -312,9 +341,51 @@ function formatDurationHuman(totalMinutes) {
   return `${minutes} min ${String(seconds).padStart(2, "0")}`;
 }
 
+function formatPlanType(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized || normalized === "no_plan") {
+    return "Aucun plan";
+  }
+  if (normalized === "single_zone") {
+    return "Zone unique";
+  }
+  if (normalized === "multi_zone") {
+    return "Multi-zone";
+  }
+  return String(value);
+}
+
+function formatApplicationMode(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return "Non disponible";
+  }
+  if (normalized === "auto") {
+    return "Auto";
+  }
+  if (normalized === "manuel" || normalized === "manual") {
+    return "Manuel";
+  }
+  if (normalized === "suggestion") {
+    return "Suggestion";
+  }
+  return String(value);
+}
+
 function formatStatusLabel(status) {
   const normalized = String(status ?? "").trim().toLowerCase();
   return STATUS_LABELS[normalized] || (isEmpty(status) ? "Non disponible" : String(status));
+}
+
+function formatSwitchState(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (["on", "true", "yes", "1", "oui"].includes(normalized)) {
+    return "Autorisé";
+  }
+  if (["off", "false", "no", "0", "non"].includes(normalized)) {
+    return "Désactivé";
+  }
+  return isUnavailableState(value) ? "Non disponible" : String(value);
 }
 
 function statusTone(status) {
@@ -331,6 +402,23 @@ function statusTone(status) {
   return "neutral";
 }
 
+function toneSeverity(tone) {
+  switch (tone) {
+    case "critical":
+      return 4;
+    case "danger":
+      return 3;
+    case "warning":
+      return 2;
+    case "accent":
+      return 1;
+    case "success":
+    case "neutral":
+    default:
+      return 0;
+  }
+}
+
 class GazonIntelligentCard extends HTMLElement {
   constructor() {
     super();
@@ -338,6 +426,7 @@ class GazonIntelligentCard extends HTMLElement {
     this._config = null;
     this._hass = null;
     this._tapTimer = null;
+    this._activeTab = "watering";
     this._activeSection = "overview";
     this._onClick = this._onClick.bind(this);
     this._onContextMenu = this._onContextMenu.bind(this);
@@ -358,10 +447,18 @@ class GazonIntelligentCard extends HTMLElement {
       entity_dernier_arrosage: DEFAULT_CONFIG.entity_dernier_arrosage,
       entity_derniere_application: DEFAULT_CONFIG.entity_derniere_application,
       entity_mode: DEFAULT_CONFIG.entity_mode,
+      entity_switch_arrosage_automatique: DEFAULT_CONFIG.entity_switch_arrosage_automatique,
       entity_arrosage_recommande: DEFAULT_CONFIG.entity_arrosage_recommande,
       entity_objectif_arrosage: DEFAULT_CONFIG.entity_objectif_arrosage,
       entity_type_arrosage: DEFAULT_CONFIG.entity_type_arrosage,
       entity_risque: DEFAULT_CONFIG.entity_risque,
+      entity_debit_zone_1: DEFAULT_CONFIG.entity_debit_zone_1,
+      entity_debit_zone_2: DEFAULT_CONFIG.entity_debit_zone_2,
+      entity_debit_zone_3: DEFAULT_CONFIG.entity_debit_zone_3,
+      entity_debit_zone_4: DEFAULT_CONFIG.entity_debit_zone_4,
+      entity_debit_zone_5: DEFAULT_CONFIG.entity_debit_zone_5,
+      entity_hauteur_min_tondeuse: DEFAULT_CONFIG.entity_hauteur_min_tondeuse,
+      entity_hauteur_max_tondeuse: DEFAULT_CONFIG.entity_hauteur_max_tondeuse,
     };
   }
 
@@ -381,10 +478,18 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_dernier_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_derniere_application", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_mode", selector: { entity: { domain: ["select"] } } },
+        { name: "entity_switch_arrosage_automatique", selector: { entity: { domain: ["switch"] } } },
         { name: "entity_arrosage_recommande", selector: { entity: { domain: ["binary_sensor"] } } },
         { name: "entity_objectif_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_type_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_risque", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_debit_zone_1", selector: { entity: { domain: ["number"] } } },
+        { name: "entity_debit_zone_2", selector: { entity: { domain: ["number"] } } },
+        { name: "entity_debit_zone_3", selector: { entity: { domain: ["number"] } } },
+        { name: "entity_debit_zone_4", selector: { entity: { domain: ["number"] } } },
+        { name: "entity_debit_zone_5", selector: { entity: { domain: ["number"] } } },
+        { name: "entity_hauteur_min_tondeuse", selector: { entity: { domain: ["number"] } } },
+        { name: "entity_hauteur_max_tondeuse", selector: { entity: { domain: ["number"] } } },
         { name: "entity_phase", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_sous_phase", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_conseil", selector: { entity: { domain: ["sensor"] } } },
@@ -403,6 +508,7 @@ class GazonIntelligentCard extends HTMLElement {
       throw new Error(`Invalid configuration for ${CARD_NAME}.`);
     }
     this._config = mergeConfig(DEFAULT_CONFIG, config);
+    this._activeTab = "watering";
     this._activeSection = "overview";
     this._render();
   }
@@ -511,14 +617,39 @@ class GazonIntelligentCard extends HTMLElement {
     return phaseTone(this._entityState("entity_phase"));
   }
 
+  _riskTone() {
+    const tone = computeRisqueTone(this._entityState("entity_risque"));
+    return tone || "neutral";
+  }
+
+  _actionTone() {
+    const tone = computeActionTone(this._entityState("entity_niveau"));
+    return tone || "neutral";
+  }
+
   _sectionAccent(section = this._activeSection) {
     return sectionToAccent(section);
   }
 
+  _tabAccent(tab = this._activeTab) {
+    switch (tab) {
+      case "watering":
+        return SECTION_ACCENTS.watering;
+      case "mowing":
+        return SECTION_ACCENTS.mowing;
+      case "gazon":
+        return "#4f8f3a";
+      case "config":
+        return SECTION_ACCENTS.details;
+      default:
+        return SECTION_ACCENTS.overview;
+    }
+  }
+
   _primaryTone() {
-    const actionTone = computeActionTone(this._entityState("entity_niveau"));
+    const actionTone = this._actionTone();
     const tonteTone = computeTonteTone(this._entityState("entity_tonte"));
-    const riskTone = computeRisqueTone(this._entityState("entity_risque"));
+    const riskTone = this._riskTone();
     const phase = this._phaseTone();
 
     if (phase !== "success") {
@@ -542,7 +673,78 @@ class GazonIntelligentCard extends HTMLElement {
     return "neutral";
   }
 
+  _cardTone() {
+    const riskTone = this._riskTone();
+    const actionTone = this._actionTone();
+
+    const tones = [riskTone, actionTone].filter((tone) => tone && tone !== "neutral");
+    if (tones.length === 0) {
+      return "neutral";
+    }
+    return tones.sort((left, right) => toneSeverity(right) - toneSeverity(left))[0];
+  }
+
+  _tabTone(tab = this._activeTab) {
+    if (tab === "watering") {
+      return this._windowState().tone;
+    }
+    if (tab === "mowing") {
+      return computeTonteTone(this._entityState("entity_tonte"));
+    }
+    if (tab === "gazon") {
+      const actionTone = this._actionTone();
+      const riskTone = this._riskTone();
+      const phaseToneValue = this._phaseTone();
+      if (phaseToneValue !== "success") {
+        return phaseToneValue;
+      }
+      if (riskTone === "danger") {
+        return riskTone;
+      }
+      if (actionTone === "danger") {
+        return actionTone;
+      }
+      if (actionTone === "warning" || riskTone === "warning") {
+        return "warning";
+      }
+      return "success";
+    }
+    if (tab === "config") {
+      const autoState = String(this._entityState("entity_switch_arrosage_automatique", "")).trim().toLowerCase();
+      if (["on", "true", "yes", "1", "oui"].includes(autoState)) {
+        return "success";
+      }
+      if (["off", "false", "no", "0", "non"].includes(autoState)) {
+        return "danger";
+      }
+      return "neutral";
+    }
+    return this._primaryTone();
+  }
+
   _primaryEntityId() {
+    if (this._activeTab === "watering") {
+      return (
+        this._entityId("entity_fenetre_optimale") ||
+        this._entityId("entity_plan_arrosage") ||
+        this._entityId("entity_objectif_arrosage") ||
+        this._entityId("entity_derniere_application") ||
+        this._entityId("entity_mode")
+      );
+    }
+    if (this._activeTab === "mowing") {
+      return this._entityId("entity_tonte") || this._entityId("entity_hauteur") || this._entityId("entity_fenetre_optimale");
+    }
+    if (this._activeTab === "gazon") {
+      return this._entityId("entity_phase") || this._entityId("entity_sous_phase") || this._entityId("entity_niveau");
+    }
+    if (this._activeTab === "config") {
+      return (
+        this._entityId("entity_switch_arrosage_automatique") ||
+        this._entityId("entity_mode") ||
+        this._entityId("entity_debit_zone_1")
+      );
+    }
     return (
       this._entityId("entity_fenetre_optimale") ||
       this._entityId("entity_plan_arrosage") ||
@@ -725,7 +927,227 @@ class GazonIntelligentCard extends HTMLElement {
     `;
   }
 
-  _renderDecisionLayout() {
+  _renderTabPill(label, value, tone = "neutral", icon = null) {
+    return this._renderContextPill(label, value, tone, icon);
+  }
+
+  _renderTabNav() {
+    return `
+      <nav class="tab-nav" aria-label="Domaines de la carte">
+        ${TAB_DEFS.map((tab) => {
+          const active = tab.key === this._activeTab;
+          const iconHtml = this._config?.show_icons ? `<ha-icon icon="${escapeHtml(tab.icon)}"></ha-icon>` : "";
+          return `
+            <button
+              type="button"
+              class="tab-nav__item ${active ? "tab-nav__item--active" : ""}"
+              data-tab="${escapeHtml(tab.key)}"
+              aria-pressed="${active ? "true" : "false"}"
+            >
+              ${iconHtml}
+              <span>${escapeHtml(tab.label)}</span>
+            </button>
+          `;
+        }).join("")}
+      </nav>
+    `;
+  }
+
+  _renderStatCard(label, value, tone = "neutral", icon = null, secondary = "") {
+    const iconHtml = this._config?.show_icons && icon ? `<ha-icon icon="${escapeHtml(icon)}"></ha-icon>` : "";
+    return `
+      <section class="tab-stat tab-stat--${tone}">
+        <div class="tab-stat__main">
+          ${iconHtml ? `<div class="tab-stat__icon">${iconHtml}</div>` : ""}
+          <div class="tab-stat__content">
+            <div class="tab-stat__label">${escapeHtml(label)}</div>
+            <div class="tab-stat__value">${escapeHtml(value)}</div>
+            ${secondary ? `<div class="tab-stat__secondary">${escapeHtml(secondary)}</div>` : ""}
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  _planTypeTone(planType) {
+    const normalized = String(planType ?? "").trim().toLowerCase();
+    if (normalized === "multi_zone") {
+      return "accent";
+    }
+    if (normalized === "single_zone") {
+      return "success";
+    }
+    if (normalized === "no_plan") {
+      return "neutral";
+    }
+    return "neutral";
+  }
+
+  _configSwitchState() {
+    const state = String(this._entityState("entity_switch_arrosage_automatique", "")).trim().toLowerCase();
+    if (["on", "true", "yes", "1", "oui"].includes(state)) {
+      return { label: "Autorisé", tone: "success" };
+    }
+    if (["off", "false", "no", "0", "non"].includes(state)) {
+      return { label: "Désactivé", tone: "danger" };
+    }
+    return { label: "Non disponible", tone: "neutral" };
+  }
+
+  _zoneDebitEntries() {
+    return [
+      { key: "entity_debit_zone_1", label: "Débit zone 1" },
+      { key: "entity_debit_zone_2", label: "Débit zone 2" },
+      { key: "entity_debit_zone_3", label: "Débit zone 3" },
+      { key: "entity_debit_zone_4", label: "Débit zone 4" },
+      { key: "entity_debit_zone_5", label: "Débit zone 5" },
+    ];
+  }
+
+  _renderConfigValue(entityKey, suffix = "") {
+    const entity = this._entity(entityKey);
+    if (!entity) {
+      return { value: "Non disponible", tone: "neutral", secondary: "" };
+    }
+    const raw = entity.state;
+    const numeric = asNumber(raw);
+    if (numeric !== null) {
+      return {
+        value: suffix ? `${formatNumber(numeric, 1)} ${suffix}` : formatNumber(numeric, 1) || String(raw),
+        tone: "accent",
+        secondary: "",
+      };
+    }
+    return {
+      value: normalizeDisplayValue(raw),
+      tone: String(raw).toLowerCase() === "on" ? "success" : String(raw).toLowerCase() === "off" ? "danger" : "neutral",
+      secondary: "",
+    };
+  }
+
+  _renderConfigTab() {
+    const switchState = this._configSwitchState();
+    const mode = this._entityState("entity_mode", null);
+    const modeTone = phaseTone(mode);
+    const switchIconHtml = this._config?.show_icons ? '<ha-icon icon="mdi:switch"></ha-icon>' : "";
+    const zoneCards = this._zoneDebitEntries()
+      .map((entry) => {
+        const config = this._renderConfigValue(entry.key, "mm/h");
+        return this._renderStatCard(entry.label, config.value, config.tone, "mdi:sprinkler", config.secondary);
+      })
+      .join("");
+    const heightMin = this._renderConfigValue("entity_hauteur_min_tondeuse", "cm");
+    const heightMax = this._renderConfigValue("entity_hauteur_max_tondeuse", "cm");
+
+    return `
+      <section class="tab-panel tab-panel--config">
+        <div class="tab-panel__header">
+          <div>
+            <div class="tab-panel__eyebrow">Configuration</div>
+            <div class="tab-panel__title">Autorisation, débits et hauteurs</div>
+          </div>
+          <div class="tab-panel__status tab-panel__status--${switchState.tone}">
+            ${switchIconHtml}
+            <span>${escapeHtml(switchState.label)}</span>
+          </div>
+        </div>
+
+        <div class="tab-panel__grid">
+          ${this._renderStatCard("Arrosage automatique", switchState.label, switchState.tone, "mdi:switch")}
+          ${this._renderStatCard("Mode du gazon", formatApplicationMode(mode), modeTone, "mdi:grass")}
+          ${this._renderStatCard("Hauteur min tondeuse", heightMin.value, heightMin.tone, "mdi:ruler-square")}
+          ${this._renderStatCard("Hauteur max tondeuse", heightMax.value, heightMax.tone, "mdi:ruler-square")}
+        </div>
+
+        <div class="tab-panel__section">
+          <div class="tab-panel__section-title">Débits des zones</div>
+          <div class="tab-panel__grid">
+            ${zoneCards || `<div class="tab-panel__empty">Débits non configurés.</div>`}
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  _renderGazonTab() {
+    const phase = this._entityState("entity_phase", null);
+    const subPhase = this._entityState("entity_sous_phase", null);
+    const risk = this._entityState("entity_risque", null);
+    const action = this._entityState("entity_niveau", null);
+    const progress = asNumber(this._entity("entity_sous_phase")?.attributes?.sous_phase_progression);
+    const progressDetail = this._entity("entity_sous_phase")?.attributes?.sous_phase_detail || "";
+    const progressLabel = progress === null ? "Progression non disponible" : `${formatNumber(progress, 0)} %`;
+    const progressWidth = progress === null ? 0 : Math.max(0, Math.min(100, progress));
+    const gazonStatusIcon = this._config?.show_icons ? '<ha-icon icon="mdi:grass"></ha-icon>' : "";
+
+    return `
+      <section class="tab-panel tab-panel--gazon">
+        <div class="tab-panel__header">
+          <div>
+            <div class="tab-panel__eyebrow">Gazon</div>
+            <div class="tab-panel__title">Phase, sous-phase et risque</div>
+          </div>
+          <div class="tab-panel__status tab-panel__status--${computeActionTone(action)}">
+            ${gazonStatusIcon}
+            <span>${escapeHtml(formatStatusLabel(action))}</span>
+          </div>
+        </div>
+
+        <div class="tab-panel__grid">
+          ${this._renderStatCard("Phase dominante", phase, phaseTone(phase), "mdi:grass")}
+          ${this._renderStatCard("Sous-phase", subPhase, phaseTone(phase), "mdi:sprout", progressDetail ? progressDetail : "")}
+          ${this._renderStatCard("Risque gazon", risk, computeRisqueTone(risk), "mdi:shield-alert-outline")}
+          ${this._renderStatCard("Niveau d'action", action, computeActionTone(action), "mdi:signal")}
+        </div>
+
+        <div class="tab-panel__section">
+          <div class="tab-panel__section-title">Progression de la sous-phase</div>
+          <div class="tab-progress" aria-label="${escapeHtml(progressLabel)}">
+            <div class="tab-progress__bar">
+              <span style="width:${escapeHtml(String(progressWidth))}%;"></span>
+            </div>
+            <div class="tab-progress__meta">${escapeHtml(progressLabel)}</div>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  _renderMowingTab() {
+    const tonte = this._entity("entity_tonte");
+    const height = this._entity("entity_hauteur");
+    const windowState = this._windowState();
+    const tonteValue = tonte ? normalizeDisplayValue(tonte.state) : "Non disponible";
+    const heightValue = height ? formatCm(height.state) : "Non disponible";
+    const heightMin = asNumber(height?.attributes?.hauteur_tonte_min_cm);
+    const heightMax = asNumber(height?.attributes?.hauteur_tonte_max_cm);
+    const heightSecondary = heightMin !== null && heightMax !== null ? `${formatCm(heightMin)} → ${formatCm(heightMax)}` : "";
+    const windowSummary = windowState.entity ? windowState.summary : "Fenêtre optimale non disponible";
+    const mowingStatusIcon = this._config?.show_icons ? '<ha-icon icon="mdi:content-cut"></ha-icon>' : "";
+
+    return `
+      <section class="tab-panel tab-panel--mowing">
+        <div class="tab-panel__header">
+          <div>
+            <div class="tab-panel__eyebrow">Tonte</div>
+            <div class="tab-panel__title">État, hauteur et créneau</div>
+          </div>
+          <div class="tab-panel__status tab-panel__status--${computeTonteTone(tonteValue)}">
+            ${mowingStatusIcon}
+            <span>${escapeHtml(tonteValue)}</span>
+          </div>
+        </div>
+
+        <div class="tab-panel__grid">
+          ${this._renderStatCard("État de tonte", tonteValue, computeTonteTone(tonteValue), "mdi:content-cut")}
+          ${this._renderStatCard("Hauteur conseillée", heightValue, this._phaseTone(), "mdi:ruler-square", heightSecondary)}
+          ${this._renderStatCard("Fenêtre optimale", windowSummary, windowState.tone, "mdi:clock-outline", windowState.nextAction || "")}
+        </div>
+      </section>
+    `;
+  }
+
+  _renderWateringTab() {
     const windowState = this._windowState();
     const planState = this._planState();
     const objective = windowState.objective;
@@ -734,117 +1156,135 @@ class GazonIntelligentCard extends HTMLElement {
     const lastWatering = this._lastWateringState();
     const tone = windowState.tone;
     const windowIcon = this._statusIcon(windowState.status);
+    const windowStatusIcon = this._config?.show_icons ? `<ha-icon icon="${escapeHtml(windowIcon)}"></ha-icon>` : "";
     const manualButtonVisible = windowState.showManualAction && objective > 0;
-    const showLegacy = this._canShowLegacyDetails();
     const noActionBlocked = windowState.status === "bloque" || objective <= 0;
     const blockText = noActionBlocked
       ? windowState.summary || "Aucune action possible"
       : "";
     const blockHint = noActionBlocked ? windowState.nextAction || "" : "";
+    const planTypeLabel = formatPlanType(planState.planType);
 
     const contextPills = [
-      this._renderContextPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
-      this._renderContextPill("Risque gazon", context.risk, computeRisqueTone(context.risk), "mdi:shield-alert-outline"),
-      this._renderContextPill(
+      this._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
+      this._renderTabPill("Risque gazon", context.risk, computeRisqueTone(context.risk), "mdi:shield-alert-outline"),
+      this._renderTabPill(
         "Température",
-        context.temperature === null ? "" : `${formatNumber(context.temperature, 1)} °C`,
+        context.temperature === null ? "Non disponible" : `${formatNumber(context.temperature, 1)} °C`,
         context.temperature !== null && context.temperature >= 24 ? "warning" : "neutral",
         "mdi:thermometer",
       ),
-      this._renderContextPill(
+      this._renderTabPill(
         "ETP",
-        context.etp === null ? "" : `${formatNumber(context.etp, 1)} mm`,
+        context.etp === null ? "Non disponible" : `${formatNumber(context.etp, 1)} mm`,
         context.etp !== null && context.etp >= 4 ? "warning" : "neutral",
         "mdi:weather-sunny",
       ),
-    ].filter(Boolean);
+    ];
 
-    const footerPills = [
-      this._renderPill("Mode", context.mode, phaseTone(context.mode), "mdi:grass"),
-      this._renderPill("Type", context.typeArrosage, computeActionTone(context.typeArrosage), "mdi:sprinkler"),
-    ].filter(Boolean);
+    const planChips = [
+      this._renderTabPill("Zones", planState.zoneCount ? `${planState.zoneCount}` : "0", planState.zoneCount > 1 ? "accent" : "neutral", "mdi:pipe"),
+      this._renderTabPill("Passages", planState.passages ? `${planState.passages}` : "1", planState.fractionation ? "warning" : "neutral", "mdi:cached"),
+      this._renderTabPill("Fractionnement", planState.fractionation ? "Oui" : "Non", planState.fractionation ? "warning" : "neutral", "mdi:call-split"),
+      this._renderTabPill("Type", planTypeLabel, this._planTypeTone(planState.planType), "mdi:shape"),
+      this._renderTabPill("Objectif", objectiveLabel, objective > 0 ? "success" : "neutral", "mdi:water"),
+    ];
 
     return `
-      <section class="decision-layout">
-        <section class="decision-hero decision-hero--${tone} ${manualButtonVisible ? "decision-hero--pulse" : ""}" style="--gazon-card-accent:${escapeHtml(toneToColor(tone))};">
-          <div class="decision-hero__top">
-            <div class="decision-hero__summary">${escapeHtml(windowState.summary || "Arrosage prévu")}</div>
-            <div class="decision-status decision-status--${tone}">
-              <ha-icon icon="${escapeHtml(windowIcon)}"></ha-icon>
+      <section class="tab-panel tab-panel--watering">
+        <div class="tab-panel__hero tab-panel__hero--${tone}">
+          <div class="tab-panel__hero-top">
+            <div class="tab-panel__hero-summary">${escapeHtml(windowState.summary || "Arrosage prévu")}</div>
+            <div class="tab-panel__hero-status tab-panel__hero-status--${tone}">
+              ${windowStatusIcon}
               <span>${escapeHtml(windowState.statusLabel)}</span>
             </div>
           </div>
           ${
             windowState.nextAction
-              ? `<div class="decision-hero__next">${escapeHtml(windowState.nextAction)}</div>`
+              ? `<div class="tab-panel__hero-next">${escapeHtml(windowState.nextAction)}</div>`
               : ""
           }
           ${
             windowState.status === "bloque" && blockHint
-              ? `<div class="decision-hero__hint">${escapeHtml(blockHint)}</div>`
+              ? `<div class="tab-panel__hero-hint">${escapeHtml(blockHint)}</div>`
               : ""
           }
-        </section>
+        </div>
 
         ${
           manualButtonVisible
-            ? `<section class="decision-action decision-action--${tone} ${tone !== "danger" ? "decision-action--pulse" : ""}">
-                <div class="decision-action__content">
-                  <div class="decision-action__label">Action principale</div>
-                  <div class="decision-action__title">Arrosage manuel immédiat</div>
-                  <div class="decision-action__subtitle">${escapeHtml(objectiveLabel)} à déclencher maintenant</div>
+            ? `<section class="tab-panel__action tab-panel__action--${tone}">
+                <div class="tab-panel__action-content">
+                  <div class="tab-panel__eyebrow">Action principale</div>
+                  <div class="tab-panel__action-title">Arrosage manuel immédiat</div>
+                  <div class="tab-panel__action-subtitle">${escapeHtml(objectiveLabel)} à déclencher maintenant</div>
                 </div>
                 <button
                   type="button"
-                  class="decision-action__button"
+                  class="tab-panel__action-button"
                   data-gazon-action="manual-irrigation"
                   aria-label="Arrosage manuel immédiat"
                 >
-                  <ha-icon icon="mdi:water-pump"></ha-icon>
+                  ${this._config?.show_icons ? '<ha-icon icon="mdi:water-pump"></ha-icon>' : ""}
                   <span>Arrosage manuel immédiat</span>
                 </button>
               </section>`
-            : `<section class="decision-block decision-block--${windowState.status === "bloque" ? "danger" : "neutral"}">
-                <div class="decision-block__label">Blocage</div>
-                <div class="decision-block__value">${escapeHtml(blockText || "Aucune action disponible")}</div>
+            : `<section class="tab-panel__block tab-panel__block--${windowState.status === "bloque" ? "danger" : "neutral"}">
+                <div class="tab-panel__eyebrow">Blocage</div>
+                <div class="tab-panel__block-value">${escapeHtml(blockText || "Aucune action disponible")}</div>
                 ${
                   blockHint
-                    ? `<div class="decision-block__hint">${escapeHtml(blockHint)}</div>`
+                    ? `<div class="tab-panel__block-hint">${escapeHtml(blockHint)}</div>`
                     : ""
                 }
               </section>`
         }
 
-        <section class="decision-plan">
-          <div class="decision-plan__header">
-            <div class="decision-plan__label">Résumé du plan</div>
-            <div class="decision-plan__meta">${escapeHtml(planState.durationHuman)} · ${escapeHtml(planState.planType)}</div>
+        <section class="tab-panel__section">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Résumé du plan</div>
+            <div class="tab-panel__section-meta">${escapeHtml(planState.durationHuman)} · ${escapeHtml(planTypeLabel)}</div>
           </div>
-          <div class="decision-plan__summary">${escapeHtml(planState.summary)}</div>
+          <div class="tab-panel__section-summary">${escapeHtml(planState.summary)}</div>
           ${
             this._config?.show_secondary_info
-              ? `<div class="decision-plan__chips">
-                  ${this._renderPill("Zones", planState.zoneCount ? `${planState.zoneCount}` : "0", "neutral", "mdi:pipe") || ""}
-                  ${this._renderPill("Passages", planState.passages ? `${planState.passages}` : "1", planState.fractionation ? "warning" : "neutral", "mdi:cached") || ""}
-                  ${this._renderPill("Objectif", objectiveLabel, objective > 0 ? "success" : "neutral", "mdi:water") || ""}
-                </div>`
+              ? `<div class="tab-panel__chips">${planChips.join("")}</div>`
               : ""
           }
         </section>
 
-        <section class="decision-context">
-          <div class="decision-context__label">Contexte</div>
-          <div class="decision-context__grid">
+        <section class="tab-panel__section">
+          <div class="tab-panel__eyebrow">Contexte</div>
+          <div class="tab-panel__grid">
             ${contextPills.join("")}
           </div>
         </section>
+      </section>
+    `;
+  }
 
-        <footer class="decision-footer">
-          ${footerPills.join("")}
-        </footer>
+  _renderActiveTab() {
+    switch (this._activeTab) {
+      case "mowing":
+        return this._renderMowingTab();
+      case "gazon":
+        return this._renderGazonTab();
+      case "config":
+        return this._renderConfigTab();
+      case "watering":
+      default:
+        return this._renderWateringTab();
+    }
+  }
 
+  _renderDecisionLayout() {
+    return `
+      <section class="tabs-layout">
+        ${this._renderTabNav()}
+        ${this._renderActiveTab()}
         ${
-          showLegacy
+          this._canShowLegacyDetails()
             ? `<section class="decision-legacy">
                 ${this._renderSectionNav()}
                 ${this._buildDecisionBlocks()}
@@ -862,6 +1302,14 @@ class GazonIntelligentCard extends HTMLElement {
       return;
     }
     this._activeSection = section;
+    this._render();
+  }
+
+  _setActiveTab(tab) {
+    if (!TAB_DEFS.some((entry) => entry.key === tab) || this._activeTab === tab) {
+      return;
+    }
+    this._activeTab = tab;
     this._render();
   }
 
@@ -1115,7 +1563,7 @@ class GazonIntelligentCard extends HTMLElement {
     }
     const phase = this._entityState("entity_phase", null);
     const subPhase = this._entityState("entity_sous_phase", null);
-    const tone = this._phaseTone();
+    const tone = this._cardTone();
     const primaryEntity = this._primaryEntityId();
 
     return `
@@ -1209,9 +1657,9 @@ class GazonIntelligentCard extends HTMLElement {
       return;
     }
 
-    const windowState = this._windowState();
-    const accent = this._config.accent_color || this._accentColorFromTone(windowState.tone);
-    const sectionAccent = this._sectionAccent(this._activeSection);
+    const activeTone = this._cardTone();
+    const accent = this._config.accent_color || this._accentColorFromTone(activeTone);
+    const sectionAccent = this._tabAccent(this._activeTab);
     const background = this._config.show_background ? "true" : "false";
     const backgroundStyle = this._config.background_style || "solid";
     const themeMode = this._config.theme_mode || "auto";
@@ -1220,6 +1668,7 @@ class GazonIntelligentCard extends HTMLElement {
     const borderRadius = `${this._config.border_radius ?? 24}px`;
     const iconSize = `${this._config.icon_size ?? 24}px`;
     const showLegacy = this._canShowLegacyDetails();
+    const actionCritical = this._actionTone() === "critical";
 
     const rootClass = [
       "card",
@@ -1227,6 +1676,7 @@ class GazonIntelligentCard extends HTMLElement {
       backgroundStyle ? `card--${backgroundStyle}` : "",
       themeMode ? `card--theme-${themeMode}` : "",
       this._config.use_gradient ? "card--gradient" : "",
+      actionCritical ? "card--pulse-critical" : "",
     ]
       .filter(Boolean)
       .join(" ");
@@ -1239,12 +1689,15 @@ class GazonIntelligentCard extends HTMLElement {
           max-width: 100%;
           min-width: 0;
           --gazon-accent-color: ${accent};
+          --gazon-card-tone-color: ${accent};
+          --gazon-card-tone: ${activeTone};
           --gazon-section-accent: ${sectionAccent};
           --gazon-danger-color: ${STATUS_COLORS.danger};
           --gazon-warning-color: ${STATUS_COLORS.warning};
           --gazon-success-color: ${STATUS_COLORS.success};
           --gazon-neutral-color: ${STATUS_COLORS.neutral};
           --gazon-accent-tone-color: ${STATUS_COLORS.accent};
+          --gazon-critical-color: ${STATUS_COLORS.critical};
           --gazon-border-radius: ${borderRadius};
           --gazon-icon-size: ${iconSize};
           --gazon-card-height: ${height || "auto"};
@@ -1269,6 +1722,359 @@ class GazonIntelligentCard extends HTMLElement {
           display: grid;
           gap: 10px;
           margin-top: 8px;
+        }
+
+        @keyframes gazonTabFade {
+          from {
+            opacity: 0;
+            transform: translateY(4px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .tabs-layout {
+          display: grid;
+          gap: 10px;
+          margin-top: 8px;
+        }
+
+        .tab-nav {
+          display: flex;
+          gap: 6px;
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          max-width: 100%;
+          scrollbar-width: none;
+          padding-bottom: 2px;
+          scroll-snap-type: x proximity;
+        }
+
+        .tab-nav::-webkit-scrollbar {
+          display: none;
+        }
+
+        .tab-nav__item {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          min-width: 0;
+          border: 1px solid rgba(127, 127, 127, 0.12);
+          background: var(--secondary-background-color);
+          color: var(--secondary-text-color);
+          border-radius: 12px;
+          padding: 7px 10px;
+          font-size: 0.78rem;
+          cursor: pointer;
+          transition: background 140ms ease, color 140ms ease, border-color 140ms ease, transform 140ms ease;
+          scroll-snap-align: start;
+        }
+
+        .tab-nav__item:hover {
+          transform: translateY(-1px);
+          background: color-mix(in srgb, var(--secondary-background-color) 88%, var(--gazon-section-accent) 12%);
+        }
+
+        .tab-nav__item ha-icon {
+          width: 18px;
+          height: 18px;
+        }
+
+        .tab-nav__item--active {
+          color: var(--primary-text-color);
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 22%, var(--divider-color));
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 14%, transparent) 0%, transparent 100%),
+            var(--secondary-background-color);
+          box-shadow: none;
+        }
+
+        .tab-panel {
+          display: grid;
+          gap: 10px;
+          animation: gazonTabFade 180ms ease;
+        }
+
+        .tab-panel__hero,
+        .tab-panel__section,
+        .tab-panel__block,
+        .tab-panel__action {
+          border: 1px solid rgba(127, 127, 127, 0.15);
+          border-radius: 18px;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 8%, transparent) 0%, transparent 100%),
+            color-mix(in srgb, var(--secondary-background-color) 92%, white);
+          padding: 12px 14px;
+        }
+
+        .tab-panel__hero {
+          display: grid;
+          gap: 7px;
+          border-color: color-mix(in srgb, var(--gazon-card-accent) 24%, var(--divider-color));
+        }
+
+        .tab-panel__hero--pulse,
+        .tab-panel__action--pulse {
+          animation: gazonPulseSoft 2.8s ease-in-out infinite;
+        }
+
+        .tab-panel__hero-top,
+        .tab-panel__header,
+        .tab-panel__section-head {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 10px;
+          min-width: 0;
+        }
+
+        .tab-panel__hero-summary,
+        .tab-panel__title,
+        .tab-panel__section-summary,
+        .tab-panel__action-title,
+        .tab-panel__block-value {
+          min-width: 0;
+          overflow-wrap: anywhere;
+        }
+
+        .tab-panel__hero-summary {
+          font-size: clamp(1rem, 1.6vw, 1.15rem);
+          font-weight: 800;
+          line-height: 1.22;
+        }
+
+        .tab-panel__hero-status,
+        .tab-panel__status {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 7px 10px;
+          border-radius: 999px;
+          font-size: 0.76rem;
+          font-weight: 700;
+          white-space: nowrap;
+          background: color-mix(in srgb, var(--gazon-card-accent) 14%, transparent);
+          color: var(--primary-text-color);
+        }
+
+        .tab-panel__hero-status ha-icon,
+        .tab-panel__status ha-icon {
+          width: 16px;
+          height: 16px;
+        }
+
+        .tab-panel__hero-status--danger,
+        .tab-panel__status--danger {
+          background: color-mix(in srgb, var(--gazon-danger-color) 14%, transparent);
+        }
+
+        .tab-panel__hero-status--critical,
+        .tab-panel__status--critical {
+          background: color-mix(in srgb, var(--gazon-critical-color) 18%, transparent);
+        }
+
+        .tab-panel__hero-status--warning,
+        .tab-panel__status--warning {
+          background: color-mix(in srgb, var(--gazon-warning-color) 16%, transparent);
+        }
+
+        .tab-panel__hero-status--success,
+        .tab-panel__status--success {
+          background: color-mix(in srgb, var(--gazon-success-color) 16%, transparent);
+        }
+
+        .tab-panel__hero-status--neutral,
+        .tab-panel__status--neutral {
+          background: color-mix(in srgb, var(--gazon-neutral-color) 12%, transparent);
+        }
+
+        .tab-panel__hero-next,
+        .tab-panel__hero-hint,
+        .tab-panel__block-hint,
+        .tab-panel__section-meta,
+        .tab-panel__section-title,
+        .tab-panel__eyebrow,
+        .tab-panel__action-subtitle,
+        .tab-panel__stat-secondary,
+        .tab-panel__empty {
+          color: var(--secondary-text-color);
+        }
+
+        .tab-panel__hero-next,
+        .tab-panel__hero-hint,
+        .tab-panel__block-hint,
+        .tab-panel__action-subtitle,
+        .tab-panel__stat-secondary,
+        .tab-panel__empty {
+          font-size: 0.82rem;
+          line-height: 1.35;
+        }
+
+        .tab-panel__section {
+          display: grid;
+          gap: 8px;
+          border-color: color-mix(in srgb, var(--gazon-card-accent) 18%, var(--divider-color));
+        }
+
+        .tab-panel__section-title {
+          font-size: 0.72rem;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+        }
+
+        .tab-panel__section-summary {
+          font-size: 0.94rem;
+          font-weight: 700;
+          line-height: 1.28;
+        }
+
+        .tab-panel__grid,
+        .tab-panel__chips {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          gap: 8px;
+        }
+
+        .tab-panel__chips {
+          margin-top: 2px;
+        }
+
+        .tab-stat {
+          border-radius: 14px;
+          padding: 10px 11px;
+          border: 1px solid rgba(127, 127, 127, 0.15);
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, var(--secondary-background-color) 100%);
+        }
+
+        .tab-stat--danger { border-color: color-mix(in srgb, var(--gazon-danger-color) 22%, transparent); }
+        .tab-stat--critical { border-color: color-mix(in srgb, var(--gazon-critical-color) 26%, transparent); }
+        .tab-stat--warning { border-color: color-mix(in srgb, var(--gazon-warning-color) 22%, transparent); }
+        .tab-stat--success { border-color: color-mix(in srgb, var(--gazon-success-color) 22%, transparent); }
+        .tab-stat--accent { border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 22%, transparent); }
+        .tab-stat--neutral { border-color: rgba(127, 127, 127, 0.15); }
+
+        .tab-stat__main {
+          display: flex;
+          gap: 8px;
+          align-items: flex-start;
+          min-width: 0;
+        }
+
+        .tab-stat__icon {
+          width: 22px;
+          height: 22px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex: none;
+          background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
+          color: var(--gazon-section-accent);
+        }
+
+        .tab-stat__icon ha-icon {
+          width: 14px;
+          height: 14px;
+        }
+
+        .tab-stat__content {
+          min-width: 0;
+        }
+
+        .tab-stat__label {
+          font-size: 0.61rem;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
+          color: var(--secondary-text-color);
+          margin-bottom: 1px;
+        }
+
+        .tab-stat__value {
+          font-size: 0.82rem;
+          line-height: 1.18;
+          font-weight: 700;
+          overflow-wrap: anywhere;
+          hyphens: auto;
+        }
+
+        .tab-progress {
+          display: grid;
+          gap: 6px;
+        }
+
+        .tab-progress__bar {
+          height: 9px;
+          border-radius: 999px;
+          overflow: hidden;
+          background: color-mix(in srgb, var(--secondary-text-color) 10%, transparent);
+        }
+
+        .tab-progress__bar span {
+          display: block;
+          height: 100%;
+          border-radius: inherit;
+          background: linear-gradient(90deg, color-mix(in srgb, var(--gazon-section-accent) 80%, white), var(--gazon-section-accent));
+        }
+
+        .tab-progress__meta {
+          font-size: 0.72rem;
+          color: var(--secondary-text-color);
+        }
+
+        .tab-panel__action {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          border-color: color-mix(in srgb, var(--gazon-card-accent) 28%, var(--divider-color));
+        }
+
+        .tab-panel__action-content {
+          min-width: 0;
+        }
+
+        .tab-panel__action-title {
+          font-size: 1rem;
+          font-weight: 800;
+          line-height: 1.24;
+        }
+
+        .tab-panel__action-button {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          border: 0;
+          border-radius: 16px;
+          padding: 11px 14px;
+          cursor: pointer;
+          color: white;
+          font: inherit;
+          font-weight: 800;
+          background: linear-gradient(145deg, color-mix(in srgb, var(--gazon-card-accent) 88%, white), var(--gazon-card-accent));
+          box-shadow:
+            0 10px 24px color-mix(in srgb, var(--gazon-card-accent) 25%, transparent),
+            inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        }
+
+        .tab-panel__action-button ha-icon {
+          width: 18px;
+          height: 18px;
+        }
+
+        .tab-panel__block {
+          display: grid;
+          gap: 4px;
+        }
+
+        .tab-panel__block--danger {
+          border-color: color-mix(in srgb, var(--gazon-danger-color) 22%, transparent);
+        }
+
+        .tab-panel__block--neutral {
+          border-color: rgba(127, 127, 127, 0.15);
         }
 
         .decision-hero,
@@ -1496,6 +2302,11 @@ class GazonIntelligentCard extends HTMLElement {
           border-color: color-mix(in srgb, var(--gazon-danger-color) 22%, transparent);
         }
 
+        .pill--critical,
+        .context-pill--critical {
+          border-color: color-mix(in srgb, var(--gazon-critical-color) 26%, transparent);
+        }
+
         .pill--warning,
         .context-pill--warning {
           border-color: color-mix(in srgb, var(--gazon-warning-color) 22%, transparent);
@@ -1565,10 +2376,10 @@ class GazonIntelligentCard extends HTMLElement {
           border-radius: var(--gazon-border-radius);
           color: var(--primary-text-color);
           background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-section-accent) 14%, transparent) 0%, transparent 38%),
-            radial-gradient(circle at bottom left, color-mix(in srgb, var(--gazon-section-accent) 8%, transparent) 0%, transparent 34%),
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-card-tone-color) 14%, transparent) 0%, transparent 38%),
+            radial-gradient(circle at bottom left, color-mix(in srgb, var(--gazon-card-tone-color) 8%, transparent) 0%, transparent 34%),
             var(--card-background-color, var(--ha-card-background, transparent));
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 18%, var(--divider-color));
+          border: 1px solid color-mix(in srgb, var(--gazon-card-tone-color) 18%, var(--divider-color));
           box-shadow:
             0 12px 30px rgba(0, 0, 0, 0.10),
             0 1px 0 rgba(255, 255, 255, 0.04) inset,
@@ -1603,7 +2414,7 @@ class GazonIntelligentCard extends HTMLElement {
           position: absolute;
           inset: 0 0 auto 0;
           height: 4px;
-          background: linear-gradient(90deg, transparent 0%, var(--gazon-section-accent) 15%, var(--gazon-section-accent) 85%, transparent 100%);
+          background: linear-gradient(90deg, transparent 0%, var(--gazon-card-tone-color) 15%, var(--gazon-card-tone-color) 85%, transparent 100%);
           opacity: 0.95;
           z-index: 0;
         }
@@ -1617,7 +2428,7 @@ class GazonIntelligentCard extends HTMLElement {
           background: linear-gradient(
             180deg,
             transparent 0%,
-            color-mix(in srgb, var(--gazon-section-accent) 10%, transparent) 100%
+            color-mix(in srgb, var(--gazon-card-tone-color) 10%, transparent) 100%
           );
           opacity: 0.8;
           z-index: 0;
@@ -1636,6 +2447,34 @@ class GazonIntelligentCard extends HTMLElement {
           background: transparent;
           border: 0;
           box-shadow: none;
+        }
+
+        .card--pulse-critical {
+          animation: gazonCriticalPulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes gazonCriticalPulse {
+          0% {
+            box-shadow:
+              0 12px 30px rgba(0, 0, 0, 0.10),
+              0 0 0 0 color-mix(in srgb, var(--gazon-critical-color) 0%, transparent),
+              0 1px 0 rgba(255, 255, 255, 0.04) inset,
+              var(--ha-card-box-shadow, none);
+          }
+          70% {
+            box-shadow:
+              0 12px 30px rgba(0, 0, 0, 0.10),
+              0 0 0 10px color-mix(in srgb, var(--gazon-critical-color) 18%, transparent),
+              0 1px 0 rgba(255, 255, 255, 0.04) inset,
+              var(--ha-card-box-shadow, none);
+          }
+          100% {
+            box-shadow:
+              0 12px 30px rgba(0, 0, 0, 0.10),
+              0 0 0 0 color-mix(in srgb, var(--gazon-critical-color) 0%, transparent),
+              0 1px 0 rgba(255, 255, 255, 0.04) inset,
+              var(--ha-card-box-shadow, none);
+          }
         }
 
         .header {
@@ -1691,9 +2530,9 @@ class GazonIntelligentCard extends HTMLElement {
           align-items: center;
           justify-content: center;
           color: white;
-          background: linear-gradient(145deg, color-mix(in srgb, var(--gazon-section-accent) 86%, white), var(--gazon-section-accent));
+          background: linear-gradient(145deg, color-mix(in srgb, var(--gazon-card-tone-color) 86%, white), var(--gazon-card-tone-color));
           box-shadow:
-            0 10px 24px color-mix(in srgb, var(--gazon-section-accent) 28%, transparent),
+            0 10px 24px color-mix(in srgb, var(--gazon-card-tone-color) 28%, transparent),
             inset 0 1px 0 rgba(255, 255, 255, 0.22);
           flex: none;
         }
@@ -1703,6 +2542,7 @@ class GazonIntelligentCard extends HTMLElement {
         .header__icon--success { background: var(--gazon-success-color, #4f8f3a); }
         .header__icon--neutral { background: var(--gazon-neutral-color, #607d8b); }
         .header__icon--accent { background: var(--gazon-accent-tone-color, #2b8c7c); }
+        .header__icon--critical { background: var(--gazon-critical-color, #ff1744); }
 
         .header__titles {
           min-width: 0;
@@ -1729,8 +2569,8 @@ class GazonIntelligentCard extends HTMLElement {
           border-radius: 999px;
           margin-right: 6px;
           vertical-align: middle;
-          background: var(--gazon-section-accent);
-          box-shadow: 0 0 0 3px color-mix(in srgb, var(--gazon-section-accent) 14%, transparent);
+          background: var(--gazon-card-tone-color);
+          box-shadow: 0 0 0 3px color-mix(in srgb, var(--gazon-card-tone-color) 14%, transparent);
         }
 
         .hero {
@@ -2048,12 +2888,24 @@ class GazonIntelligentCard extends HTMLElement {
             flex-direction: column;
           }
 
+          .tab-panel__hero-top,
+          .tab-panel__header,
+          .tab-panel__section-head,
+          .tab-panel__action {
+            flex-direction: column;
+          }
+
           .hero {
             grid-template-columns: 1fr;
           }
 
           .hero__metrics {
             grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .tab-panel__grid,
+          .tab-panel__chips {
+            grid-template-columns: 1fr;
           }
 
           .hero__lead {
@@ -2073,7 +2925,7 @@ class GazonIntelligentCard extends HTMLElement {
         role="button"
         aria-label="${escapeHtml(this._config.title || DEFAULT_CONFIG.title)}"
         data-background="${background}"
-        data-tone="${windowState.tone}"
+        data-tone="${activeTone}"
         data-action-target="primary"
         style="${this._config.show_background ? `--gazon-accent-color:${accent}; --gazon-section-accent:${sectionAccent};` : ""}"
       >
@@ -2124,6 +2976,13 @@ class GazonIntelligentCard extends HTMLElement {
       event.preventDefault();
       event.stopPropagation();
       this._triggerManualIrrigation();
+      return;
+    }
+    const tabTarget = event.target.closest("[data-tab]");
+    if (tabTarget) {
+      event.preventDefault();
+      event.stopPropagation();
+      this._setActiveTab(tabTarget.dataset.tab);
       return;
     }
     const sectionTarget = event.target.closest("[data-section]");
@@ -2563,6 +3422,21 @@ class GazonIntelligentCardEditor extends HTMLElement {
             ${this._renderEntityInput("entity_mode", "Mode du gazon")}
             ${this._renderEntityInput("entity_type_arrosage", "Type d'arrosage")}
             ${this._renderEntityInput("entity_risque", "Risque gazon")}
+          </div>
+        </section>
+
+        <section class="section">
+          <h3>Configuration</h3>
+          <p>Ces entités alimentent l'onglet Config pour garder une vue rapide sur l'autorisation, les débits et les hauteurs de tonte.</p>
+          <div class="grid">
+            ${this._renderEntityInput("entity_switch_arrosage_automatique", "Arrosage automatique")}
+            ${this._renderEntityInput("entity_debit_zone_1", "Débit zone 1")}
+            ${this._renderEntityInput("entity_debit_zone_2", "Débit zone 2")}
+            ${this._renderEntityInput("entity_debit_zone_3", "Débit zone 3")}
+            ${this._renderEntityInput("entity_debit_zone_4", "Débit zone 4")}
+            ${this._renderEntityInput("entity_debit_zone_5", "Débit zone 5")}
+            ${this._renderEntityInput("entity_hauteur_min_tondeuse", "Hauteur min tondeuse")}
+            ${this._renderEntityInput("entity_hauteur_max_tondeuse", "Hauteur max tondeuse")}
           </div>
         </section>
 

@@ -8,6 +8,7 @@
 > Une carte Lovelace claire et premium pour lire les décisions de **Gazon Intelligent** en un coup d'œil.
 
 Gazon Intelligent Card affiche dans Home Assistant les décisions métier les plus utiles de ton intégration Gazon Intelligent :
+- navigation par onglets pour séparer clairement arrosage, tonte, gazon et configuration
 - fenêtre optimale avec résumé lisible et statut coloré
 - bouton unique `Arrosage manuel immédiat` quand un arrosage est possible
 - résumé compact du plan d'arrosage
@@ -27,6 +28,7 @@ Gazon Intelligent Card affiche dans Home Assistant les décisions métier les pl
 
 - affiche une lecture claire et hiérarchisée du moteur Gazon Intelligent
 - met en avant la fenêtre optimale, le plan d'arrosage et l'action manuelle unique
+- sépare les usages par onglets: arrosage, tonte, gazon, config
 - reste lisible même si certaines entités sont absentes
 - s’adapte au thème clair ou sombre de Home Assistant
 - propose un éditeur visuel simple pour la configuration de base
@@ -86,10 +88,18 @@ entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
 entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
 entity_derniere_application: sensor.gazon_intelligent_derniere_application
 entity_mode: select.gazon_intelligent_mode_du_gazon
+entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique
 entity_arrosage_recommande: binary_sensor.gazon_intelligent_arrosage_recommande
 entity_objectif_arrosage: sensor.gazon_intelligent_objectif_d_arrosage
 entity_type_arrosage: sensor.gazon_intelligent_type_d_arrosage
 entity_risque: sensor.gazon_intelligent_risque_gazon
+entity_debit_zone_1: number.gazon_intelligent_debit_zone_1
+entity_debit_zone_2: number.gazon_intelligent_debit_zone_2
+entity_debit_zone_3: number.gazon_intelligent_debit_zone_3
+entity_debit_zone_4: number.gazon_intelligent_debit_zone_4
+entity_debit_zone_5: number.gazon_intelligent_debit_zone_5
+entity_hauteur_min_tondeuse: number.gazon_intelligent_hauteur_min_tondeuse
+entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 show_legacy_details: false
 ```
 
@@ -125,10 +135,18 @@ entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
 entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
 entity_derniere_application: sensor.gazon_intelligent_derniere_application
 entity_mode: select.gazon_intelligent_mode_du_gazon
+entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique
 entity_arrosage_recommande: binary_sensor.gazon_intelligent_arrosage_recommande
 entity_objectif_arrosage: sensor.gazon_intelligent_objectif_d_arrosage
 entity_type_arrosage: sensor.gazon_intelligent_type_d_arrosage
 entity_risque: sensor.gazon_intelligent_risque_gazon
+entity_debit_zone_1: number.gazon_intelligent_debit_zone_1
+entity_debit_zone_2: number.gazon_intelligent_debit_zone_2
+entity_debit_zone_3: number.gazon_intelligent_debit_zone_3
+entity_debit_zone_4: number.gazon_intelligent_debit_zone_4
+entity_debit_zone_5: number.gazon_intelligent_debit_zone_5
+entity_hauteur_min_tondeuse: number.gazon_intelligent_hauteur_min_tondeuse
+entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 ```
 
 ---
@@ -141,10 +159,18 @@ entity_risque: sensor.gazon_intelligent_risque_gazon
 - `entity_dernier_arrosage`
 - `entity_derniere_application`
 - `entity_mode`
+- `entity_switch_arrosage_automatique`
 - `entity_arrosage_recommande`
 - `entity_objectif_arrosage`
 - `entity_type_arrosage`
 - `entity_risque`
+- `entity_debit_zone_1`
+- `entity_debit_zone_2`
+- `entity_debit_zone_3`
+- `entity_debit_zone_4`
+- `entity_debit_zone_5`
+- `entity_hauteur_min_tondeuse`
+- `entity_hauteur_max_tondeuse`
 - `show_icons`
 - `show_header`
 - `show_background`
@@ -172,8 +198,11 @@ La carte expose un éditeur visuel natif dans Home Assistant pour :
 - le titre
 - la fenêtre optimale, le plan et le contexte principal
 - le mode du gazon et le type d'arrosage
+- l’onglet Config avec le switch auto, les débits et les hauteurs
 - les options visuelles de base
-- l'affichage optionnel des détails legacy
+- l’affichage optionnel des détails legacy
+
+Par défaut, le switch d’autorisation pointe vers `switch.gazon_intelligent_arrosage_automatique`. Si ton instance expose un identifiant différent, ajuste `entity_switch_arrosage_automatique`.
 
 Pour les réglages avancés, l’édition YAML reste la voie la plus directe.
 

@@ -1146,8 +1146,10 @@ export const CARD_STYLES = String.raw`
 
         .header__meta {
           display: flex;
+          flex-wrap: wrap;
           justify-content: flex-end;
           align-items: center;
+          gap: 8px;
           min-width: 0;
           margin-left: auto;
         }
@@ -1159,6 +1161,42 @@ export const CARD_STYLES = String.raw`
         .header__weather .gi-pill__text {
           font-size: 0.76rem;
           font-weight: 650;
+        }
+
+        .header__action {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          min-height: 34px;
+          padding: 5px 12px;
+          border-radius: 999px;
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 16%, var(--divider-color));
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, transparent) 0%, transparent 100%),
+            var(--gi-surface-fill);
+          color: var(--primary-text-color);
+          box-shadow: var(--gi-surface-shadow);
+          font-size: 0.76rem;
+          font-weight: 750;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+
+        .header__action .gi-icon {
+          width: 12px;
+          height: 12px;
+        }
+
+        .card--theme-light .header__action {
+          background: #ffffff;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(0, 0, 0, 0.08));
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+        }
+
+        .card--theme-dark .header__action {
+          background: #000000;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(255, 255, 255, 0.10));
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
         }
 
         .card--theme-light .header__weather {

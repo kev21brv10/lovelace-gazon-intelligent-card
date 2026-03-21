@@ -2123,11 +2123,6 @@ class GazonIntelligentCard extends HTMLElement {
     const wateringProgress = this._wateringProgressState();
     const objective = windowState.objective;
     const objectiveLabel = formatMm(objective);
-    const manualButtonVisible = true;
-    const manualActionLabel = this._manualActionLabel();
-    const manualActionSubtitle = objective > 0
-      ? `${objectiveLabel} à déclencher maintenant`
-      : "Lancement manuel disponible à tout moment";
 
     return `
       <section class="tab-panel gi-panel tab-panel--overview">
@@ -2139,22 +2134,6 @@ class GazonIntelligentCard extends HTMLElement {
           <div class="tab-panel__hero-next">${escapeHtml(windowState.summary || planState.summary || "Vue d’ensemble de la carte.")}</div>
           <div class="tab-panel__hero-hint">${escapeHtml("Le résumé s’adapte automatiquement à la situation réelle et remonte les informations utiles en premier.")}</div>
         </div>
-
-        ${
-          manualButtonVisible
-            ? `<button
-                type="button"
-                class="tab-panel__action tab-panel__action--${overviewTone} gi-primary-action gi-action gi-action--primary ${this._actionTone() === "critical" ? "gi-alert--critical" : ""}"
-                data-gazon-action="manual-irrigation"
-                aria-label="${escapeHtml(manualActionLabel)}"
-              >
-                ${this._config?.show_icons ? renderIconBox("mdi:water-pump", "md") : ""}
-                <span class="tab-panel__action-content">
-                  <span class="tab-panel__action-title">${escapeHtml(manualActionLabel)}</span>
-                  <span class="tab-panel__action-subtitle">${escapeHtml(manualActionSubtitle)}</span>
-                </span>
-              </button>`
-        }
 
         ${this._renderWateringProgressSection(wateringProgress)}
 
@@ -2187,7 +2166,6 @@ class GazonIntelligentCard extends HTMLElement {
     const tone = windowState.tone;
     const windowIcon = this._statusIcon(windowState.status);
     const windowStatusIcon = this._config?.show_icons ? windowIcon : null;
-    const manualButtonVisible = true;
     const isBlocked = windowState.isBlocked;
     const isAwaiting = windowState.isAwaiting;
     const noActionText = windowState.isNoActionRequired ? "Aucune irrigation nécessaire" : "";
@@ -2203,9 +2181,6 @@ class GazonIntelligentCard extends HTMLElement {
         ? windowState.nextAction || "Attendre le créneau prévu"
         : noActionHint;
     const planTypeLabel = formatPlanType(planState.planType);
-    const manualActionSubtitle = objective > 0
-      ? `${objectiveLabel} à déclencher maintenant`
-      : "Lancement manuel disponible à tout moment";
 
     const contextPills = [
       this._renderTabPill("Arrosage recommandé", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
@@ -2257,22 +2232,6 @@ class GazonIntelligentCard extends HTMLElement {
         </div>
 
         ${this._renderWateringProgressSection(wateringProgress)}
-
-        ${
-          manualButtonVisible
-            ? `<button
-                type="button"
-                class="tab-panel__action tab-panel__action--${tone} gi-primary-action gi-action gi-action--primary ${manualButtonVisible ? "gi-primary-action--active" : ""} ${this._actionTone() === "critical" ? "gi-alert--critical" : ""}"
-                data-gazon-action="manual-irrigation"
-                aria-label="${escapeHtml(manualActionLabel)}"
-              >
-                ${this._config?.show_icons ? renderIconBox("mdi:water-pump", "md") : ""}
-                <span class="tab-panel__action-content">
-                  <span class="tab-panel__action-title">${escapeHtml(manualActionLabel)}</span>
-                  <span class="tab-panel__action-subtitle">${escapeHtml(manualActionSubtitle)}</span>
-                </span>
-              </button>`
-        }
 
         <section class="gi-info gi-info--main tab-panel__section">
           <div class="tab-panel__section-head">
@@ -2624,6 +2583,7 @@ class GazonIntelligentCard extends HTMLElement {
     const phase = this._entityState("entity_phase", null);
     const subPhase = this._entityState("entity_sous_phase", null);
     const weather = this._weatherState();
+    const manualActionLabel = this._manualActionLabel();
     const tone = this._cardTone();
     return `
       <header class="gi-row header">
@@ -2639,13 +2599,22 @@ class GazonIntelligentCard extends HTMLElement {
             </div>
           </div>
         </div>
-        ${
-          weather
-            ? `<div class="header__meta">
-                ${renderStatusPill(weather.summary, "neutral", weather.icon, "header__weather")}
-              </div>`
-            : ""
-        }
+        <div class="header__meta">
+          ${
+            weather
+              ? `${renderStatusPill(weather.summary, "neutral", weather.icon, "header__weather")}`
+              : ""
+          }
+          <button
+            type="button"
+            class="header__action gi-action gi-action--primary"
+            data-gazon-action="manual-irrigation"
+            aria-label="${escapeHtml(manualActionLabel)}"
+          >
+            ${this._config?.show_icons ? renderIconBox("mdi:water-pump", "sm") : ""}
+            <span>${escapeHtml(manualActionLabel)}</span>
+          </button>
+        </div>
 
       </header>
     `;

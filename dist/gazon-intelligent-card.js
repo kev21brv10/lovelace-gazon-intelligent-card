@@ -175,7 +175,7 @@ const CARD_STYLES = String.raw`
         .gi-icon--pill svg {
           width: 12px;
           height: 12px;
-          transform: translateY(var(--gi-icon-shift-pill));
+          transform: none;
         }
 
         .gi-tabs,
@@ -799,6 +799,7 @@ const CARD_STYLES = String.raw`
           align-items: center;
           justify-content: flex-start;
           gap: 6px;
+          vertical-align: middle;
           min-height: 28px;
           padding: 2px 10px;
           border-radius: 999px;
@@ -843,7 +844,6 @@ const CARD_STYLES = String.raw`
           justify-content: center;
           flex: none;
           overflow: visible;
-          transform: none;
           color: inherit;
           line-height: 0;
         }
@@ -1997,7 +1997,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.29";
+const CARD_VERSION = "0.1.30";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

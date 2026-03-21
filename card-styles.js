@@ -175,7 +175,7 @@ export const CARD_STYLES = String.raw`
         .gi-icon--pill svg {
           width: 12px;
           height: 12px;
-          transform: translateY(var(--gi-icon-shift-pill));
+          transform: none;
         }
 
         .gi-tabs,
@@ -799,6 +799,7 @@ export const CARD_STYLES = String.raw`
           align-items: center;
           justify-content: flex-start;
           gap: 6px;
+          vertical-align: middle;
           min-height: 28px;
           padding: 2px 10px;
           border-radius: 999px;
@@ -843,7 +844,6 @@ export const CARD_STYLES = String.raw`
           justify-content: center;
           flex: none;
           overflow: visible;
-          transform: none;
           color: inherit;
           line-height: 0;
         }

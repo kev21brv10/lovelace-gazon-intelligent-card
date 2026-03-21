@@ -1556,6 +1556,106 @@ const CARD_STYLES = String.raw`
             var(--ha-card-box-shadow, none);
         }
 
+        .card--theme-light {
+          --gi-theme-base: #ffffff;
+          --gi-theme-base-strong: #ffffff;
+          --gi-theme-base-soft: #ffffff;
+          --gi-theme-border-override: color-mix(in srgb, var(--gazon-section-accent) 18%, rgba(0, 0, 0, 0.10));
+          --gi-theme-shadow-override: 0 14px 28px rgba(0, 0, 0, 0.08);
+        }
+
+        .card--theme-dark {
+          --gi-theme-base: #000000;
+          --gi-theme-base-strong: #000000;
+          --gi-theme-base-soft: #080808;
+          --gi-theme-border-override: color-mix(in srgb, var(--gazon-section-accent) 22%, rgba(255, 255, 255, 0.10));
+          --gi-theme-shadow-override: 0 18px 34px rgba(0, 0, 0, 0.36);
+        }
+
+        .card--theme-light .card {
+          background:
+            radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 16%, transparent) 0%, transparent 30%),
+            radial-gradient(circle at 84% 12%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 0%, transparent 24%),
+            linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 28%, rgba(0, 0, 0, 0.08));
+        }
+
+        .card--theme-dark .card {
+          background:
+            radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 16%, transparent) 0%, transparent 30%),
+            radial-gradient(circle at 84% 12%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 0%, transparent 24%),
+            linear-gradient(180deg, #000000 0%, #000000 100%);
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 24%, rgba(255, 255, 255, 0.08));
+        }
+
+        .card--theme-light :is(.tab-panel__hero, .tab-panel__section, .tab-panel__block, .gi-info, .gi-info--main, .gi-info--secondary, .decision-hero, .decision-plan, .decision-context, .decision-block, .decision-footer, .gi-card-core, .gi-tab, .tab-nav__item, .hero__lead, .decision) {
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 8%, #ffffff) 0%, #ffffff 100%);
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 18%, rgba(0, 0, 0, 0.08));
+          box-shadow: var(--gi-theme-shadow-override);
+        }
+
+        .card--theme-dark :is(.tab-panel__hero, .tab-panel__section, .tab-panel__block, .gi-info, .gi-info--main, .gi-info--secondary, .decision-hero, .decision-plan, .decision-context, .decision-block, .decision-footer, .gi-card-core, .gi-tab, .tab-nav__item, .hero__lead, .decision) {
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 12%, #000000) 0%, #000000 100%);
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 20%, rgba(255, 255, 255, 0.08));
+          box-shadow: var(--gi-theme-shadow-override);
+        }
+
+        .card--theme-light :is(.gi-card-core--tile, .gi-card-core--metric, .gi-card-core--stat) {
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 12%, #ffffff) 0%, #ffffff 100%);
+        }
+
+        .card--theme-dark :is(.gi-card-core--tile, .gi-card-core--metric, .gi-card-core--stat) {
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 14%, #000000) 0%, #000000 100%);
+        }
+
+        .card--theme-light .gi-card-core__secondary,
+        .card--theme-light .tab-panel__hero-next,
+        .card--theme-light .tab-panel__hero-hint,
+        .card--theme-light .tab-panel__block-hint,
+        .card--theme-light .tab-panel__section-meta,
+        .card--theme-light .tab-panel__section-title,
+        .card--theme-light .tab-panel__eyebrow,
+        .card--theme-light .tab-panel__stat-secondary,
+        .card--theme-light .tab-panel__empty,
+        .card--theme-light .tab-panel__header-hint,
+        .card--theme-light .decision-hero__next,
+        .card--theme-light .decision-hero__hint,
+        .card--theme-light .decision-plan__meta,
+        .card--theme-light .pill__label,
+        .card--theme-light .context-pill__label,
+        .card--theme-light .gi-card-core__label,
+        .card--theme-light .gi-card-core__secondary,
+        .card--theme-light .header__subtitle,
+        .card--theme-light .footer {
+          color: color-mix(in srgb, #000000 55%, var(--secondary-text-color));
+        }
+
+        .card--theme-dark .gi-card-core__secondary,
+        .card--theme-dark .tab-panel__hero-next,
+        .card--theme-dark .tab-panel__hero-hint,
+        .card--theme-dark .tab-panel__block-hint,
+        .card--theme-dark .tab-panel__section-meta,
+        .card--theme-dark .tab-panel__section-title,
+        .card--theme-dark .tab-panel__eyebrow,
+        .card--theme-dark .tab-panel__stat-secondary,
+        .card--theme-dark .tab-panel__empty,
+        .card--theme-dark .tab-panel__header-hint,
+        .card--theme-dark .decision-hero__next,
+        .card--theme-dark .decision-hero__hint,
+        .card--theme-dark .decision-plan__meta,
+        .card--theme-dark .pill__label,
+        .card--theme-dark .context-pill__label,
+        .card--theme-dark .gi-card-core__label,
+        .card--theme-dark .gi-card-core__secondary,
+        .card--theme-dark .header__subtitle,
+        .card--theme-dark .footer {
+          color: color-mix(in srgb, #ffffff 72%, var(--secondary-text-color));
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .card,
           .gi-card,
@@ -1735,7 +1835,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.6";
+const CARD_VERSION = "0.1.7";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -4295,6 +4395,7 @@ class GazonIntelligentCard extends HTMLElement {
     const background = this._config.show_background ? "true" : "false";
     const backgroundStyle = this._config.background_style || "solid";
     const themeMode = this._config.theme_mode || "auto";
+    const resolvedThemeMode = themeMode === "auto" ? (this._hass?.themes?.darkMode ? "dark" : "light") : themeMode;
     const numericHeight = asNumber(this._config.card_height);
     const height = numericHeight && numericHeight > 0 ? `${numericHeight}px` : "";
     const borderRadius = `${this._config.border_radius ?? 24}px`;
@@ -4315,7 +4416,7 @@ class GazonIntelligentCard extends HTMLElement {
       "card",
       this._config.compact ? "card--compact" : "",
       backgroundStyle ? `card--${backgroundStyle}` : "",
-      themeMode ? `card--theme-${themeMode}` : "",
+      resolvedThemeMode ? `card--theme-${resolvedThemeMode}` : "",
       this._config.use_gradient ? "card--gradient" : "",
       actionCritical ? "card--pulse-critical" : "",
       isPreview ? "card--editor-preview" : "",

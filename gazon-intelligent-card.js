@@ -3,7 +3,7 @@ import { EDITOR_STYLES } from "./editor-styles.js";
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.6";
+const CARD_VERSION = "0.1.7";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -2563,6 +2563,7 @@ class GazonIntelligentCard extends HTMLElement {
     const background = this._config.show_background ? "true" : "false";
     const backgroundStyle = this._config.background_style || "solid";
     const themeMode = this._config.theme_mode || "auto";
+    const resolvedThemeMode = themeMode === "auto" ? (this._hass?.themes?.darkMode ? "dark" : "light") : themeMode;
     const numericHeight = asNumber(this._config.card_height);
     const height = numericHeight && numericHeight > 0 ? `${numericHeight}px` : "";
     const borderRadius = `${this._config.border_radius ?? 24}px`;
@@ -2583,7 +2584,7 @@ class GazonIntelligentCard extends HTMLElement {
       "card",
       this._config.compact ? "card--compact" : "",
       backgroundStyle ? `card--${backgroundStyle}` : "",
-      themeMode ? `card--theme-${themeMode}` : "",
+      resolvedThemeMode ? `card--theme-${resolvedThemeMode}` : "",
       this._config.use_gradient ? "card--gradient" : "",
       actionCritical ? "card--pulse-critical" : "",
       isPreview ? "card--editor-preview" : "",

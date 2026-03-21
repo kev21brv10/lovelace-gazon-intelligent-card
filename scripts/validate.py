@@ -7,6 +7,10 @@ ROOT = Path(__file__).resolve().parents[1]
 package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
 hacs = json.loads((ROOT / "hacs.json").read_text(encoding="utf-8"))
 SRC_FILES = [
+    "src/constants.js",
+    "src/utils/formatters.js",
+    "src/renderers/primitives.js",
+    "src/editor/editor.js",
     "src/gazon-intelligent-card.js",
     "src/renderers/layout.js",
     "src/styles/card-styles.js",
@@ -29,6 +33,7 @@ if hacs.get("content_in_root") is not False:
     raise SystemExit("hacs.json content_in_root must be false")
 
 main_src = src_files["src/gazon-intelligent-card.js"]
+constants_src = src_files["src/constants.js"]
 dist_src = dist_files[DIST_FILE]
 
 version_match = re.search(r'CARD_VERSION\s*=\s*"([^"]+)"', main_src)
@@ -37,6 +42,13 @@ if not version_match:
 
 if version_match.group(1) != package.get("version"):
     raise SystemExit("CARD_VERSION must match package.json version")
+
+constants_version_match = re.search(r'CARD_VERSION\s*=\s*"([^"]+)"', constants_src)
+if not constants_version_match:
+    raise SystemExit("Could not find CARD_VERSION in src/constants.js")
+
+if constants_version_match.group(1) != package.get("version"):
+    raise SystemExit("CARD_VERSION in src/constants.js must match package.json version")
 
 if 'import { CARD_STYLES } from "./card-styles.js";' in dist_src:
     raise SystemExit("dist/gazon-intelligent-card.js must not import CARD_STYLES")
@@ -58,16 +70,38 @@ if "/local/gazon-intelligent-card/gazon-intelligent-card.js" not in readme:
 if 'import { CARD_STYLES } from "./styles/card-styles.js";' not in main_src:
     raise SystemExit('Missing CARD_STYLES import in src/gazon-intelligent-card.js')
 
-if 'import { EDITOR_STYLES } from "./styles/editor-styles.js";' not in main_src:
-    raise SystemExit('Missing EDITOR_STYLES import in src/gazon-intelligent-card.js')
-
 if 'from "./renderers/layout.js";' not in main_src:
     raise SystemExit("src/gazon-intelligent-card.js must import the layout renderer module")
+
+editor_src = src_files["src/editor/editor.js"]
+for marker in (
+    'import { CARD_TYPE, DEFAULT_CONFIG } from "../constants.js";',
+    'import { EDITOR_STYLES } from "../styles/editor-styles.js";',
+    "GazonIntelligentCardEditor",
+    'customElements.define(`${CARD_TYPE}-editor`',
+):
+    if marker not in editor_src:
+        raise SystemExit(f"Missing expected marker in src/editor/editor.js: {marker}")
 
 layout_src = src_files["src/renderers/layout.js"]
 for marker in ("renderHeader", "renderDecisionLayout", "renderWateringProgressSection"):
     if marker not in layout_src:
         raise SystemExit(f"Missing expected marker in src/renderers/layout.js: {marker}")
+
+primitives_src = src_files["src/renderers/primitives.js"]
+for marker in ("renderPill", "renderCardCore", "renderStatusPill"):
+    if marker not in primitives_src:
+        raise SystemExit(f"Missing expected marker in src/renderers/primitives.js: {marker}")
+
+formatters_src = src_files["src/utils/formatters.js"]
+for marker in ("formatDurationHuman", "humanDateTimeText", "normalizeConfig"):
+    if marker not in formatters_src:
+        raise SystemExit(f"Missing expected marker in src/utils/formatters.js: {marker}")
+
+constants_markers = ("SECTION_DEFS", "TAB_DEFS", "STATUS_COLORS")
+for marker in constants_markers:
+    if marker not in constants_src:
+        raise SystemExit(f"Missing expected marker in src/constants.js: {marker}")
 
 for marker in ("customElements.define", "getConfigForm", "window.customCards"):
     if marker not in main_src:

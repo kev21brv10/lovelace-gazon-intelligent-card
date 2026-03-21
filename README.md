@@ -96,6 +96,7 @@ resources:
 - `src/renderers/primitives.js` : primitives communes pour pills et cartes
 - `src/utils/formatters.js` : formatage et fonctions de tonalité
 - `src/constants.js` : constantes partagées entre les couches
+- `src/editor/editor.js` : éditeur visuel de la carte
 - `src/styles/card-styles.js` : styles de la carte Lovelace
 - `src/styles/editor-styles.js` : styles de l'éditeur
 - `dist/gazon-intelligent-card.js` : bundle final consommé par Home Assistant et HACS

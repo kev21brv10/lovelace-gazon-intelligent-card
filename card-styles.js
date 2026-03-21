@@ -851,9 +851,16 @@ export const CARD_STYLES = String.raw`
         }
 
         .gi-pill__icon .gi-icon--pill ha-icon {
-          display: inline-flex;
+          display: flex;
           align-items: center;
           justify-content: center;
+          width: 14px;
+          height: 14px;
+          margin: 0;
+          padding: 0;
+          line-height: 0;
+          vertical-align: middle;
+          transform: translateY(-0.5px);
           --mdc-icon-size: 14px;
         }
 

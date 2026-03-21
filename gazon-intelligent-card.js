@@ -3,7 +3,7 @@ import { EDITOR_STYLES } from "./editor-styles.js";
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.20";
+const CARD_VERSION = "0.1.21";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

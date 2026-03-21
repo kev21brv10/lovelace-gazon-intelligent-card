@@ -127,14 +127,13 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-icon {
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          display: grid;
+          place-items: center;
           width: 20px;
           height: 20px;
           flex: none;
           flex-shrink: 0;
-          line-height: 0;
+          line-height: 1;
           overflow: visible;
           --mdc-icon-size: 16px;
         }
@@ -156,6 +155,7 @@ const CARD_STYLES = String.raw`
           display: block;
           width: 16px;
           height: 16px;
+          margin: 0;
           transform: none;
         }
 
@@ -823,7 +823,7 @@ const CARD_STYLES = String.raw`
           place-items: center;
           flex: none;
           overflow: visible;
-          line-height: 0;
+          line-height: 1;
           border-radius: 999px;
           background: color-mix(in srgb, var(--gazon-card-accent) 14%, transparent);
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -1253,9 +1253,8 @@ const CARD_STYLES = String.raw`
           width: calc(var(--gazon-icon-size) * 1.2);
           height: calc(var(--gazon-icon-size) * 1.2);
           border-radius: 999px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          display: grid;
+          place-items: center;
           color: white;
           background: linear-gradient(145deg, color-mix(in srgb, var(--gazon-card-tone-color) 84%, white), color-mix(in srgb, var(--gazon-card-tone-color) 88%, var(--gazon-water-color, #44c8ea)));
           box-shadow:
@@ -1350,9 +1349,8 @@ const CARD_STYLES = String.raw`
           width: 20px;
           height: 20px;
           border-radius: 999px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          display: grid;
+          place-items: center;
           flex: none;
           color: var(--gazon-section-accent);
           background: color-mix(in srgb, var(--gazon-section-accent) 20%, transparent);
@@ -1504,12 +1502,11 @@ const CARD_STYLES = String.raw`
           width: var(--gi-card-core-icon-size);
           height: var(--gi-card-core-icon-size);
           border-radius: 999px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          display: grid;
+          place-items: center;
           flex: none;
           overflow: visible;
-          line-height: 0;
+          line-height: 1;
           background: color-mix(in srgb, var(--gazon-section-accent) 18%, transparent);
           color: var(--gazon-section-accent);
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -1524,6 +1521,7 @@ const CARD_STYLES = String.raw`
           width: var(--gi-card-core-icon-glyph-size);
           height: var(--gi-card-core-icon-glyph-size);
           display: block;
+          margin: 0;
           transform: none;
         }
 
@@ -1968,7 +1966,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.20";
+const CARD_VERSION = "0.1.21";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

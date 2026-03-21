@@ -45,6 +45,7 @@ const DEFAULT_CONFIG = {
 };
 
 const TAB_DEFS = [
+  { key: "overview", label: "Résumé", icon: "mdi:view-dashboard" },
   { key: "watering", label: "Arrosage", icon: "mdi:water" },
   { key: "mowing", label: "Tonte", icon: "mdi:content-cut" },
   { key: "gazon", label: "Gazon", icon: "mdi:grass" },
@@ -479,7 +480,7 @@ class GazonIntelligentCard extends HTMLElement {
     this._hass = null;
     this._tapTimer = null;
     this._lastRenderSignature = null;
-    this._activeTab = "watering";
+    this._activeTab = "overview";
     this._activeSection = "overview";
     this._onClick = this._onClick.bind(this);
     this._onContextMenu = this._onContextMenu.bind(this);
@@ -562,7 +563,7 @@ class GazonIntelligentCard extends HTMLElement {
     }
     this._config = normalizeConfig(mergeConfig(DEFAULT_CONFIG, config));
     this._lastRenderSignature = null;
-    this._activeTab = "watering";
+    this._activeTab = "overview";
     this._activeSection = "overview";
     this._render();
   }
@@ -1162,6 +1163,53 @@ class GazonIntelligentCard extends HTMLElement {
     });
   }
 
+  _overviewProposal() {
+    const windowState = this._windowState();
+    const planState = this._planState();
+    const objective = windowState.objective;
+    const objectiveLabel = formatMm(objective);
+    const switchState = this._configSwitchState();
+    const tonte = this._entityState("entity_tonte", null);
+    const phase = this._entityState("entity_phase", null);
+    const risk = this._entityState("entity_risque", null);
+    const actionTone = this._actionTone();
+    const primaryTone = this._primaryTone();
+
+    let title = "Aucun changement prioritaire";
+    let hint = planState.summary || windowState.summary || "Les paramètres restent cohérents.";
+    let tone = "neutral";
+    let icon = "mdi:check-circle-outline";
+
+    if (windowState.showManualAction && objective > 0) {
+      title = "Arrosage manuel possible";
+      hint = `${objectiveLabel} à déclencher maintenant. ${windowState.nextAction || planState.summary || ""}`.trim();
+      tone = actionTone === "critical" ? "critical" : "warning";
+      icon = "mdi:water-pump";
+    } else if (windowState.isBlocked) {
+      title = "Arrosage à attendre";
+      hint = windowState.nextAction || windowState.summary || "Le créneau prévu n’est pas encore ouvert.";
+      tone = primaryTone === "danger" ? "danger" : "warning";
+      icon = "mdi:clock-outline";
+    } else if (computeTonteTone(tonte) === "danger") {
+      title = "Tonte interdite";
+      hint = "L’onglet Tonte donne le détail du créneau et de la hauteur conseillée.";
+      tone = "danger";
+      icon = "mdi:content-cut";
+    } else if (computeRisqueTone(risk) === "danger" || computeRisqueTone(risk) === "critical") {
+      title = "Risque gazon élevé";
+      hint = "Ouvrir l’onglet Gazon pour voir la phase, la sous-phase et le niveau d’action.";
+      tone = computeRisqueTone(risk);
+      icon = "mdi:shield-alert-outline";
+    } else if (switchState.tone === "danger") {
+      title = "Arrosage automatique désactivé";
+      hint = "L’onglet Configuration permet de vérifier l’autorisation et les débits.";
+      tone = "danger";
+      icon = "mdi:switch-off";
+    }
+
+    return { title, hint, tone, icon };
+  }
+
   _planTypeTone(planType) {
     const normalized = String(planType ?? "").trim().toLowerCase();
     if (normalized === "multi_zone") {
@@ -1331,6 +1379,46 @@ class GazonIntelligentCard extends HTMLElement {
     `;
   }
 
+  _renderOverviewTab() {
+    const windowState = this._windowState();
+    const planState = this._planState();
+    const phase = this._entityState("entity_phase", null);
+    const subPhase = this._entityState("entity_sous_phase", null);
+    const tonte = this._entityState("entity_tonte", null);
+    const switchState = this._configSwitchState();
+    const proposal = this._overviewProposal();
+    const overviewTone = proposal.tone;
+    const overviewIcon = this._config?.show_icons ? proposal.icon : null;
+    const objective = windowState.objective;
+    const objectiveLabel = formatMm(objective);
+
+    return `
+      <section class="tab-panel gi-panel tab-panel--overview">
+        <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${overviewTone}">
+          <div class="tab-panel__hero-top">
+            <div class="tab-panel__hero-summary">Résumé proposé</div>
+            ${renderStatusPill(proposal.title, overviewTone, overviewIcon, `tab-panel__status tab-panel__status--${overviewTone}`)}
+          </div>
+          <div class="tab-panel__hero-next">${escapeHtml(windowState.summary || planState.summary || "Vue d’ensemble de la carte.")}</div>
+          <div class="tab-panel__hero-hint">${escapeHtml("Ouvrez un onglet pour détailler l’arrosage, la tonte, le gazon ou la configuration.")}</div>
+        </div>
+
+        <div class="tab-panel__grid">
+          ${this._renderStatCard("Arrosage", windowState.statusLabel, windowState.tone, "mdi:water", windowState.nextAction || planState.summary || objectiveLabel)}
+          ${this._renderStatCard("Tonte", formatStatusLabel(tonte), computeTonteTone(tonte), "mdi:content-cut", this._config?.show_secondary_info ? `Hauteur: ${formatCm(this._entityState("entity_hauteur", null))}` : "")}
+          ${this._renderStatCard("Gazon", formatStatusLabel(phase), phaseTone(phase), "mdi:grass", subPhase ? `Sous-phase: ${subPhase}` : "")}
+          ${this._renderStatCard("Configuration", switchState.label, switchState.tone, "mdi:switch", this._config?.show_secondary_info ? `Mode: ${formatApplicationMode(this._entityState("entity_mode", null))}` : "")}
+        </div>
+
+        <section class="gi-info gi-info--secondary tab-panel__section">
+          <div class="tab-panel__eyebrow">Proposition</div>
+          <div class="tab-panel__section-summary">${escapeHtml(proposal.title)}</div>
+          <div class="tab-panel__block-hint">${escapeHtml(proposal.hint)}</div>
+        </section>
+      </section>
+    `;
+  }
+
   _renderWateringTab() {
     const windowState = this._windowState();
     const planState = this._planState();
@@ -1443,6 +1531,8 @@ class GazonIntelligentCard extends HTMLElement {
 
   _renderActiveTab() {
     switch (this._activeTab) {
+      case "overview":
+        return this._renderOverviewTab();
       case "mowing":
         return this._renderMowingTab();
       case "gazon":

@@ -678,7 +678,7 @@ class GazonIntelligentCard extends HTMLElement {
     const advanced = Boolean(this._config?.show_advanced_details);
     return {
       rows: minimal ? 4 : compact ? 6 : 7,
-      columns: "full",
+      columns: 12,
       min_rows: minimal ? 3 : compact ? 5 : 6,
       min_columns: 12,
       max_rows: minimal ? 4 : compact ? 7 : advanced ? 9 : 8,
@@ -2656,5 +2656,7 @@ if (!window.customCards.some((card) => card.type === CARD_TYPE)) {
     type: CARD_TYPE,
     name: CARD_NAME,
     description: "Carte Lovelace pour les décisions de gazon intelligent.",
+    documentationURL:
+      "https://github.com/kev21brv10/lovelace-gazon-intelligent-card",
   });
 }

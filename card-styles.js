@@ -795,7 +795,15 @@ export const CARD_STYLES = String.raw`
           box-sizing: border-box;
         }
 
-        .gi-pill--status,
+        .gi-pill--status {
+          gap: 8px;
+          min-height: 32px;
+          padding: 4px 12px 4px 8px;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 18%, transparent) 0%, color-mix(in srgb, var(--gazon-card-accent) 8%, transparent) 100%);
+          color: var(--primary-text-color);
+        }
+
         .gi-pill--context {
           gap: 8px;
           min-height: 32px;
@@ -849,15 +857,16 @@ export const CARD_STYLES = String.raw`
           display: flex;
           flex-direction: row;
           align-items: center;
-          justify-content: center;
-          gap: 0;
+          justify-content: flex-start;
+          gap: 4px;
           line-height: 1.12;
           overflow: hidden;
         }
 
         .gi-pill--context .gi-pill__content {
           flex-direction: column;
-          justify-content: center;
+          align-items: flex-start;
+          gap: 2px;
         }
 
         .gi-pill__label {

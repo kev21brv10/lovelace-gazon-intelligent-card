@@ -3,7 +3,7 @@ import { EDITOR_STYLES } from "./editor-styles.js";
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.5";
+const CARD_VERSION = "0.1.6";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -134,10 +134,10 @@ const SECTION_FIELDS = {
 };
 
 const SECTION_ACCENTS = {
-  overview: "#5aa53c",
-  watering: "#2a8f84",
-  mowing: "#6b8f2d",
-  details: "#5f7280",
+  overview: "#58c27d",
+  watering: "#31b8d4",
+  mowing: "#97c84b",
+  details: "#7b8da0",
 };
 
 const LEGACY_ENTITY_KEYS = [
@@ -179,12 +179,12 @@ const RENDER_SIGNATURE_ATTRS = {
 };
 
 const STATUS_COLORS = {
-  danger: "#e53935",
-  warning: "#fb8c00",
-  success: "#43a047",
-  neutral: "#607d8b",
-  accent: "#fdd835",
-  critical: "#ff1744",
+  danger: "#f15f69",
+  warning: "#f3ba4b",
+  success: "#4fc38c",
+  neutral: "#7a8c9d",
+  accent: "#49cfd0",
+  critical: "#ff4d78",
 };
 
 const STATUS_LABELS = {
@@ -1150,9 +1150,14 @@ class GazonIntelligentCard extends HTMLElement {
     }
     const vars = {
       "--gazon-accent-color": accent,
+      "--gazon-card-accent": accent,
       "--gazon-card-tone-color": accent,
       "--gazon-card-tone": activeTone,
       "--gazon-section-accent": sectionAccent,
+      "--gazon-lawn-color": `color-mix(in srgb, ${sectionAccent} 62%, #80da67)`,
+      "--gazon-water-color": `color-mix(in srgb, ${accent} 42%, #44c8ea)`,
+      "--gazon-moss-color": `color-mix(in srgb, ${sectionAccent} 74%, #4d9f58)`,
+      "--gi-soil-color": `color-mix(in srgb, ${accent} 18%, #b8865d)`,
       "--gazon-danger-color": STATUS_COLORS.danger,
       "--gazon-warning-color": STATUS_COLORS.warning,
       "--gazon-success-color": STATUS_COLORS.success,
@@ -2632,15 +2637,15 @@ ${CARD_STYLES}
   _accentColorFromTone(tone) {
     switch (tone) {
       case "danger":
-        return "var(--gazon-danger-color, #c62828)";
+        return "var(--gazon-danger-color, #f15f69)";
       case "warning":
-        return "var(--gazon-warning-color, #7e9a3c)";
+        return "var(--gazon-warning-color, #f3ba4b)";
       case "success":
-        return "var(--gazon-success-color, #4f8f3a)";
+        return "var(--gazon-success-color, #4fc38c)";
       case "accent":
-        return "var(--gazon-accent-tone-color, #2b8c7c)";
+        return "var(--gazon-accent-tone-color, #49cfd0)";
       default:
-        return "var(--gazon-success-color, #4f8f3a)";
+        return "var(--gazon-success-color, #4fc38c)";
     }
   }
 

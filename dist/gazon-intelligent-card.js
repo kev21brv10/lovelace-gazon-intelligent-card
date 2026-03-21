@@ -56,7 +56,7 @@ const CARD_STYLES = String.raw`
           --gi-surface-fill-accent:
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
           --gi-surface-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
-          --gi-surface-shadow-strong: 0 14px 30px rgba(0, 0, 0, 0.14);
+          --gi-surface-shadow-strong: 0 16px 34px rgba(0, 0, 0, 0.16);
         }
 
         @keyframes gazonPulseSoft {
@@ -256,6 +256,8 @@ const CARD_STYLES = String.raw`
           border: 1px solid var(--gi-surface-border);
           border-radius: 18px;
           background:
+            radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 14%, transparent) 0%, transparent 28%),
+            radial-gradient(circle at 10% 92%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 16%, transparent) 0%, transparent 30%),
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 9%, transparent) 0%, transparent 100%),
             var(--gi-surface-fill);
           padding: 12px 14px;
@@ -271,6 +273,8 @@ const CARD_STYLES = String.raw`
           gap: 7px;
           border-color: var(--gi-surface-border-strong);
           background:
+            radial-gradient(circle at 82% 0%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 18%, transparent) 0%, transparent 32%),
+            radial-gradient(circle at 12% 88%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 22%, transparent) 0%, transparent 34%),
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 14%, transparent) 0%, transparent 100%),
             var(--gi-surface-fill-accent);
         }
@@ -416,12 +420,12 @@ const CARD_STYLES = String.raw`
           display: block;
           height: 100%;
           border-radius: inherit;
-          background: linear-gradient(90deg, color-mix(in srgb, var(--gazon-section-accent) 80%, white), var(--gazon-section-accent));
+          background: linear-gradient(90deg, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 88%, white), var(--gazon-section-accent), color-mix(in srgb, var(--gazon-lawn-color, #80da67) 90%, white));
           transition:
             width var(--gi-motion-medium) var(--gi-ease-soft),
             background var(--gi-motion-fast) var(--gi-ease-standard),
             box-shadow var(--gi-motion-fast) var(--gi-ease-standard);
-          box-shadow: 0 0 12px color-mix(in srgb, var(--gazon-section-accent) 22%, transparent);
+          box-shadow: 0 0 12px color-mix(in srgb, var(--gazon-water-color, #44c8ea) 18%, transparent);
         }
 
         .gi-progress__bar--critical {
@@ -475,10 +479,11 @@ const CARD_STYLES = String.raw`
           font-size: 1.04rem;
           letter-spacing: 0.01em;
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 18%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 95%, white) 100%);
+            linear-gradient(135deg, color-mix(in srgb, var(--gazon-card-accent) 94%, white) 0%, color-mix(in srgb, var(--gazon-section-accent) 86%, black) 100%);
           box-shadow:
-            0 16px 30px rgba(0, 0, 0, 0.16),
-            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
+            0 16px 30px rgba(0, 0, 0, 0.18),
+            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent),
+            0 0 24px color-mix(in srgb, var(--gazon-water-color, #44c8ea) 16%, transparent);
           text-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
         }
 
@@ -606,6 +611,7 @@ const CARD_STYLES = String.raw`
         .gi-info {
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
           background:
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 12%, transparent) 0%, transparent 32%),
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 7%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, white) 100%);
           box-shadow: var(--gi-surface-shadow);
         }
@@ -613,6 +619,7 @@ const CARD_STYLES = String.raw`
         .gi-info--main {
           border-color: var(--gi-surface-border);
           background:
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 14%, transparent) 0%, transparent 30%),
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 13%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, white) 100%);
           box-shadow: var(--gi-surface-shadow-strong);
         }
@@ -620,6 +627,7 @@ const CARD_STYLES = String.raw`
         .gi-info--secondary {
           border-color: color-mix(in srgb, var(--gazon-section-accent) 10%, var(--divider-color));
           background:
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 8%, transparent) 0%, transparent 34%),
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 4%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 100%, white) 100%);
         }
 
@@ -973,14 +981,15 @@ const CARD_STYLES = String.raw`
           border-radius: var(--gazon-border-radius);
           color: var(--primary-text-color);
           background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-lawn-color) 18%, transparent) 0%, transparent 34%),
-            radial-gradient(circle at top left, color-mix(in srgb, var(--gazon-water-color) 12%, transparent) 0%, transparent 26%),
-            radial-gradient(circle at bottom left, color-mix(in srgb, var(--gi-soil-color) 18%, transparent) 0%, transparent 30%),
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 88%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 26%, var(--divider-color));
+            radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 20%, transparent) 0%, transparent 32%),
+            radial-gradient(circle at 84% 12%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 14%, transparent) 0%, transparent 26%),
+            radial-gradient(circle at 18% 90%, color-mix(in srgb, var(--gi-soil-color, #b8865d) 16%, transparent) 0%, transparent 28%),
+            radial-gradient(circle at 92% 86%, color-mix(in srgb, var(--gazon-moss-color, #4d9f58) 10%, transparent) 0%, transparent 22%),
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 82%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, black) 100%);
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 30%, var(--divider-color));
           box-shadow:
-            0 16px 34px rgba(0, 0, 0, 0.18),
-            0 0 0 1px color-mix(in srgb, var(--gazon-section-accent) 10%, transparent),
+            0 18px 38px rgba(0, 0, 0, 0.18),
+            0 0 0 1px color-mix(in srgb, var(--gazon-section-accent) 12%, transparent),
             0 1px 0 rgba(255, 255, 255, 0.06) inset,
             var(--ha-card-box-shadow, none);
           overflow: hidden;
@@ -1013,7 +1022,7 @@ const CARD_STYLES = String.raw`
           position: absolute;
           inset: 0 0 auto 0;
           height: 4px;
-          background: linear-gradient(90deg, transparent 0%, var(--gazon-lawn-color) 14%, var(--gazon-section-accent) 50%, var(--gazon-moss-color) 86%, transparent 100%);
+          background: linear-gradient(90deg, transparent 0%, var(--gazon-water-color, #44c8ea) 14%, var(--gazon-lawn-color, #80da67) 42%, var(--gazon-section-accent) 62%, var(--gazon-moss-color, #4d9f58) 86%, transparent 100%);
           opacity: 0.95;
           z-index: 0;
         }
@@ -1035,8 +1044,9 @@ const CARD_STYLES = String.raw`
 
         .card--solid {
           background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-lawn-color) 10%, transparent) 0%, transparent 34%),
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, black) 100%);
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 16%, transparent) 0%, transparent 34%),
+            radial-gradient(circle at bottom left, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 0%, transparent 26%),
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 90%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, black) 100%);
         }
 
         .card--glass {
@@ -1151,7 +1161,7 @@ const CARD_STYLES = String.raw`
           align-items: center;
           justify-content: center;
           color: white;
-          background: linear-gradient(145deg, color-mix(in srgb, var(--gazon-card-tone-color) 86%, white), var(--gazon-card-tone-color));
+          background: linear-gradient(145deg, color-mix(in srgb, var(--gazon-card-tone-color) 84%, white), color-mix(in srgb, var(--gazon-card-tone-color) 88%, var(--gazon-water-color, #44c8ea)));
           box-shadow:
             0 10px 24px color-mix(in srgb, var(--gazon-card-tone-color) 28%, transparent),
             inset 0 1px 0 rgba(255, 255, 255, 0.22);
@@ -1214,9 +1224,13 @@ const CARD_STYLES = String.raw`
           padding: var(--gi-hero-lead-padding);
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 32%, var(--divider-color));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 18%, transparent) 0%, transparent 100%),
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 14%, transparent) 0%, transparent 34%),
+            radial-gradient(circle at bottom left, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 18%, transparent) 0%, transparent 34%),
+            linear-gradient(135deg, color-mix(in srgb, var(--gazon-section-accent) 20%, transparent) 0%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 100%),
             color-mix(in srgb, var(--secondary-background-color) 84%, transparent);
-          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+          box-shadow:
+            0 8px 22px rgba(0, 0, 0, 0.10),
+            0 0 0 1px color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -1245,7 +1259,7 @@ const CARD_STYLES = String.raw`
           justify-content: center;
           flex: none;
           color: var(--gazon-section-accent);
-          background: color-mix(in srgb, var(--gazon-section-accent) 18%, transparent);
+          background: color-mix(in srgb, var(--gazon-section-accent) 20%, transparent);
         }
 
         .hero__lead-icon .gi-icon {
@@ -1304,6 +1318,7 @@ const CARD_STYLES = String.raw`
           padding: 10px 11px;
           border: 1px solid rgba(127, 127, 127, 0.15);
           background:
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 8%, transparent) 0%, transparent 30%),
             linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, var(--secondary-background-color) 100%);
           box-shadow: none;
         }
@@ -1352,6 +1367,8 @@ const CARD_STYLES = String.raw`
           position: relative;
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
           background:
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 0%, transparent 28%),
+            radial-gradient(circle at bottom left, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 12%, transparent) 0%, transparent 32%),
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 6%, transparent) 0%, transparent 100%),
             var(--gi-surface-fill);
           box-shadow:
@@ -1382,6 +1399,7 @@ const CARD_STYLES = String.raw`
         .gi-card-core--tile {
           border: 1px solid color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 26%, transparent);
           background:
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 8%, transparent) 0%, transparent 26%),
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 16%, transparent) 0%, transparent 100%),
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 14%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
         }
@@ -1396,7 +1414,7 @@ const CARD_STYLES = String.raw`
           flex: none;
           overflow: visible;
           line-height: 0;
-          background: color-mix(in srgb, var(--gazon-section-accent) 16%, transparent);
+          background: color-mix(in srgb, var(--gazon-section-accent) 18%, transparent);
           color: var(--gazon-section-accent);
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
@@ -1496,8 +1514,8 @@ const CARD_STYLES = String.raw`
           align-items: center;
           justify-content: center;
           border-radius: 999px;
-          background: color-mix(in srgb, var(--gazon-section-accent) 10%, transparent);
-          color: color-mix(in srgb, var(--gazon-section-accent) 88%, var(--secondary-text-color));
+          background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
+          color: color-mix(in srgb, var(--gazon-section-accent) 90%, var(--secondary-text-color));
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
           opacity: 0.9;
           pointer-events: none;
@@ -1717,7 +1735,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.5";
+const CARD_VERSION = "0.1.6";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -1848,10 +1866,10 @@ const SECTION_FIELDS = {
 };
 
 const SECTION_ACCENTS = {
-  overview: "#5aa53c",
-  watering: "#2a8f84",
-  mowing: "#6b8f2d",
-  details: "#5f7280",
+  overview: "#58c27d",
+  watering: "#31b8d4",
+  mowing: "#97c84b",
+  details: "#7b8da0",
 };
 
 const LEGACY_ENTITY_KEYS = [
@@ -1893,12 +1911,12 @@ const RENDER_SIGNATURE_ATTRS = {
 };
 
 const STATUS_COLORS = {
-  danger: "#e53935",
-  warning: "#fb8c00",
-  success: "#43a047",
-  neutral: "#607d8b",
-  accent: "#fdd835",
-  critical: "#ff1744",
+  danger: "#f15f69",
+  warning: "#f3ba4b",
+  success: "#4fc38c",
+  neutral: "#7a8c9d",
+  accent: "#49cfd0",
+  critical: "#ff4d78",
 };
 
 const STATUS_LABELS = {
@@ -2864,9 +2882,14 @@ class GazonIntelligentCard extends HTMLElement {
     }
     const vars = {
       "--gazon-accent-color": accent,
+      "--gazon-card-accent": accent,
       "--gazon-card-tone-color": accent,
       "--gazon-card-tone": activeTone,
       "--gazon-section-accent": sectionAccent,
+      "--gazon-lawn-color": `color-mix(in srgb, ${sectionAccent} 62%, #80da67)`,
+      "--gazon-water-color": `color-mix(in srgb, ${accent} 42%, #44c8ea)`,
+      "--gazon-moss-color": `color-mix(in srgb, ${sectionAccent} 74%, #4d9f58)`,
+      "--gi-soil-color": `color-mix(in srgb, ${accent} 18%, #b8865d)`,
       "--gazon-danger-color": STATUS_COLORS.danger,
       "--gazon-warning-color": STATUS_COLORS.warning,
       "--gazon-success-color": STATUS_COLORS.success,
@@ -4346,15 +4369,15 @@ ${CARD_STYLES}
   _accentColorFromTone(tone) {
     switch (tone) {
       case "danger":
-        return "var(--gazon-danger-color, #c62828)";
+        return "var(--gazon-danger-color, #f15f69)";
       case "warning":
-        return "var(--gazon-warning-color, #7e9a3c)";
+        return "var(--gazon-warning-color, #f3ba4b)";
       case "success":
-        return "var(--gazon-success-color, #4f8f3a)";
+        return "var(--gazon-success-color, #4fc38c)";
       case "accent":
-        return "var(--gazon-accent-tone-color, #2b8c7c)";
+        return "var(--gazon-accent-tone-color, #49cfd0)";
       default:
-        return "var(--gazon-success-color, #4f8f3a)";
+        return "var(--gazon-success-color, #4fc38c)";
     }
   }
 

@@ -153,25 +153,41 @@ export const CARD_STYLES = String.raw`
         }
 
         .gi-icon ha-icon,
+        .gi-icon ha-svg-icon,
         .gi-icon svg {
-          display: block;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           width: 16px;
           height: 16px;
           margin: 0;
+          padding: 0;
+          line-height: 0;
+          vertical-align: middle;
           transform: translateY(var(--gi-icon-vertical-shift));
         }
 
         .gi-icon--sm ha-icon,
+        .gi-icon--sm ha-svg-icon,
         .gi-icon--sm svg {
           width: 13px;
           height: 13px;
+          margin: 0;
+          padding: 0;
+          line-height: 0;
+          vertical-align: middle;
           transform: translateY(var(--gi-icon-vertical-shift));
         }
 
         .gi-icon--pill ha-icon,
+        .gi-icon--pill ha-svg-icon,
         .gi-icon--pill svg {
           width: 14px;
           height: 14px;
+          margin: 0;
+          padding: 0;
+          line-height: 0;
+          vertical-align: middle;
           transform: none;
         }
 

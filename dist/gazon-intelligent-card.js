@@ -1638,7 +1638,7 @@ const DEFAULT_CONFIG = {
   entity_action: "sensor.gazon_intelligent_action_recommandee",
   entity_avoid: "sensor.gazon_intelligent_action_a_eviter",
   entity_mode: "select.gazon_intelligent_mode_du_gazon",
-  entity_switch_arrosage_automatique: "switch.gazon_intelligent_arrosage_automatique",
+  entity_switch_arrosage_automatique: "switch.gazon_intelligent_arrosage_automatique_autorise",
   entity_arrosage_recommande: "binary_sensor.gazon_intelligent_arrosage_recommande",
   entity_arrosage_apres_application_autorise: "binary_sensor.gazon_intelligent_arrosage_apres_application_autorise",
   entity_tonte_autorisee: "binary_sensor.gazon_intelligent_tonte_autorisee",

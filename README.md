@@ -95,7 +95,7 @@ entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
 entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
 entity_derniere_application: sensor.gazon_intelligent_derniere_application
 entity_mode: select.gazon_intelligent_mode_du_gazon
-entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique
+entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique_autorise
 entity_arrosage_recommande: binary_sensor.gazon_intelligent_arrosage_recommande
 entity_objectif_arrosage: sensor.gazon_intelligent_objectif_d_arrosage
 entity_type_arrosage: sensor.gazon_intelligent_type_d_arrosage
@@ -142,7 +142,7 @@ entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
 entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
 entity_derniere_application: sensor.gazon_intelligent_derniere_application
 entity_mode: select.gazon_intelligent_mode_du_gazon
-entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique
+entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique_autorise
 entity_arrosage_recommande: binary_sensor.gazon_intelligent_arrosage_recommande
 entity_objectif_arrosage: sensor.gazon_intelligent_objectif_d_arrosage
 entity_type_arrosage: sensor.gazon_intelligent_type_d_arrosage
@@ -209,7 +209,7 @@ La carte expose un éditeur visuel natif dans Home Assistant pour :
 - les options visuelles de base
 - l’affichage optionnel des détails avancés
 
-Par défaut, le switch d’autorisation pointe vers `switch.gazon_intelligent_arrosage_automatique`. Si ton instance expose un identifiant différent, ajuste `entity_switch_arrosage_automatique`.
+Par défaut, le switch d’autorisation pointe vers `switch.gazon_intelligent_arrosage_automatique_autorise`. Si ton instance expose un identifiant différent, ajuste `entity_switch_arrosage_automatique`.
 
 Pour les réglages avancés, l’édition YAML reste la voie la plus directe.
 

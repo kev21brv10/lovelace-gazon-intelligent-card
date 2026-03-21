@@ -11,6 +11,7 @@ const CARD_STYLES = String.raw`
           --gi-font-lg: clamp(1.04rem, 0.98rem + 0.28vw, 1.16rem);
           --gi-font-xl: clamp(1.10rem, 1.00rem + 0.38vw, 1.26rem);
           --gi-font-2xl: clamp(1.28rem, 1.14rem + 0.56vw, 1.52rem);
+          --gi-icon-vertical-shift: -0.5px;
           --gi-motion-fast: 180ms;
           --gi-motion-medium: 260ms;
           --gi-ease-standard: cubic-bezier(0.2, 0, 0, 1);
@@ -156,21 +157,21 @@ const CARD_STYLES = String.raw`
           width: 16px;
           height: 16px;
           margin: 0;
-          transform: none;
+          transform: translateY(var(--gi-icon-vertical-shift));
         }
 
         .gi-icon--sm ha-icon,
         .gi-icon--sm svg {
           width: 13px;
           height: 13px;
-          transform: none;
+          transform: translateY(var(--gi-icon-vertical-shift));
         }
 
         .gi-icon--pill ha-icon,
         .gi-icon--pill svg {
           width: 12px;
           height: 12px;
-          transform: none;
+          transform: translateY(var(--gi-icon-vertical-shift));
         }
 
         .gi-tabs,
@@ -838,7 +839,7 @@ const CARD_STYLES = String.raw`
           height: 12px;
           flex: none;
           overflow: visible;
-          transform: none;
+          transform: translateY(var(--gi-icon-vertical-shift));
           color: inherit;
         }
 
@@ -846,7 +847,7 @@ const CARD_STYLES = String.raw`
         .gi-pill__icon .gi-icon--pill svg {
           width: 12px;
           height: 12px;
-          transform: none;
+          transform: translateY(var(--gi-icon-vertical-shift));
         }
 
         .gi-pill__icon .gi-icon,
@@ -1273,6 +1274,7 @@ const CARD_STYLES = String.raw`
         .header__icon .gi-icon {
           width: 14px;
           height: 14px;
+          transform: translateY(var(--gi-icon-vertical-shift));
         }
 
         .header__titles {
@@ -1359,6 +1361,7 @@ const CARD_STYLES = String.raw`
         .hero__lead-icon .gi-icon {
           width: 12px;
           height: 12px;
+          transform: translateY(var(--gi-icon-vertical-shift));
         }
 
         .hero__label {
@@ -1522,7 +1525,7 @@ const CARD_STYLES = String.raw`
           height: var(--gi-card-core-icon-glyph-size);
           display: block;
           margin: 0;
-          transform: none;
+          transform: translateY(var(--gi-icon-vertical-shift));
         }
 
         .gi-card-core__icon .gi-icon ha-icon,
@@ -1539,12 +1542,14 @@ const CARD_STYLES = String.raw`
         .gi-card-core--metric .gi-card-core__icon .gi-icon {
           width: 11px;
           height: 11px;
+          transform: translateY(var(--gi-icon-vertical-shift));
         }
 
         .gi-card-core--metric .gi-card-core__icon .gi-icon ha-icon,
         .gi-card-core--metric .gi-card-core__icon .gi-icon svg {
           width: 11px;
           height: 11px;
+          transform: translateY(var(--gi-icon-vertical-shift));
         }
 
         .tiles .gi-card-core {
@@ -1966,7 +1971,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.21";
+const CARD_VERSION = "0.1.22";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

@@ -152,12 +152,8 @@ export const CARD_STYLES = String.raw`
           --mdc-icon-size: 14px;
         }
 
-        .gi-icon ha-icon,
-        .gi-icon ha-svg-icon,
-        .gi-icon svg {
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        .gi-icon ha-icon {
+          display: block;
           width: 16px;
           height: 16px;
           margin: 0;
@@ -167,9 +163,8 @@ export const CARD_STYLES = String.raw`
           transform: translateY(var(--gi-icon-vertical-shift));
         }
 
-        .gi-icon--sm ha-icon,
-        .gi-icon--sm ha-svg-icon,
-        .gi-icon--sm svg {
+        .gi-icon--sm ha-icon {
+          display: block;
           width: 13px;
           height: 13px;
           margin: 0;
@@ -179,9 +174,8 @@ export const CARD_STYLES = String.raw`
           transform: translateY(var(--gi-icon-vertical-shift));
         }
 
-        .gi-icon--pill ha-icon,
-        .gi-icon--pill ha-svg-icon,
-        .gi-icon--pill svg {
+        .gi-icon--pill ha-icon {
+          display: block;
           width: 14px;
           height: 14px;
           margin: 0;
@@ -528,8 +522,7 @@ export const CARD_STYLES = String.raw`
           background: var(--gi-action-icon-bg);
         }
 
-        .gi-action--primary .gi-icon ha-icon,
-        .gi-action--primary .gi-icon svg {
+        .gi-action--primary .gi-icon ha-icon {
           width: var(--gi-action-icon-glyph-size);
           height: var(--gi-action-icon-glyph-size);
         }
@@ -855,8 +848,7 @@ export const CARD_STYLES = String.raw`
           line-height: 0;
         }
 
-        .gi-pill__icon .gi-icon--pill ha-icon,
-        .gi-pill__icon .gi-icon--pill svg {
+        .gi-pill__icon .gi-icon--pill ha-icon {
           width: 14px;
           height: 14px;
           margin: 0;
@@ -867,9 +859,7 @@ export const CARD_STYLES = String.raw`
         }
 
         .gi-pill__icon .gi-icon--pill ha-icon {
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          display: block;
           width: 14px;
           height: 14px;
           margin: 0;
@@ -878,10 +868,6 @@ export const CARD_STYLES = String.raw`
           vertical-align: middle;
           transform: translateY(-1px);
           --mdc-icon-size: 14px;
-        }
-
-        .gi-pill__icon .gi-icon--pill svg {
-          display: block;
         }
 
         .gi-pill__content {
@@ -1557,8 +1543,7 @@ export const CARD_STYLES = String.raw`
           line-height: 0;
         }
 
-        .gi-card-core__icon .gi-icon ha-icon,
-        .gi-card-core__icon .gi-icon svg {
+        .gi-card-core__icon .gi-icon ha-icon {
           width: var(--gi-card-core-icon-glyph-size);
           height: var(--gi-card-core-icon-glyph-size);
           display: block;
@@ -1578,8 +1563,7 @@ export const CARD_STYLES = String.raw`
           transform: none;
         }
 
-        .gi-card-core--metric .gi-card-core__icon .gi-icon ha-icon,
-        .gi-card-core--metric .gi-card-core__icon .gi-icon svg {
+        .gi-card-core--metric .gi-card-core__icon .gi-icon ha-icon {
           width: 11px;
           height: 11px;
           transform: none;

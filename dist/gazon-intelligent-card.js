@@ -980,12 +980,7 @@ const CARD_STYLES = String.raw`
           min-height: var(--gazon-card-height);
           border-radius: var(--gazon-border-radius);
           color: var(--primary-text-color);
-          background:
-            radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 20%, transparent) 0%, transparent 32%),
-            radial-gradient(circle at 84% 12%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 14%, transparent) 0%, transparent 26%),
-            radial-gradient(circle at 18% 90%, color-mix(in srgb, var(--gi-soil-color, #b8865d) 16%, transparent) 0%, transparent 28%),
-            radial-gradient(circle at 92% 86%, color-mix(in srgb, var(--gazon-moss-color, #4d9f58) 10%, transparent) 0%, transparent 22%),
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 82%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, black) 100%);
+          background: var(--gi-theme-base, var(--secondary-background-color));
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 18%, var(--divider-color));
           box-shadow:
             0 14px 34px rgba(0, 0, 0, 0.14),
@@ -1033,12 +1028,8 @@ const CARD_STYLES = String.raw`
           inset: auto 0 0 0;
           height: 140px;
           pointer-events: none;
-          background: linear-gradient(
-            180deg,
-            transparent 0%,
-            color-mix(in srgb, var(--gazon-card-tone-color) 10%, transparent) 100%
-          );
-          opacity: 0.8;
+          background: transparent;
+          opacity: 0;
           z-index: 0;
         }
 
@@ -1151,6 +1142,35 @@ const CARD_STYLES = String.raw`
           align-items: center;
           min-width: 0;
           flex: 1;
+        }
+
+        .header__meta {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          min-width: 0;
+          margin-left: auto;
+        }
+
+        .header__weather {
+          max-width: min(240px, 100%);
+        }
+
+        .header__weather .gi-pill__text {
+          font-size: 0.76rem;
+          font-weight: 650;
+        }
+
+        .card--theme-light .header__weather {
+          background: #ffffff;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(0, 0, 0, 0.08));
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+        }
+
+        .card--theme-dark .header__weather {
+          background: #000000;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(255, 255, 255, 0.10));
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
         }
 
         .header__icon {
@@ -1572,14 +1592,34 @@ const CARD_STYLES = String.raw`
           --gi-theme-shadow-override: 0 18px 34px rgba(0, 0, 0, 0.34);
         }
 
-        .card--theme-light .card {
+        .card.card--theme-light {
           background: #ffffff;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 22%, rgba(0, 0, 0, 0.08));
         }
 
-        .card--theme-dark .card {
+        .card.card--theme-dark {
           background: #000000;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 20%, rgba(255, 255, 255, 0.08));
+        }
+
+        .card.card--theme-light::before {
+          background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.045) 48%, transparent 100%);
+        }
+
+        .card.card--theme-dark::before {
+          background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 48%, transparent 100%);
+        }
+
+        .card.card--theme-light.card--gradient::after,
+        .card.card--theme-dark.card--gradient::after {
+          content: "";
+          position: absolute;
+          inset: auto 0 0 0;
+          height: 140px;
+          pointer-events: none;
+          background: linear-gradient(180deg, transparent 0%, transparent 100%);
+          opacity: 0;
+          z-index: 0;
         }
 
         .card--theme-light :is(.tab-panel__hero, .tab-panel__section, .tab-panel__block, .gi-info, .gi-info--main, .gi-info--secondary, .decision-hero, .decision-plan, .decision-context, .decision-block, .decision-footer, .gi-card-core, .gi-tab, .tab-nav__item, .hero__lead, .decision) {
@@ -1624,6 +1664,11 @@ const CARD_STYLES = String.raw`
           color: color-mix(in srgb, #000000 55%, var(--secondary-text-color));
         }
 
+        .card--theme-light :is(.gi-pill--neutral, .pill--neutral, .context-pill--neutral) {
+          background: #ffffff;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(0, 0, 0, 0.08));
+        }
+
         .card--theme-light .header__icon--warning { background: color-mix(in srgb, var(--gazon-warning-color) 74%, white); }
         .card--theme-light .header__icon--danger { background: color-mix(in srgb, var(--gazon-danger-color) 74%, white); }
         .card--theme-light .header__icon--success { background: color-mix(in srgb, var(--gazon-success-color) 74%, white); }
@@ -1651,6 +1696,11 @@ const CARD_STYLES = String.raw`
         .card--theme-dark .header__subtitle,
         .card--theme-dark .footer {
           color: color-mix(in srgb, #ffffff 72%, var(--secondary-text-color));
+        }
+
+        .card--theme-dark :is(.gi-pill--neutral, .pill--neutral, .context-pill--neutral) {
+          background: #000000;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(255, 255, 255, 0.10));
         }
 
         .card--theme-dark .header__icon--warning { background: color-mix(in srgb, var(--gazon-warning-color) 74%, black); }
@@ -1839,7 +1889,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.10";
+const CARD_VERSION = "0.1.14";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -1858,6 +1908,7 @@ const DEFAULT_CONFIG = {
   use_gradient: true,
   show_secondary_info: true,
   entity_fenetre_optimale: "sensor.gazon_intelligent_fenetre_optimale",
+  entity_weather: "weather.forecast_home",
   entity_plan_arrosage: "sensor.gazon_intelligent_plan_d_arrosage",
   entity_dernier_arrosage: "sensor.gazon_intelligent_dernier_arrosage_detecte",
   entity_derniere_application: "sensor.gazon_intelligent_derniere_application",
@@ -1886,6 +1937,7 @@ const DEFAULT_CONFIG = {
   entity_hauteur_min_tondeuse: "number.gazon_intelligent_hauteur_min_tondeuse",
   entity_hauteur_max_tondeuse: "number.gazon_intelligent_hauteur_max_tondeuse",
   manual_action_service: "gazon_intelligent.start_manual_irrigation",
+  manual_action_label: "Lancer l'arrosage manuel",
   tap_action: { action: "more-info" },
   hold_action: { action: "none" },
   double_tap_action: { action: "none" },
@@ -2011,6 +2063,7 @@ const RENDER_SIGNATURE_ATTRS = {
   entity_tonte_autorisee: ["phase_active", "tonte_statut", "niveau_action", "fenetre_optimale", "risque_gazon", "hauteur_tonte_recommandee_cm", "hauteur_tonte_min_cm", "hauteur_tonte_max_cm"],
   entity_sous_phase: ["sous_phase_progression", "sous_phase_detail"],
   entity_phase: ["phase_dominante_source", "pluie_demain_source"],
+  entity_weather: ["temperature", "dew_point", "humidity", "uv_index", "pressure", "wind_speed", "wind_bearing", "precipitation"],
   entity_hauteur: ["hauteur_tonte_min_cm", "hauteur_tonte_max_cm"],
 };
 
@@ -2210,6 +2263,85 @@ function formatStateLabel(value) {
     return "Non disponible";
   }
   return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
+const WEATHER_LABELS = {
+  "clear-night": "Nuit claire",
+  cloudy: "Nuageux",
+  exceptional: "Exceptionnel",
+  fog: "Brumeux",
+  hail: "Grêle",
+  lightning: "Orageux",
+  "lightning-rainy": "Orageux",
+  partlycloudy: "Partiellement nuageux",
+  pouring: "Averses",
+  rainy: "Pluvieux",
+  snowy: "Neigeux",
+  "snowy-rainy": "Neige et pluie",
+  sunny: "Ensoleillé",
+  windy: "Venteux",
+  "windy-variant": "Venteux",
+};
+
+function formatWeatherConditionLabel(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return "Météo";
+  }
+  if (WEATHER_LABELS[normalized]) {
+    return WEATHER_LABELS[normalized];
+  }
+  const cleaned = normalized.replaceAll("_", " ").replaceAll("-", " ").replace(/\s+/g, " ").trim();
+  if (!cleaned) {
+    return "Météo";
+  }
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
+function weatherIconForState(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return "mdi:weather-partly-cloudy";
+  }
+  if (normalized.includes("lightning")) {
+    return "mdi:weather-lightning-rainy";
+  }
+  if (normalized.includes("pour")) {
+    return "mdi:weather-pouring";
+  }
+  if (normalized.includes("rain")) {
+    return "mdi:weather-rainy";
+  }
+  if (normalized.includes("snow")) {
+    return "mdi:weather-snowy";
+  }
+  if (normalized.includes("fog")) {
+    return "mdi:weather-fog";
+  }
+  if (normalized.includes("wind")) {
+    return "mdi:weather-windy";
+  }
+  if (normalized.includes("cloud")) {
+    return normalized.includes("partly") ? "mdi:weather-partly-cloudy" : "mdi:weather-cloudy";
+  }
+  if (normalized.includes("clear") || normalized.includes("sun")) {
+    return "mdi:weather-sunny";
+  }
+  return "mdi:weather-partly-cloudy";
+}
+
+function weatherToneForState(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return "neutral";
+  }
+  if (normalized.includes("lightning") || normalized.includes("pour") || normalized.includes("rain") || normalized.includes("snow")) {
+    return "warning";
+  }
+  if (normalized.includes("sun") || normalized.includes("clear")) {
+    return "success";
+  }
+  return "neutral";
 }
 
 function normalizeDisplayValue(value) {
@@ -2428,6 +2560,7 @@ class GazonIntelligentCard extends HTMLElement {
       show_background: DEFAULT_CONFIG.show_background,
       compact: DEFAULT_CONFIG.compact,
       entity_fenetre_optimale: DEFAULT_CONFIG.entity_fenetre_optimale,
+      entity_weather: DEFAULT_CONFIG.entity_weather,
       entity_plan_arrosage: DEFAULT_CONFIG.entity_plan_arrosage,
       entity_dernier_arrosage: DEFAULT_CONFIG.entity_dernier_arrosage,
       entity_derniere_application: DEFAULT_CONFIG.entity_derniere_application,
@@ -2466,6 +2599,7 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "show_secondary_info", selector: { boolean: {} } },
         { name: "show_advanced_details", selector: { boolean: {} } },
         { name: "entity_fenetre_optimale", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_weather", selector: { entity: { domain: ["weather"] } } },
         { name: "entity_plan_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_dernier_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_derniere_application", selector: { entity: { domain: ["sensor"] } } },
@@ -2490,6 +2624,7 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_tonte", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_hauteur", selector: { entity: { domain: ["sensor"] } } },
         { name: "manual_action_service", selector: { text: {} } },
+        { name: "manual_action_label", selector: { text: {} } },
       ],
     };
   }
@@ -2728,6 +2863,10 @@ class GazonIntelligentCard extends HTMLElement {
     return this._entity("entity_plan_arrosage");
   }
 
+  _weatherEntity() {
+    return this._entity("entity_weather");
+  }
+
   _lastWateringEntity() {
     return this._entity("entity_dernier_arrosage");
   }
@@ -2790,6 +2929,31 @@ class GazonIntelligentCard extends HTMLElement {
       planType: planType || "no_plan",
       passages: passages ?? 1,
       fractionation: Boolean(attrs.fractionation),
+    };
+  }
+
+  _weatherState() {
+    const entity = this._weatherEntity();
+    if (!entity || isUnavailableState(entity.state)) {
+      return null;
+    }
+    const condition = String(entity.state || "").trim().toLowerCase();
+    const temperature = asNumber(entity.attributes?.temperature);
+    const temperatureLabel = temperature === null ? "" : `${formatNumber(temperature, 1)} °C`;
+    const label = formatWeatherConditionLabel(condition);
+    const summary = [label, temperatureLabel].filter(Boolean).join(" · ");
+    if (!summary) {
+      return null;
+    }
+    return {
+      entity,
+      condition,
+      label,
+      summary,
+      icon: weatherIconForState(condition),
+      tone: weatherToneForState(condition),
+      temperature,
+      temperatureLabel,
     };
   }
 
@@ -2968,6 +3132,14 @@ class GazonIntelligentCard extends HTMLElement {
     return service;
   }
 
+  _manualActionLabel() {
+    const label = String(this._config?.manual_action_label || "").trim();
+    if (!label) {
+      return "Lancer l'arrosage manuel";
+    }
+    return label;
+  }
+
   _canShowLegacyDetails() {
     return Boolean(this._config?.show_advanced_details);
   }
@@ -3033,6 +3205,7 @@ class GazonIntelligentCard extends HTMLElement {
       "entity_niveau",
       "entity_risque",
       "entity_fenetre_optimale",
+      "entity_weather",
       "entity_plan_arrosage",
       "entity_dernier_arrosage",
       "entity_derniere_application",
@@ -3691,6 +3864,14 @@ class GazonIntelligentCard extends HTMLElement {
     const progressLabel = progress === null ? "Progression non disponible" : `${formatNumber(progress, 0)} %`;
     const progressWidth = progress === null ? 0 : Math.max(0, Math.min(100, progress));
     const gazonStatusIcon = this._config?.show_icons ? "mdi:grass" : null;
+    const gazonSummary = [
+      phase ? `Phase ${formatStatusLabel(phase)}` : "",
+      subPhase ? `Sous-phase ${formatStatusLabel(subPhase)}` : "",
+    ].filter(Boolean).join(" · ") || "Contexte gazon";
+    const gazonHint = [
+      risk ? `Risque ${formatStatusLabel(risk)}` : "",
+      action ? `Action ${formatStatusLabel(action)}` : "",
+    ].filter(Boolean).join(" · ") || "Les détails avancés suivent l’onglet actif.";
     const gazonFacts = [
       {
         label: "Phase dominante",
@@ -3732,6 +3913,7 @@ class GazonIntelligentCard extends HTMLElement {
           <div>
             <div class="tab-panel__eyebrow">Gazon</div>
             <div class="tab-panel__title">Phase, sous-phase et contexte avancé</div>
+            <div class="tab-panel__header-hint">${escapeHtml(gazonSummary)}${gazonHint ? ` · ${escapeHtml(gazonHint)}` : ""}</div>
           </div>
           ${renderStatusPill(formatStatusLabel(action), computeActionTone(action), gazonStatusIcon, "tab-panel__status")}
         </div>
@@ -3825,6 +4007,10 @@ class GazonIntelligentCard extends HTMLElement {
     const overviewIcon = this._config?.show_icons ? proposal.icon : null;
     const facts = this._overviewFacts();
     const wateringProgress = this._wateringProgressState();
+    const objective = windowState.objective;
+    const objectiveLabel = formatMm(objective);
+    const manualButtonVisible = windowState.showManualAction && objective > 0;
+    const manualActionLabel = this._manualActionLabel();
 
     return `
       <section class="tab-panel gi-panel tab-panel--overview">
@@ -3836,6 +4022,23 @@ class GazonIntelligentCard extends HTMLElement {
           <div class="tab-panel__hero-next">${escapeHtml(windowState.summary || planState.summary || "Vue d’ensemble de la carte.")}</div>
           <div class="tab-panel__hero-hint">${escapeHtml("Le résumé s’adapte automatiquement à la situation réelle et remonte les informations utiles en premier.")}</div>
         </div>
+
+        ${
+          manualButtonVisible
+            ? `<button
+                type="button"
+                class="tab-panel__action tab-panel__action--${overviewTone} gi-primary-action gi-action gi-action--primary ${this._actionTone() === "critical" ? "gi-alert--critical" : ""}"
+                data-gazon-action="manual-irrigation"
+                aria-label="${escapeHtml(manualActionLabel)}"
+              >
+                ${this._config?.show_icons ? renderIconBox("mdi:water-pump", "md") : ""}
+                <span class="tab-panel__action-content">
+                  <span class="tab-panel__action-title">${escapeHtml(manualActionLabel)}</span>
+                  <span class="tab-panel__action-subtitle">${escapeHtml(objectiveLabel)} à déclencher maintenant</span>
+                </span>
+              </button>`
+            : ""
+        }
 
         ${this._renderWateringProgressSection(wateringProgress)}
 
@@ -3913,6 +4116,7 @@ class GazonIntelligentCard extends HTMLElement {
       this._renderTabPill("Objectif", objectiveLabel, objective > 0 ? "success" : "neutral", "mdi:water"),
     ];
     const wateringProgress = this._wateringProgressState();
+    const manualActionLabel = this._manualActionLabel();
 
     return `
       <section class="tab-panel gi-panel tab-panel--watering">
@@ -3941,11 +4145,11 @@ class GazonIntelligentCard extends HTMLElement {
                 type="button"
                 class="tab-panel__action tab-panel__action--${tone} gi-primary-action gi-action gi-action--primary ${manualButtonVisible ? "gi-primary-action--active" : ""} ${this._actionTone() === "critical" ? "gi-alert--critical" : ""}"
                 data-gazon-action="manual-irrigation"
-                aria-label="Arrosage manuel immédiat"
+                aria-label="${escapeHtml(manualActionLabel)}"
               >
                 ${this._config?.show_icons ? renderIconBox("mdi:water-pump", "md") : ""}
                 <span class="tab-panel__action-content">
-                  <span class="tab-panel__action-title">Arrosage manuel immédiat</span>
+                  <span class="tab-panel__action-title">${escapeHtml(manualActionLabel)}</span>
                   <span class="tab-panel__action-subtitle">${escapeHtml(objectiveLabel)} à déclencher maintenant</span>
                 </span>
               </button>`
@@ -4026,11 +4230,29 @@ class GazonIntelligentCard extends HTMLElement {
     this._render();
   }
 
+  _sectionForTab(tab) {
+    switch (tab) {
+      case "watering":
+        return "watering";
+      case "mowing":
+        return "mowing";
+      case "gazon":
+      case "config":
+        return "details";
+      case "overview":
+      default:
+        return "overview";
+    }
+  }
+
   _setActiveTab(tab) {
     if (!TAB_DEFS.some((entry) => entry.key === tab) || this._activeTab === tab) {
       return;
     }
     this._activeTab = tab;
+    if (this._canShowLegacyDetails()) {
+      this._activeSection = this._sectionForTab(tab);
+    }
     this._render();
   }
 
@@ -4291,6 +4513,7 @@ class GazonIntelligentCard extends HTMLElement {
     }
     const phase = this._entityState("entity_phase", null);
     const subPhase = this._entityState("entity_sous_phase", null);
+    const weather = this._weatherState();
     const tone = this._cardTone();
     return `
       <header class="gi-row header">
@@ -4306,6 +4529,13 @@ class GazonIntelligentCard extends HTMLElement {
             </div>
           </div>
         </div>
+        ${
+          weather
+            ? `<div class="header__meta">
+                ${renderStatusPill(weather.summary, "neutral", weather.icon, "header__weather")}
+              </div>`
+            : ""
+        }
 
       </header>
     `;
@@ -4882,6 +5112,7 @@ ${EDITOR_STYLES}
           </div>
           <div class="grid">
             ${this._renderEntityInput("manual_action_service", "Service du bouton manuel")}
+            ${this._renderEntityInput("manual_action_label", "Libellé du bouton manuel")}
           </div>
         </section>
       </div>

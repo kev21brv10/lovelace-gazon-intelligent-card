@@ -980,12 +980,7 @@ export const CARD_STYLES = String.raw`
           min-height: var(--gazon-card-height);
           border-radius: var(--gazon-border-radius);
           color: var(--primary-text-color);
-          background:
-            radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 20%, transparent) 0%, transparent 32%),
-            radial-gradient(circle at 84% 12%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 14%, transparent) 0%, transparent 26%),
-            radial-gradient(circle at 18% 90%, color-mix(in srgb, var(--gi-soil-color, #b8865d) 16%, transparent) 0%, transparent 28%),
-            radial-gradient(circle at 92% 86%, color-mix(in srgb, var(--gazon-moss-color, #4d9f58) 10%, transparent) 0%, transparent 22%),
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 82%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, black) 100%);
+          background: var(--gi-theme-base, var(--secondary-background-color));
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 18%, var(--divider-color));
           box-shadow:
             0 14px 34px rgba(0, 0, 0, 0.14),
@@ -1033,12 +1028,8 @@ export const CARD_STYLES = String.raw`
           inset: auto 0 0 0;
           height: 140px;
           pointer-events: none;
-          background: linear-gradient(
-            180deg,
-            transparent 0%,
-            color-mix(in srgb, var(--gazon-card-tone-color) 10%, transparent) 100%
-          );
-          opacity: 0.8;
+          background: transparent;
+          opacity: 0;
           z-index: 0;
         }
 
@@ -1151,6 +1142,35 @@ export const CARD_STYLES = String.raw`
           align-items: center;
           min-width: 0;
           flex: 1;
+        }
+
+        .header__meta {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          min-width: 0;
+          margin-left: auto;
+        }
+
+        .header__weather {
+          max-width: min(240px, 100%);
+        }
+
+        .header__weather .gi-pill__text {
+          font-size: 0.76rem;
+          font-weight: 650;
+        }
+
+        .card--theme-light .header__weather {
+          background: #ffffff;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(0, 0, 0, 0.08));
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+        }
+
+        .card--theme-dark .header__weather {
+          background: #000000;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(255, 255, 255, 0.10));
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
         }
 
         .header__icon {
@@ -1572,14 +1592,34 @@ export const CARD_STYLES = String.raw`
           --gi-theme-shadow-override: 0 18px 34px rgba(0, 0, 0, 0.34);
         }
 
-        .card--theme-light .card {
+        .card.card--theme-light {
           background: #ffffff;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 22%, rgba(0, 0, 0, 0.08));
         }
 
-        .card--theme-dark .card {
+        .card.card--theme-dark {
           background: #000000;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 20%, rgba(255, 255, 255, 0.08));
+        }
+
+        .card.card--theme-light::before {
+          background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.045) 48%, transparent 100%);
+        }
+
+        .card.card--theme-dark::before {
+          background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 48%, transparent 100%);
+        }
+
+        .card.card--theme-light.card--gradient::after,
+        .card.card--theme-dark.card--gradient::after {
+          content: "";
+          position: absolute;
+          inset: auto 0 0 0;
+          height: 140px;
+          pointer-events: none;
+          background: linear-gradient(180deg, transparent 0%, transparent 100%);
+          opacity: 0;
+          z-index: 0;
         }
 
         .card--theme-light :is(.tab-panel__hero, .tab-panel__section, .tab-panel__block, .gi-info, .gi-info--main, .gi-info--secondary, .decision-hero, .decision-plan, .decision-context, .decision-block, .decision-footer, .gi-card-core, .gi-tab, .tab-nav__item, .hero__lead, .decision) {
@@ -1624,6 +1664,11 @@ export const CARD_STYLES = String.raw`
           color: color-mix(in srgb, #000000 55%, var(--secondary-text-color));
         }
 
+        .card--theme-light :is(.gi-pill--neutral, .pill--neutral, .context-pill--neutral) {
+          background: #ffffff;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(0, 0, 0, 0.08));
+        }
+
         .card--theme-light .header__icon--warning { background: color-mix(in srgb, var(--gazon-warning-color) 74%, white); }
         .card--theme-light .header__icon--danger { background: color-mix(in srgb, var(--gazon-danger-color) 74%, white); }
         .card--theme-light .header__icon--success { background: color-mix(in srgb, var(--gazon-success-color) 74%, white); }
@@ -1651,6 +1696,11 @@ export const CARD_STYLES = String.raw`
         .card--theme-dark .header__subtitle,
         .card--theme-dark .footer {
           color: color-mix(in srgb, #ffffff 72%, var(--secondary-text-color));
+        }
+
+        .card--theme-dark :is(.gi-pill--neutral, .pill--neutral, .context-pill--neutral) {
+          background: #000000;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(255, 255, 255, 0.10));
         }
 
         .card--theme-dark .header__icon--warning { background: color-mix(in srgb, var(--gazon-warning-color) 74%, black); }

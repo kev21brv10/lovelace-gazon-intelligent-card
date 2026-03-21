@@ -843,13 +843,22 @@ export const CARD_STYLES = String.raw`
         .gi-pill__icon .gi-icon--pill svg {
           width: 14px;
           height: 14px;
-          display: block;
           margin: 0;
+          padding: 0;
+          vertical-align: middle;
           transform: none;
+          line-height: 0;
         }
 
         .gi-pill__icon .gi-icon--pill ha-icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           --mdc-icon-size: 14px;
+        }
+
+        .gi-pill__icon .gi-icon--pill svg {
+          display: block;
         }
 
         .gi-pill__content {

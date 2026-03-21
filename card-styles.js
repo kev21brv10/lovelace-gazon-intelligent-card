@@ -1180,14 +1180,21 @@ export const CARD_STYLES = String.raw`
           font-weight: 700;
           cursor: pointer;
           white-space: nowrap;
+          width: auto;
+          flex: 0 0 auto;
           max-width: 184px;
           overflow: hidden;
+          text-shadow: none;
         }
 
         .header__action .gi-icon {
           width: 11px;
           height: 11px;
           flex: none;
+        }
+
+        .header__action::after {
+          content: none;
         }
 
         .header__action span:last-child {

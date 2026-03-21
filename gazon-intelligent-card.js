@@ -2607,7 +2607,7 @@ class GazonIntelligentCard extends HTMLElement {
           }
           <button
             type="button"
-            class="header__action gi-action gi-action--primary"
+            class="header__action gi-action"
             data-gazon-action="manual-irrigation"
             aria-label="${escapeHtml(manualActionLabel)}"
           >

@@ -3,7 +3,7 @@ import { EDITOR_STYLES } from "./editor-styles.js";
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.16";
+const CARD_VERSION = "0.1.17";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -308,9 +308,11 @@ function formatNumber(value, digits = 1) {
   if (number === null) {
     return null;
   }
+  const maximumFractionDigits = Math.max(0, Number.isFinite(digits) ? Math.floor(digits) : 0);
+  const minimumFractionDigits = Math.min(maximumFractionDigits, Number.isInteger(number) ? 0 : 1);
   return new Intl.NumberFormat(undefined, {
-    maximumFractionDigits: digits,
-    minimumFractionDigits: Number.isInteger(number) ? 0 : 1,
+    maximumFractionDigits,
+    minimumFractionDigits,
   }).format(number);
 }
 

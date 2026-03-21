@@ -1576,7 +1576,7 @@ const CARD_STYLES = String.raw`
           background:
             radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 16%, transparent) 0%, transparent 30%),
             radial-gradient(circle at 84% 12%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 0%, transparent 24%),
-            linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
+            #ffffff;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 28%, rgba(0, 0, 0, 0.08));
         }
 
@@ -1584,32 +1584,28 @@ const CARD_STYLES = String.raw`
           background:
             radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 16%, transparent) 0%, transparent 30%),
             radial-gradient(circle at 84% 12%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 0%, transparent 24%),
-            linear-gradient(180deg, #000000 0%, #000000 100%);
+            #000000;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 24%, rgba(255, 255, 255, 0.08));
         }
 
         .card--theme-light :is(.tab-panel__hero, .tab-panel__section, .tab-panel__block, .gi-info, .gi-info--main, .gi-info--secondary, .decision-hero, .decision-plan, .decision-context, .decision-block, .decision-footer, .gi-card-core, .gi-tab, .tab-nav__item, .hero__lead, .decision) {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 8%, #ffffff) 0%, #ffffff 100%);
+          background: #ffffff;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 18%, rgba(0, 0, 0, 0.08));
           box-shadow: var(--gi-theme-shadow-override);
         }
 
         .card--theme-dark :is(.tab-panel__hero, .tab-panel__section, .tab-panel__block, .gi-info, .gi-info--main, .gi-info--secondary, .decision-hero, .decision-plan, .decision-context, .decision-block, .decision-footer, .gi-card-core, .gi-tab, .tab-nav__item, .hero__lead, .decision) {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 12%, #000000) 0%, #000000 100%);
+          background: #000000;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 20%, rgba(255, 255, 255, 0.08));
           box-shadow: var(--gi-theme-shadow-override);
         }
 
         .card--theme-light :is(.gi-card-core--tile, .gi-card-core--metric, .gi-card-core--stat) {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 12%, #ffffff) 0%, #ffffff 100%);
+          background: #ffffff;
         }
 
         .card--theme-dark :is(.gi-card-core--tile, .gi-card-core--metric, .gi-card-core--stat) {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 14%, #000000) 0%, #000000 100%);
+          background: #000000;
         }
 
         .card--theme-light .gi-card-core__secondary,
@@ -1835,7 +1831,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.7";
+const CARD_VERSION = "0.1.8";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

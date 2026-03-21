@@ -1485,11 +1485,11 @@ export const CARD_STYLES = String.raw`
         .gi-card-core--stat,
         .gi-card-core--tile,
         .gi-card-core--metric {
-          min-height: 76px;
+          min-height: 84px;
         }
 
         .gi-card-core--metric {
-          min-height: 66px;
+          min-height: 74px;
           padding: 12px 13px;
         }
 
@@ -1573,6 +1573,7 @@ export const CARD_STYLES = String.raw`
           flex-direction: column;
           justify-content: center;
           gap: 2px;
+          overflow: hidden;
         }
 
         .gi-card-core__label {
@@ -1582,15 +1583,23 @@ export const CARD_STYLES = String.raw`
           color: var(--secondary-text-color);
           line-height: 1.1;
           min-height: 1.1em;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          overflow: hidden;
         }
 
         .gi-card-core__value {
           font-weight: 700;
           min-width: 0;
-          overflow-wrap: anywhere;
-          hyphens: auto;
+          overflow-wrap: break-word;
+          word-break: normal;
           font-size: var(--gi-font-sm);
           line-height: 1.24;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          overflow: hidden;
         }
 
         .gi-card-core--metric .gi-card-core__value {
@@ -1603,6 +1612,10 @@ export const CARD_STYLES = String.raw`
           line-height: 1.3;
           color: var(--secondary-text-color);
           min-height: 1.15em;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          overflow: hidden;
         }
 
         .gi-card-core__secondary--empty {

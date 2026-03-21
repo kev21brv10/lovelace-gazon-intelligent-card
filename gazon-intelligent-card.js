@@ -3,7 +3,7 @@ import { EDITOR_STYLES } from "./editor-styles.js";
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.26";
+const CARD_VERSION = "0.1.27";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -2577,6 +2577,9 @@ class GazonIntelligentCard extends HTMLElement {
     if (!entity) {
       return "Non disponible";
     }
+    if (field.key === "entity_fenetre_optimale") {
+      return formatStatusLabel(entity.state);
+    }
     if (field.key === "entity_arrosage_recommande") {
       return formatRecommendationState(entity.state);
     }
@@ -2590,6 +2593,9 @@ class GazonIntelligentCard extends HTMLElement {
     if (field.key === "entity_hauteur") {
       const numeric = asNumber(entity.state);
       return formatCm(numeric);
+    }
+    if (field.key === "entity_switch_arrosage_automatique") {
+      return formatSwitchState(entity.state);
     }
     if (field.key === "entity_tonte") {
       return formatStatusLabel(entity.state);

@@ -1485,11 +1485,11 @@ const CARD_STYLES = String.raw`
         .gi-card-core--stat,
         .gi-card-core--tile,
         .gi-card-core--metric {
-          min-height: 76px;
+          min-height: 84px;
         }
 
         .gi-card-core--metric {
-          min-height: 66px;
+          min-height: 74px;
           padding: 12px 13px;
         }
 
@@ -1573,6 +1573,7 @@ const CARD_STYLES = String.raw`
           flex-direction: column;
           justify-content: center;
           gap: 2px;
+          overflow: hidden;
         }
 
         .gi-card-core__label {
@@ -1582,15 +1583,23 @@ const CARD_STYLES = String.raw`
           color: var(--secondary-text-color);
           line-height: 1.1;
           min-height: 1.1em;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          overflow: hidden;
         }
 
         .gi-card-core__value {
           font-weight: 700;
           min-width: 0;
-          overflow-wrap: anywhere;
-          hyphens: auto;
+          overflow-wrap: break-word;
+          word-break: normal;
           font-size: var(--gi-font-sm);
           line-height: 1.24;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          overflow: hidden;
         }
 
         .gi-card-core--metric .gi-card-core__value {
@@ -1603,6 +1612,10 @@ const CARD_STYLES = String.raw`
           line-height: 1.3;
           color: var(--secondary-text-color);
           min-height: 1.15em;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          overflow: hidden;
         }
 
         .gi-card-core__secondary--empty {
@@ -1977,7 +1990,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.26";
+const CARD_VERSION = "0.1.27";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -4551,6 +4564,9 @@ class GazonIntelligentCard extends HTMLElement {
     if (!entity) {
       return "Non disponible";
     }
+    if (field.key === "entity_fenetre_optimale") {
+      return formatStatusLabel(entity.state);
+    }
     if (field.key === "entity_arrosage_recommande") {
       return formatRecommendationState(entity.state);
     }
@@ -4564,6 +4580,9 @@ class GazonIntelligentCard extends HTMLElement {
     if (field.key === "entity_hauteur") {
       const numeric = asNumber(entity.state);
       return formatCm(numeric);
+    }
+    if (field.key === "entity_switch_arrosage_automatique") {
+      return formatSwitchState(entity.state);
     }
     if (field.key === "entity_tonte") {
       return formatStatusLabel(entity.state);

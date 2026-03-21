@@ -13,8 +13,11 @@ export const CARD_STYLES = String.raw`
           --gi-header-justify: space-between;
           --gi-header-gap: 10px;
           --gi-header-margin-bottom: 8px;
+          --gi-hero-margin: 2px 0 6px;
+          --gi-hero-gap: 8px;
           --gi-hero-lead-padding: 11px 12px;
           --gi-hero-lead-gap: 8px;
+          --gi-hero-metrics-gap: 6px;
           --gi-inline-direction: row;
           --gi-inline-align: center;
           --gi-inline-justify: space-between;
@@ -29,6 +32,7 @@ export const CARD_STYLES = String.raw`
           --gi-action-justify: flex-start;
           --gi-action-width: 100%;
           --gi-action-padding-inline: 18px;
+          --gi-action-padding-inline-end: 20px;
           --gi-action-padding-block: 16px;
           --gi-action-min-height: 84px;
           --gi-action-gap: 12px;
@@ -153,7 +157,8 @@ export const CARD_STYLES = String.raw`
         }
 
         .gi-tabs,
-        .tab-nav {
+        .tab-nav,
+        .section-nav {
           display: flex;
           gap: var(--gi-nav-gap);
           flex-wrap: nowrap;
@@ -166,7 +171,8 @@ export const CARD_STYLES = String.raw`
         }
 
         .gi-tabs::-webkit-scrollbar,
-        .tab-nav::-webkit-scrollbar {
+        .tab-nav::-webkit-scrollbar,
+        .section-nav::-webkit-scrollbar {
           display: none;
         }
 
@@ -432,7 +438,7 @@ export const CARD_STYLES = String.raw`
           gap: var(--gi-action-gap);
           width: var(--gi-action-width);
           min-height: var(--gi-action-min-height);
-          padding-inline: var(--gi-action-padding-inline) 20px;
+          padding-inline: var(--gi-action-padding-inline) var(--gi-action-padding-inline-end);
           padding-block: var(--gi-action-padding-block);
           border: 2px solid color-mix(in srgb, var(--gazon-card-accent) 34%, var(--divider-color));
           border-radius: var(--gi-action-radius);
@@ -466,6 +472,14 @@ export const CARD_STYLES = String.raw`
           height: var(--gi-action-icon-size);
           border-radius: 999px;
           background: var(--gi-action-icon-bg);
+        }
+
+        .gi-action--primary .gi-icon ha-icon,
+        .gi-action--primary .gi-icon svg,
+        .gi-primary-action .gi-icon ha-icon,
+        .gi-primary-action .gi-icon svg {
+          width: var(--gi-action-icon-glyph-size);
+          height: var(--gi-action-icon-glyph-size);
         }
 
         @media (hover: hover) {
@@ -966,10 +980,11 @@ export const CARD_STYLES = String.raw`
 
         .header {
           display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 8px;
+          flex-direction: var(--gi-header-direction);
+          justify-content: var(--gi-header-justify);
+          align-items: var(--gi-header-align);
+          gap: var(--gi-header-gap);
+          margin-bottom: var(--gi-header-margin-bottom);
         }
 
         .header--clickable,
@@ -1001,8 +1016,7 @@ export const CARD_STYLES = String.raw`
           .hero__lead:hover,
           .gi-action:hover,
           .gi-tab:hover,
-          .tab-nav__item:hover,
-          .gi-primary-action:hover {
+          .tab-nav__item:hover {
             transform: translateY(-1px);
           }
         }
@@ -1075,15 +1089,15 @@ export const CARD_STYLES = String.raw`
           display: flex;
           flex-wrap: wrap;
           min-width: 0;
-          gap: 8px;
+          gap: var(--gi-hero-gap);
           align-items: stretch;
-          margin: 2px 0 6px;
+          margin: var(--gi-hero-margin);
         }
 
         .hero__lead {
           min-width: 0;
           border-radius: 16px;
-          padding: 11px 12px;
+          padding: var(--gi-hero-lead-padding);
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 22%, var(--divider-color));
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 12%, transparent) 0%, transparent 100%),
@@ -1092,8 +1106,20 @@ export const CARD_STYLES = String.raw`
           cursor: pointer;
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: var(--gi-hero-lead-gap);
           flex: 1 1 260px;
+        }
+
+        .hero__metrics {
+          display: flex;
+          flex-wrap: wrap;
+          min-width: 0;
+          gap: var(--gi-hero-metrics-gap);
+          align-content: start;
+        }
+
+        .hero__metrics .gi-card-core {
+          flex: 1 1 110px;
         }
 
         .hero__lead-icon {
@@ -1234,8 +1260,8 @@ export const CARD_STYLES = String.raw`
         }
 
         .gi-card-core__icon {
-          width: 20px;
-          height: 20px;
+          width: var(--gi-card-core-icon-size);
+          height: var(--gi-card-core-icon-size);
           border-radius: 999px;
           display: flex;
           align-items: center;
@@ -1253,10 +1279,16 @@ export const CARD_STYLES = String.raw`
         }
 
         .gi-card-core__icon .gi-icon {
-          width: 12px;
-          height: 12px;
+          width: var(--gi-card-core-icon-glyph-size);
+          height: var(--gi-card-core-icon-glyph-size);
           display: block;
-          transform: translateY(-0.5px);
+          transform: none;
+        }
+
+        .gi-card-core__icon .gi-icon ha-icon,
+        .gi-card-core__icon .gi-icon svg {
+          width: var(--gi-card-core-icon-glyph-size);
+          height: var(--gi-card-core-icon-glyph-size);
         }
 
         .gi-card-core--metric .gi-card-core__icon {
@@ -1267,6 +1299,16 @@ export const CARD_STYLES = String.raw`
         .gi-card-core--metric .gi-card-core__icon .gi-icon {
           width: 11px;
           height: 11px;
+        }
+
+        .gi-card-core--metric .gi-card-core__icon .gi-icon ha-icon,
+        .gi-card-core--metric .gi-card-core__icon .gi-icon svg {
+          width: 11px;
+          height: 11px;
+        }
+
+        .tiles .gi-card-core {
+          flex: 1 1 118px;
         }
 
         .gi-card-core__icon--empty {
@@ -1362,34 +1404,35 @@ export const CARD_STYLES = String.raw`
         }
 
         @media (max-width: 600px) {
-          .header {
-            flex-direction: column;
-          }
-
-          .tab-panel__hero-top,
-          .tab-panel__header,
-          .tab-panel__section-head,
-          .gi-primary-action {
-            flex-direction: column;
-          }
-
-          .gi-primary-action {
-            width: 100%;
-            justify-content: center;
-          }
-
-          .hero__lead {
-            padding: 10px;
-          }
-
-          .decision-grid,
-          .tiles {
-            gap: 6px;
-          }
-
-          .tab-panel__grid,
-          .tab-panel__grid--config {
-            grid-template-columns: 1fr;
+          :host {
+            --gi-header-gap: 8px;
+            --gi-header-margin-bottom: 8px;
+            --gi-hero-margin: 2px 0 6px;
+            --gi-hero-gap: 8px;
+            --gi-hero-lead-padding: 10px 11px;
+            --gi-hero-lead-gap: 6px;
+            --gi-hero-metrics-gap: 6px;
+            --gi-inline-gap: 8px;
+            --gi-nav-gap: 5px;
+            --gi-nav-margin: 4px 0 6px;
+            --gi-nav-item-padding: 6px 9px;
+            --gi-grid-gap: 6px;
+            --gi-grid-template: 1fr;
+            --gi-action-padding-inline: 16px;
+            --gi-action-padding-block: 14px;
+            --gi-action-padding-inline-end: 18px;
+            --gi-action-gap: 10px;
+            --gi-action-min-height: 78px;
+            --gi-action-icon-size: 24px;
+            --gi-action-icon-glyph-size: 15px;
+            --gi-card-core-gap: 8px;
+            --gi-card-core-padding: 11px 13px;
+            --gi-card-core-min-height: 72px;
+            --gi-card-core-radius: 14px;
+            --gi-card-core-icon-size: 18px;
+            --gi-card-core-icon-glyph-size: 11px;
+            --gi-decision-grid-gap: 6px;
+            --gi-tiles-gap: 6px;
           }
         }
 `;

@@ -4,6 +4,13 @@ export const CARD_STYLES = String.raw`
           width: 100%;
           max-width: 100%;
           min-width: 0;
+          --gi-font-xxs: clamp(0.64rem, 0.60rem + 0.12vw, 0.72rem);
+          --gi-font-xs: clamp(0.72rem, 0.68rem + 0.16vw, 0.80rem);
+          --gi-font-sm: clamp(0.80rem, 0.76rem + 0.18vw, 0.92rem);
+          --gi-font-md: clamp(0.92rem, 0.86rem + 0.22vw, 1.04rem);
+          --gi-font-lg: clamp(1.05rem, 0.98rem + 0.30vw, 1.18rem);
+          --gi-font-xl: clamp(1.16rem, 1.06rem + 0.42vw, 1.34rem);
+          --gi-font-2xl: clamp(1.32rem, 1.16rem + 0.62vw, 1.58rem);
           --gi-motion-fast: 180ms;
           --gi-motion-medium: 260ms;
           --gi-ease-standard: cubic-bezier(0.2, 0, 0, 1);
@@ -198,7 +205,7 @@ export const CARD_STYLES = String.raw`
           color: var(--secondary-text-color);
           border-radius: 12px;
           padding: var(--gi-nav-item-padding);
-          font-size: 0.78rem;
+          font-size: var(--gi-font-xs);
           cursor: pointer;
           user-select: none;
           -webkit-tap-highlight-color: transparent;
@@ -303,9 +310,9 @@ export const CARD_STYLES = String.raw`
         }
 
         .tab-panel__hero-summary {
-          font-size: clamp(1rem, 1.6vw, 1.15rem);
+          font-size: var(--gi-font-lg);
           font-weight: 800;
-          line-height: 1.22;
+          line-height: 1.24;
         }
 
         .tab-panel__hero-next,
@@ -325,8 +332,8 @@ export const CARD_STYLES = String.raw`
         .tab-panel__header-hint,
         .tab-panel__stat-secondary,
         .tab-panel__empty {
-          font-size: 0.82rem;
-          line-height: 1.22;
+          font-size: var(--gi-font-sm);
+          line-height: 1.3;
         }
 
         .tab-panel__section {
@@ -337,7 +344,7 @@ export const CARD_STYLES = String.raw`
         }
 
         .tab-panel__section-title {
-          font-size: 0.72rem;
+          font-size: var(--gi-font-xxs);
           text-transform: uppercase;
           letter-spacing: 0.04em;
         }
@@ -345,14 +352,14 @@ export const CARD_STYLES = String.raw`
         .tab-panel__header-hint {
           margin-top: 4px;
           color: var(--secondary-text-color);
-          font-size: 0.78rem;
-          line-height: 1.22;
+          font-size: var(--gi-font-xs);
+          line-height: 1.3;
         }
 
         .tab-panel__section-summary {
-          font-size: 0.94rem;
+          font-size: var(--gi-font-md);
           font-weight: 700;
-          line-height: 1.28;
+          line-height: 1.3;
         }
 
         .tab-panel__grid {
@@ -434,7 +441,7 @@ export const CARD_STYLES = String.raw`
         }
 
         .tab-progress__meta {
-          font-size: 0.72rem;
+          font-size: var(--gi-font-xs);
           color: var(--secondary-text-color);
         }
 
@@ -448,15 +455,15 @@ export const CARD_STYLES = String.raw`
         }
 
         .tab-panel__action-title {
-          font-size: 1.04rem;
+          font-size: var(--gi-font-lg);
           font-weight: 900;
-          line-height: 1.16;
+          line-height: 1.18;
         }
 
         .tab-panel__action-subtitle {
           color: color-mix(in srgb, white 86%, transparent);
-          font-size: 0.84rem;
-          line-height: 1.24;
+          font-size: var(--gi-font-sm);
+          line-height: 1.3;
         }
 
         .gi-action--primary,
@@ -476,7 +483,7 @@ export const CARD_STYLES = String.raw`
           color: white;
           font: inherit;
           font-weight: 900;
-          font-size: 1.04rem;
+          font-size: var(--gi-font-lg);
           letter-spacing: 0.01em;
           background:
             linear-gradient(135deg, color-mix(in srgb, var(--gazon-card-accent) 94%, white) 0%, color-mix(in srgb, var(--gazon-section-accent) 86%, black) 100%);
@@ -490,7 +497,7 @@ export const CARD_STYLES = String.raw`
         .gi-primary-action::after {
           content: "›";
           margin-left: auto;
-          font-size: 2rem;
+          font-size: var(--gi-font-2xl);
           line-height: 1;
           opacity: 0.94;
           transform: translateY(-1px);
@@ -683,9 +690,9 @@ export const CARD_STYLES = String.raw`
         }
 
         .decision-hero__summary {
-          font-size: clamp(1rem, 1.6vw, 1.15rem);
+          font-size: var(--gi-font-lg);
           font-weight: 800;
-          line-height: 1.22;
+          line-height: 1.24;
           min-width: 0;
           overflow-wrap: anywhere;
         }
@@ -696,7 +703,7 @@ export const CARD_STYLES = String.raw`
           gap: 6px;
           padding: 7px 10px;
           border-radius: 999px;
-          font-size: 0.76rem;
+          font-size: var(--gi-font-xs);
           font-weight: 700;
           white-space: nowrap;
           background: color-mix(in srgb, var(--gazon-card-accent) 14%, transparent);
@@ -727,14 +734,14 @@ export const CARD_STYLES = String.raw`
         .decision-hero__next,
         .decision-hero__hint {
           color: var(--secondary-text-color);
-          font-size: 0.86rem;
-          line-height: 1.22;
+          font-size: var(--gi-font-sm);
+          line-height: 1.3;
         }
 
         .decision-plan__label,
         .decision-context__label,
         .decision-block__label {
-          font-size: 0.68rem;
+          font-size: var(--gi-font-xxs);
           text-transform: uppercase;
           letter-spacing: 0.04em;
           color: var(--secondary-text-color);
@@ -757,15 +764,15 @@ export const CARD_STYLES = String.raw`
         }
 
         .decision-plan__meta {
-          font-size: 0.76rem;
+          font-size: var(--gi-font-xs);
           color: var(--secondary-text-color);
           white-space: nowrap;
         }
 
         .decision-plan__summary {
-          font-size: 0.94rem;
+          font-size: var(--gi-font-md);
           font-weight: 700;
-          line-height: 1.28;
+          line-height: 1.3;
           min-width: 0;
           overflow-wrap: anywhere;
         }
@@ -851,7 +858,7 @@ export const CARD_STYLES = String.raw`
 
         .pill__label,
         .context-pill__label {
-          font-size: 0.61rem;
+          font-size: var(--gi-font-xxs);
           text-transform: uppercase;
           letter-spacing: 0.03em;
           color: var(--secondary-text-color);
@@ -860,7 +867,7 @@ export const CARD_STYLES = String.raw`
 
         .pill__value,
         .context-pill__value {
-          font-size: 0.8rem;
+          font-size: var(--gi-font-xs);
           font-weight: 700;
           line-height: 1.12;
           overflow-wrap: anywhere;
@@ -871,7 +878,7 @@ export const CARD_STYLES = String.raw`
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          font-size: 0.8rem;
+          font-size: var(--gi-font-xs);
           font-weight: 700;
           line-height: 1.12;
         }
@@ -941,16 +948,16 @@ export const CARD_STYLES = String.raw`
         }
 
         .decision-block__value {
-          font-size: 0.92rem;
+          font-size: var(--gi-font-sm);
           font-weight: 700;
-          line-height: 1.3;
+          line-height: 1.32;
           overflow-wrap: anywhere;
         }
 
         .decision-block__hint {
           color: var(--secondary-text-color);
-          font-size: 0.82rem;
-          line-height: 1.22;
+          font-size: var(--gi-font-sm);
+          line-height: 1.3;
         }
 
         .decision-footer {
@@ -1156,7 +1163,7 @@ export const CARD_STYLES = String.raw`
         }
 
         .header__weather .gi-pill__text {
-          font-size: 0.76rem;
+          font-size: var(--gi-font-xs);
           font-weight: 650;
         }
 
@@ -1174,7 +1181,7 @@ export const CARD_STYLES = String.raw`
           box-shadow:
             0 12px 24px rgba(30, 143, 85, 0.28),
             0 0 0 1px rgba(30, 143, 85, 0.18);
-          font-size: 0.72rem;
+          font-size: var(--gi-font-xs);
           font-weight: 800;
           cursor: pointer;
           white-space: nowrap;
@@ -1226,7 +1233,7 @@ export const CARD_STYLES = String.raw`
           .header__action {
             max-width: 144px;
             padding: 4px 8px;
-            font-size: 0.64rem;
+            font-size: var(--gi-font-xxs);
           }
         }
 
@@ -1274,16 +1281,16 @@ export const CARD_STYLES = String.raw`
         }
 
         .header__title {
-          font-size: 1.08rem;
+          font-size: var(--gi-font-xl);
           font-weight: 800;
-          line-height: 1.16;
+          line-height: 1.2;
           margin-bottom: 2px;
         }
 
         .header__subtitle {
           color: var(--secondary-text-color);
-          font-size: 0.81rem;
-          line-height: 1.22;
+          font-size: var(--gi-font-sm);
+          line-height: 1.3;
         }
 
         .header__subtitle::before {
@@ -1357,7 +1364,7 @@ export const CARD_STYLES = String.raw`
         }
 
         .hero__label {
-          font-size: 0.64rem;
+          font-size: var(--gi-font-xxs);
           text-transform: uppercase;
           letter-spacing: 0.04em;
           color: var(--secondary-text-color);
@@ -1365,9 +1372,9 @@ export const CARD_STYLES = String.raw`
         }
 
         .hero__value {
-          font-size: clamp(0.9rem, 1.3vw, 1.02rem);
+          font-size: var(--gi-font-md);
           font-weight: 700;
-          line-height: 1.22;
+          line-height: 1.28;
           min-width: 0;
           overflow-wrap: anywhere;
           hyphens: auto;
@@ -1421,7 +1428,7 @@ export const CARD_STYLES = String.raw`
         }
 
         .decision__label {
-          font-size: 0.7rem;
+          font-size: var(--gi-font-xxs);
           text-transform: uppercase;
           letter-spacing: 0.03em;
           color: var(--secondary-text-color);
@@ -1560,7 +1567,7 @@ export const CARD_STYLES = String.raw`
         }
 
         .gi-card-core__label {
-          font-size: 0.63rem;
+          font-size: var(--gi-font-xxs);
           text-transform: uppercase;
           letter-spacing: 0.05em;
           color: var(--secondary-text-color);
@@ -1573,18 +1580,18 @@ export const CARD_STYLES = String.raw`
           min-width: 0;
           overflow-wrap: anywhere;
           hyphens: auto;
-          font-size: 0.84rem;
-          line-height: 1.16;
+          font-size: var(--gi-font-sm);
+          line-height: 1.24;
         }
 
         .gi-card-core--metric .gi-card-core__value {
-          font-size: 0.82rem;
-          line-height: 1.14;
+          font-size: var(--gi-font-sm);
+          line-height: 1.24;
         }
 
         .gi-card-core__secondary {
-          font-size: 0.72rem;
-          line-height: 1.15;
+          font-size: var(--gi-font-xs);
+          line-height: 1.3;
           color: var(--secondary-text-color);
           min-height: 1.15em;
         }
@@ -1618,7 +1625,7 @@ export const CARD_STYLES = String.raw`
         .footer {
           margin-top: 8px;
           color: var(--secondary-text-color);
-          font-size: 0.72rem;
+          font-size: var(--gi-font-xs);
         }
 
         .empty {

@@ -8,7 +8,7 @@ SRC_EDITOR = ROOT / "src" / "editor" / "editor.js"
 SRC_CARD_STYLES = ROOT / "src" / "styles" / "card-styles.js"
 SRC_EDITOR_STYLES = ROOT / "src" / "styles" / "editor-styles.js"
 DIST_DIR = ROOT / "dist"
-DIST_MAIN = DIST_DIR / "gazon-intelligent-card.js"
+ROOT_MAIN = ROOT / "gazon-intelligent-card.js"
 
 def strip_module_source(text: str) -> str:
     lines = []
@@ -50,7 +50,6 @@ bundle = (
 
 if DIST_DIR.exists():
     shutil.rmtree(DIST_DIR)
-DIST_DIR.mkdir(parents=True, exist_ok=True)
-DIST_MAIN.write_text(bundle, encoding="utf-8")
+ROOT_MAIN.write_text(bundle, encoding="utf-8")
 
-print(f"Built {DIST_MAIN.relative_to(ROOT)}")
+print(f"Built {ROOT_MAIN.relative_to(ROOT)}")

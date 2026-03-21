@@ -52,14 +52,14 @@ Gazon Intelligent Card affiche dans Home Assistant les décisions métier les pl
 La ressource réellement utilisée par cette carte via HACS est :
 
 ```yaml
-/hacsfiles/lovelace-gazon-intelligent-card/dist/gazon-intelligent-card.js
+/hacsfiles/lovelace-gazon-intelligent-card/gazon-intelligent-card.js
 ```
 
 Si tu l’ajoutes manuellement :
 
 ```yaml
 resources:
-  - url: /hacsfiles/lovelace-gazon-intelligent-card/dist/gazon-intelligent-card.js
+  - url: /hacsfiles/lovelace-gazon-intelligent-card/gazon-intelligent-card.js
     type: module
 ```
 
@@ -67,7 +67,7 @@ resources:
 
 ## 🔧 Installation manuelle
 
-1. Copie le fichier `dist/gazon-intelligent-card.js` dans `config/www/gazon-intelligent-card/gazon-intelligent-card.js`.
+1. Copie le fichier `gazon-intelligent-card.js` dans `config/www/gazon-intelligent-card/gazon-intelligent-card.js`.
 2. Ajoute cette ressource Lovelace :
 
 ```yaml
@@ -99,7 +99,7 @@ resources:
 - `src/editor/editor.js` : éditeur visuel de la carte
 - `src/styles/card-styles.js` : styles de la carte Lovelace
 - `src/styles/editor-styles.js` : styles de l'éditeur
-- `dist/gazon-intelligent-card.js` : bundle final consommé par Home Assistant et HACS
+- `gazon-intelligent-card.js` : bundle final consommé par Home Assistant et HACS
 
 ---
 
@@ -248,10 +248,10 @@ python3 scripts/build.py
 python3 scripts/validate.py
 ```
 
-Le fichier distribué est généré dans :
+Le fichier distribué est généré à la racine du dépôt :
 
 ```text
-dist/gazon-intelligent-card.js
+gazon-intelligent-card.js
 ```
 
 ---

@@ -4,9 +4,9 @@
   "description": "Lovelace card for Home Assistant integration Gazon Intelligent",
   "license": "MIT",
   "private": false,
-  "main": "dist/gazon-intelligent-card.js",
+  "main": "gazon-intelligent-card.js",
   "files": [
-    "dist",
+    "gazon-intelligent-card.js",
     "README.md",
     "hacs.json",
     "LICENSE"

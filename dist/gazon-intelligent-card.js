@@ -8,6 +8,43 @@ const CARD_STYLES = String.raw`
           --gi-motion-medium: 260ms;
           --gi-ease-standard: cubic-bezier(0.2, 0, 0, 1);
           --gi-ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+          --gi-header-direction: row;
+          --gi-header-align: center;
+          --gi-header-justify: space-between;
+          --gi-header-gap: 10px;
+          --gi-header-margin-bottom: 8px;
+          --gi-hero-lead-padding: 11px 12px;
+          --gi-hero-lead-gap: 8px;
+          --gi-inline-direction: row;
+          --gi-inline-align: center;
+          --gi-inline-justify: space-between;
+          --gi-inline-gap: 10px;
+          --gi-nav-gap: 6px;
+          --gi-nav-margin: 4px 0 8px;
+          --gi-nav-item-gap: 6px;
+          --gi-nav-item-padding: 7px 10px;
+          --gi-grid-template: repeat(2, minmax(0, 1fr));
+          --gi-grid-gap: 8px;
+          --gi-action-direction: row;
+          --gi-action-justify: flex-start;
+          --gi-action-width: 100%;
+          --gi-action-padding-inline: 18px;
+          --gi-action-padding-block: 16px;
+          --gi-action-min-height: 84px;
+          --gi-action-gap: 12px;
+          --gi-action-radius: 22px;
+          --gi-action-icon-size: 26px;
+          --gi-action-icon-glyph-size: 16px;
+          --gi-action-icon-bg: rgba(255, 255, 255, 0.2);
+          --gi-decision-grid-gap: 8px;
+          --gi-tiles-gap: 6px;
+          --gi-card-core-gap: 10px;
+          --gi-card-core-padding: 12px 14px;
+          --gi-card-core-min-height: 78px;
+          --gi-card-core-radius: 16px;
+          --gi-card-core-icon-size: 20px;
+          --gi-card-core-icon-glyph-size: 12px;
+          --gi-card-core-secondary-size: 0.72rem;
         }
 
         @keyframes gazonPulseSoft {
@@ -50,7 +87,6 @@ const CARD_STYLES = String.raw`
         .gi-card,
         .gi-panel,
         .gi-tab,
-        .gi-tile,
         .gi-primary-action,
         .gi-progress__bar,
         .gi-status-pill {
@@ -117,37 +153,35 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-tabs,
-        .tab-nav,
-        .section-nav {
+        .tab-nav {
           display: flex;
-          gap: 6px;
+          gap: var(--gi-nav-gap);
           flex-wrap: nowrap;
           overflow-x: auto;
           max-width: 100%;
           scrollbar-width: none;
           padding-bottom: 2px;
+          margin: var(--gi-nav-margin);
           scroll-snap-type: x proximity;
         }
 
         .gi-tabs::-webkit-scrollbar,
-        .tab-nav::-webkit-scrollbar,
-        .section-nav::-webkit-scrollbar {
+        .tab-nav::-webkit-scrollbar {
           display: none;
         }
 
         .gi-tab,
-        .tab-nav__item,
-        .section-nav__item {
+        .tab-nav__item {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: var(--gi-nav-item-gap);
           min-width: 0;
           border: 1px solid color-mix(in srgb, var(--gazon-card-tone-color) 18%, var(--divider-color));
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-tone-color) 8%, var(--secondary-background-color)) 0%, var(--secondary-background-color) 100%);
           color: var(--secondary-text-color);
           border-radius: 12px;
-          padding: 7px 10px;
+          padding: var(--gi-nav-item-padding);
           font-size: 0.78rem;
           cursor: pointer;
           user-select: none;
@@ -163,8 +197,7 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-tab:hover,
-        .tab-nav__item:hover,
-        .section-nav__item:hover {
+        .tab-nav__item:hover {
           transform: translateY(-1px);
           background: color-mix(in srgb, var(--secondary-background-color) 78%, var(--gazon-section-accent) 22%);
           border-color: color-mix(in srgb, var(--gazon-section-accent) 34%, var(--divider-color));
@@ -172,15 +205,13 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-tab .gi-icon,
-        .tab-nav__item .gi-icon,
-        .section-nav__item .gi-icon {
+        .tab-nav__item .gi-icon {
           width: 18px;
           height: 18px;
         }
 
         .gi-tab--active,
-        .tab-nav__item--active,
-        .section-nav__item--active {
+        .tab-nav__item--active {
           color: var(--primary-text-color);
           border-color: color-mix(in srgb, var(--gazon-section-accent) 22%, var(--divider-color));
           background:
@@ -224,8 +255,7 @@ const CARD_STYLES = String.raw`
           border-color: color-mix(in srgb, var(--gazon-card-accent) 24%, var(--divider-color));
         }
 
-        .tab-panel__hero--pulse,
-        .tab-panel__action--pulse {
+        .tab-panel__hero--pulse {
           animation: gazonPulseSoft 2.8s ease-in-out infinite;
         }
 
@@ -233,16 +263,16 @@ const CARD_STYLES = String.raw`
         .tab-panel__header,
         .tab-panel__section-head {
           display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 10px;
+          flex-direction: var(--gi-inline-direction);
+          align-items: var(--gi-inline-align);
+          justify-content: var(--gi-inline-justify);
+          gap: var(--gi-inline-gap);
           min-width: 0;
         }
 
         .tab-panel__hero-summary,
         .tab-panel__title,
         .tab-panel__section-summary,
-        .tab-panel__action-title,
         .tab-panel__block-value {
           min-width: 0;
           overflow-wrap: anywhere;
@@ -260,7 +290,6 @@ const CARD_STYLES = String.raw`
         .tab-panel__section-meta,
         .tab-panel__section-title,
         .tab-panel__eyebrow,
-        .tab-panel__action-subtitle,
         .tab-panel__stat-secondary,
         .tab-panel__empty {
           color: var(--secondary-text-color);
@@ -269,7 +298,6 @@ const CARD_STYLES = String.raw`
         .tab-panel__hero-next,
         .tab-panel__hero-hint,
         .tab-panel__block-hint,
-        .tab-panel__action-subtitle,
         .tab-panel__stat-secondary,
         .tab-panel__empty {
           font-size: 0.82rem;
@@ -297,31 +325,31 @@ const CARD_STYLES = String.raw`
 
         .tab-panel__grid {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 8px;
+          grid-template-columns: var(--gi-grid-template);
+          gap: var(--gi-grid-gap);
           align-items: stretch;
           grid-auto-rows: 1fr;
           align-content: start;
         }
 
         .tab-panel__grid--config {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 8px;
+          grid-template-columns: var(--gi-grid-template);
+          gap: var(--gi-grid-gap);
         }
 
         .tab-panel__grid--config-top,
         .tab-panel__grid--config-debits {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-columns: var(--gi-grid-template);
           grid-auto-rows: 1fr;
           align-content: start;
         }
 
         .tab-panel__grid--config-top {
-          gap: 10px;
+          gap: var(--gi-grid-gap);
         }
 
         .tab-panel__grid--config-debits {
-          gap: 10px;
+          gap: var(--gi-grid-gap);
         }
 
         .tab-panel__section--config-debits {
@@ -335,88 +363,6 @@ const CARD_STYLES = String.raw`
           align-content: flex-start;
           gap: 8px;
           margin-top: 2px;
-        }
-
-        .tab-stat {
-          display: flex;
-          align-items: stretch;
-          gap: 8px;
-          border-radius: 14px;
-          padding: 12px 14px;
-          min-height: 72px;
-          height: 100%;
-          border: 1px solid rgba(127, 127, 127, 0.15);
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, var(--secondary-background-color) 100%);
-          transition:
-            transform var(--gi-motion-fast) var(--gi-ease-standard),
-            border-color var(--gi-motion-fast) var(--gi-ease-standard),
-            background-color var(--gi-motion-fast) var(--gi-ease-standard),
-            box-shadow var(--gi-motion-fast) var(--gi-ease-standard);
-        }
-
-        .tab-stat--danger { border-color: color-mix(in srgb, var(--gazon-danger-color) 22%, transparent); }
-        .tab-stat--critical { border-color: color-mix(in srgb, var(--gazon-critical-color) 26%, transparent); }
-        .tab-stat--warning { border-color: color-mix(in srgb, var(--gazon-warning-color) 22%, transparent); }
-        .tab-stat--success { border-color: color-mix(in srgb, var(--gazon-success-color) 22%, transparent); }
-        .tab-stat--accent { border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 22%, transparent); }
-        .tab-stat--neutral { border-color: rgba(127, 127, 127, 0.15); }
-
-        .tab-stat__main {
-          display: flex;
-          gap: 8px;
-          align-items: center;
-          min-width: 0;
-          width: 100%;
-          height: 100%;
-        }
-
-        .tab-stat__icon {
-          width: 20px;
-          height: 20px;
-          border-radius: 999px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex: none;
-          background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
-          color: var(--gazon-section-accent);
-        }
-
-        .tab-stat__icon .gi-icon {
-          width: 16px;
-          height: 16px;
-        }
-
-        .tab-stat__content {
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          gap: 1px;
-        }
-
-        .tab-stat__main,
-        .tile,
-        .metric {
-          align-items: center;
-        }
-
-        .tab-stat__label {
-          font-size: 0.61rem;
-          text-transform: uppercase;
-          letter-spacing: 0.03em;
-          color: var(--secondary-text-color);
-          margin-bottom: 1px;
-          line-height: 1.1;
-        }
-
-        .tab-stat__value {
-          font-size: 0.82rem;
-          line-height: 1.12;
-          font-weight: 700;
-          overflow-wrap: anywhere;
-          hyphens: auto;
         }
 
         .tab-progress {
@@ -462,6 +408,7 @@ const CARD_STYLES = String.raw`
           flex-direction: column;
           gap: 4px;
           flex: 1;
+          overflow-wrap: anywhere;
         }
 
         .tab-panel__action-title {
@@ -477,15 +424,18 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-action--primary,
-        .gi-primary-action,
-        .tab-panel__action {
+        .gi-primary-action {
           display: flex;
+          flex-direction: row;
           align-items: center;
-          justify-content: center;
-          gap: 12px;
-          border: 2px solid color-mix(in srgb, var(--gazon-card-accent) 82%, var(--divider-color));
-          border-radius: 18px;
-          padding: 18px 24px;
+          justify-content: flex-start;
+          gap: var(--gi-action-gap);
+          width: var(--gi-action-width);
+          min-height: var(--gi-action-min-height);
+          padding-inline: var(--gi-action-padding-inline) 20px;
+          padding-block: var(--gi-action-padding-block);
+          border: 2px solid color-mix(in srgb, var(--gazon-card-accent) 34%, var(--divider-color));
+          border-radius: var(--gi-action-radius);
           cursor: pointer;
           color: white;
           font: inherit;
@@ -493,32 +443,14 @@ const CARD_STYLES = String.raw`
           font-size: 1.04rem;
           letter-spacing: 0.01em;
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 100%, white) 0%, color-mix(in srgb, var(--gazon-card-accent) 62%, #000) 100%);
-          box-shadow:
-            0 26px 50px color-mix(in srgb, var(--gazon-card-accent) 46%, rgba(0, 0, 0, 0.24)),
-            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 38%, transparent),
-            inset 0 1px 0 rgba(255, 255, 255, 0.24);
-          text-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
-        }
-
-        .tab-panel__action {
-          justify-content: flex-start;
-          align-items: center;
-          width: 100%;
-          padding-inline: 18px 20px;
-          padding-block: 16px;
-          gap: 12px;
-          min-height: 84px;
-          border-radius: 22px;
-          border: 2px solid color-mix(in srgb, var(--gazon-card-accent) 34%, var(--divider-color));
-          background:
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 16%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, white) 100%);
           box-shadow:
             0 18px 36px rgba(0, 0, 0, 0.16),
             0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
+          text-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
         }
 
-        .tab-panel__action::after {
+        .gi-primary-action::after {
           content: "›";
           margin-left: auto;
           font-size: 2rem;
@@ -529,36 +461,22 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-action--primary .gi-icon,
-        .gi-primary-action .gi-icon,
-        .tab-panel__action .gi-icon {
-          width: 24px;
-          height: 24px;
+        .gi-primary-action .gi-icon {
+          width: var(--gi-action-icon-size);
+          height: var(--gi-action-icon-size);
           border-radius: 999px;
-          background: rgba(255, 255, 255, 0.18);
-        }
-
-        .tab-panel__action .gi-icon {
-          width: 26px;
-          height: 26px;
-          background: rgba(255, 255, 255, 0.2);
+          background: var(--gi-action-icon-bg);
         }
 
         @media (hover: hover) {
           .gi-action--primary:hover,
-          .gi-primary-action:hover,
-          .tab-panel__action:hover {
+          .gi-primary-action:hover {
             transform: translateY(-1px);
             border-color: color-mix(in srgb, var(--gazon-card-accent) 52%, var(--divider-color));
             box-shadow:
               0 14px 28px rgba(0, 0, 0, 0.22),
               0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
           }
-        }
-
-        .tab-panel__action:hover {
-          box-shadow:
-            0 22px 42px rgba(0, 0, 0, 0.22),
-            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 22%, transparent);
         }
 
         .gi-primary-action--active {
@@ -577,12 +495,6 @@ const CARD_STYLES = String.raw`
         .gi-action .gi-icon {
           width: 20px;
           height: 20px;
-        }
-
-        .gi-action--primary .gi-icon,
-        .gi-primary-action .gi-icon {
-          width: 22px;
-          height: 22px;
         }
 
         .gi-info {
@@ -1070,11 +982,9 @@ const CARD_STYLES = String.raw`
         .header,
         .gi-action,
         .hero__lead,
-        .section-nav__item,
         .gi-tab,
         .tab-nav__item,
         .gi-info,
-        .gi-tile,
         .gi-status-pill,
         .gi-panel,
         .gi-primary-action,
@@ -1090,11 +1000,9 @@ const CARD_STYLES = String.raw`
         @media (hover: hover) {
           .hero__lead:hover,
           .gi-action:hover,
-          .section-nav__item:hover,
           .gi-tab:hover,
           .tab-nav__item:hover,
-          .gi-primary-action:hover,
-          .tab-panel__action:hover {
+          .gi-primary-action:hover {
             transform: translateY(-1px);
           }
         }
@@ -1230,123 +1138,6 @@ const CARD_STYLES = String.raw`
           color: var(--gazon-danger-color, #c62828);
         }
 
-        .hero__metrics {
-          display: flex;
-          flex-wrap: wrap;
-          min-width: 0;
-          gap: 6px;
-          align-content: start;
-        }
-
-        .metric {
-          display: flex;
-          gap: 8px;
-          align-items: center;
-          min-width: 0;
-          border-radius: 14px;
-          padding: 10px 12px;
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, var(--secondary-background-color) 100%);
-          border: 1px solid rgba(127, 127, 127, 0.15);
-          box-shadow: none;
-          min-height: 0;
-          flex: 1 1 110px;
-        }
-
-        .metric__icon {
-          width: 18px;
-          height: 18px;
-          border-radius: 999px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex: none;
-          background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
-          color: var(--gazon-section-accent);
-        }
-
-        .metric__icon .gi-icon {
-          width: 12px;
-          height: 12px;
-        }
-
-        .metric__content {
-          min-width: 0;
-        }
-
-        .metric__label {
-          font-size: 0.61rem;
-          text-transform: uppercase;
-          letter-spacing: 0.03em;
-          color: var(--secondary-text-color);
-          margin-bottom: 1px;
-          line-height: 1.1;
-        }
-
-        .metric__value {
-          font-size: 0.8rem;
-          font-weight: 700;
-          line-height: 1.12;
-          min-width: 0;
-          overflow-wrap: anywhere;
-          hyphens: auto;
-        }
-
-        .hero__metrics .metric--danger { border-color: color-mix(in srgb, var(--gazon-danger-color) 20%, transparent); }
-        .hero__metrics .metric--warning { border-color: color-mix(in srgb, var(--gazon-warning-color) 20%, transparent); }
-        .hero__metrics .metric--success { border-color: color-mix(in srgb, var(--gazon-success-color) 20%, transparent); }
-        .hero__metrics .metric--accent { border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 20%, transparent); }
-
-        .section-nav {
-          display: flex;
-          gap: 5px;
-          flex-wrap: nowrap;
-          overflow-x: auto;
-          max-width: 100%;
-          scrollbar-width: none;
-          margin: 4px 0 8px;
-          padding-bottom: 2px;
-          scroll-snap-type: x proximity;
-        }
-
-        .section-nav::-webkit-scrollbar {
-          display: none;
-        }
-
-        .section-nav__item {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          min-width: 0;
-          border: 1px solid rgba(127, 127, 127, 0.12);
-          background: var(--secondary-background-color);
-          color: var(--secondary-text-color);
-          border-radius: 12px;
-          padding: 7px 10px;
-          font-size: 0.78rem;
-          cursor: pointer;
-          transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
-          scroll-snap-align: start;
-        }
-
-        .section-nav__item:hover {
-          background: color-mix(in srgb, var(--secondary-background-color) 88%, var(--gazon-section-accent) 12%);
-        }
-
-        .section-nav__item .gi-icon {
-          width: 12px;
-          height: 12px;
-        }
-
-        .section-nav__item--active {
-          color: var(--primary-text-color);
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 22%, var(--divider-color));
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 14%, transparent) 0%, transparent 100%),
-            var(--secondary-background-color);
-          box-shadow: none;
-        }
-
         .lead--empty {
           color: var(--secondary-text-color);
           font-weight: 500;
@@ -1398,31 +1189,26 @@ const CARD_STYLES = String.raw`
           line-height: 1.28;
         }
 
-        .gi-tile,
         .tiles {
           display: flex;
           flex-wrap: wrap;
           align-items: stretch;
           min-width: 0;
-          gap: 6px;
+          gap: var(--gi-tiles-gap);
           margin-top: 4px;
         }
 
-        .gi-tile,
-        .tile {
+        .gi-card-core {
           display: flex;
-          gap: 10px;
           align-items: stretch;
+          gap: var(--gi-card-core-gap);
+          width: 100%;
           min-width: 0;
-          padding: 13px 15px;
-          border-radius: 14px;
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, var(--secondary-background-color) 100%);
-          border: 1px solid rgba(127, 127, 127, 0.15);
-          box-shadow: none;
-          min-height: 78px;
+          box-sizing: border-box;
+          border-radius: var(--gi-card-core-radius);
+          min-height: var(--gi-card-core-min-height);
           height: 100%;
-          flex: 1 1 118px;
+          padding: var(--gi-card-core-padding);
           transition:
             transform var(--gi-motion-fast) var(--gi-ease-standard),
             border-color var(--gi-motion-fast) var(--gi-ease-standard),
@@ -1430,82 +1216,15 @@ const CARD_STYLES = String.raw`
             box-shadow var(--gi-motion-fast) var(--gi-ease-standard);
         }
 
-        .tile__icon {
-          width: 18px;
-          height: 18px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex: none;
-          color: var(--gazon-tile-accent, var(--gazon-section-accent));
-        }
-
-        .tile__icon .gi-icon {
-          width: 12px;
-          height: 12px;
-        }
-
-        .tile__content {
-          min-width: 0;
-          flex: 1;
-        }
-
-        .tile__label {
-          font-size: 0.61rem;
-          text-transform: uppercase;
-          letter-spacing: 0.025em;
-          color: var(--secondary-text-color);
-          margin-bottom: 1px;
-        }
-
-        .tile__value {
-          font-size: 0.82rem;
-          line-height: 1.18;
-          font-weight: 700;
-          min-width: 0;
-          overflow-wrap: anywhere;
-          hyphens: auto;
-          word-break: break-word;
-        }
-
-        .tile__secondary {
-          margin-top: 1px;
-          font-size: 0.72rem;
-          color: var(--secondary-text-color);
-        }
-
-        .tile--danger { border-color: color-mix(in srgb, var(--gazon-danger-color) 22%, transparent); }
-        .tile--warning { border-color: color-mix(in srgb, var(--gazon-warning-color) 22%, transparent); }
-        .tile--success { border-color: color-mix(in srgb, var(--gazon-success-color) 22%, transparent); }
-        .tile--accent { border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 22%, transparent); }
-
-        .gi-card-core,
-        .tab-stat,
-        .tile,
-        .metric {
-          display: flex;
-          align-items: stretch;
-          gap: 10px;
-          width: 100%;
-          min-width: 0;
-          box-sizing: border-box;
-          border-radius: 16px;
-          min-height: 78px;
-          height: 100%;
-          padding: 12px 14px;
-        }
-
-        .gi-card-core--metric,
-        .metric {
-          min-height: 64px;
-          padding: 11px 13px;
-        }
-
         .gi-card-core--stat,
         .gi-card-core--tile,
-        .tab-stat,
-        .tile {
+        .gi-card-core--metric {
           min-height: 74px;
+        }
+
+        .gi-card-core--metric {
+          min-height: 64px;
+          padding: 11px 13px;
         }
 
         .gi-card-core--tile {
@@ -1514,10 +1233,7 @@ const CARD_STYLES = String.raw`
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 6%, var(--secondary-background-color)) 0%, var(--secondary-background-color) 100%);
         }
 
-        .gi-card-core__icon,
-        .tab-stat__icon,
-        .tile__icon,
-        .metric__icon {
+        .gi-card-core__icon {
           width: 20px;
           height: 20px;
           border-radius: 999px;
@@ -1536,24 +1252,19 @@ const CARD_STYLES = String.raw`
           color: var(--gazon-tile-accent, var(--gazon-section-accent));
         }
 
-        .gi-card-core__icon .gi-icon,
-        .tab-stat__icon .gi-icon,
-        .tile__icon .gi-icon,
-        .metric__icon .gi-icon {
+        .gi-card-core__icon .gi-icon {
           width: 12px;
           height: 12px;
           display: block;
           transform: translateY(-0.5px);
         }
 
-        .gi-card-core--metric .gi-card-core__icon,
-        .metric__icon {
+        .gi-card-core--metric .gi-card-core__icon {
           width: 18px;
           height: 18px;
         }
 
-        .gi-card-core--metric .gi-card-core__icon .gi-icon,
-        .metric__icon .gi-icon {
+        .gi-card-core--metric .gi-card-core__icon .gi-icon {
           width: 11px;
           height: 11px;
         }
@@ -1562,10 +1273,7 @@ const CARD_STYLES = String.raw`
           background: transparent;
         }
 
-        .gi-card-core__content,
-        .tab-stat__content,
-        .tile__content,
-        .metric__content {
+        .gi-card-core__content {
           flex: 1;
           min-width: 0;
           display: flex;
@@ -1574,10 +1282,7 @@ const CARD_STYLES = String.raw`
           gap: 2px;
         }
 
-        .gi-card-core__label,
-        .tab-stat__label,
-        .tile__label,
-        .metric__label {
+        .gi-card-core__label {
           font-size: 0.61rem;
           text-transform: uppercase;
           letter-spacing: 0.03em;
@@ -1586,40 +1291,28 @@ const CARD_STYLES = String.raw`
           min-height: 1.1em;
         }
 
-        .gi-card-core__value,
-        .tab-stat__value,
-        .tile__value,
-        .metric__value {
+        .gi-card-core__value {
           font-weight: 700;
           min-width: 0;
           overflow-wrap: anywhere;
           hyphens: auto;
-        }
-
-        .gi-card-core__value,
-        .tab-stat__value,
-        .tile__value {
           font-size: 0.82rem;
           line-height: 1.18;
         }
 
-        .metric__value {
+        .gi-card-core--metric .gi-card-core__value {
           font-size: 0.8rem;
           line-height: 1.14;
         }
 
-        .gi-card-core__secondary,
-        .tab-stat__secondary,
-        .tile__secondary {
+        .gi-card-core__secondary {
           font-size: 0.72rem;
           line-height: 1.15;
           color: var(--secondary-text-color);
           min-height: 1.15em;
         }
 
-        .gi-card-core__secondary--empty,
-        .tab-stat__secondary:empty,
-        .tile__secondary:empty {
+        .gi-card-core__secondary--empty {
           visibility: hidden;
         }
 
@@ -1638,7 +1331,6 @@ const CARD_STYLES = String.raw`
 
         .card--editor-preview .gi-panel,
         .card--editor-preview .gi-tab,
-        .card--editor-preview .gi-tile,
         .card--editor-preview .gi-status-pill,
         .card--editor-preview .gi-action,
         .card--editor-preview .gi-info,
@@ -1654,9 +1346,6 @@ const CARD_STYLES = String.raw`
           .gi-panel,
           .gi-tab,
           .tab-nav__item,
-          .section-nav__item,
-          .gi-tile,
-          .tile,
           .pill,
           .context-pill,
           .gi-status-pill,
@@ -1680,12 +1369,11 @@ const CARD_STYLES = String.raw`
           .tab-panel__hero-top,
           .tab-panel__header,
           .tab-panel__section-head,
-          .tab-panel__action {
+          .gi-primary-action {
             flex-direction: column;
           }
 
-          .gi-primary-action,
-          .tab-panel__action {
+          .gi-primary-action {
             width: 100%;
             justify-content: center;
           }

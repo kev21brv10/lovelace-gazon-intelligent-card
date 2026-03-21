@@ -2140,7 +2140,6 @@ class GazonIntelligentCard extends HTMLElement {
     const height = numericHeight && numericHeight > 0 ? `${numericHeight}px` : "";
     const borderRadius = `${this._config.border_radius ?? 24}px`;
     const iconSize = `${this._config.icon_size ?? 24}px`;
-    const showLegacy = this._canShowLegacyDetails();
     const actionCritical = this._actionTone() === "critical";
     const isPreview = this._isPreviewMode();
 
@@ -2181,17 +2180,6 @@ ${CARD_STYLES}
         >
         ${this._buildHeader()}
         ${this._renderDecisionLayout()}
-        ${
-          showLegacy
-            ? `
-              ${this._renderSectionNav()}
-              ${this._renderHero()}
-              ${this._buildDecisionBlocks()}
-              ${this._buildContent()}
-              ${this._buildFooter()}
-            `
-            : ""
-        }
       </ha-card>
     `;
 

@@ -233,7 +233,7 @@ function renderIconBox(icon, size = "md") {
     return "";
   }
   const sizeClass = size === "sm" ? "gi-icon--sm" : size === "pill" ? "gi-icon--pill" : "";
-  const iconSize = size === "sm" ? "13px" : size === "pill" ? "12px" : "16px";
+  const iconSize = size === "sm" ? "13px" : size === "pill" ? "14px" : "16px";
   return `<span class="gi-icon ${sizeClass}"><ha-icon style="--mdc-icon-size:${iconSize};" icon="${escapeHtml(icon)}"></ha-icon></span>`;
 }
 
@@ -242,6 +242,38 @@ function renderPillIcon(icon) {
     return "";
   }
   return `<span class="gi-pill__icon">${renderIconBox(icon, "pill")}</span>`;
+}
+
+function renderPillContent({ label = "", value = "", compact = false }) {
+  if (compact) {
+    return `<span class="gi-pill__value">${escapeHtml(value)}</span>`;
+  }
+  return `
+    <span class="gi-pill__label">${escapeHtml(label)}</span>
+    <span class="gi-pill__value">${escapeHtml(value)}</span>
+  `;
+}
+
+function renderPill({
+  label = "",
+  value = "",
+  tone = "neutral",
+  icon = null,
+  compact = false,
+  extraClass = "",
+}) {
+  const classes = ["gi-pill", compact ? "gi-pill--status" : "gi-pill--context", `gi-pill--${tone}`];
+  if (extraClass) {
+    classes.push(extraClass);
+  }
+  return `
+    <div class="${classes.join(" ")}">
+      ${renderPillIcon(icon)}
+      <div class="gi-pill__content">
+        ${renderPillContent({ label, value, compact })}
+      </div>
+    </div>
+  `;
 }
 
 function renderCardCore({
@@ -283,16 +315,7 @@ function renderCardCore({
 }
 
 function renderStatusPill(text, tone = "neutral", icon = null, extraClass = "") {
-  const classes = ["gi-pill", "gi-pill--status", `gi-pill--${tone}`];
-  if (extraClass) {
-    classes.push(extraClass);
-  }
-  return `
-    <div class="${classes.join(" ")}">
-      ${renderPillIcon(icon)}
-      <span class="gi-pill__text">${escapeHtml(text)}</span>
-    </div>
-  `;
+  return renderPill({ value: text, tone, icon, compact: true, extraClass });
 }
 
 function asNumber(value) {
@@ -1487,14 +1510,12 @@ class GazonIntelligentCard extends HTMLElement {
     if (isEmpty(value)) {
       return "";
     }
-    const iconHtml = this._config?.show_icons ? renderIconBox(icon, "pill") : "";
-    return `
-      <div class="gi-pill gi-status-pill context-pill context-pill--${tone}">
-        ${iconHtml}
-        <span class="context-pill__label">${escapeHtml(label)}</span>
-        <strong class="context-pill__value">${escapeHtml(value)}</strong>
-      </div>
-    `;
+    return renderPill({
+      label,
+      value,
+      tone,
+      icon: this._config?.show_icons ? icon : null,
+    });
   }
 
   _renderTabPill(label, value, tone = "neutral", icon = null) {

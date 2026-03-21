@@ -14,7 +14,6 @@ const CARD_STYLES = String.raw`
           --gi-icon-vertical-shift: 0px;
           --gi-icon-shift-header: 0px;
           --gi-icon-shift-hero: 0px;
-          --gi-icon-shift-pill: 0px;
           --gi-icon-shift-core: 0px;
           --gi-motion-fast: 180ms;
           --gi-motion-medium: 260ms;
@@ -150,9 +149,9 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-icon--pill {
-          width: 16px;
-          height: 16px;
-          --mdc-icon-size: 12px;
+          width: 14px;
+          height: 14px;
+          --mdc-icon-size: 14px;
         }
 
         .gi-icon ha-icon,
@@ -173,8 +172,8 @@ const CARD_STYLES = String.raw`
 
         .gi-icon--pill ha-icon,
         .gi-icon--pill svg {
-          width: 12px;
-          height: 12px;
+          width: 14px;
+          height: 14px;
           transform: none;
         }
 
@@ -792,6 +791,8 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-pill,
+        .gi-pill--status,
+        .gi-pill--context,
         .gi-status-pill,
         .pill,
         .context-pill {
@@ -813,7 +814,18 @@ const CARD_STYLES = String.raw`
           box-sizing: border-box;
         }
 
-        .gi-pill--status {
+        .gi-pill__content {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 0;
+          line-height: 1.12;
+          overflow: hidden;
+        }
+
+        .gi-pill--status,
+        .gi-status-pill {
           gap: 8px;
           min-height: 32px;
           padding: 4px 12px 4px 8px;
@@ -861,6 +873,12 @@ const CARD_STYLES = String.raw`
           --mdc-icon-size: 14px;
         }
 
+        .gi-pill--status .gi-pill__content,
+        .gi-status-pill .gi-pill__content {
+          flex-direction: row;
+          align-items: center;
+        }
+
         .gi-pill__icon .gi-icon,
         .gi-status-pill .gi-icon,
         .pill .gi-icon,
@@ -868,6 +886,7 @@ const CARD_STYLES = String.raw`
           flex: none;
         }
 
+        .gi-pill__label,
         .pill__label,
         .context-pill__label {
           font-size: var(--gi-font-xxs);
@@ -877,6 +896,8 @@ const CARD_STYLES = String.raw`
           line-height: 1.1;
         }
 
+        .gi-pill__value,
+        .gi-pill__text,
         .pill__value,
         .context-pill__value {
           font-size: var(--gi-font-xs);
@@ -885,14 +906,12 @@ const CARD_STYLES = String.raw`
           overflow-wrap: anywhere;
         }
 
-        .gi-pill__text {
+        .gi-pill--status .gi-pill__value,
+        .gi-status-pill .gi-pill__value {
           min-width: 0;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          font-size: var(--gi-font-xs);
-          font-weight: 700;
-          line-height: 1.12;
         }
 
         .gi-pill--danger,
@@ -1131,6 +1150,8 @@ const CARD_STYLES = String.raw`
         .gi-tab,
         .tab-nav__item,
         .gi-info,
+        .gi-pill--status,
+        .gi-pill--context,
         .gi-status-pill,
         .gi-panel,
         .gi-primary-action,
@@ -1174,7 +1195,7 @@ const CARD_STYLES = String.raw`
           max-width: min(240px, 100%);
         }
 
-        .header__weather .gi-pill__text {
+        .header__weather .gi-pill__value {
           font-size: var(--gi-font-xxs);
           font-weight: 650;
         }
@@ -1673,6 +1694,7 @@ const CARD_STYLES = String.raw`
 
         .card--editor-preview .gi-panel,
         .card--editor-preview .gi-tab,
+        .card--editor-preview .gi-pill--status,
         .card--editor-preview .gi-status-pill,
         .card--editor-preview .gi-action,
         .card--editor-preview .gi-info,
@@ -1770,6 +1792,8 @@ const CARD_STYLES = String.raw`
         .card--theme-light .decision-hero__next,
         .card--theme-light .decision-hero__hint,
         .card--theme-light .decision-plan__meta,
+        .card--theme-light .gi-pill__label,
+        .card--theme-light .gi-pill__value,
         .card--theme-light .pill__label,
         .card--theme-light .context-pill__label,
         .card--theme-light .gi-card-core__label,
@@ -1779,7 +1803,7 @@ const CARD_STYLES = String.raw`
           color: color-mix(in srgb, #000000 55%, var(--secondary-text-color));
         }
 
-        .card--theme-light :is(.gi-pill--neutral, .pill--neutral, .context-pill--neutral) {
+        .card--theme-light :is(.gi-pill--neutral, .gi-pill--context--neutral, .pill--neutral, .context-pill--neutral) {
           background: #ffffff;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(0, 0, 0, 0.08));
         }
@@ -1804,6 +1828,8 @@ const CARD_STYLES = String.raw`
         .card--theme-dark .decision-hero__next,
         .card--theme-dark .decision-hero__hint,
         .card--theme-dark .decision-plan__meta,
+        .card--theme-dark .gi-pill__label,
+        .card--theme-dark .gi-pill__value,
         .card--theme-dark .pill__label,
         .card--theme-dark .context-pill__label,
         .card--theme-dark .gi-card-core__label,
@@ -1813,7 +1839,7 @@ const CARD_STYLES = String.raw`
           color: color-mix(in srgb, #ffffff 72%, var(--secondary-text-color));
         }
 
-        .card--theme-dark :is(.gi-pill--neutral, .pill--neutral, .context-pill--neutral) {
+        .card--theme-dark :is(.gi-pill--neutral, .gi-pill--context--neutral, .pill--neutral, .context-pill--neutral) {
           background: #000000;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(255, 255, 255, 0.10));
         }
@@ -2234,7 +2260,7 @@ function renderIconBox(icon, size = "md") {
     return "";
   }
   const sizeClass = size === "sm" ? "gi-icon--sm" : size === "pill" ? "gi-icon--pill" : "";
-  const iconSize = size === "sm" ? "13px" : size === "pill" ? "12px" : "16px";
+  const iconSize = size === "sm" ? "13px" : size === "pill" ? "14px" : "16px";
   return `<span class="gi-icon ${sizeClass}"><ha-icon style="--mdc-icon-size:${iconSize};" icon="${escapeHtml(icon)}"></ha-icon></span>`;
 }
 
@@ -2243,6 +2269,38 @@ function renderPillIcon(icon) {
     return "";
   }
   return `<span class="gi-pill__icon">${renderIconBox(icon, "pill")}</span>`;
+}
+
+function renderPillContent({ label = "", value = "", compact = false }) {
+  if (compact) {
+    return `<span class="gi-pill__value">${escapeHtml(value)}</span>`;
+  }
+  return `
+    <span class="gi-pill__label">${escapeHtml(label)}</span>
+    <span class="gi-pill__value">${escapeHtml(value)}</span>
+  `;
+}
+
+function renderPill({
+  label = "",
+  value = "",
+  tone = "neutral",
+  icon = null,
+  compact = false,
+  extraClass = "",
+}) {
+  const classes = ["gi-pill", compact ? "gi-pill--status" : "gi-pill--context", `gi-pill--${tone}`];
+  if (extraClass) {
+    classes.push(extraClass);
+  }
+  return `
+    <div class="${classes.join(" ")}">
+      ${renderPillIcon(icon)}
+      <div class="gi-pill__content">
+        ${renderPillContent({ label, value, compact })}
+      </div>
+    </div>
+  `;
 }
 
 function renderCardCore({
@@ -2284,16 +2342,7 @@ function renderCardCore({
 }
 
 function renderStatusPill(text, tone = "neutral", icon = null, extraClass = "") {
-  const classes = ["gi-pill", "gi-pill--status", `gi-pill--${tone}`];
-  if (extraClass) {
-    classes.push(extraClass);
-  }
-  return `
-    <div class="${classes.join(" ")}">
-      ${renderPillIcon(icon)}
-      <span class="gi-pill__text">${escapeHtml(text)}</span>
-    </div>
-  `;
+  return renderPill({ value: text, tone, icon, compact: true, extraClass });
 }
 
 function asNumber(value) {
@@ -3488,14 +3537,12 @@ class GazonIntelligentCard extends HTMLElement {
     if (isEmpty(value)) {
       return "";
     }
-    const iconHtml = this._config?.show_icons ? renderIconBox(icon, "pill") : "";
-    return `
-      <div class="gi-pill gi-status-pill context-pill context-pill--${tone}">
-        ${iconHtml}
-        <span class="context-pill__label">${escapeHtml(label)}</span>
-        <strong class="context-pill__value">${escapeHtml(value)}</strong>
-      </div>
-    `;
+    return renderPill({
+      label,
+      value,
+      tone,
+      icon: this._config?.show_icons ? icon : null,
+    });
   }
 
   _renderTabPill(label, value, tone = "neutral", icon = null) {

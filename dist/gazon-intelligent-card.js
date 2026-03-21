@@ -3715,41 +3715,60 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _renderWateringProgressSection(progressState) {
-    if (!progressState?.active) {
-      return "";
-    }
-    const percent = Math.max(0, Math.min(100, asNumber(progressState.progressPercent) ?? 0));
-    const remainingSeconds = Math.max(0, asNumber(progressState.remainingSeconds) ?? 0);
-    const remainingLabel = progressState.remainingSeconds !== undefined && progressState.remainingSeconds !== null
-      ? formatDurationHuman(remainingSeconds / 60.0)
-      : "0 min";
-    const summary = String(progressState.summary || "Arrosage en cours").trim();
-    const detail = String(progressState.detail || "").trim();
-    const metaParts = [];
-    if (progressState.startedAtLabel) {
-      metaParts.push(progressState.startedAtLabel);
-    }
-    if (detail) {
-      metaParts.push(detail);
-    }
-    if (remainingSeconds > 0) {
-      metaParts.push(`${remainingLabel} restants`);
-    }
-    return `
-      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--watering-progress">
-        <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Arrosage en cours</div>
-          <div class="tab-panel__section-meta">${escapeHtml(`${Math.round(percent)} %`)}</div>
-        </div>
-        <div class="tab-panel__section-summary">${escapeHtml(summary)}</div>
-        <div class="tab-progress" aria-label="${escapeHtml(summary)}">
-          <div class="tab-progress__bar gi-progress">
-            <span class="gi-progress__bar ${progressState.critical ? "gi-progress__bar--critical" : ""}" style="width:${escapeHtml(String(percent))}%;"></span>
+    try {
+      if (!progressState?.active) {
+        return "";
+      }
+      const percent = Math.max(0, Math.min(100, asNumber(progressState.progressPercent) ?? 0));
+      const remainingSeconds = Math.max(0, asNumber(progressState.remainingSeconds) ?? 0);
+      const remainingLabel = progressState.remainingSeconds !== undefined && progressState.remainingSeconds !== null
+        ? formatDurationHuman(remainingSeconds / 60.0)
+        : "0 min";
+      const summary = String(progressState.summary || "Arrosage en cours").trim();
+      const detail = String(progressState.detail || "").trim();
+      const metaParts = [];
+      if (progressState.startedAtLabel) {
+        metaParts.push(progressState.startedAtLabel);
+      }
+      if (detail) {
+        metaParts.push(detail);
+      }
+      if (remainingSeconds > 0) {
+        metaParts.push(`${remainingLabel} restants`);
+      }
+      return `
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--watering-progress">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Arrosage en cours</div>
+            <div class="tab-panel__section-meta">${escapeHtml(`${Math.round(percent)} %`)}</div>
           </div>
-          <div class="tab-progress__meta">${escapeHtml(metaParts.join(" · ") || "Session active")}</div>
-        </div>
-      </section>
-    `;
+          <div class="tab-panel__section-summary">${escapeHtml(summary)}</div>
+          <div class="tab-progress" aria-label="${escapeHtml(summary)}">
+            <div class="tab-progress__bar gi-progress">
+              <span class="gi-progress__bar ${progressState.critical ? "gi-progress__bar--critical" : ""}" style="width:${escapeHtml(String(percent))}%;"></span>
+            </div>
+            <div class="tab-progress__meta">${escapeHtml(metaParts.join(" · ") || "Session active")}</div>
+          </div>
+        </section>
+      `;
+    } catch (error) {
+      console.error("[gazon-intelligent-card] progress render failed", error);
+      return `
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--watering-progress">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Arrosage en cours</div>
+            <div class="tab-panel__section-meta">—</div>
+          </div>
+          <div class="tab-panel__section-summary">Suivi de progression indisponible</div>
+          <div class="tab-progress">
+            <div class="tab-progress__bar gi-progress">
+              <span class="gi-progress__bar" style="width:0%;"></span>
+            </div>
+            <div class="tab-progress__meta">La session reste active.</div>
+          </div>
+        </section>
+      `;
+    }
   }
 
   _overviewProposal() {
@@ -4655,83 +4674,93 @@ class GazonIntelligentCard extends HTMLElement {
     if (!this.shadowRoot) {
       return;
     }
-    if (!this._config) {
-      if (this._lastRenderSignature === "no-config") {
+    try {
+      if (!this._config) {
+        if (this._lastRenderSignature === "no-config") {
+          return;
+        }
+        this._lastRenderSignature = "no-config";
+        this.shadowRoot.innerHTML = `<div class="empty">Configuration manquante.</div>`;
         return;
       }
-      this._lastRenderSignature = "no-config";
-      this.shadowRoot.innerHTML = `<div class="empty">Configuration manquante.</div>`;
-      return;
-    }
 
-    const renderSignature = this._renderSignature();
-    if (renderSignature === this._lastRenderSignature) {
-      return;
-    }
-    this._lastRenderSignature = renderSignature;
+      const renderSignature = this._renderSignature();
+      if (renderSignature === this._lastRenderSignature) {
+        return;
+      }
+      this._lastRenderSignature = renderSignature;
 
-    const activeTone = this._cardTone();
-    const accent = this._config.accent_color || this._accentColorFromTone(activeTone);
-    const sectionAccent = this._tabAccent(this._activeTab);
-    const background = this._config.show_background ? "true" : "false";
-    const backgroundStyle = this._config.background_style || "solid";
-    const themeMode = this._config.theme_mode || "auto";
-    const resolvedThemeMode = themeMode === "auto" ? (this._hass?.themes?.darkMode ? "dark" : "light") : themeMode;
-    const numericHeight = asNumber(this._config.card_height);
-    const height = numericHeight && numericHeight > 0 ? `${numericHeight}px` : "";
-    const borderRadius = `${this._config.border_radius ?? 24}px`;
-    const iconSize = `${this._config.icon_size ?? 24}px`;
-    const actionCritical = this._actionTone() === "critical";
-    const isPreview = this._isPreviewMode();
+      const activeTone = this._cardTone();
+      const accent = this._config.accent_color || this._accentColorFromTone(activeTone);
+      const sectionAccent = this._tabAccent(this._activeTab);
+      const background = this._config.show_background ? "true" : "false";
+      const backgroundStyle = this._config.background_style || "solid";
+      const themeMode = this._config.theme_mode || "auto";
+      const resolvedThemeMode = themeMode === "auto" ? (this._hass?.themes?.darkMode ? "dark" : "light") : themeMode;
+      const numericHeight = asNumber(this._config.card_height);
+      const height = numericHeight && numericHeight > 0 ? `${numericHeight}px` : "";
+      const borderRadius = `${this._config.border_radius ?? 24}px`;
+      const iconSize = `${this._config.icon_size ?? 24}px`;
+      const actionCritical = this._actionTone() === "critical";
+      const isPreview = this._isPreviewMode();
 
-    this._applyHostVariables({
-      accent,
-      activeTone,
-      sectionAccent,
-      borderRadius,
-      iconSize,
-      height,
-    });
+      this._applyHostVariables({
+        accent,
+        activeTone,
+        sectionAccent,
+        borderRadius,
+        iconSize,
+        height,
+      });
 
-    const rootClass = [
-      "card",
-      this._config.compact ? "card--compact" : "",
-      backgroundStyle ? `card--${backgroundStyle}` : "",
-      resolvedThemeMode ? `card--theme-${resolvedThemeMode}` : "",
-      this._config.use_gradient ? "card--gradient" : "",
-      actionCritical ? "card--pulse-critical" : "",
-      isPreview ? "card--editor-preview" : "",
-    ]
-      .filter(Boolean)
-      .join(" ");
+      const rootClass = [
+        "card",
+        this._config.compact ? "card--compact" : "",
+        backgroundStyle ? `card--${backgroundStyle}` : "",
+        resolvedThemeMode ? `card--theme-${resolvedThemeMode}` : "",
+        this._config.use_gradient ? "card--gradient" : "",
+        actionCritical ? "card--pulse-critical" : "",
+        isPreview ? "card--editor-preview" : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
 
-    this.shadowRoot.innerHTML = `
-      <style>
+      this.shadowRoot.innerHTML = `
+        <style>
 ${CARD_STYLES}
-      </style>
+        </style>
 
-        <ha-card
-          class="gi-card ${rootClass}"
-          aria-label="${escapeHtml(this._config.title || DEFAULT_CONFIG.title)}"
-          data-background="${background}"
-          data-tone="${activeTone}"
-        >
-        ${this._buildHeader()}
-        ${this._renderDecisionLayout()}
-      </ha-card>
-    `;
+          <ha-card
+            class="gi-card ${rootClass}"
+            aria-label="${escapeHtml(this._config.title || DEFAULT_CONFIG.title)}"
+            data-background="${background}"
+            data-tone="${activeTone}"
+          >
+          ${this._buildHeader()}
+          ${this._renderDecisionLayout()}
+        </ha-card>
+      `;
 
-    this._bindMoreInfoButtons();
+      this._bindMoreInfoButtons();
 
-    this.shadowRoot.removeEventListener("click", this._onClick);
-    this.shadowRoot.removeEventListener("contextmenu", this._onContextMenu);
-    this.shadowRoot.removeEventListener("dblclick", this._onDoubleClick);
-    this.shadowRoot.removeEventListener("keydown", this._onKeyDown);
-    this.shadowRoot.addEventListener("click", this._onClick);
-    this.shadowRoot.addEventListener("contextmenu", this._onContextMenu);
-    this.shadowRoot.addEventListener("dblclick", this._onDoubleClick);
-    this.shadowRoot.addEventListener("keydown", this._onKeyDown);
-    this._syncWateringProgressTimer();
+      this.shadowRoot.removeEventListener("click", this._onClick);
+      this.shadowRoot.removeEventListener("contextmenu", this._onContextMenu);
+      this.shadowRoot.removeEventListener("dblclick", this._onDoubleClick);
+      this.shadowRoot.removeEventListener("keydown", this._onKeyDown);
+      this.shadowRoot.addEventListener("click", this._onClick);
+      this.shadowRoot.addEventListener("contextmenu", this._onContextMenu);
+      this.shadowRoot.addEventListener("dblclick", this._onDoubleClick);
+      this.shadowRoot.addEventListener("keydown", this._onKeyDown);
+      this._syncWateringProgressTimer();
+    } catch (error) {
+      console.error("[gazon-intelligent-card] render failed", error);
+      this.shadowRoot.innerHTML = `
+        <div class="empty">
+          <strong>Carte indisponible pendant l'arrosage.</strong>
+          <div>Le rafraîchissement de la progression a rencontré un problème. Recharge la ressource Lovelace si besoin.</div>
+        </div>
+      `;
+    }
   }
 
   _bindMoreInfoButtons() {

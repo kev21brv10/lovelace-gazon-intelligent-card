@@ -15,7 +15,7 @@ export const CARD_STYLES = String.raw`
           --gi-icon-shift-header: 0px;
           --gi-icon-shift-hero: 0px;
           --gi-icon-shift-pill: 0px;
-          --gi-icon-shift-core: 0px;
+          --gi-icon-shift-core: 0.5px;
           --gi-motion-fast: 180ms;
           --gi-motion-medium: 260ms;
           --gi-ease-standard: cubic-bezier(0.2, 0, 0, 1);

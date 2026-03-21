@@ -8,9 +8,9 @@ export const CARD_STYLES = String.raw`
           --gi-font-xs: clamp(0.72rem, 0.68rem + 0.16vw, 0.80rem);
           --gi-font-sm: clamp(0.80rem, 0.76rem + 0.18vw, 0.92rem);
           --gi-font-md: clamp(0.92rem, 0.86rem + 0.22vw, 1.04rem);
-          --gi-font-lg: clamp(1.05rem, 0.98rem + 0.30vw, 1.18rem);
-          --gi-font-xl: clamp(1.16rem, 1.06rem + 0.42vw, 1.34rem);
-          --gi-font-2xl: clamp(1.32rem, 1.16rem + 0.62vw, 1.58rem);
+          --gi-font-lg: clamp(1.04rem, 0.98rem + 0.28vw, 1.16rem);
+          --gi-font-xl: clamp(1.10rem, 1.00rem + 0.38vw, 1.26rem);
+          --gi-font-2xl: clamp(1.28rem, 1.14rem + 0.56vw, 1.52rem);
           --gi-motion-fast: 180ms;
           --gi-motion-medium: 260ms;
           --gi-ease-standard: cubic-bezier(0.2, 0, 0, 1);
@@ -205,7 +205,7 @@ export const CARD_STYLES = String.raw`
           color: var(--secondary-text-color);
           border-radius: 12px;
           padding: var(--gi-nav-item-padding);
-          font-size: var(--gi-font-xs);
+          font-size: var(--gi-font-xxs);
           cursor: pointer;
           user-select: none;
           -webkit-tap-highlight-color: transparent;
@@ -352,7 +352,7 @@ export const CARD_STYLES = String.raw`
         .tab-panel__header-hint {
           margin-top: 4px;
           color: var(--secondary-text-color);
-          font-size: var(--gi-font-xs);
+          font-size: var(--gi-font-xxs);
           line-height: 1.3;
         }
 
@@ -1163,7 +1163,7 @@ export const CARD_STYLES = String.raw`
         }
 
         .header__weather .gi-pill__text {
-          font-size: var(--gi-font-xs);
+          font-size: var(--gi-font-xxs);
           font-weight: 650;
         }
 
@@ -1181,7 +1181,7 @@ export const CARD_STYLES = String.raw`
           box-shadow:
             0 12px 24px rgba(30, 143, 85, 0.28),
             0 0 0 1px rgba(30, 143, 85, 0.18);
-          font-size: var(--gi-font-xs);
+          font-size: var(--gi-font-xxs);
           font-weight: 800;
           cursor: pointer;
           white-space: nowrap;
@@ -1281,7 +1281,7 @@ export const CARD_STYLES = String.raw`
         }
 
         .header__title {
-          font-size: var(--gi-font-xl);
+          font-size: var(--gi-font-lg);
           font-weight: 800;
           line-height: 1.2;
           margin-bottom: 2px;

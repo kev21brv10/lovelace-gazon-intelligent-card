@@ -860,7 +860,7 @@ export const CARD_STYLES = String.raw`
           padding: 0;
           line-height: 0;
           vertical-align: middle;
-          transform: translateY(-0.5px);
+          transform: translateY(-1px);
           --mdc-icon-size: 14px;
         }
 

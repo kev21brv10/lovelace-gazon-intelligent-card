@@ -1511,6 +1511,7 @@ export const CARD_STYLES = String.raw`
           border-radius: 999px;
           display: grid;
           place-items: center;
+          align-self: center;
           flex: none;
           overflow: visible;
           line-height: 1;
@@ -1541,6 +1542,7 @@ export const CARD_STYLES = String.raw`
         .gi-card-core--metric .gi-card-core__icon {
           width: 18px;
           height: 18px;
+          align-self: center;
         }
 
         .gi-card-core--metric .gi-card-core__icon .gi-icon {

@@ -9,12 +9,14 @@
 
 Gazon Intelligent Card affiche dans Home Assistant les décisions métier les plus utiles de ton intégration Gazon Intelligent :
 - navigation par onglets pour séparer clairement arrosage, tonte, gazon et configuration
-- fenêtre optimale avec résumé lisible et statut coloré
+- résumé adaptatif qui met en avant les vraies informations utiles selon la situation
+- tuiles du résumé, de la tonte, du gazon et de la configuration cliquables pour ouvrir le bon `more-info`
+- fenêtre optimale, objectif d'arrosage et type d'arrosage bien lisibles
 - bouton unique `Arrosage manuel immédiat` quand un arrosage est possible
 - résumé compact du plan d'arrosage
-- contexte utile: dernier arrosage, risque gazon, température et ETP
+- contexte utile dans les détails: dernier arrosage, application, phase et risque
 - blocage explicite quand aucune action n'est possible
-- pied de carte avec le mode du gazon et le type d'arrosage
+- pied de carte avec le mode du gazon et l'autorisation d'arrosage
 
 ---
 
@@ -27,8 +29,8 @@ Gazon Intelligent Card affiche dans Home Assistant les décisions métier les pl
 ## ✨ Ce que fait la carte
 
 - affiche une lecture claire et hiérarchisée du moteur Gazon Intelligent
-- met en avant la fenêtre optimale, le plan d'arrosage et l'action manuelle unique
-- sépare les usages par onglets: arrosage, tonte, gazon, config
+- met en avant la fenêtre optimale, l'objectif d'arrosage et l'action manuelle unique
+- sépare les usages par onglets: arrosage, tonte, configuration et contexte avancé
 - reste lisible même si certaines entités sont absentes
 - s’adapte au thème clair ou sombre de Home Assistant
 - propose un éditeur visuel simple pour la configuration de base
@@ -99,7 +101,8 @@ entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatiqu
 entity_arrosage_recommande: binary_sensor.gazon_intelligent_arrosage_recommande
 entity_objectif_arrosage: sensor.gazon_intelligent_objectif_d_arrosage
 entity_type_arrosage: sensor.gazon_intelligent_type_d_arrosage
-entity_risque: sensor.gazon_intelligent_risque_gazon
+entity_tonte: sensor.gazon_intelligent_etat_de_tonte
+entity_hauteur: sensor.gazon_intelligent_hauteur_de_tonte_conseillee
 entity_debit_zone_1: number.gazon_intelligent_debit_zone_1
 entity_debit_zone_2: number.gazon_intelligent_debit_zone_2
 entity_debit_zone_3: number.gazon_intelligent_debit_zone_3
@@ -146,7 +149,8 @@ entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatiqu
 entity_arrosage_recommande: binary_sensor.gazon_intelligent_arrosage_recommande
 entity_objectif_arrosage: sensor.gazon_intelligent_objectif_d_arrosage
 entity_type_arrosage: sensor.gazon_intelligent_type_d_arrosage
-entity_risque: sensor.gazon_intelligent_risque_gazon
+entity_tonte: sensor.gazon_intelligent_etat_de_tonte
+entity_hauteur: sensor.gazon_intelligent_hauteur_de_tonte_conseillee
 entity_debit_zone_1: number.gazon_intelligent_debit_zone_1
 entity_debit_zone_2: number.gazon_intelligent_debit_zone_2
 entity_debit_zone_3: number.gazon_intelligent_debit_zone_3
@@ -168,9 +172,12 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 - `entity_mode`
 - `entity_switch_arrosage_automatique`
 - `entity_arrosage_recommande`
+- `entity_arrosage_apres_application_autorise`
 - `entity_objectif_arrosage`
 - `entity_type_arrosage`
-- `entity_risque`
+- `entity_tonte_autorisee`
+- `entity_tonte`
+- `entity_hauteur`
 - `entity_debit_zone_1`
 - `entity_debit_zone_2`
 - `entity_debit_zone_3`
@@ -204,10 +211,12 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 La carte expose un éditeur visuel natif dans Home Assistant pour :
 - le titre
 - la fenêtre optimale, le plan et le contexte principal
-- le mode du gazon et le type d'arrosage
+- le mode du gazon, le type d'arrosage et les réglages de tonte
 - l’onglet Config avec le switch auto, les débits et les hauteurs
 - les options visuelles de base
 - l’affichage optionnel des détails avancés
+
+Dans la carte elle-même, l’onglet **Config** propose aussi des tuiles cliquables qui ouvrent directement le contrôle Home Assistant des entités associées. C’est le chemin le plus simple pour ajuster un switch, un sélecteur ou un nombre sans quitter la vue.
 
 Par défaut, le switch d’autorisation pointe vers `switch.gazon_intelligent_arrosage_automatique_autorise`. Si ton instance expose un identifiant différent, ajuste `entity_switch_arrosage_automatique`.
 

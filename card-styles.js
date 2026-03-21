@@ -318,6 +318,7 @@ export const CARD_STYLES = String.raw`
         .tab-panel__hero-next,
         .tab-panel__hero-hint,
         .tab-panel__block-hint,
+        .tab-panel__header-hint,
         .tab-panel__stat-secondary,
         .tab-panel__empty {
           font-size: 0.82rem;
@@ -335,6 +336,13 @@ export const CARD_STYLES = String.raw`
           font-size: 0.72rem;
           text-transform: uppercase;
           letter-spacing: 0.04em;
+        }
+
+        .tab-panel__header-hint {
+          margin-top: 4px;
+          color: var(--secondary-text-color);
+          font-size: 0.78rem;
+          line-height: 1.22;
         }
 
         .tab-panel__section-summary {
@@ -373,6 +381,10 @@ export const CARD_STYLES = String.raw`
         }
 
         .tab-panel__section--config-debits {
+          gap: 10px;
+        }
+
+        .tab-panel__section--config-quick {
           gap: 10px;
         }
 
@@ -518,6 +530,99 @@ export const CARD_STYLES = String.raw`
           cursor: pointer;
           user-select: none;
           -webkit-tap-highlight-color: transparent;
+        }
+
+        .gi-config-action {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          width: 100%;
+          border: 0;
+          padding: 0;
+          margin: 0;
+          background: transparent;
+          text-align: inherit;
+        }
+
+        .gi-config-action .gi-card-core {
+          width: 100%;
+        }
+
+        @media (hover: hover) {
+          .gi-config-action:hover .gi-card-core {
+            transform: translateY(-1px);
+            box-shadow: var(--gi-surface-shadow-strong);
+          }
+        }
+
+        .gi-config-action:focus-visible {
+          outline: none;
+        }
+
+        .gi-config-action:focus-visible .gi-card-core {
+          box-shadow:
+            0 0 0 2px color-mix(in srgb, var(--gazon-card-accent) 38%, transparent),
+            var(--gi-surface-shadow-strong);
+        }
+
+        .gi-overview-action {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          width: 100%;
+          border: 0;
+          padding: 0;
+          margin: 0;
+          background: transparent;
+          text-align: inherit;
+        }
+
+        .gi-overview-action .gi-card-core {
+          width: 100%;
+        }
+
+        @media (hover: hover) {
+          .gi-overview-action:hover .gi-card-core {
+            transform: translateY(-1px);
+            box-shadow: var(--gi-surface-shadow-strong);
+          }
+        }
+
+        .gi-overview-action:focus-visible {
+          outline: none;
+        }
+
+        .gi-overview-action:focus-visible .gi-card-core {
+          box-shadow:
+            0 0 0 2px color-mix(in srgb, var(--gazon-card-accent) 32%, transparent),
+            var(--gi-surface-shadow-strong);
+        }
+
+        .gi-card-core__action {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          font-size: 0.68rem;
+          line-height: 1.15;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          color: color-mix(in srgb, var(--secondary-text-color) 92%, var(--gazon-section-accent));
+          margin-top: 2px;
+        }
+
+        .gi-card-core__action::before {
+          content: "";
+          display: inline-block;
+          width: 6px;
+          height: 6px;
+          border-radius: 999px;
+          background: color-mix(in srgb, var(--gazon-section-accent) 75%, white);
+          box-shadow: 0 0 0 3px color-mix(in srgb, var(--gazon-section-accent) 10%, transparent);
+          flex: none;
+        }
+
+        .gi-card-core__action--empty {
+          opacity: 0;
         }
 
         .gi-action .gi-icon {

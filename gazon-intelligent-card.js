@@ -3,7 +3,7 @@ import { EDITOR_STYLES } from "./editor-styles.js";
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.1";
+const CARD_VERSION = "0.1.3";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -109,28 +109,24 @@ const SECTION_FIELDS = {
     "entity_arrosage_apres_application_autorise",
     "entity_tonte_autorisee",
     "entity_objectif_arrosage",
-    "entity_phase",
-    "entity_sous_phase",
-    "entity_niveau",
-    "entity_risque",
+    "entity_type_arrosage",
+    "entity_mode",
+    "entity_fenetre_optimale",
+    "entity_plan_arrosage",
+    "entity_dernier_arrosage",
+    "entity_derniere_application",
+    "entity_switch_arrosage_automatique",
   ],
   watering: [
     "entity_arrosage_recommande",
     "entity_objectif_arrosage",
     "entity_type_arrosage",
-    "entity_niveau",
-    "entity_risque",
-    "entity_phase",
     "entity_arrosage_apres_application_autorise",
   ],
   mowing: [
     "entity_tonte",
     "entity_hauteur",
     "entity_tonte_autorisee",
-    "entity_niveau",
-    "entity_phase",
-    "entity_sous_phase",
-    "entity_risque",
   ],
   details: ENTITY_KEYS.map((field) => field.key),
 };
@@ -143,17 +139,27 @@ const SECTION_ACCENTS = {
 };
 
 const LEGACY_ENTITY_KEYS = [
-  "entity_phase",
-  "entity_sous_phase",
   "entity_conseil",
   "entity_action",
   "entity_avoid",
-  "entity_niveau",
   "entity_tonte",
   "entity_hauteur",
 ];
 
-const OVERVIEW_ENTITY_KEYS = new Set([...LEGACY_ENTITY_KEYS, "entity_risque", "entity_arrosage_apres_application_autorise", "entity_tonte_autorisee"]);
+const OVERVIEW_ENTITY_KEYS = new Set([
+  ...LEGACY_ENTITY_KEYS,
+  "entity_arrosage_recommande",
+  "entity_arrosage_apres_application_autorise",
+  "entity_tonte_autorisee",
+  "entity_objectif_arrosage",
+  "entity_type_arrosage",
+  "entity_mode",
+  "entity_fenetre_optimale",
+  "entity_plan_arrosage",
+  "entity_dernier_arrosage",
+  "entity_derniere_application",
+  "entity_switch_arrosage_automatique",
+]);
 
 const RENDER_SIGNATURE_ATTRS = {
   entity_fenetre_optimale: ["status", "summary", "next_action", "auto_irrigation_enabled"],
@@ -240,6 +246,7 @@ function renderCardCore({
   icon = null,
   iconSize = "md",
   secondary = "",
+  actionHint = "",
   style = "",
 }) {
   const classes = ["gi-card-core", `gi-card-core--${kind}`];
@@ -248,6 +255,7 @@ function renderCardCore({
   }
   const iconHtml = icon ? renderIconBox(icon, iconSize) : "";
   const secondaryValue = isEmpty(secondary) ? "&nbsp;" : escapeHtml(secondary);
+  const actionValue = isEmpty(actionHint) ? "" : escapeHtml(actionHint);
   return `
     <section class="${classes.join(" ")}"${style ? ` style="${escapeHtml(style)}"` : ""}>
       <div class="gi-card-core__icon ${iconHtml ? "" : "gi-card-core__icon--empty"}">
@@ -257,6 +265,7 @@ function renderCardCore({
         <div class="gi-card-core__label">${escapeHtml(label)}</div>
         <div class="gi-card-core__value">${escapeHtml(value)}</div>
         <div class="gi-card-core__secondary ${isEmpty(secondary) ? "gi-card-core__secondary--empty" : ""}">${secondaryValue}</div>
+        <div class="gi-card-core__action ${isEmpty(actionHint) ? "gi-card-core__action--empty" : ""}">${actionValue || "&nbsp;"}</div>
       </div>
     </section>
   `;
@@ -555,7 +564,6 @@ class GazonIntelligentCard extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this._config = null;
     this._hass = null;
-    this._tapTimer = null;
     this._lastRenderSignature = null;
     this._activeTab = "overview";
     this._activeSection = "overview";
@@ -587,10 +595,6 @@ class GazonIntelligentCard extends HTMLElement {
       entity_tonte_autorisee: DEFAULT_CONFIG.entity_tonte_autorisee,
       entity_objectif_arrosage: DEFAULT_CONFIG.entity_objectif_arrosage,
       entity_type_arrosage: DEFAULT_CONFIG.entity_type_arrosage,
-      entity_risque: DEFAULT_CONFIG.entity_risque,
-      entity_phase: DEFAULT_CONFIG.entity_phase,
-      entity_sous_phase: DEFAULT_CONFIG.entity_sous_phase,
-      entity_niveau: DEFAULT_CONFIG.entity_niveau,
       entity_tonte: DEFAULT_CONFIG.entity_tonte,
       entity_hauteur: DEFAULT_CONFIG.entity_hauteur,
       entity_debit_zone_1: DEFAULT_CONFIG.entity_debit_zone_1,
@@ -628,7 +632,6 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_tonte_autorisee", selector: { entity: { domain: ["binary_sensor"] } } },
         { name: "entity_objectif_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_type_arrosage", selector: { entity: { domain: ["sensor"] } } },
-        { name: "entity_risque", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_debit_zone_1", selector: { entity: { domain: ["number"] } } },
         { name: "entity_debit_zone_2", selector: { entity: { domain: ["number"] } } },
         { name: "entity_debit_zone_3", selector: { entity: { domain: ["number"] } } },
@@ -636,9 +639,6 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_debit_zone_5", selector: { entity: { domain: ["number"] } } },
         { name: "entity_hauteur_min_tondeuse", selector: { entity: { domain: ["number"] } } },
         { name: "entity_hauteur_max_tondeuse", selector: { entity: { domain: ["number"] } } },
-        { name: "entity_phase", selector: { entity: { domain: ["sensor"] } } },
-        { name: "entity_sous_phase", selector: { entity: { domain: ["sensor"] } } },
-        { name: "entity_niveau", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_tonte", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_hauteur", selector: { entity: { domain: ["sensor"] } } },
         { name: "manual_action_service", selector: { text: {} } },
@@ -695,10 +695,6 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   disconnectedCallback() {
-    if (this._tapTimer) {
-      clearTimeout(this._tapTimer);
-      this._tapTimer = null;
-    }
     this.shadowRoot?.removeEventListener("click", this._onClick);
     this.shadowRoot?.removeEventListener("contextmenu", this._onContextMenu);
     this.shadowRoot?.removeEventListener("dblclick", this._onDoubleClick);
@@ -871,40 +867,6 @@ class GazonIntelligentCard extends HTMLElement {
       return "neutral";
     }
     return this._primaryTone();
-  }
-
-  _primaryEntityId() {
-    if (this._activeTab === "watering") {
-      return (
-        this._entityId("entity_fenetre_optimale") ||
-        this._entityId("entity_plan_arrosage") ||
-        this._entityId("entity_objectif_arrosage") ||
-        this._entityId("entity_derniere_application") ||
-        this._entityId("entity_mode")
-      );
-    }
-    if (this._activeTab === "mowing") {
-      return this._entityId("entity_tonte") || this._entityId("entity_hauteur") || this._entityId("entity_fenetre_optimale");
-    }
-    if (this._activeTab === "gazon") {
-      return this._entityId("entity_phase") || this._entityId("entity_sous_phase") || this._entityId("entity_niveau");
-    }
-    if (this._activeTab === "config") {
-      return (
-        this._entityId("entity_switch_arrosage_automatique") ||
-        this._entityId("entity_mode") ||
-        this._entityId("entity_debit_zone_1")
-      );
-    }
-    return (
-      this._entityId("entity_fenetre_optimale") ||
-      this._entityId("entity_plan_arrosage") ||
-      this._entityId("entity_objectif_arrosage") ||
-      this._entityId("entity_phase") ||
-      this._entityId("entity_conseil") ||
-      this._entityId("entity_tonte") ||
-      this._entityId("entity_hauteur")
-    );
   }
 
   _windowEntity() {
@@ -1263,7 +1225,7 @@ class GazonIntelligentCard extends HTMLElement {
     `;
   }
 
-  _renderStatCard(label, value, tone = "neutral", icon = null, secondary = "") {
+  _renderStatCard(label, value, tone = "neutral", icon = null, secondary = "", actionHint = "") {
     return renderCardCore({
       kind: "stat",
       label,
@@ -1271,7 +1233,252 @@ class GazonIntelligentCard extends HTMLElement {
       tone,
       icon: this._config?.show_icons ? icon : null,
       secondary,
+      actionHint,
     });
+  }
+
+  _overviewFacts() {
+    const windowState = this._windowState();
+    const planState = this._planState();
+    const objective = windowState.objective;
+    const objectiveLabel = formatMm(objective);
+    const switchState = this._configSwitchState();
+    const tonte = this._entityState("entity_tonte", null);
+    const tonteAutorisee = this._entityState("entity_tonte_autorisee", null);
+    const risk = this._entityState("entity_risque", null);
+    const afterApplication = this._entityState("entity_arrosage_apres_application_autorise", null);
+    const arrosageRecommande = this._entityState("entity_arrosage_recommande", null);
+    const mode = this._entityState("entity_mode", null);
+    const typeArrosage = this._entityState("entity_type_arrosage", null);
+    const lastWatering = this._lastWateringState();
+    const height = this._entity("entity_hauteur");
+    const heightValue = height ? formatCm(height.state) : "Non disponible";
+    const heightSecondary =
+      height && height.attributes?.hauteur_tonte_min_cm !== undefined && height.attributes?.hauteur_tonte_max_cm !== undefined
+        ? `${formatCm(height.attributes.hauteur_tonte_min_cm)} → ${formatCm(height.attributes.hauteur_tonte_max_cm)}`
+        : "";
+    const phase = this._entityState("entity_phase", null);
+    const subPhase = this._entityState("entity_sous_phase", null);
+
+    const facts = [];
+    const addFact = ({ label, value, tone = "neutral", icon = null, secondary = "", entityKey = null }) => {
+      if (isEmpty(value)) {
+        return;
+      }
+      facts.push({ label, value, tone, icon, secondary, entityKey });
+    };
+
+    const wateringFocus = objective > 0 || arrosageRecommande === "on" || windowState.isAwaiting || windowState.showManualAction;
+    const mowingFocus =
+      computeTonteTone(tonte) !== "neutral" ||
+      computeRisqueTone(risk) !== "neutral" ||
+      tonteAutorisee === "off" ||
+      !isEmpty(phase) ||
+      !isEmpty(subPhase);
+    const configFocus = switchState.tone !== "success" || afterApplication === "off" || !isEmpty(mode);
+    const stableState = !wateringFocus && !mowingFocus && !configFocus;
+
+    const waterGroup = [
+      {
+        label: "Arrosage",
+        value: formatRecommendationState(arrosageRecommande),
+        tone: arrosageRecommande === "on" ? "success" : windowState.tone,
+        icon: "mdi:water-check",
+        secondary: windowState.summary || planState.summary || objectiveLabel,
+        entityKey: "entity_arrosage_recommande",
+      },
+      {
+        label: "Fenêtre",
+        value: windowState.statusLabel,
+        tone: windowState.tone,
+        icon: "mdi:clock-outline",
+        secondary: windowState.summary || windowState.nextAction || planState.summary,
+        entityKey: "entity_fenetre_optimale",
+      },
+      {
+        label: "Objectif",
+        value: objectiveLabel,
+        tone: objective > 0 ? "success" : "neutral",
+        icon: "mdi:water-percent",
+        secondary: typeArrosage ? `Type: ${formatApplicationMode(typeArrosage)}` : "",
+        entityKey: "entity_objectif_arrosage",
+      },
+      {
+        label: "Plan",
+        value: planState.summary,
+        tone: this._planTypeTone(planState.planType),
+        icon: "mdi:timer-outline",
+        secondary: `${planState.durationHuman}${planState.zoneCount ? ` · ${planState.zoneCount} zone${planState.zoneCount > 1 ? "s" : ""}` : ""}`,
+        entityKey: "entity_plan_arrosage",
+      },
+    ];
+
+    const mowingGroup = [
+      {
+        label: "Tonte",
+        value: formatStatusLabel(tonte),
+        tone: computeTonteTone(tonte),
+        icon: "mdi:content-cut",
+        secondary: heightValue !== "Non disponible" ? `Hauteur: ${heightValue}` : "",
+        entityKey: "entity_tonte",
+      },
+      {
+        label: "Risque",
+        value: formatStatusLabel(risk),
+        tone: computeRisqueTone(risk),
+        icon: "mdi:shield-alert-outline",
+        secondary: subPhase ? `Sous-phase: ${formatStatusLabel(subPhase)}` : "",
+        entityKey: "entity_risque",
+      },
+      {
+        label: "Hauteur",
+        value: heightValue,
+        tone: this._phaseTone(),
+        icon: "mdi:ruler-square",
+        secondary: heightSecondary,
+        entityKey: "entity_hauteur",
+      },
+      {
+        label: "Sous-phase",
+        value: formatStatusLabel(subPhase),
+        tone: phaseTone(phase),
+        icon: "mdi:sprout",
+        secondary: phase ? `Phase: ${formatStatusLabel(phase)}` : "",
+        entityKey: "entity_sous_phase",
+      },
+    ];
+
+    const configGroup = [
+      {
+        label: "Configuration",
+        value: switchState.label,
+        tone: switchState.tone,
+        icon: "mdi:switch",
+        secondary: !isEmpty(mode)
+          ? `Mode: ${formatApplicationMode(mode)}`
+          : afterApplication
+            ? `Après application: ${formatAuthorizationState(afterApplication)}`
+            : "",
+        entityKey: "entity_switch_arrosage_automatique",
+      },
+      {
+        label: "Dernier arrosage",
+        value: lastWatering.label,
+        tone: lastWatering.value !== null ? "success" : "neutral",
+        icon: "mdi:water-check",
+        secondary: lastWatering.detail,
+        entityKey: "entity_dernier_arrosage",
+      },
+    ];
+
+    const pushGroup = (group) => {
+      for (const item of group) {
+        if (facts.length >= 4) {
+          return;
+        }
+        addFact(item);
+      }
+    };
+
+    if (wateringFocus) {
+      pushGroup(waterGroup);
+      if (facts.length < 4) {
+        pushGroup(mowingGroup);
+      }
+      if (facts.length < 4) {
+        pushGroup(configGroup);
+      }
+    } else if (mowingFocus) {
+      pushGroup(mowingGroup);
+      if (facts.length < 4) {
+        pushGroup(waterGroup);
+      }
+      if (facts.length < 4) {
+        pushGroup(configGroup);
+      }
+    } else if (configFocus) {
+      pushGroup(configGroup);
+      if (facts.length < 4) {
+        pushGroup(waterGroup);
+      }
+      if (facts.length < 4) {
+        pushGroup(mowingGroup);
+      }
+    } else if (stableState) {
+      pushGroup(waterGroup);
+      if (facts.length < 4) {
+        pushGroup(mowingGroup);
+      }
+      if (facts.length < 4) {
+        pushGroup(configGroup);
+      }
+    }
+
+    if (facts.length < 4) {
+      pushGroup([
+        {
+          label: "Configuration",
+          value: switchState.label,
+          tone: switchState.tone,
+          icon: "mdi:switch",
+          secondary: !isEmpty(mode) ? `Mode: ${formatApplicationMode(mode)}` : "",
+          entityKey: "entity_switch_arrosage_automatique",
+        },
+        {
+          label: "Dernier arrosage",
+          value: lastWatering.label,
+          tone: lastWatering.value !== null ? "success" : "neutral",
+          icon: "mdi:water-check",
+          secondary: lastWatering.detail,
+          entityKey: "entity_dernier_arrosage",
+        },
+      ]);
+    }
+
+    return facts.slice(0, 4);
+  }
+
+  _renderConfigActionCard(label, entityKey, value, tone = "neutral", icon = null, secondary = "Touchez pour modifier") {
+    const entityId = this._entityId(entityKey);
+    const card = this._renderStatCard(label, value, tone, icon, secondary, "Touchez pour ouvrir");
+    if (!entityId) {
+      return card;
+    }
+    return `
+      <button
+        type="button"
+        class="gi-action gi-config-action"
+        data-more-info-entity="${escapeHtml(entityId)}"
+        aria-label="Modifier ${escapeHtml(label)}"
+      >
+        ${card}
+      </button>
+    `;
+  }
+
+  _renderLinkedStatCard(fact) {
+    const card = this._renderStatCard(
+      fact.label,
+      fact.value,
+      fact.tone,
+      fact.icon,
+      this._config?.show_secondary_info ? fact.secondary : "",
+      `Ouvre: ${fact.label}`,
+    );
+    const entityId = this._entityId(fact.entityKey);
+    if (!entityId) {
+      return card;
+    }
+    return `
+      <button
+        type="button"
+        class="gi-action gi-overview-action"
+        data-more-info-entity="${escapeHtml(entityId)}"
+        aria-label="Ouvrir ${escapeHtml(fact.label)}"
+      >
+        ${card}
+      </button>
+    `;
   }
 
   _overviewProposal() {
@@ -1281,8 +1488,6 @@ class GazonIntelligentCard extends HTMLElement {
     const objectiveLabel = formatMm(objective);
     const switchState = this._configSwitchState();
     const tonte = this._entityState("entity_tonte", null);
-    const phase = this._entityState("entity_phase", null);
-    const subPhase = this._entityState("entity_sous_phase", null);
     const risk = this._entityState("entity_risque", null);
     const conseil = this._entityState("entity_conseil", null);
     const action = this._entityState("entity_action", null);
@@ -1314,12 +1519,12 @@ class GazonIntelligentCard extends HTMLElement {
       icon = "mdi:cancel";
     } else if (computeTonteTone(tonte) === "danger") {
       title = "Tonte interdite";
-      hint = `${avoid || "Tondre avant levée complète."}${phase ? ` · ${formatStatusLabel(phase)}` : ""}${subPhase ? ` · ${formatStatusLabel(subPhase)}` : ""}`;
+      hint = avoid || "Tondre avant levée complète.";
       tone = "danger";
       icon = "mdi:content-cut";
     } else if (computeRisqueTone(risk) === "danger" || computeRisqueTone(risk) === "critical") {
       title = "Risque gazon élevé";
-      hint = action || conseil || "Ouvrir l’onglet Gazon pour voir la phase, la sous-phase et le niveau d’action.";
+      hint = action || conseil || "Ouvrir l’onglet Gazon pour voir les détails avancés.";
       tone = computeRisqueTone(risk);
       icon = "mdi:shield-alert-outline";
     } else if (arrosageRecommande === "on") {
@@ -1334,14 +1539,9 @@ class GazonIntelligentCard extends HTMLElement {
       icon = "mdi:switch-off";
     } else if (tonteAutorisee === "off") {
       title = "Tonte interdite";
-      hint = `${action || "Sursemis en cours."}${phase ? ` · ${formatStatusLabel(phase)}` : ""}`;
+      hint = action || "Sursemis en cours.";
       tone = "danger";
       icon = "mdi:content-cut";
-    } else if (phase) {
-      title = formatStatusLabel(phase);
-      hint = subPhase ? `${formatStatusLabel(subPhase)} · ${conseil || planState.summary || "Vue d’ensemble de la carte."}` : conseil || planState.summary || "Vue d’ensemble de la carte.";
-      tone = phaseTone(phase);
-      icon = "mdi:grass";
     }
 
     return { title, hint, tone, icon };
@@ -1413,7 +1613,7 @@ class GazonIntelligentCard extends HTMLElement {
     const zoneCards = this._zoneDebitEntries()
       .map((entry) => {
         const config = this._renderConfigValue(entry.key, "mm/h");
-        return this._renderStatCard(entry.label, config.value, config.tone, "mdi:sprinkler", config.secondary);
+        return this._renderConfigActionCard(entry.label, entry.key, config.value, config.tone, "mdi:sprinkler", "Touchez pour ouvrir");
       })
       .join("");
     const heightMin = this._renderConfigValue("entity_hauteur_min_tondeuse", "cm");
@@ -1425,23 +1625,39 @@ class GazonIntelligentCard extends HTMLElement {
           <div>
             <div class="tab-panel__eyebrow">Configuration</div>
             <div class="tab-panel__title">Autorisation, débits et hauteurs</div>
+            <div class="tab-panel__header-hint">Touchez une tuile pour ouvrir le contrôle Home Assistant correspondant.</div>
           </div>
           ${renderStatusPill(switchState.label, switchState.tone, switchIcon, "tab-panel__status")}
         </div>
 
         <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-top">
-          ${this._renderStatCard("Arrosage automatique", switchState.label, switchState.tone, "mdi:switch")}
-          ${this._renderStatCard("Après application", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off")}
-          ${this._renderStatCard("Tonte autorisée", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", "mdi:content-cut")}
-          ${this._renderStatCard("Mode du gazon", formatApplicationMode(mode), modeTone, "mdi:grass")}
-          ${this._renderStatCard("Hauteur min tondeuse", heightMin.value, heightMin.tone, "mdi:ruler-square")}
-          ${this._renderStatCard("Hauteur max tondeuse", heightMax.value, heightMax.tone, "mdi:ruler-square")}
+          ${this._renderConfigActionCard("Arrosage automatique", "entity_switch_arrosage_automatique", switchState.label, switchState.tone, "mdi:switch", "Touchez pour activer / désactiver")}
+          ${this._renderConfigActionCard("Après application", "entity_arrosage_apres_application_autorise", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off", "Touchez pour ouvrir")}
+          ${this._renderConfigActionCard("Tonte autorisée", "entity_tonte_autorisee", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", "mdi:content-cut", "Touchez pour ouvrir")}
+          ${this._renderConfigActionCard("Mode du gazon", "entity_mode", formatApplicationMode(mode), modeTone, "mdi:grass", "Touchez pour changer")}
+          ${this._renderConfigActionCard("Hauteur min tondeuse", "entity_hauteur_min_tondeuse", heightMin.value, heightMin.tone, "mdi:ruler-square", "Touchez pour ajuster")}
+          ${this._renderConfigActionCard("Hauteur max tondeuse", "entity_hauteur_max_tondeuse", heightMax.value, heightMax.tone, "mdi:ruler-square", "Touchez pour ajuster")}
+        </div>
+
+        <div class="tab-panel__section tab-panel__section--config-quick">
+          <div class="tab-panel__section-title">Accès rapide</div>
+          <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">
+            ${this._renderConfigActionCard("Arrosage auto", "entity_switch_arrosage_automatique", switchState.label, switchState.tone, "mdi:switch", "Modifier")}
+            ${this._renderConfigActionCard("Mode", "entity_mode", formatApplicationMode(mode), modeTone, "mdi:grass", "Modifier")}
+            ${this._renderConfigActionCard("Après application", "entity_arrosage_apres_application_autorise", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off", "Modifier")}
+            ${this._renderConfigActionCard("Tonte", "entity_tonte_autorisee", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", "mdi:content-cut", "Modifier")}
+          </div>
         </div>
 
         <div class="tab-panel__section tab-panel__section--config-debits">
           <div class="tab-panel__section-title">Débits des zones</div>
           <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">
             ${zoneCards || `<div class="tab-panel__empty">Débits non configurés.</div>`}
+          </div>
+          <div class="tab-panel__section-title">Hauteurs de tondeuse</div>
+          <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">
+            ${this._renderConfigActionCard("Hauteur min tondeuse", "entity_hauteur_min_tondeuse", heightMin.value, heightMin.tone, "mdi:ruler-square", "Touchez pour ouvrir")}
+            ${this._renderConfigActionCard("Hauteur max tondeuse", "entity_hauteur_max_tondeuse", heightMax.value, heightMax.tone, "mdi:ruler-square", "Touchez pour ouvrir")}
           </div>
         </div>
       </section>
@@ -1458,22 +1674,53 @@ class GazonIntelligentCard extends HTMLElement {
     const progressLabel = progress === null ? "Progression non disponible" : `${formatNumber(progress, 0)} %`;
     const progressWidth = progress === null ? 0 : Math.max(0, Math.min(100, progress));
     const gazonStatusIcon = this._config?.show_icons ? "mdi:grass" : null;
+    const gazonFacts = [
+      {
+        label: "Phase dominante",
+        value: formatStatusLabel(phase),
+        tone: phaseTone(phase),
+        icon: "mdi:grass",
+        secondary: "",
+        entityKey: "entity_phase",
+      },
+      {
+        label: "Sous-phase",
+        value: formatStatusLabel(subPhase),
+        tone: phaseTone(phase),
+        icon: "mdi:sprout",
+        secondary: progressDetail || "",
+        entityKey: "entity_sous_phase",
+      },
+      {
+        label: "Risque gazon",
+        value: formatStatusLabel(risk),
+        tone: computeRisqueTone(risk),
+        icon: "mdi:shield-alert-outline",
+        secondary: "",
+        entityKey: "entity_risque",
+      },
+      {
+        label: "Niveau d'action",
+        value: formatStatusLabel(action),
+        tone: computeActionTone(action),
+        icon: "mdi:signal",
+        secondary: "",
+        entityKey: "entity_niveau",
+      },
+    ];
 
     return `
       <section class="tab-panel gi-panel tab-panel--gazon">
         <div class="tab-panel__header">
           <div>
             <div class="tab-panel__eyebrow">Gazon</div>
-            <div class="tab-panel__title">Phase, sous-phase et risque</div>
+            <div class="tab-panel__title">Phase, sous-phase et contexte avancé</div>
           </div>
           ${renderStatusPill(formatStatusLabel(action), computeActionTone(action), gazonStatusIcon, "tab-panel__status")}
         </div>
 
         <div class="tab-panel__grid">
-          ${this._renderStatCard("Phase dominante", formatStatusLabel(phase), phaseTone(phase), "mdi:grass")}
-          ${this._renderStatCard("Sous-phase", formatStatusLabel(subPhase), phaseTone(phase), "mdi:sprout", progressDetail ? progressDetail : "")}
-          ${this._renderStatCard("Risque gazon", formatStatusLabel(risk), computeRisqueTone(risk), "mdi:shield-alert-outline")}
-          ${this._renderStatCard("Niveau d'action", formatStatusLabel(action), computeActionTone(action), "mdi:signal")}
+          ${gazonFacts.map((fact) => this._renderLinkedStatCard(fact)).join("")}
         </div>
 
         <div class="tab-panel__section">
@@ -1501,6 +1748,40 @@ class GazonIntelligentCard extends HTMLElement {
     const heightSecondary = heightMin !== null && heightMax !== null ? `${formatCm(heightMin)} → ${formatCm(heightMax)}` : "";
     const windowSummary = windowState.entity ? windowState.summary : "Fenêtre optimale non disponible";
     const mowingStatusIcon = this._config?.show_icons ? "mdi:content-cut" : null;
+    const mowingFacts = [
+      {
+        label: "État de tonte",
+        value: tonteValue,
+        tone: computeTonteTone(tonteValue),
+        icon: "mdi:content-cut",
+        secondary: "",
+        entityKey: "entity_tonte",
+      },
+      {
+        label: "Tonte autorisée",
+        value: formatAuthorizationState(tonteAutorisee),
+        tone: tonteAutorisee === "on" ? "success" : "danger",
+        icon: "mdi:content-cut",
+        secondary: "",
+        entityKey: "entity_tonte_autorisee",
+      },
+      {
+        label: "Hauteur conseillée",
+        value: heightValue,
+        tone: this._phaseTone(),
+        icon: "mdi:ruler-square",
+        secondary: heightSecondary,
+        entityKey: "entity_hauteur",
+      },
+      {
+        label: "Fenêtre optimale",
+        value: windowSummary,
+        tone: windowState.tone,
+        icon: "mdi:clock-outline",
+        secondary: windowState.nextAction || "",
+        entityKey: "entity_fenetre_optimale",
+      },
+    ];
 
     return `
       <section class="tab-panel gi-panel tab-panel--mowing">
@@ -1513,10 +1794,7 @@ class GazonIntelligentCard extends HTMLElement {
         </div>
 
         <div class="tab-panel__grid">
-          ${this._renderStatCard("État de tonte", tonteValue, computeTonteTone(tonteValue), "mdi:content-cut")}
-          ${this._renderStatCard("Tonte autorisée", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", "mdi:content-cut")}
-          ${this._renderStatCard("Hauteur conseillée", heightValue, this._phaseTone(), "mdi:ruler-square", heightSecondary)}
-          ${this._renderStatCard("Fenêtre optimale", windowSummary, windowState.tone, "mdi:clock-outline", windowState.nextAction || "")}
+          ${mowingFacts.map((fact) => this._renderLinkedStatCard(fact)).join("")}
         </div>
       </section>
     `;
@@ -1525,18 +1803,10 @@ class GazonIntelligentCard extends HTMLElement {
   _renderOverviewTab() {
     const windowState = this._windowState();
     const planState = this._planState();
-    const phase = this._entityState("entity_phase", null);
-    const subPhase = this._entityState("entity_sous_phase", null);
-    const tonte = this._entityState("entity_tonte", null);
-    const conseil = this._entityState("entity_conseil", null);
-    const action = this._entityState("entity_action", null);
-    const avoid = this._entityState("entity_avoid", null);
-    const switchState = this._configSwitchState();
     const proposal = this._overviewProposal();
     const overviewTone = proposal.tone;
     const overviewIcon = this._config?.show_icons ? proposal.icon : null;
-    const objective = windowState.objective;
-    const objectiveLabel = formatMm(objective);
+    const facts = this._overviewFacts();
 
     return `
       <section class="tab-panel gi-panel tab-panel--overview">
@@ -1546,54 +1816,21 @@ class GazonIntelligentCard extends HTMLElement {
             ${renderStatusPill(proposal.title, overviewTone, overviewIcon, `tab-panel__status tab-panel__status--${overviewTone}`)}
           </div>
           <div class="tab-panel__hero-next">${escapeHtml(windowState.summary || planState.summary || "Vue d’ensemble de la carte.")}</div>
-          <div class="tab-panel__hero-hint">${escapeHtml("Ouvrez un onglet pour détailler l’arrosage, la tonte, le gazon ou la configuration.")}</div>
+          <div class="tab-panel__hero-hint">${escapeHtml("Le résumé s’adapte automatiquement à la situation réelle et remonte les informations utiles en premier.")}</div>
         </div>
 
-        <div class="tab-panel__grid">
-          ${this._renderStatCard("Arrosage", windowState.statusLabel, windowState.tone, "mdi:water", windowState.nextAction || planState.summary || objectiveLabel)}
-          ${this._renderStatCard("Tonte", formatStatusLabel(tonte), computeTonteTone(tonte), "mdi:content-cut", this._config?.show_secondary_info ? `Hauteur: ${formatCm(this._entityState("entity_hauteur", null))}` : "")}
-          ${this._renderStatCard("Gazon", formatStatusLabel(phase), phaseTone(phase), "mdi:grass", subPhase ? `Sous-phase: ${subPhase}` : "")}
-          ${this._renderStatCard("Configuration", switchState.label, switchState.tone, "mdi:switch", this._config?.show_secondary_info ? `Mode: ${formatApplicationMode(this._entityState("entity_mode", null))}` : "")}
+        <div class="tab-panel__grid tab-panel__grid--overview">
+          ${facts
+            .map((fact) => this._renderLinkedStatCard(fact))
+            .join("")}
         </div>
 
         ${
-          conseil || action || avoid
-            ? `<section class="gi-info gi-info--secondary tab-panel__section">
-                <div class="tab-panel__eyebrow">À retenir</div>
-                <div class="tab-panel__section-summary">${escapeHtml(proposal.title)}</div>
-                <div class="tab-panel__block-hint">${escapeHtml(proposal.hint)}</div>
-                <div class="decision-grid" style="margin-top: 4px;">
-                  ${
-                    conseil
-                      ? `<div class="gi-info gi-info--secondary decision">
-                          <div class="decision__label">Conseil principal</div>
-                          <div class="decision__value">${escapeHtml(conseil)}</div>
-                        </div>`
-                      : ""
-                  }
-                  ${
-                    action
-                      ? `<div class="gi-info gi-info--secondary decision decision--action">
-                          <div class="decision__label">Action recommandée</div>
-                          <div class="decision__value">${escapeHtml(formatStatusLabel(action))}</div>
-                        </div>`
-                      : ""
-                  }
-                  ${
-                    avoid
-                      ? `<div class="gi-info gi-info--secondary decision decision--avoid">
-                          <div class="decision__label">Action à éviter</div>
-                          <div class="decision__value">${escapeHtml(avoid)}</div>
-                        </div>`
-                      : ""
-                  }
-                </div>
-              </section>`
-            : `<section class="gi-info gi-info--secondary tab-panel__section">
-                <div class="tab-panel__eyebrow">Proposition</div>
-                <div class="tab-panel__section-summary">${escapeHtml(proposal.title)}</div>
-                <div class="tab-panel__block-hint">${escapeHtml(proposal.hint)}</div>
-              </section>`
+          `<section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--overview-brief">
+            <div class="tab-panel__eyebrow">À retenir</div>
+            <div class="tab-panel__section-summary">${escapeHtml(proposal.title)}</div>
+            <div class="tab-panel__block-hint">${escapeHtml(proposal.hint)}</div>
+          </section>`
         }
       </section>
     `;
@@ -1905,19 +2142,21 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _renderHero() {
-    const phase = this._entityState("entity_phase", null);
-    const subPhase = this._entityState("entity_sous_phase", null);
     const tonte = this._entityState("entity_tonte", null);
     const arrosage = this._entityState("entity_arrosage_recommande", null);
     const afterApplication = this._entityState("entity_arrosage_apres_application_autorise", null);
     const tonteAutorisee = this._entityState("entity_tonte_autorisee", null);
     const hauteur = this._entityState("entity_hauteur", null);
+    const typeArrosage = this._entityState("entity_type_arrosage", null);
+    const objective = this._objectiveMm();
+    const objectiveLabel = objective === null ? "Non disponible" : formatMm(objective);
+    const windowState = this._windowState();
     const conseil = this._entityState("entity_conseil", null);
     const sectionAccent = this._sectionAccent("overview");
 
     return `
       <section class="hero" style="--gazon-section-accent:${escapeHtml(sectionAccent)};">
-        <div class="gi-row gi-action hero__lead ${this._primaryTone() === "danger" ? "hero__lead--danger" : ""}" data-action-target="primary">
+        <div class="gi-row hero__lead ${this._primaryTone() === "danger" ? "hero__lead--danger" : ""}">
           <div class="hero__lead-icon">${this._config.show_icons ? renderIconBox("mdi:leaf", "md") : ""}</div>
           <div class="hero__lead-content">
             <div class="hero__label">Conseil principal</div>
@@ -1925,8 +2164,9 @@ class GazonIntelligentCard extends HTMLElement {
           </div>
         </div>
         <div class="hero__metrics">
-          ${this._renderMetric("Phase", phase, phaseTone(phase), this._heroMetricIcon("entity_phase", phase))}
-          ${this._renderMetric("Sous-phase", subPhase, phaseTone(phase), this._heroMetricIcon("entity_sous_phase", subPhase))}
+          ${this._renderMetric("Fenêtre", windowState.summary || windowState.statusLabel, windowState.tone, this._heroMetricIcon("entity_fenetre_optimale", windowState.summary || windowState.statusLabel))}
+          ${this._renderMetric("Objectif", objectiveLabel, objective !== null && objective > 0 ? "success" : "neutral", "mdi:water-percent")}
+          ${this._renderMetric("Type d'arrosage", formatApplicationMode(typeArrosage), isEmpty(typeArrosage) ? "neutral" : "accent", "mdi:sprinkler")}
           ${this._renderMetric("Tonte", tonte, computeTonteTone(tonte), this._heroMetricIcon("entity_tonte", tonte))}
           ${this._renderMetric("Arrosage", formatRecommendationState(arrosage), arrosage === "on" ? "success" : "neutral", this._heroMetricIcon("entity_arrosage_recommande", arrosage))}
           ${this._renderMetric("Tonte autorisée", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", this._heroMetricIcon("entity_tonte_autorisee", tonteAutorisee))}
@@ -2029,10 +2269,8 @@ class GazonIntelligentCard extends HTMLElement {
     const phase = this._entityState("entity_phase", null);
     const subPhase = this._entityState("entity_sous_phase", null);
     const tone = this._cardTone();
-    const primaryEntity = this._primaryEntityId();
-
     return `
-      <header class="gi-row gi-action header ${primaryEntity ? "header--clickable" : ""}" data-action-target="primary">
+      <header class="gi-row header">
         <div class="gi-row header__title-wrap">
           <div class="header__icon header__icon--${tone}">
             ${this._config.show_icons ? renderIconBox("mdi:grass", "md") : ""}
@@ -2173,17 +2411,16 @@ ${CARD_STYLES}
 
         <ha-card
           class="gi-card ${rootClass}"
-          tabindex="0"
-          role="button"
           aria-label="${escapeHtml(this._config.title || DEFAULT_CONFIG.title)}"
           data-background="${background}"
           data-tone="${activeTone}"
-          data-action-target="primary"
         >
         ${this._buildHeader()}
         ${this._renderDecisionLayout()}
       </ha-card>
     `;
+
+    this._bindMoreInfoButtons();
 
     this.shadowRoot.removeEventListener("click", this._onClick);
     this.shadowRoot.removeEventListener("contextmenu", this._onContextMenu);
@@ -2193,6 +2430,20 @@ ${CARD_STYLES}
     this.shadowRoot.addEventListener("contextmenu", this._onContextMenu);
     this.shadowRoot.addEventListener("dblclick", this._onDoubleClick);
     this.shadowRoot.addEventListener("keydown", this._onKeyDown);
+  }
+
+  _bindMoreInfoButtons() {
+    if (!this.shadowRoot) {
+      return;
+    }
+    const buttons = this.shadowRoot.querySelectorAll("[data-more-info-entity]");
+    buttons.forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        this._openEntityMoreInfo(button.dataset.moreInfoEntity);
+      });
+    });
   }
 
   _accentColorFromTone(tone) {
@@ -2232,56 +2483,34 @@ ${CARD_STYLES}
       this._setActiveSection(sectionTarget.dataset.section);
       return;
     }
-    const target = event.target.closest("[data-action-target]");
-    if (!target) {
-      return;
-    }
-    event.preventDefault();
-    if (this._tapTimer) {
-      clearTimeout(this._tapTimer);
-    }
-    this._tapTimer = setTimeout(() => {
-      this._tapTimer = null;
-      this._performAction(this._config?.tap_action, this._primaryEntityId());
-    }, 220);
   }
 
   _onContextMenu(event) {
-    const target = event.target.closest("[data-action-target]");
-    if (!target) {
-      return;
-    }
     event.preventDefault();
-    this._performAction(this._config?.hold_action, this._primaryEntityId());
   }
 
   _onDoubleClick(event) {
-    const target = event.target.closest("[data-action-target]");
-    if (!target) {
-      return;
-    }
     event.preventDefault();
-    if (this._tapTimer) {
-      clearTimeout(this._tapTimer);
-      this._tapTimer = null;
-    }
-    this._performAction(this._config?.double_tap_action, this._primaryEntityId());
   }
 
   _onKeyDown(event) {
-    const target = event.target.closest("[data-action-target]");
-    if (!target) {
-      return;
-    }
     if (event.key !== "Enter" && event.key !== " ") {
       return;
     }
     event.preventDefault();
-    if (this._tapTimer) {
-      clearTimeout(this._tapTimer);
-      this._tapTimer = null;
+  }
+
+  _openEntityMoreInfo(entityId) {
+    if (!entityId) {
+      return;
     }
-    this._performAction(this._config?.tap_action, this._primaryEntityId());
+    this.dispatchEvent(
+      new CustomEvent("hass-more-info", {
+        detail: { entityId },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   _triggerManualIrrigation() {
@@ -2589,11 +2818,10 @@ ${EDITOR_STYLES}
         </section>
 
         <section class="section">
-          <h3>Contexte</h3>
+          <h3>Contexte principal</h3>
           <div class="grid">
             ${this._renderEntityInput("entity_mode", "Mode du gazon")}
             ${this._renderEntityInput("entity_type_arrosage", "Type d'arrosage")}
-            ${this._renderEntityInput("entity_risque", "Risque gazon")}
           </div>
         </section>
 
@@ -2614,10 +2842,11 @@ ${EDITOR_STYLES}
 
         <section class="section">
           <h3>Détails avancés</h3>
-          <p>Ces champs alimentent encore les vues détaillées et les écrans existants si tu actives l'option correspondante.</p>
+          <p>Ces champs alimentent les vues détaillées et les écrans de diagnostic si tu actives l'option correspondante.</p>
           <div class="grid">
             ${this._renderEntityInput("entity_phase", "Phase dominante")}
             ${this._renderEntityInput("entity_sous_phase", "Sous-phase")}
+            ${this._renderEntityInput("entity_risque", "Risque gazon")}
             ${this._renderEntityInput("entity_conseil", "Conseil principal")}
             ${this._renderEntityInput("entity_action", "Action recommandée")}
             ${this._renderEntityInput("entity_avoid", "Action à éviter")}

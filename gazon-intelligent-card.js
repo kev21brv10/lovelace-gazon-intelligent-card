@@ -3,7 +3,7 @@ import { EDITOR_STYLES } from "./editor-styles.js";
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.14";
+const CARD_VERSION = "0.1.15";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -1252,6 +1252,15 @@ class GazonIntelligentCard extends HTMLElement {
       return "Arrosage manuel";
     }
     return label;
+  }
+
+  _manualActionStyle() {
+    return [
+      "background: linear-gradient(135deg, #2ec86f 0%, #19a3ff 100%)",
+      "border: 1px solid #1e8f55",
+      "color: #ffffff",
+      "box-shadow: 0 12px 24px rgba(30, 143, 85, 0.28), 0 0 0 1px rgba(30, 143, 85, 0.18)",
+    ].join("; ");
   }
 
   _canShowLegacyDetails() {
@@ -2609,6 +2618,7 @@ class GazonIntelligentCard extends HTMLElement {
             type="button"
             class="header__action gi-action"
             data-gazon-action="manual-irrigation"
+            style="${this._manualActionStyle()}"
             aria-label="${escapeHtml(manualActionLabel)}"
           >
             ${this._config?.show_icons ? renderIconBox("mdi:water-pump", "sm") : ""}

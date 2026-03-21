@@ -89,6 +89,15 @@ resources:
 
 ---
 
+## 🧱 Structure du projet
+
+- `src/gazon-intelligent-card.js` : point d'entrée source de la carte
+- `src/styles/card-styles.js` : styles de la carte Lovelace
+- `src/styles/editor-styles.js` : styles de l'éditeur
+- `dist/gazon-intelligent-card.js` : bundle final consommé par Home Assistant et HACS
+
+---
+
 ## 🪄 Exemple YAML simple
 
 ```yaml

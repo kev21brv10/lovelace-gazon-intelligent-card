@@ -1,5 +1,5 @@
-import { CARD_STYLES } from "./card-styles.js";
-import { EDITOR_STYLES } from "./editor-styles.js";
+import { CARD_STYLES } from "./styles/card-styles.js";
+import { EDITOR_STYLES } from "./styles/editor-styles.js";
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";

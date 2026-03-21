@@ -2,9 +2,9 @@ from pathlib import Path
 import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC_MAIN = ROOT / "gazon-intelligent-card.js"
-SRC_CARD_STYLES = ROOT / "card-styles.js"
-SRC_EDITOR_STYLES = ROOT / "editor-styles.js"
+SRC_MAIN = ROOT / "src" / "gazon-intelligent-card.js"
+SRC_CARD_STYLES = ROOT / "src" / "styles" / "card-styles.js"
+SRC_EDITOR_STYLES = ROOT / "src" / "styles" / "editor-styles.js"
 DIST_DIR = ROOT / "dist"
 DIST_MAIN = DIST_DIR / "gazon-intelligent-card.js"
 
@@ -13,10 +13,10 @@ editor_styles = SRC_EDITOR_STYLES.read_text(encoding="utf-8").split("`", 1)[1].r
 main = SRC_MAIN.read_text(encoding="utf-8")
 
 lines = main.splitlines(keepends=True)
-if not lines[0].startswith('import { CARD_STYLES } from "./card-styles.js";'):
-    raise SystemExit("gazon-intelligent-card.js must import CARD_STYLES first")
-if not lines[1].startswith('import { EDITOR_STYLES } from "./editor-styles.js";'):
-    raise SystemExit("gazon-intelligent-card.js must import EDITOR_STYLES second")
+if not lines[0].startswith('import { CARD_STYLES } from "./styles/card-styles.js";'):
+    raise SystemExit("src/gazon-intelligent-card.js must import CARD_STYLES first")
+if not lines[1].startswith('import { EDITOR_STYLES } from "./styles/editor-styles.js";'):
+    raise SystemExit("src/gazon-intelligent-card.js must import EDITOR_STYLES second")
 
 main = "".join(lines[2:])
 bundle = (

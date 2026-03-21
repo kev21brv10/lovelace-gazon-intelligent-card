@@ -82,13 +82,6 @@ export const CARD_STYLES = String.raw`
           }
         }
 
-        .decision-layout {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          margin-top: 8px;
-        }
-
         @keyframes gi-fade-up {
           from {
             opacity: 0;
@@ -455,27 +448,6 @@ export const CARD_STYLES = String.raw`
         .tab-progress__meta {
           font-size: var(--gi-font-xs);
           color: var(--secondary-text-color);
-        }
-
-        .tab-panel__action-content {
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-          flex: 1;
-          overflow-wrap: anywhere;
-        }
-
-        .tab-panel__action-title {
-          font-size: var(--gi-font-lg);
-          font-weight: 900;
-          line-height: 1.18;
-        }
-
-        .tab-panel__action-subtitle {
-          color: color-mix(in srgb, white 86%, transparent);
-          font-size: var(--gi-font-sm);
-          line-height: 1.3;
         }
 
         .gi-action--primary {

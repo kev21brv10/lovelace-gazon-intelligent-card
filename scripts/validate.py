@@ -7,9 +7,9 @@ ROOT = Path(__file__).resolve().parents[1]
 package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
 hacs = json.loads((ROOT / "hacs.json").read_text(encoding="utf-8"))
 SRC_FILES = [
-    "gazon-intelligent-card.js",
-    "card-styles.js",
-    "editor-styles.js",
+    "src/gazon-intelligent-card.js",
+    "src/styles/card-styles.js",
+    "src/styles/editor-styles.js",
 ]
 DIST_FILE = "gazon-intelligent-card.js"
 
@@ -27,12 +27,12 @@ if hacs.get("filename") != "dist/gazon-intelligent-card.js":
 if hacs.get("content_in_root") is not False:
     raise SystemExit("hacs.json content_in_root must be false")
 
-main_src = src_files["gazon-intelligent-card.js"]
+main_src = src_files["src/gazon-intelligent-card.js"]
 dist_src = dist_files[DIST_FILE]
 
 version_match = re.search(r'CARD_VERSION\s*=\s*"([^"]+)"', main_src)
 if not version_match:
-    raise SystemExit("Could not find CARD_VERSION in gazon-intelligent-card.js")
+    raise SystemExit("Could not find CARD_VERSION in src/gazon-intelligent-card.js")
 
 if version_match.group(1) != package.get("version"):
     raise SystemExit("CARD_VERSION must match package.json version")
@@ -54,11 +54,11 @@ if dist_entries != [DIST_FILE]:
 if "/local/gazon-intelligent-card/gazon-intelligent-card.js" not in readme:
     raise SystemExit("README.md must document the local Lovelace resource path")
 
-if 'import { CARD_STYLES } from "./card-styles.js";' not in main_src:
-    raise SystemExit('Missing CARD_STYLES import in gazon-intelligent-card.js')
+if 'import { CARD_STYLES } from "./styles/card-styles.js";' not in main_src:
+    raise SystemExit('Missing CARD_STYLES import in src/gazon-intelligent-card.js')
 
-if 'import { EDITOR_STYLES } from "./editor-styles.js";' not in main_src:
-    raise SystemExit('Missing EDITOR_STYLES import in gazon-intelligent-card.js')
+if 'import { EDITOR_STYLES } from "./styles/editor-styles.js";' not in main_src:
+    raise SystemExit('Missing EDITOR_STYLES import in src/gazon-intelligent-card.js')
 
 for marker in ("customElements.define", "getConfigForm", "window.customCards"):
     if marker not in main_src:

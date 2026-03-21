@@ -824,34 +824,41 @@ const CARD_STYLES = String.raw`
         .gi-pill__icon {
           width: 20px;
           height: 20px;
-          display: grid;
-          place-items: center;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           flex: none;
           overflow: visible;
-          line-height: 1;
+          line-height: 0;
           border-radius: 999px;
           background: color-mix(in srgb, var(--gazon-card-accent) 14%, transparent);
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
 
-        .gi-pill__icon .gi-icon {
-          overflow: visible;
-        }
-
         .gi-pill__icon .gi-icon--pill {
-          width: 12px;
-          height: 12px;
+          width: 14px;
+          height: 14px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           flex: none;
           overflow: visible;
-          transform: translateY(var(--gi-icon-shift-pill));
+          transform: none;
           color: inherit;
+          line-height: 0;
         }
 
         .gi-pill__icon .gi-icon--pill ha-icon,
         .gi-pill__icon .gi-icon--pill svg {
-          width: 12px;
-          height: 12px;
-          transform: translateY(var(--gi-icon-shift-pill));
+          width: 14px;
+          height: 14px;
+          display: block;
+          margin: 0;
+          transform: none;
+        }
+
+        .gi-pill__icon .gi-icon--pill ha-icon {
+          --mdc-icon-size: 14px;
         }
 
         .gi-pill__icon .gi-icon,
@@ -1990,7 +1997,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.28";
+const CARD_VERSION = "0.1.29";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

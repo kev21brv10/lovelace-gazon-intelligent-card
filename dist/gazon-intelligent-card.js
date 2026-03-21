@@ -535,7 +535,7 @@ const CARD_STYLES = String.raw`
         .gi-config-action {
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          gap: 0;
           width: 100%;
           border: 0;
           padding: 0;
@@ -568,7 +568,7 @@ const CARD_STYLES = String.raw`
         .gi-overview-action {
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          gap: 0;
           width: 100%;
           border: 0;
           padding: 0;
@@ -596,33 +596,6 @@ const CARD_STYLES = String.raw`
           box-shadow:
             0 0 0 2px color-mix(in srgb, var(--gazon-card-accent) 32%, transparent),
             var(--gi-surface-shadow-strong);
-        }
-
-        .gi-card-core__action {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          font-size: 0.68rem;
-          line-height: 1.15;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          color: color-mix(in srgb, var(--secondary-text-color) 92%, var(--gazon-section-accent));
-          margin-top: 2px;
-        }
-
-        .gi-card-core__action::before {
-          content: "";
-          display: inline-block;
-          width: 6px;
-          height: 6px;
-          border-radius: 999px;
-          background: color-mix(in srgb, var(--gazon-section-accent) 75%, white);
-          box-shadow: 0 0 0 3px color-mix(in srgb, var(--gazon-section-accent) 10%, transparent);
-          flex: none;
-        }
-
-        .gi-card-core__action--empty {
-          opacity: 0;
         }
 
         .gi-action .gi-icon {
@@ -1376,6 +1349,7 @@ const CARD_STYLES = String.raw`
           min-height: var(--gi-card-core-min-height);
           height: 100%;
           padding: var(--gi-card-core-padding);
+          position: relative;
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 6%, transparent) 0%, transparent 100%),
@@ -1399,6 +1373,10 @@ const CARD_STYLES = String.raw`
         .gi-card-core--metric {
           min-height: 64px;
           padding: 11px 13px;
+        }
+
+        .gi-card-core--interactive {
+          padding-right: 42px;
         }
 
         .gi-card-core--tile {
@@ -1506,6 +1484,28 @@ const CARD_STYLES = String.raw`
 
         .gi-card-core__secondary--empty {
           visibility: hidden;
+        }
+
+        .gi-card-core__affordance {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 999px;
+          background: color-mix(in srgb, var(--gazon-section-accent) 10%, transparent);
+          color: color-mix(in srgb, var(--gazon-section-accent) 88%, var(--secondary-text-color));
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+          opacity: 0.9;
+          pointer-events: none;
+        }
+
+        .gi-card-core--interactive:hover .gi-card-core__affordance {
+          background: color-mix(in srgb, var(--gazon-section-accent) 16%, transparent);
+          opacity: 1;
         }
 
         .footer {
@@ -1717,7 +1717,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.3";
+const CARD_VERSION = "0.1.5";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -1755,6 +1755,7 @@ const DEFAULT_CONFIG = {
   entity_niveau: "sensor.gazon_intelligent_niveau_d_action",
   entity_tonte: "sensor.gazon_intelligent_etat_de_tonte",
   entity_hauteur: "sensor.gazon_intelligent_hauteur_de_tonte_conseillee",
+  entity_arrosage_en_cours: "sensor.gazon_intelligent_arrosage_en_cours",
   entity_debit_zone_1: "number.gazon_intelligent_debit_zone_1",
   entity_debit_zone_2: "number.gazon_intelligent_debit_zone_2",
   entity_debit_zone_3: "number.gazon_intelligent_debit_zone_3",
@@ -1779,6 +1780,7 @@ const TAB_DEFS = [
 const ENTITY_KEYS = [
   { key: "entity_fenetre_optimale", label: "Fenêtre optimale", icon: "mdi:clock-outline", domain: ["sensor"] },
   { key: "entity_plan_arrosage", label: "Plan d'arrosage", icon: "mdi:timer-outline", domain: ["sensor"] },
+  { key: "entity_arrosage_en_cours", label: "Arrosage en cours", icon: "mdi:progress-clock", domain: ["sensor"] },
   { key: "entity_dernier_arrosage", label: "Dernier arrosage détecté", icon: "mdi:water-check", domain: ["sensor"] },
   { key: "entity_derniere_application", label: "Dernière application", icon: "mdi:spray-bottle", domain: ["sensor"] },
   { key: "entity_conseil", label: "Conseil principal", icon: "mdi:message-text-outline", domain: ["sensor"] },
@@ -1878,6 +1880,7 @@ const OVERVIEW_ENTITY_KEYS = new Set([
 const RENDER_SIGNATURE_ATTRS = {
   entity_fenetre_optimale: ["status", "summary", "next_action", "auto_irrigation_enabled"],
   entity_plan_arrosage: ["summary", "duration_human", "zone_count", "objective_mm", "plan_type", "passages", "fractionation", "total_duration_min"],
+  entity_arrosage_en_cours: ["active", "started_at_utc", "last_activity_at_utc", "active_zone_count", "zone_count", "progress_percent"],
   entity_dernier_arrosage: ["source", "date_action", "detected_at", "zone_count"],
   entity_derniere_application: ["source", "application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm"],
   entity_objectif_arrosage: ["temperature", "etp", "phase_active"],
@@ -1960,16 +1963,21 @@ function renderCardCore({
   icon = null,
   iconSize = "md",
   secondary = "",
-  actionHint = "",
+  interactive = false,
   style = "",
 }) {
   const classes = ["gi-card-core", `gi-card-core--${kind}`];
   if (tone) {
     classes.push(`gi-card-core--${tone}`);
   }
+  if (interactive) {
+    classes.push("gi-card-core--interactive");
+  }
   const iconHtml = icon ? renderIconBox(icon, iconSize) : "";
   const secondaryValue = isEmpty(secondary) ? "&nbsp;" : escapeHtml(secondary);
-  const actionValue = isEmpty(actionHint) ? "" : escapeHtml(actionHint);
+  const affordanceHtml = interactive
+    ? `<div class="gi-card-core__affordance" aria-hidden="true">${renderIconBox("mdi:chevron-right", "sm")}</div>`
+    : "";
   return `
     <section class="${classes.join(" ")}"${style ? ` style="${escapeHtml(style)}"` : ""}>
       <div class="gi-card-core__icon ${iconHtml ? "" : "gi-card-core__icon--empty"}">
@@ -1979,8 +1987,8 @@ function renderCardCore({
         <div class="gi-card-core__label">${escapeHtml(label)}</div>
         <div class="gi-card-core__value">${escapeHtml(value)}</div>
         <div class="gi-card-core__secondary ${isEmpty(secondary) ? "gi-card-core__secondary--empty" : ""}">${secondaryValue}</div>
-        <div class="gi-card-core__action ${isEmpty(actionHint) ? "gi-card-core__action--empty" : ""}">${actionValue || "&nbsp;"}</div>
       </div>
+      ${affordanceHtml}
     </section>
   `;
 }
@@ -2281,6 +2289,8 @@ class GazonIntelligentCard extends HTMLElement {
     this._lastRenderSignature = null;
     this._activeTab = "overview";
     this._activeSection = "overview";
+    this._wateringProgressTimer = null;
+    this._wateringProgressTick = 0;
     this._onClick = this._onClick.bind(this);
     this._onContextMenu = this._onContextMenu.bind(this);
     this._onDoubleClick = this._onDoubleClick.bind(this);
@@ -2311,6 +2321,7 @@ class GazonIntelligentCard extends HTMLElement {
       entity_type_arrosage: DEFAULT_CONFIG.entity_type_arrosage,
       entity_tonte: DEFAULT_CONFIG.entity_tonte,
       entity_hauteur: DEFAULT_CONFIG.entity_hauteur,
+      entity_arrosage_en_cours: DEFAULT_CONFIG.entity_arrosage_en_cours,
       entity_debit_zone_1: DEFAULT_CONFIG.entity_debit_zone_1,
       entity_debit_zone_2: DEFAULT_CONFIG.entity_debit_zone_2,
       entity_debit_zone_3: DEFAULT_CONFIG.entity_debit_zone_3,
@@ -2346,6 +2357,7 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_tonte_autorisee", selector: { entity: { domain: ["binary_sensor"] } } },
         { name: "entity_objectif_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_type_arrosage", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_arrosage_en_cours", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_debit_zone_1", selector: { entity: { domain: ["number"] } } },
         { name: "entity_debit_zone_2", selector: { entity: { domain: ["number"] } } },
         { name: "entity_debit_zone_3", selector: { entity: { domain: ["number"] } } },
@@ -2364,6 +2376,7 @@ class GazonIntelligentCard extends HTMLElement {
     if (!config || config.type !== `custom:${CARD_TYPE}`) {
       throw new Error(`Invalid configuration for ${CARD_NAME}.`);
     }
+    this._clearWateringProgressTimer();
     this._config = normalizeConfig(mergeConfig(DEFAULT_CONFIG, config));
     this._lastRenderSignature = null;
     this._activeTab = "overview";
@@ -2406,9 +2419,11 @@ class GazonIntelligentCard extends HTMLElement {
 
   connectedCallback() {
     this._render();
+    this._syncWateringProgressTimer();
   }
 
   disconnectedCallback() {
+    this._clearWateringProgressTimer();
     this.shadowRoot?.removeEventListener("click", this._onClick);
     this.shadowRoot?.removeEventListener("contextmenu", this._onContextMenu);
     this.shadowRoot?.removeEventListener("dblclick", this._onDoubleClick);
@@ -2656,6 +2671,122 @@ class GazonIntelligentCard extends HTMLElement {
     };
   }
 
+  _wateringProgressEntity() {
+    return this._entity("entity_arrosage_en_cours");
+  }
+
+  _estimatedWateringTotalSeconds() {
+    const entity = this._planEntity();
+    const attrs = entity?.attributes || {};
+    const zones = Array.isArray(attrs.zones) ? attrs.zones : [];
+    let totalSeconds = 0;
+    for (const zone of zones) {
+      if (!zone || typeof zone !== "object") {
+        continue;
+      }
+      const durationSeconds = asNumber(zone.duration_seconds);
+      if (durationSeconds !== null && durationSeconds > 0) {
+        totalSeconds += durationSeconds;
+        continue;
+      }
+      const durationMin = asNumber(zone.duration_min);
+      if (durationMin !== null && durationMin > 0) {
+        totalSeconds += durationMin * 60.0;
+      }
+    }
+    if (totalSeconds <= 0) {
+      const totalDurationMin = asNumber(attrs.total_duration_min);
+      if (totalDurationMin !== null && totalDurationMin > 0) {
+        totalSeconds = totalDurationMin * 60.0;
+      }
+    }
+    const passages = Math.max(1, asNumber(attrs.passages) ?? 1);
+    const pauseMinutes = Math.max(0, asNumber(attrs.pause_between_passages_minutes) ?? 0);
+    if (totalSeconds > 0 && passages > 1) {
+      totalSeconds = (totalSeconds * passages) + (pauseMinutes * 60.0 * (passages - 1));
+    }
+    return totalSeconds > 0 ? totalSeconds : 0;
+  }
+
+  _wateringProgressState() {
+    const entity = this._wateringProgressEntity();
+    const attrs = entity?.attributes || {};
+    const active = Boolean(attrs.active);
+    if (!entity || !active) {
+      return {
+        active: false,
+        progressPercent: 0,
+        summary: "Aucun arrosage en cours",
+        detail: "Aucune session active",
+      };
+    }
+
+    const startedAtRaw = String(attrs.started_at_utc || "").trim();
+    const startedAt = startedAtRaw ? Date.parse(startedAtRaw) : NaN;
+    const totalSeconds = this._estimatedWateringTotalSeconds();
+    const elapsedSeconds = Number.isFinite(startedAt)
+      ? Math.max(0, (Date.now() - startedAt) / 1000)
+      : asNumber(attrs.elapsed_seconds) ?? 0;
+    const progressPercent = totalSeconds > 0
+      ? Math.min(100, (elapsedSeconds / totalSeconds) * 100)
+      : asNumber(attrs.progress_percent) ?? asNumber(entity.state) ?? 0;
+    const remainingSeconds = totalSeconds > 0 ? Math.max(totalSeconds - elapsedSeconds, 0) : asNumber(attrs.remaining_seconds) ?? 0;
+    const activeZoneCount = asNumber(attrs.active_zone_count) ?? 0;
+    const zoneCount = asNumber(attrs.zone_count) ?? activeZoneCount;
+    const startedAtLabel = String(attrs.started_at || "").trim() || (startedAtRaw ? _human_datetime_text(startedAtRaw) : "");
+    const detailParts = [];
+    if (startedAtLabel) {
+      detailParts.push(`Démarré ${startedAtLabel}`);
+    }
+    detailParts.push(`${activeZoneCount} zone${activeZoneCount > 1 ? "s" : ""} active${activeZoneCount > 1 ? "s" : ""}`);
+    if (totalSeconds > 0) {
+      detailParts.push(`Restant ${formatDurationHuman(remainingSeconds / 60.0)}`);
+    }
+    const summary = `Arrosage en cours ${formatNumber(progressPercent, 0) || 0}%`;
+    return {
+      active: true,
+      progressPercent,
+      remainingSeconds,
+      elapsedSeconds,
+      summary,
+      detail: detailParts.join(" · "),
+      startedAtLabel,
+      activeZoneCount,
+      zoneCount,
+      critical: progressPercent >= 90,
+    };
+  }
+
+  _hasActiveWateringProgress() {
+    return this._wateringProgressState().active;
+  }
+
+  _clearWateringProgressTimer() {
+    if (this._wateringProgressTimer !== null) {
+      window.clearInterval(this._wateringProgressTimer);
+      this._wateringProgressTimer = null;
+    }
+  }
+
+  _syncWateringProgressTimer() {
+    if (typeof window === "undefined") {
+      return;
+    }
+    if (this._hasActiveWateringProgress()) {
+      if (this._wateringProgressTimer === null) {
+        this._wateringProgressTimer = window.setInterval(() => {
+          if (!this.isConnected) {
+            return;
+          }
+          this._wateringProgressTick = Date.now();
+          this._render();
+        }, 5000);
+      }
+      return;
+    }
+    this._clearWateringProgressTimer();
+  }
+
   _lastWateringState() {
     const entity = this._lastWateringEntity();
     if (!entity) {
@@ -2768,6 +2899,7 @@ class GazonIntelligentCard extends HTMLElement {
       "entity_sous_phase",
       "entity_tonte",
       "entity_hauteur",
+      "entity_arrosage_en_cours",
       "entity_arrosage_recommande",
       "entity_arrosage_apres_application_autorise",
       "entity_tonte_autorisee",
@@ -2784,6 +2916,7 @@ class GazonIntelligentCard extends HTMLElement {
       "entity_type_arrosage",
       "entity_mode",
       "entity_switch_arrosage_automatique",
+      "entity_arrosage_en_cours",
       "entity_debit_zone_1",
       "entity_debit_zone_2",
       "entity_debit_zone_3",
@@ -2826,6 +2959,7 @@ class GazonIntelligentCard extends HTMLElement {
           "entity_avoid",
           "entity_objectif_arrosage",
           "entity_type_arrosage",
+          "entity_arrosage_en_cours",
           "entity_arrosage_recommande",
           "entity_arrosage_apres_application_autorise",
           "entity_tonte_autorisee",
@@ -2836,6 +2970,10 @@ class GazonIntelligentCard extends HTMLElement {
           "entity_hauteur",
         ].forEach((key) => keys.add(key));
       }
+    }
+
+    if (this._hasActiveWateringProgress()) {
+      keys.add(`watering_progress_${this._wateringProgressTick || 0}`);
     }
 
     const snapshot = {
@@ -2939,7 +3077,7 @@ class GazonIntelligentCard extends HTMLElement {
     `;
   }
 
-  _renderStatCard(label, value, tone = "neutral", icon = null, secondary = "", actionHint = "") {
+  _renderStatCard(label, value, tone = "neutral", icon = null, secondary = "", interactive = false) {
     return renderCardCore({
       kind: "stat",
       label,
@@ -2947,7 +3085,7 @@ class GazonIntelligentCard extends HTMLElement {
       tone,
       icon: this._config?.show_icons ? icon : null,
       secondary,
-      actionHint,
+      interactive,
     });
   }
 
@@ -3152,9 +3290,9 @@ class GazonIntelligentCard extends HTMLElement {
     return facts.slice(0, 4);
   }
 
-  _renderConfigActionCard(label, entityKey, value, tone = "neutral", icon = null, secondary = "Touchez pour modifier") {
+  _renderConfigActionCard(label, entityKey, value, tone = "neutral", icon = null, secondary = "") {
     const entityId = this._entityId(entityKey);
-    const card = this._renderStatCard(label, value, tone, icon, secondary, "Touchez pour ouvrir");
+    const card = this._renderStatCard(label, value, tone, icon, secondary, true);
     if (!entityId) {
       return card;
     }
@@ -3177,7 +3315,7 @@ class GazonIntelligentCard extends HTMLElement {
       fact.tone,
       fact.icon,
       this._config?.show_secondary_info ? fact.secondary : "",
-      `Ouvre: ${fact.label}`,
+      true,
     );
     const entityId = this._entityId(fact.entityKey);
     if (!entityId) {
@@ -3192,6 +3330,44 @@ class GazonIntelligentCard extends HTMLElement {
       >
         ${card}
       </button>
+    `;
+  }
+
+  _renderWateringProgressSection(progressState) {
+    if (!progressState?.active) {
+      return "";
+    }
+    const percent = Math.max(0, Math.min(100, asNumber(progressState.progressPercent) ?? 0));
+    const remainingSeconds = Math.max(0, asNumber(progressState.remainingSeconds) ?? 0);
+    const remainingLabel = progressState.remainingSeconds !== undefined && progressState.remainingSeconds !== null
+      ? formatDurationHuman(remainingSeconds / 60.0)
+      : "0 min";
+    const summary = String(progressState.summary || "Arrosage en cours").trim();
+    const detail = String(progressState.detail || "").trim();
+    const metaParts = [];
+    if (progressState.startedAtLabel) {
+      metaParts.push(progressState.startedAtLabel);
+    }
+    if (detail) {
+      metaParts.push(detail);
+    }
+    if (remainingSeconds > 0) {
+      metaParts.push(`${remainingLabel} restants`);
+    }
+    return `
+      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--watering-progress">
+        <div class="tab-panel__section-head">
+          <div class="tab-panel__eyebrow">Arrosage en cours</div>
+          <div class="tab-panel__section-meta">${escapeHtml(`${Math.round(percent)} %`)}</div>
+        </div>
+        <div class="tab-panel__section-summary">${escapeHtml(summary)}</div>
+        <div class="tab-progress" aria-label="${escapeHtml(summary)}">
+          <div class="tab-progress__bar gi-progress">
+            <span class="gi-progress__bar ${progressState.critical ? "gi-progress__bar--critical" : ""}" style="width:${escapeHtml(String(percent))}%;"></span>
+          </div>
+          <div class="tab-progress__meta">${escapeHtml(metaParts.join(" · ") || "Session active")}</div>
+        </div>
+      </section>
     `;
   }
 
@@ -3327,7 +3503,7 @@ class GazonIntelligentCard extends HTMLElement {
     const zoneCards = this._zoneDebitEntries()
       .map((entry) => {
         const config = this._renderConfigValue(entry.key, "mm/h");
-        return this._renderConfigActionCard(entry.label, entry.key, config.value, config.tone, "mdi:sprinkler", "Touchez pour ouvrir");
+        return this._renderConfigActionCard(entry.label, entry.key, config.value, config.tone, "mdi:sprinkler");
       })
       .join("");
     const heightMin = this._renderConfigValue("entity_hauteur_min_tondeuse", "cm");
@@ -3345,21 +3521,21 @@ class GazonIntelligentCard extends HTMLElement {
         </div>
 
         <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-top">
-          ${this._renderConfigActionCard("Arrosage automatique", "entity_switch_arrosage_automatique", switchState.label, switchState.tone, "mdi:switch", "Touchez pour activer / désactiver")}
-          ${this._renderConfigActionCard("Après application", "entity_arrosage_apres_application_autorise", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off", "Touchez pour ouvrir")}
-          ${this._renderConfigActionCard("Tonte autorisée", "entity_tonte_autorisee", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", "mdi:content-cut", "Touchez pour ouvrir")}
-          ${this._renderConfigActionCard("Mode du gazon", "entity_mode", formatApplicationMode(mode), modeTone, "mdi:grass", "Touchez pour changer")}
-          ${this._renderConfigActionCard("Hauteur min tondeuse", "entity_hauteur_min_tondeuse", heightMin.value, heightMin.tone, "mdi:ruler-square", "Touchez pour ajuster")}
-          ${this._renderConfigActionCard("Hauteur max tondeuse", "entity_hauteur_max_tondeuse", heightMax.value, heightMax.tone, "mdi:ruler-square", "Touchez pour ajuster")}
+          ${this._renderConfigActionCard("Arrosage automatique", "entity_switch_arrosage_automatique", switchState.label, switchState.tone, "mdi:switch")}
+          ${this._renderConfigActionCard("Après application", "entity_arrosage_apres_application_autorise", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off")}
+          ${this._renderConfigActionCard("Tonte autorisée", "entity_tonte_autorisee", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", "mdi:content-cut")}
+          ${this._renderConfigActionCard("Mode du gazon", "entity_mode", formatApplicationMode(mode), modeTone, "mdi:grass")}
+          ${this._renderConfigActionCard("Hauteur min tondeuse", "entity_hauteur_min_tondeuse", heightMin.value, heightMin.tone, "mdi:ruler-square")}
+          ${this._renderConfigActionCard("Hauteur max tondeuse", "entity_hauteur_max_tondeuse", heightMax.value, heightMax.tone, "mdi:ruler-square")}
         </div>
 
         <div class="tab-panel__section tab-panel__section--config-quick">
           <div class="tab-panel__section-title">Accès rapide</div>
           <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">
-            ${this._renderConfigActionCard("Arrosage auto", "entity_switch_arrosage_automatique", switchState.label, switchState.tone, "mdi:switch", "Modifier")}
-            ${this._renderConfigActionCard("Mode", "entity_mode", formatApplicationMode(mode), modeTone, "mdi:grass", "Modifier")}
-            ${this._renderConfigActionCard("Après application", "entity_arrosage_apres_application_autorise", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off", "Modifier")}
-            ${this._renderConfigActionCard("Tonte", "entity_tonte_autorisee", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", "mdi:content-cut", "Modifier")}
+            ${this._renderConfigActionCard("Arrosage auto", "entity_switch_arrosage_automatique", switchState.label, switchState.tone, "mdi:switch")}
+            ${this._renderConfigActionCard("Mode", "entity_mode", formatApplicationMode(mode), modeTone, "mdi:grass")}
+            ${this._renderConfigActionCard("Après application", "entity_arrosage_apres_application_autorise", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off")}
+            ${this._renderConfigActionCard("Tonte", "entity_tonte_autorisee", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", "mdi:content-cut")}
           </div>
         </div>
 
@@ -3370,8 +3546,8 @@ class GazonIntelligentCard extends HTMLElement {
           </div>
           <div class="tab-panel__section-title">Hauteurs de tondeuse</div>
           <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">
-            ${this._renderConfigActionCard("Hauteur min tondeuse", "entity_hauteur_min_tondeuse", heightMin.value, heightMin.tone, "mdi:ruler-square", "Touchez pour ouvrir")}
-            ${this._renderConfigActionCard("Hauteur max tondeuse", "entity_hauteur_max_tondeuse", heightMax.value, heightMax.tone, "mdi:ruler-square", "Touchez pour ouvrir")}
+            ${this._renderConfigActionCard("Hauteur min tondeuse", "entity_hauteur_min_tondeuse", heightMin.value, heightMin.tone, "mdi:ruler-square")}
+            ${this._renderConfigActionCard("Hauteur max tondeuse", "entity_hauteur_max_tondeuse", heightMax.value, heightMax.tone, "mdi:ruler-square")}
           </div>
         </div>
       </section>
@@ -3521,6 +3697,7 @@ class GazonIntelligentCard extends HTMLElement {
     const overviewTone = proposal.tone;
     const overviewIcon = this._config?.show_icons ? proposal.icon : null;
     const facts = this._overviewFacts();
+    const wateringProgress = this._wateringProgressState();
 
     return `
       <section class="tab-panel gi-panel tab-panel--overview">
@@ -3532,6 +3709,8 @@ class GazonIntelligentCard extends HTMLElement {
           <div class="tab-panel__hero-next">${escapeHtml(windowState.summary || planState.summary || "Vue d’ensemble de la carte.")}</div>
           <div class="tab-panel__hero-hint">${escapeHtml("Le résumé s’adapte automatiquement à la situation réelle et remonte les informations utiles en premier.")}</div>
         </div>
+
+        ${this._renderWateringProgressSection(wateringProgress)}
 
         <div class="tab-panel__grid tab-panel__grid--overview">
           ${facts
@@ -3606,6 +3785,7 @@ class GazonIntelligentCard extends HTMLElement {
       this._renderTabPill("Type", planTypeLabel, this._planTypeTone(planState.planType), "mdi:shape"),
       this._renderTabPill("Objectif", objectiveLabel, objective > 0 ? "success" : "neutral", "mdi:water"),
     ];
+    const wateringProgress = this._wateringProgressState();
 
     return `
       <section class="tab-panel gi-panel tab-panel--watering">
@@ -3625,6 +3805,8 @@ class GazonIntelligentCard extends HTMLElement {
               : ""
           }
         </div>
+
+        ${this._renderWateringProgressSection(wateringProgress)}
 
         ${
           manualButtonVisible
@@ -4144,6 +4326,7 @@ ${CARD_STYLES}
     this.shadowRoot.addEventListener("contextmenu", this._onContextMenu);
     this.shadowRoot.addEventListener("dblclick", this._onDoubleClick);
     this.shadowRoot.addEventListener("keydown", this._onKeyDown);
+    this._syncWateringProgressTimer();
   }
 
   _bindMoreInfoButtons() {

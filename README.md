@@ -11,6 +11,7 @@ Gazon Intelligent Card affiche dans Home Assistant les décisions métier les pl
 - navigation par onglets pour séparer clairement arrosage, tonte, gazon et configuration
 - résumé adaptatif qui met en avant les vraies informations utiles selon la situation
 - tuiles du résumé, de la tonte, du gazon et de la configuration cliquables pour ouvrir le bon `more-info`
+- barre de progression visible quand un arrosage est en cours
 - fenêtre optimale, objectif d'arrosage et type d'arrosage bien lisibles
 - bouton unique `Arrosage manuel immédiat` quand un arrosage est possible
 - résumé compact du plan d'arrosage
@@ -30,6 +31,7 @@ Gazon Intelligent Card affiche dans Home Assistant les décisions métier les pl
 
 - affiche une lecture claire et hiérarchisée du moteur Gazon Intelligent
 - met en avant la fenêtre optimale, l'objectif d'arrosage et l'action manuelle unique
+- affiche la progression d'arrosage en cours dès qu'une session est active
 - sépare les usages par onglets: arrosage, tonte, configuration et contexte avancé
 - reste lisible même si certaines entités sont absentes
 - s’adapte au thème clair ou sombre de Home Assistant
@@ -167,6 +169,7 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 - `title`
 - `entity_fenetre_optimale`
 - `entity_plan_arrosage`
+- `entity_arrosage_en_cours`
 - `entity_dernier_arrosage`
 - `entity_derniere_application`
 - `entity_mode`

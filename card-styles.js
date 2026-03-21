@@ -535,7 +535,7 @@ export const CARD_STYLES = String.raw`
         .gi-config-action {
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          gap: 0;
           width: 100%;
           border: 0;
           padding: 0;
@@ -568,7 +568,7 @@ export const CARD_STYLES = String.raw`
         .gi-overview-action {
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          gap: 0;
           width: 100%;
           border: 0;
           padding: 0;
@@ -596,33 +596,6 @@ export const CARD_STYLES = String.raw`
           box-shadow:
             0 0 0 2px color-mix(in srgb, var(--gazon-card-accent) 32%, transparent),
             var(--gi-surface-shadow-strong);
-        }
-
-        .gi-card-core__action {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          font-size: 0.68rem;
-          line-height: 1.15;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          color: color-mix(in srgb, var(--secondary-text-color) 92%, var(--gazon-section-accent));
-          margin-top: 2px;
-        }
-
-        .gi-card-core__action::before {
-          content: "";
-          display: inline-block;
-          width: 6px;
-          height: 6px;
-          border-radius: 999px;
-          background: color-mix(in srgb, var(--gazon-section-accent) 75%, white);
-          box-shadow: 0 0 0 3px color-mix(in srgb, var(--gazon-section-accent) 10%, transparent);
-          flex: none;
-        }
-
-        .gi-card-core__action--empty {
-          opacity: 0;
         }
 
         .gi-action .gi-icon {
@@ -1376,6 +1349,7 @@ export const CARD_STYLES = String.raw`
           min-height: var(--gi-card-core-min-height);
           height: 100%;
           padding: var(--gi-card-core-padding);
+          position: relative;
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 6%, transparent) 0%, transparent 100%),
@@ -1399,6 +1373,10 @@ export const CARD_STYLES = String.raw`
         .gi-card-core--metric {
           min-height: 64px;
           padding: 11px 13px;
+        }
+
+        .gi-card-core--interactive {
+          padding-right: 42px;
         }
 
         .gi-card-core--tile {
@@ -1506,6 +1484,28 @@ export const CARD_STYLES = String.raw`
 
         .gi-card-core__secondary--empty {
           visibility: hidden;
+        }
+
+        .gi-card-core__affordance {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 999px;
+          background: color-mix(in srgb, var(--gazon-section-accent) 10%, transparent);
+          color: color-mix(in srgb, var(--gazon-section-accent) 88%, var(--secondary-text-color));
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+          opacity: 0.9;
+          pointer-events: none;
+        }
+
+        .gi-card-core--interactive:hover .gi-card-core__affordance {
+          background: color-mix(in srgb, var(--gazon-section-accent) 16%, transparent);
+          opacity: 1;
         }
 
         .footer {

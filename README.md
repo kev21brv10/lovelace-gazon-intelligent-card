@@ -92,6 +92,10 @@ resources:
 ## 🧱 Structure du projet
 
 - `src/gazon-intelligent-card.js` : point d'entrée source de la carte
+- `src/renderers/layout.js` : rendu du header, des onglets et des panneaux
+- `src/renderers/primitives.js` : primitives communes pour pills et cartes
+- `src/utils/formatters.js` : formatage et fonctions de tonalité
+- `src/constants.js` : constantes partagées entre les couches
 - `src/styles/card-styles.js` : styles de la carte Lovelace
 - `src/styles/editor-styles.js` : styles de l'éditeur
 - `dist/gazon-intelligent-card.js` : bundle final consommé par Home Assistant et HACS

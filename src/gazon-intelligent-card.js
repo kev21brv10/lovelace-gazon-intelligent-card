@@ -1,9 +1,17 @@
 import { CARD_STYLES } from "./styles/card-styles.js";
 import { EDITOR_STYLES } from "./styles/editor-styles.js";
+import {
+  renderActiveTab,
+  renderDecisionLayout,
+  renderHeader,
+  renderSectionNav,
+  renderTabNav,
+  renderWateringProgressSection,
+} from "./renderers/layout.js";
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.34";
+const CARD_VERSION = "0.1.35";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -1523,25 +1531,7 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _renderTabNav() {
-    return `
-      <nav class="gi-tabs tab-nav" aria-label="Domaines de la carte">
-        ${TAB_DEFS.map((tab) => {
-          const active = tab.key === this._activeTab;
-          const iconHtml = this._config?.show_icons ? renderIconBox(tab.icon, "sm") : "";
-          return `
-            <button
-              type="button"
-              class="gi-row gi-action tab-nav__item ${active ? "tab-nav__item--active" : ""}"
-              data-tab="${escapeHtml(tab.key)}"
-              aria-pressed="${active ? "true" : "false"}"
-            >
-              ${iconHtml}
-              <span>${escapeHtml(tab.label)}</span>
-            </button>
-          `;
-        }).join("")}
-      </nav>
-    `;
+    return renderTabNav(this);
   }
 
   _renderStatCard(label, value, tone = "neutral", icon = null, secondary = "", interactive = false) {
@@ -1801,60 +1791,7 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _renderWateringProgressSection(progressState) {
-    try {
-      if (!progressState?.active) {
-        return "";
-      }
-      const percent = Math.max(0, Math.min(100, asNumber(progressState.progressPercent) ?? 0));
-      const remainingSeconds = Math.max(0, asNumber(progressState.remainingSeconds) ?? 0);
-      const remainingLabel = progressState.remainingSeconds !== undefined && progressState.remainingSeconds !== null
-        ? formatDurationHuman(remainingSeconds / 60.0)
-        : "0 min";
-      const summary = String(progressState.summary || "Arrosage en cours").trim();
-      const detail = String(progressState.detail || "").trim();
-      const metaParts = [];
-      if (progressState.startedAtLabel) {
-        metaParts.push(progressState.startedAtLabel);
-      }
-      if (detail) {
-        metaParts.push(detail);
-      }
-      if (remainingSeconds > 0) {
-        metaParts.push(`${remainingLabel} restants`);
-      }
-      return `
-        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--watering-progress">
-          <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Arrosage en cours</div>
-            <div class="tab-panel__section-meta">${escapeHtml(`${Math.round(percent)} %`)}</div>
-          </div>
-          <div class="tab-panel__section-summary">${escapeHtml(summary)}</div>
-          <div class="tab-progress" aria-label="${escapeHtml(summary)}">
-            <div class="tab-progress__bar gi-progress">
-              <span class="gi-progress__bar ${progressState.critical ? "gi-progress__bar--critical" : ""}" style="width:${escapeHtml(String(percent))}%;"></span>
-            </div>
-            <div class="tab-progress__meta">${escapeHtml(metaParts.join(" · ") || "Session active")}</div>
-          </div>
-        </section>
-      `;
-    } catch (error) {
-      console.error("[gazon-intelligent-card] progress render failed", error);
-      return `
-        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--watering-progress">
-          <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Arrosage en cours</div>
-            <div class="tab-panel__section-meta">—</div>
-          </div>
-          <div class="tab-panel__section-summary">Suivi de progression indisponible</div>
-          <div class="tab-progress">
-            <div class="tab-progress__bar gi-progress">
-              <span class="gi-progress__bar" style="width:0%;"></span>
-            </div>
-            <div class="tab-progress__meta">La session reste active.</div>
-          </div>
-        </section>
-      `;
-    }
+    return renderWateringProgressSection(this, progressState);
   }
 
   _overviewProposal() {
@@ -2329,38 +2266,11 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _renderActiveTab() {
-    switch (this._activeTab) {
-      case "overview":
-        return this._renderOverviewTab();
-      case "mowing":
-        return this._renderMowingTab();
-      case "gazon":
-        return this._renderGazonTab();
-      case "config":
-        return this._renderConfigTab();
-      case "watering":
-      default:
-        return this._renderWateringTab();
-    }
+    return renderActiveTab(this);
   }
 
   _renderDecisionLayout() {
-    return `
-      <section class="tabs-layout">
-        ${this._renderTabNav()}
-        ${this._renderActiveTab()}
-        ${
-          this._canShowLegacyDetails()
-            ? `<section class="decision-advanced">
-                ${this._renderSectionNav()}
-                ${this._buildDecisionBlocks()}
-                ${this._buildContent()}
-                ${this._buildFooter()}
-              </section>`
-            : ""
-        }
-      </section>
-    `;
+    return renderDecisionLayout(this);
   }
 
   _setActiveSection(section) {
@@ -2503,28 +2413,7 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _renderSectionNav() {
-    if (this._isMinimalMode()) {
-      return "";
-    }
-    return `
-      <nav class="gi-tabs section-nav" aria-label="Sections de la carte">
-        ${SECTION_DEFS.map((section) => {
-          const active = section.key === this._activeSection;
-          const iconHtml = this._config?.show_icons ? renderIconBox(section.icon, "sm") : "";
-          return `
-            <button
-              type="button"
-              class="gi-row gi-action gi-tab section-nav__item ${active ? "section-nav__item--active gi-tab--active" : ""}"
-              data-section="${escapeHtml(section.key)}"
-              aria-pressed="${active ? "true" : "false"}"
-            >
-              ${iconHtml}
-              <span>${escapeHtml(section.label)}</span>
-            </button>
-          `;
-        }).join("")}
-      </nav>
-    `;
+    return renderSectionNav(this);
   }
 
   _renderHero() {
@@ -2655,48 +2544,7 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _buildHeader() {
-    if (!this._config?.show_header) {
-      return "";
-    }
-    const phase = this._entityState("entity_phase", null);
-    const subPhase = this._entityState("entity_sous_phase", null);
-    const weather = this._weatherState();
-    const manualActionLabel = this._manualActionLabel();
-    const tone = this._cardTone();
-    return `
-      <header class="gi-row header">
-        <div class="gi-row header__title-wrap">
-          <div class="header__icon header__icon--${tone}">
-            ${this._config.show_icons ? renderIconBox("mdi:grass", "md") : ""}
-          </div>
-          <div class="header__titles">
-            <div class="header__title">${escapeHtml(this._config.title || DEFAULT_CONFIG.title)}</div>
-            <div class="header__subtitle">
-              ${phase ? escapeHtml(phase) : "Phase non disponible"}
-              ${subPhase ? ` · ${escapeHtml(subPhase)}` : ""}
-            </div>
-          </div>
-        </div>
-        <div class="header__meta">
-          ${
-            weather
-              ? `${renderStatusPill(weather.summary, "neutral", weather.icon, "header__weather")}`
-              : ""
-          }
-          <button
-            type="button"
-            class="header__action gi-action"
-            data-gazon-action="manual-irrigation"
-            style="${this._manualActionStyle()}"
-            aria-label="${escapeHtml(manualActionLabel)}"
-          >
-            ${this._config?.show_icons ? renderIconBox("mdi:water-pump", "sm") : ""}
-            <span>${escapeHtml(manualActionLabel)}</span>
-          </button>
-        </div>
-
-      </header>
-    `;
+    return renderHeader(this);
   }
 
   _buildDecisionBlocks(section = this._activeSection) {

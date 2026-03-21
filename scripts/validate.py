@@ -8,6 +8,7 @@ package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
 hacs = json.loads((ROOT / "hacs.json").read_text(encoding="utf-8"))
 SRC_FILES = [
     "src/gazon-intelligent-card.js",
+    "src/renderers/layout.js",
     "src/styles/card-styles.js",
     "src/styles/editor-styles.js",
 ]
@@ -59,6 +60,14 @@ if 'import { CARD_STYLES } from "./styles/card-styles.js";' not in main_src:
 
 if 'import { EDITOR_STYLES } from "./styles/editor-styles.js";' not in main_src:
     raise SystemExit('Missing EDITOR_STYLES import in src/gazon-intelligent-card.js')
+
+if 'from "./renderers/layout.js";' not in main_src:
+    raise SystemExit("src/gazon-intelligent-card.js must import the layout renderer module")
+
+layout_src = src_files["src/renderers/layout.js"]
+for marker in ("renderHeader", "renderDecisionLayout", "renderWateringProgressSection"):
+    if marker not in layout_src:
+        raise SystemExit(f"Missing expected marker in src/renderers/layout.js: {marker}")
 
 for marker in ("customElements.define", "getConfigForm", "window.customCards"):
     if marker not in main_src:

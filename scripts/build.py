@@ -3,22 +3,35 @@ import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC_MAIN = ROOT / "src" / "gazon-intelligent-card.js"
+SRC_LAYOUT = ROOT / "src" / "renderers" / "layout.js"
 SRC_CARD_STYLES = ROOT / "src" / "styles" / "card-styles.js"
 SRC_EDITOR_STYLES = ROOT / "src" / "styles" / "editor-styles.js"
 DIST_DIR = ROOT / "dist"
 DIST_MAIN = DIST_DIR / "gazon-intelligent-card.js"
 
+def strip_module_source(text: str) -> str:
+    lines = []
+    skipping_import = False
+    for line in text.splitlines(keepends=True):
+        if skipping_import:
+            if ";" in line:
+                skipping_import = False
+            continue
+        if line.lstrip().startswith("import "):
+            if ";" not in line:
+                skipping_import = True
+            continue
+        if line.startswith("export "):
+            lines.append(line[len("export "):])
+        else:
+            lines.append(line)
+    return "".join(lines)
+
 card_styles = SRC_CARD_STYLES.read_text(encoding="utf-8").split("`", 1)[1].rsplit("`;", 1)[0]
 editor_styles = SRC_EDITOR_STYLES.read_text(encoding="utf-8").split("`", 1)[1].rsplit("`;", 1)[0]
-main = SRC_MAIN.read_text(encoding="utf-8")
+main = strip_module_source(SRC_MAIN.read_text(encoding="utf-8"))
+layout = strip_module_source(SRC_LAYOUT.read_text(encoding="utf-8"))
 
-lines = main.splitlines(keepends=True)
-if not lines[0].startswith('import { CARD_STYLES } from "./styles/card-styles.js";'):
-    raise SystemExit("src/gazon-intelligent-card.js must import CARD_STYLES first")
-if not lines[1].startswith('import { EDITOR_STYLES } from "./styles/editor-styles.js";'):
-    raise SystemExit("src/gazon-intelligent-card.js must import EDITOR_STYLES second")
-
-main = "".join(lines[2:])
 bundle = (
     "const CARD_STYLES = String.raw`"
     + card_styles
@@ -27,6 +40,8 @@ bundle = (
     + editor_styles
     + "`;\n\n"
     + main
+    + "\n\n"
+    + layout
 )
 
 if DIST_DIR.exists():

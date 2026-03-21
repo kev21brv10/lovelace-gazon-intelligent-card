@@ -113,10 +113,10 @@ const SECTION_FIELDS = {
 };
 
 const SECTION_ACCENTS = {
-  overview: "#4f8f3a",
-  watering: "#2b8c7c",
-  mowing: "#5f8f3d",
-  details: "#607d8b",
+  overview: "#5aa53c",
+  watering: "#2a8f84",
+  mowing: "#6b8f2d",
+  details: "#5f7280",
 };
 
 const LEGACY_ENTITY_KEYS = [

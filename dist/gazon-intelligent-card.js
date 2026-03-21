@@ -11,11 +11,11 @@ const CARD_STYLES = String.raw`
           --gi-font-lg: clamp(1.04rem, 0.98rem + 0.28vw, 1.16rem);
           --gi-font-xl: clamp(1.10rem, 1.00rem + 0.38vw, 1.26rem);
           --gi-font-2xl: clamp(1.28rem, 1.14rem + 0.56vw, 1.52rem);
-          --gi-icon-vertical-shift: -0.5px;
-          --gi-icon-shift-header: -0.5px;
-          --gi-icon-shift-hero: -0.5px;
-          --gi-icon-shift-pill: -0.5px;
-          --gi-icon-shift-core: -0.5px;
+          --gi-icon-vertical-shift: 0px;
+          --gi-icon-shift-header: 0px;
+          --gi-icon-shift-hero: 0px;
+          --gi-icon-shift-pill: 0px;
+          --gi-icon-shift-core: 0px;
           --gi-motion-fast: 180ms;
           --gi-motion-medium: 260ms;
           --gi-ease-standard: cubic-bezier(0.2, 0, 0, 1);
@@ -1975,7 +1975,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.23";
+const CARD_VERSION = "0.1.24";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

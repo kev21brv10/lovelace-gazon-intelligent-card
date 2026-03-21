@@ -1034,10 +1034,7 @@ const CARD_STYLES = String.raw`
         }
 
         .card--solid {
-          background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 16%, transparent) 0%, transparent 34%),
-            radial-gradient(circle at bottom left, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 0%, transparent 26%),
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 90%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, black) 100%);
+          background: transparent;
         }
 
         .card--glass {
@@ -1665,13 +1662,16 @@ const CARD_STYLES = String.raw`
         }
 
         .card.card--theme-light {
-          background: #ffffff;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 22%, rgba(0, 0, 0, 0.08));
         }
 
         .card.card--theme-dark {
-          background: #000000;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 20%, rgba(255, 255, 255, 0.08));
+        }
+
+        .card.card--theme-light.card--solid,
+        .card.card--theme-dark.card--solid {
+          background: transparent;
         }
 
         .card.card--theme-light::before {
@@ -1961,7 +1961,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.17";
+const CARD_VERSION = "0.1.18";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

@@ -111,8 +111,7 @@ const CARD_STYLES = String.raw`
         .gi-panel,
         .gi-tab,
         .gi-primary-action,
-        .gi-progress__bar,
-        .gi-status-pill {
+        .gi-progress__bar {
           transition:
             transform var(--gi-motion-fast) var(--gi-ease-standard),
             opacity var(--gi-motion-fast) var(--gi-ease-standard),
@@ -792,10 +791,7 @@ const CARD_STYLES = String.raw`
 
         .gi-pill,
         .gi-pill--status,
-        .gi-pill--context,
-        .gi-status-pill,
-        .pill,
-        .context-pill {
+        .gi-pill--context {
           display: flex;
           align-items: center;
           justify-content: flex-start;
@@ -825,7 +821,7 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-pill--status,
-        .gi-status-pill {
+        .gi-pill--context {
           gap: 8px;
           min-height: 32px;
           padding: 4px 12px 4px 8px;
@@ -874,21 +870,17 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-pill--status .gi-pill__content,
-        .gi-status-pill .gi-pill__content {
+        .gi-pill--context .gi-pill__content {
           flex-direction: row;
           align-items: center;
         }
 
-        .gi-pill__icon .gi-icon,
-        .gi-status-pill .gi-icon,
-        .pill .gi-icon,
-        .context-pill .gi-icon {
+        .gi-pill__icon .gi-icon {
           flex: none;
         }
 
         .gi-pill__label,
-        .pill__label,
-        .context-pill__label {
+        .gi-pill__content .gi-pill__label {
           font-size: var(--gi-font-xxs);
           text-transform: uppercase;
           letter-spacing: 0.03em;
@@ -897,9 +889,7 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-pill__value,
-        .gi-pill__text,
-        .pill__value,
-        .context-pill__value {
+        .gi-pill__content .gi-pill__value {
           font-size: var(--gi-font-xs);
           font-weight: 700;
           line-height: 1.12;
@@ -907,7 +897,7 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-pill--status .gi-pill__value,
-        .gi-status-pill .gi-pill__value {
+        .gi-pill--context .gi-pill__value {
           min-width: 0;
           white-space: nowrap;
           overflow: hidden;
@@ -915,48 +905,42 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-pill--danger,
-        .pill--danger,
-        .context-pill--danger {
+        .gi-pill--context.gi-pill--danger {
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-danger-color) 16%, transparent) 0%, color-mix(in srgb, var(--gazon-danger-color) 8%, transparent) 100%);
           border-color: color-mix(in srgb, var(--gazon-danger-color) 24%, transparent);
         }
 
         .gi-pill--critical,
-        .pill--critical,
-        .context-pill--critical {
+        .gi-pill--context.gi-pill--critical {
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-critical-color) 18%, transparent) 0%, color-mix(in srgb, var(--gazon-critical-color) 10%, transparent) 100%);
           border-color: color-mix(in srgb, var(--gazon-critical-color) 28%, transparent);
         }
 
         .gi-pill--warning,
-        .pill--warning,
-        .context-pill--warning {
+        .gi-pill--context.gi-pill--warning {
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-warning-color) 16%, transparent) 0%, color-mix(in srgb, var(--gazon-warning-color) 8%, transparent) 100%);
           border-color: color-mix(in srgb, var(--gazon-warning-color) 24%, transparent);
         }
 
         .gi-pill--success,
-        .pill--success,
-        .context-pill--success {
+        .gi-pill--context.gi-pill--success {
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color) 16%, transparent) 0%, color-mix(in srgb, var(--gazon-success-color) 8%, transparent) 100%);
           border-color: color-mix(in srgb, var(--gazon-success-color) 24%, transparent);
         }
 
         .gi-pill--accent,
-        .pill--accent,
-        .context-pill--accent {
+        .gi-pill--context.gi-pill--accent {
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-accent-tone-color) 14%, transparent) 0%, color-mix(in srgb, var(--gazon-accent-tone-color) 7%, transparent) 100%);
           border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 24%, transparent);
         }
 
         .gi-pill--neutral,
-        .pill--neutral,
-        .context-pill--neutral {
+        .gi-pill--context.gi-pill--neutral {
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
           border-color: color-mix(in srgb, var(--divider-color) 70%, var(--gazon-section-accent) 10%);
@@ -1152,7 +1136,6 @@ const CARD_STYLES = String.raw`
         .gi-info,
         .gi-pill--status,
         .gi-pill--context,
-        .gi-status-pill,
         .gi-panel,
         .gi-primary-action,
         .gi-progress__bar {
@@ -1695,7 +1678,7 @@ const CARD_STYLES = String.raw`
         .card--editor-preview .gi-panel,
         .card--editor-preview .gi-tab,
         .card--editor-preview .gi-pill--status,
-        .card--editor-preview .gi-status-pill,
+        .card--editor-preview .gi-pill--context,
         .card--editor-preview .gi-action,
         .card--editor-preview .gi-info,
         .card--editor-preview .gi-primary-action,
@@ -1794,8 +1777,6 @@ const CARD_STYLES = String.raw`
         .card--theme-light .decision-plan__meta,
         .card--theme-light .gi-pill__label,
         .card--theme-light .gi-pill__value,
-        .card--theme-light .pill__label,
-        .card--theme-light .context-pill__label,
         .card--theme-light .gi-card-core__label,
         .card--theme-light .gi-card-core__secondary,
         .card--theme-light .header__subtitle,
@@ -1803,7 +1784,7 @@ const CARD_STYLES = String.raw`
           color: color-mix(in srgb, #000000 55%, var(--secondary-text-color));
         }
 
-        .card--theme-light :is(.gi-pill--neutral, .gi-pill--context--neutral, .pill--neutral, .context-pill--neutral) {
+        .card--theme-light :is(.gi-pill--neutral, .gi-pill--context.gi-pill--neutral) {
           background: #ffffff;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(0, 0, 0, 0.08));
         }
@@ -1830,8 +1811,6 @@ const CARD_STYLES = String.raw`
         .card--theme-dark .decision-plan__meta,
         .card--theme-dark .gi-pill__label,
         .card--theme-dark .gi-pill__value,
-        .card--theme-dark .pill__label,
-        .card--theme-dark .context-pill__label,
         .card--theme-dark .gi-card-core__label,
         .card--theme-dark .gi-card-core__secondary,
         .card--theme-dark .header__subtitle,
@@ -1839,7 +1818,7 @@ const CARD_STYLES = String.raw`
           color: color-mix(in srgb, #ffffff 72%, var(--secondary-text-color));
         }
 
-        .card--theme-dark :is(.gi-pill--neutral, .gi-pill--context--neutral, .pill--neutral, .context-pill--neutral) {
+        .card--theme-dark :is(.gi-pill--neutral, .gi-pill--context.gi-pill--neutral) {
           background: #000000;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(255, 255, 255, 0.10));
         }
@@ -1858,9 +1837,7 @@ const CARD_STYLES = String.raw`
           .gi-panel,
           .gi-tab,
           .tab-nav__item,
-          .pill,
-          .context-pill,
-          .gi-status-pill,
+          .gi-pill,
           .gi-action,
           .gi-info,
           .gi-primary-action,
@@ -2030,7 +2007,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.31";
+const CARD_VERSION = "0.1.32";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

@@ -11,10 +11,6 @@ export const CARD_STYLES = String.raw`
           --gi-font-lg: clamp(1.04rem, 0.98rem + 0.28vw, 1.16rem);
           --gi-font-xl: clamp(1.10rem, 1.00rem + 0.38vw, 1.26rem);
           --gi-font-2xl: clamp(1.28rem, 1.14rem + 0.56vw, 1.52rem);
-          --gi-icon-vertical-shift: 0px;
-          --gi-icon-shift-header: 0px;
-          --gi-icon-shift-hero: 0px;
-          --gi-icon-shift-core: 0px;
           --gi-motion-fast: 180ms;
           --gi-motion-medium: 260ms;
           --gi-ease-standard: cubic-bezier(0.2, 0, 0, 1);
@@ -153,7 +149,6 @@ export const CARD_STYLES = String.raw`
           padding: 0;
           line-height: 0;
           vertical-align: middle;
-          transform: translateY(var(--gi-icon-vertical-shift));
         }
 
         .gi-icon--sm ha-icon {
@@ -164,7 +159,6 @@ export const CARD_STYLES = String.raw`
           padding: 0;
           line-height: 0;
           vertical-align: middle;
-          transform: translateY(var(--gi-icon-vertical-shift));
         }
 
         .gi-icon--pill ha-icon {
@@ -226,7 +220,6 @@ export const CARD_STYLES = String.raw`
 
         .gi-tab:hover,
         .tab-nav__item:hover {
-          transform: translateY(-1px);
           background: color-mix(in srgb, var(--secondary-background-color) 62%, var(--gazon-section-accent) 38%);
           border-color: var(--gi-surface-border-strong);
           box-shadow: var(--gi-surface-shadow-strong);
@@ -248,7 +241,6 @@ export const CARD_STYLES = String.raw`
           box-shadow:
             0 8px 20px rgba(0, 0, 0, 0.11),
             inset 0 1px 0 rgba(255, 255, 255, 0.06);
-          transform: translateY(-1px);
         }
 
         .tab-panel,
@@ -483,7 +475,6 @@ export const CARD_STYLES = String.raw`
           font-size: var(--gi-font-2xl);
           line-height: 1;
           opacity: 0.94;
-          transform: translateY(-1px);
           flex: none;
         }
 
@@ -501,8 +492,7 @@ export const CARD_STYLES = String.raw`
 
         @media (hover: hover) {
           .gi-action--primary:hover {
-            transform: translateY(-1px);
-            border-color: color-mix(in srgb, var(--gazon-card-accent) 52%, var(--divider-color));
+              border-color: color-mix(in srgb, var(--gazon-card-accent) 52%, var(--divider-color));
             box-shadow:
               0 18px 34px rgba(0, 0, 0, 0.22),
               0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
@@ -533,8 +523,7 @@ export const CARD_STYLES = String.raw`
 
         @media (hover: hover) {
           .gi-config-action:hover .gi-card-core {
-            transform: translateY(-1px);
-            box-shadow: var(--gi-surface-shadow-strong);
+              box-shadow: var(--gi-surface-shadow-strong);
           }
         }
 
@@ -566,8 +555,7 @@ export const CARD_STYLES = String.raw`
 
         @media (hover: hover) {
           .gi-overview-action:hover .gi-card-core {
-            transform: translateY(-1px);
-            box-shadow: var(--gi-surface-shadow-strong);
+              box-shadow: var(--gi-surface-shadow-strong);
           }
         }
 
@@ -828,7 +816,6 @@ export const CARD_STYLES = String.raw`
           padding: 0;
           line-height: 0;
           vertical-align: middle;
-          transform: translateY(-1px);
           --mdc-icon-size: 14px;
         }
 
@@ -1109,8 +1096,7 @@ export const CARD_STYLES = String.raw`
           .gi-action:hover,
           .gi-tab:hover,
           .tab-nav__item:hover {
-            transform: translateY(-1px);
-          }
+            }
         }
 
         .header__title-wrap {
@@ -1246,7 +1232,6 @@ export const CARD_STYLES = String.raw`
         .header__icon .gi-icon {
           width: 14px;
           height: 14px;
-          transform: translateY(var(--gi-icon-shift-header));
         }
 
         .header__titles {
@@ -1333,7 +1318,6 @@ export const CARD_STYLES = String.raw`
         .hero__lead-icon .gi-icon {
           width: 12px;
           height: 12px;
-          transform: translateY(var(--gi-icon-shift-hero));
         }
 
         .hero__label {

@@ -12,6 +12,10 @@ export const CARD_STYLES = String.raw`
           --gi-font-xl: clamp(1.10rem, 1.00rem + 0.38vw, 1.26rem);
           --gi-font-2xl: clamp(1.28rem, 1.14rem + 0.56vw, 1.52rem);
           --gi-icon-vertical-shift: -0.5px;
+          --gi-icon-shift-header: -0.5px;
+          --gi-icon-shift-hero: -0.5px;
+          --gi-icon-shift-pill: -0.5px;
+          --gi-icon-shift-core: -0.5px;
           --gi-motion-fast: 180ms;
           --gi-motion-medium: 260ms;
           --gi-ease-standard: cubic-bezier(0.2, 0, 0, 1);
@@ -171,7 +175,7 @@ export const CARD_STYLES = String.raw`
         .gi-icon--pill svg {
           width: 12px;
           height: 12px;
-          transform: translateY(var(--gi-icon-vertical-shift));
+          transform: translateY(var(--gi-icon-shift-pill));
         }
 
         .gi-tabs,
@@ -839,7 +843,7 @@ export const CARD_STYLES = String.raw`
           height: 12px;
           flex: none;
           overflow: visible;
-          transform: translateY(var(--gi-icon-vertical-shift));
+          transform: translateY(var(--gi-icon-shift-pill));
           color: inherit;
         }
 
@@ -847,7 +851,7 @@ export const CARD_STYLES = String.raw`
         .gi-pill__icon .gi-icon--pill svg {
           width: 12px;
           height: 12px;
-          transform: translateY(var(--gi-icon-vertical-shift));
+          transform: translateY(var(--gi-icon-shift-pill));
         }
 
         .gi-pill__icon .gi-icon,
@@ -1274,7 +1278,7 @@ export const CARD_STYLES = String.raw`
         .header__icon .gi-icon {
           width: 14px;
           height: 14px;
-          transform: translateY(var(--gi-icon-vertical-shift));
+          transform: translateY(var(--gi-icon-shift-header));
         }
 
         .header__titles {
@@ -1361,7 +1365,7 @@ export const CARD_STYLES = String.raw`
         .hero__lead-icon .gi-icon {
           width: 12px;
           height: 12px;
-          transform: translateY(var(--gi-icon-vertical-shift));
+          transform: translateY(var(--gi-icon-shift-hero));
         }
 
         .hero__label {
@@ -1525,7 +1529,7 @@ export const CARD_STYLES = String.raw`
           height: var(--gi-card-core-icon-glyph-size);
           display: block;
           margin: 0;
-          transform: translateY(var(--gi-icon-vertical-shift));
+          transform: translateY(var(--gi-icon-shift-core));
         }
 
         .gi-card-core__icon .gi-icon ha-icon,
@@ -1542,14 +1546,14 @@ export const CARD_STYLES = String.raw`
         .gi-card-core--metric .gi-card-core__icon .gi-icon {
           width: 11px;
           height: 11px;
-          transform: translateY(var(--gi-icon-vertical-shift));
+          transform: translateY(var(--gi-icon-shift-core));
         }
 
         .gi-card-core--metric .gi-card-core__icon .gi-icon ha-icon,
         .gi-card-core--metric .gi-card-core__icon .gi-icon svg {
           width: 11px;
           height: 11px;
-          transform: translateY(var(--gi-icon-vertical-shift));
+          transform: translateY(var(--gi-icon-shift-core));
         }
 
         .tiles .gi-card-core {

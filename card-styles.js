@@ -1170,14 +1170,15 @@ export const CARD_STYLES = String.raw`
           min-height: 30px;
           padding: 4px 11px;
           border-radius: 999px;
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 16%, var(--divider-color));
+          border: 1px solid color-mix(in srgb, var(--gazon-success-color) 24%, var(--gazon-water-color, #44c8ea));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, transparent) 0%, transparent 100%),
-            var(--gi-surface-fill);
-          color: var(--primary-text-color);
-          box-shadow: var(--gi-surface-shadow);
+            linear-gradient(135deg, color-mix(in srgb, var(--gazon-success-color) 78%, white) 0%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 46%, white) 100%);
+          color: #10351f;
+          box-shadow:
+            0 10px 20px color-mix(in srgb, var(--gazon-success-color) 18%, transparent),
+            0 0 0 1px color-mix(in srgb, var(--gazon-success-color) 14%, transparent);
           font-size: 0.72rem;
-          font-weight: 700;
+          font-weight: 800;
           cursor: pointer;
           white-space: nowrap;
           width: auto;
@@ -1204,15 +1205,23 @@ export const CARD_STYLES = String.raw`
         }
 
         .card--theme-light .header__action {
-          background: #ffffff;
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(0, 0, 0, 0.08));
-          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+          background:
+            linear-gradient(135deg, color-mix(in srgb, var(--gazon-success-color) 80%, white) 0%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 52%, white) 100%);
+          border-color: color-mix(in srgb, var(--gazon-success-color) 32%, var(--gazon-water-color, #44c8ea));
+          box-shadow:
+            0 10px 20px color-mix(in srgb, var(--gazon-success-color) 16%, transparent),
+            0 0 0 1px color-mix(in srgb, var(--gazon-success-color) 12%, transparent);
+          color: #10351f;
         }
 
         .card--theme-dark .header__action {
-          background: #000000;
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(255, 255, 255, 0.10));
-          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
+          background:
+            linear-gradient(135deg, color-mix(in srgb, var(--gazon-success-color) 55%, black) 0%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 52%, black) 100%);
+          border-color: color-mix(in srgb, var(--gazon-success-color) 24%, var(--gazon-water-color, #44c8ea));
+          box-shadow:
+            0 10px 20px rgba(0, 0, 0, 0.24),
+            0 0 0 1px color-mix(in srgb, var(--gazon-success-color) 18%, transparent);
+          color: #f7fff7;
         }
 
         @media (max-width: 600px) {

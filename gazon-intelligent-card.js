@@ -51,7 +51,7 @@ const DEFAULT_CONFIG = {
   entity_hauteur_min_tondeuse: "number.gazon_intelligent_hauteur_min_tondeuse",
   entity_hauteur_max_tondeuse: "number.gazon_intelligent_hauteur_max_tondeuse",
   manual_action_service: "gazon_intelligent.start_manual_irrigation",
-  manual_action_label: "Lancer l'arrosage manuel",
+  manual_action_label: "Arrosage manuel",
   tap_action: { action: "more-info" },
   hold_action: { action: "none" },
   double_tap_action: { action: "none" },
@@ -1248,8 +1248,8 @@ class GazonIntelligentCard extends HTMLElement {
 
   _manualActionLabel() {
     const label = String(this._config?.manual_action_label || "").trim();
-    if (!label) {
-      return "Lancer l'arrosage manuel";
+    if (!label || label.toLowerCase() === "lancer l'arrosage manuel") {
+      return "Arrosage manuel";
     }
     return label;
   }

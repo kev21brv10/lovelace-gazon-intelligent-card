@@ -4009,8 +4009,11 @@ class GazonIntelligentCard extends HTMLElement {
     const wateringProgress = this._wateringProgressState();
     const objective = windowState.objective;
     const objectiveLabel = formatMm(objective);
-    const manualButtonVisible = windowState.showManualAction && objective > 0;
+    const manualButtonVisible = true;
     const manualActionLabel = this._manualActionLabel();
+    const manualActionSubtitle = objective > 0
+      ? `${objectiveLabel} à déclencher maintenant`
+      : "Lancement manuel disponible à tout moment";
 
     return `
       <section class="tab-panel gi-panel tab-panel--overview">
@@ -4034,10 +4037,9 @@ class GazonIntelligentCard extends HTMLElement {
                 ${this._config?.show_icons ? renderIconBox("mdi:water-pump", "md") : ""}
                 <span class="tab-panel__action-content">
                   <span class="tab-panel__action-title">${escapeHtml(manualActionLabel)}</span>
-                  <span class="tab-panel__action-subtitle">${escapeHtml(objectiveLabel)} à déclencher maintenant</span>
+                  <span class="tab-panel__action-subtitle">${escapeHtml(manualActionSubtitle)}</span>
                 </span>
               </button>`
-            : ""
         }
 
         ${this._renderWateringProgressSection(wateringProgress)}
@@ -4071,7 +4073,7 @@ class GazonIntelligentCard extends HTMLElement {
     const tone = windowState.tone;
     const windowIcon = this._statusIcon(windowState.status);
     const windowStatusIcon = this._config?.show_icons ? windowIcon : null;
-    const manualButtonVisible = windowState.showManualAction && objective > 0;
+    const manualButtonVisible = true;
     const isBlocked = windowState.isBlocked;
     const isAwaiting = windowState.isAwaiting;
     const noActionText = windowState.isNoActionRequired ? "Aucune irrigation nécessaire" : "";
@@ -4087,6 +4089,9 @@ class GazonIntelligentCard extends HTMLElement {
         ? windowState.nextAction || "Attendre le créneau prévu"
         : noActionHint;
     const planTypeLabel = formatPlanType(planState.planType);
+    const manualActionSubtitle = objective > 0
+      ? `${objectiveLabel} à déclencher maintenant`
+      : "Lancement manuel disponible à tout moment";
 
     const contextPills = [
       this._renderTabPill("Arrosage recommandé", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
@@ -4150,18 +4155,9 @@ class GazonIntelligentCard extends HTMLElement {
                 ${this._config?.show_icons ? renderIconBox("mdi:water-pump", "md") : ""}
                 <span class="tab-panel__action-content">
                   <span class="tab-panel__action-title">${escapeHtml(manualActionLabel)}</span>
-                  <span class="tab-panel__action-subtitle">${escapeHtml(objectiveLabel)} à déclencher maintenant</span>
+                  <span class="tab-panel__action-subtitle">${escapeHtml(manualActionSubtitle)}</span>
                 </span>
               </button>`
-            : `<section class="gi-info gi-info--secondary tab-panel__block tab-panel__block--${isBlocked ? "danger" : "neutral"}">
-                <div class="tab-panel__eyebrow">${escapeHtml(isBlocked ? "Blocage" : isAwaiting ? "En attente" : "Statut")}</div>
-                <div class="tab-panel__block-value">${escapeHtml(blockText || "Aucune action disponible")}</div>
-                ${
-                  blockHint
-                    ? `<div class="tab-panel__block-hint">${escapeHtml(blockHint)}</div>`
-                    : ""
-                }
-              </section>`
         }
 
         <section class="gi-info gi-info--main tab-panel__section">

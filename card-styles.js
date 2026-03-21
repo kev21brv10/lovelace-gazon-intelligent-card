@@ -895,14 +895,15 @@ export const CARD_STYLES = String.raw`
           border-radius: var(--gazon-border-radius);
           color: var(--primary-text-color);
           background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-lawn-color) 22%, transparent) 0%, transparent 38%),
-            radial-gradient(circle at top left, color-mix(in srgb, var(--gazon-water-color) 12%, transparent) 0%, transparent 28%),
-            radial-gradient(circle at bottom left, color-mix(in srgb, var(--gi-soil-color) 20%, transparent) 0%, transparent 34%),
-            var(--card-background-color, var(--ha-card-background, transparent));
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 22%, var(--divider-color));
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-lawn-color) 18%, transparent) 0%, transparent 34%),
+            radial-gradient(circle at top left, color-mix(in srgb, var(--gazon-water-color) 12%, transparent) 0%, transparent 26%),
+            radial-gradient(circle at bottom left, color-mix(in srgb, var(--gi-soil-color) 18%, transparent) 0%, transparent 30%),
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 88%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 26%, var(--divider-color));
           box-shadow:
-            0 12px 30px rgba(0, 0, 0, 0.10),
-            0 1px 0 rgba(255, 255, 255, 0.04) inset,
+            0 16px 34px rgba(0, 0, 0, 0.18),
+            0 0 0 1px color-mix(in srgb, var(--gazon-section-accent) 10%, transparent),
+            0 1px 0 rgba(255, 255, 255, 0.06) inset,
             var(--ha-card-box-shadow, none);
           overflow: hidden;
           padding: var(--gazon-card-padding);
@@ -955,12 +956,16 @@ export const CARD_STYLES = String.raw`
         }
 
         .card--solid {
-          background: var(--card-background-color, var(--ha-card-background, transparent));
+          background:
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-lawn-color) 10%, transparent) 0%, transparent 34%),
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, black) 100%);
         }
 
         .card--glass {
           backdrop-filter: blur(12px);
-          background: color-mix(in srgb, var(--card-background-color, #1f1f1f) 82%, transparent);
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 6%, transparent) 0%, transparent 26%),
+            color-mix(in srgb, var(--card-background-color, #1f1f1f) 84%, var(--secondary-background-color) 16%);
         }
 
         .card--minimal {
@@ -1419,6 +1424,13 @@ export const CARD_STYLES = String.raw`
         .card--editor-preview .gi-primary-action,
         .card--editor-preview .gi-progress__bar {
           animation: none !important;
+        }
+
+        .card--editor-preview {
+          box-shadow:
+            0 14px 28px rgba(0, 0, 0, 0.20),
+            0 0 0 1px color-mix(in srgb, var(--gazon-section-accent) 16%, transparent),
+            var(--ha-card-box-shadow, none);
         }
 
         @media (prefers-reduced-motion: reduce) {

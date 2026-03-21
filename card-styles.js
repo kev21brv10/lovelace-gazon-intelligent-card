@@ -869,18 +869,12 @@ export const CARD_STYLES = String.raw`
           --mdc-icon-size: 14px;
         }
 
-        .gi-pill--status .gi-pill__content,
-        .gi-pill--context .gi-pill__content {
+        .gi-pill__content {
           flex-direction: row;
           align-items: center;
         }
 
-        .gi-pill__icon .gi-icon {
-          flex: none;
-        }
-
-        .gi-pill__label,
-        .gi-pill__content .gi-pill__label {
+        .gi-pill__label {
           font-size: var(--gi-font-xxs);
           text-transform: uppercase;
           letter-spacing: 0.03em;
@@ -888,16 +882,11 @@ export const CARD_STYLES = String.raw`
           line-height: 1.1;
         }
 
-        .gi-pill__value,
-        .gi-pill__content .gi-pill__value {
+        .gi-pill__value {
           font-size: var(--gi-font-xs);
           font-weight: 700;
           line-height: 1.12;
           overflow-wrap: anywhere;
-        }
-
-        .gi-pill--status .gi-pill__value,
-        .gi-pill--context .gi-pill__value {
           min-width: 0;
           white-space: nowrap;
           overflow: hidden;
@@ -1784,7 +1773,7 @@ export const CARD_STYLES = String.raw`
           color: color-mix(in srgb, #000000 55%, var(--secondary-text-color));
         }
 
-        .card--theme-light :is(.gi-pill--neutral, .gi-pill--context.gi-pill--neutral) {
+        .card--theme-light :is(.gi-pill--neutral) {
           background: #ffffff;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(0, 0, 0, 0.08));
         }
@@ -1818,7 +1807,7 @@ export const CARD_STYLES = String.raw`
           color: color-mix(in srgb, #ffffff 72%, var(--secondary-text-color));
         }
 
-        .card--theme-dark :is(.gi-pill--neutral, .gi-pill--context.gi-pill--neutral) {
+        .card--theme-dark :is(.gi-pill--neutral) {
           background: #000000;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(255, 255, 255, 0.10));
         }

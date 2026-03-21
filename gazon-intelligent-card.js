@@ -588,6 +588,27 @@ function formatDurationHuman(totalMinutes) {
   return `${minutes} min ${String(seconds).padStart(2, "0")}`;
 }
 
+function humanDateTimeText(value) {
+  if (isEmpty(value)) {
+    return "";
+  }
+  const parsed = Date.parse(String(value).trim());
+  if (!Number.isFinite(parsed)) {
+    return String(value).trim();
+  }
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(parsed));
+  } catch (_error) {
+    return String(value).trim();
+  }
+}
+
 function formatPlanType(value) {
   const normalized = String(value ?? "").trim().toLowerCase();
   if (!normalized || normalized === "no_plan") {
@@ -1133,7 +1154,7 @@ class GazonIntelligentCard extends HTMLElement {
     const remainingSeconds = totalSeconds > 0 ? Math.max(totalSeconds - elapsedSeconds, 0) : asNumber(attrs.remaining_seconds) ?? 0;
     const activeZoneCount = asNumber(attrs.active_zone_count) ?? 0;
     const zoneCount = asNumber(attrs.zone_count) ?? activeZoneCount;
-    const startedAtLabel = String(attrs.started_at || "").trim() || (startedAtRaw ? _human_datetime_text(startedAtRaw) : "");
+    const startedAtLabel = String(attrs.started_at || "").trim() || (startedAtRaw ? humanDateTimeText(startedAtRaw) : "");
     const detailParts = [];
     if (startedAtLabel) {
       detailParts.push(`Démarré ${startedAtLabel}`);

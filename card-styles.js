@@ -1166,9 +1166,9 @@ export const CARD_STYLES = String.raw`
         .header__action {
           display: inline-flex;
           align-items: center;
-          gap: 6px;
-          min-height: 34px;
-          padding: 5px 12px;
+          gap: 5px;
+          min-height: 28px;
+          padding: 4px 10px;
           border-radius: 999px;
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 16%, var(--divider-color));
           background:
@@ -1176,15 +1176,24 @@ export const CARD_STYLES = String.raw`
             var(--gi-surface-fill);
           color: var(--primary-text-color);
           box-shadow: var(--gi-surface-shadow);
-          font-size: 0.76rem;
-          font-weight: 750;
+          font-size: 0.68rem;
+          font-weight: 700;
           cursor: pointer;
           white-space: nowrap;
+          max-width: 170px;
+          overflow: hidden;
         }
 
         .header__action .gi-icon {
-          width: 12px;
-          height: 12px;
+          width: 11px;
+          height: 11px;
+          flex: none;
+        }
+
+        .header__action span:last-child {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          min-width: 0;
         }
 
         .card--theme-light .header__action {
@@ -1197,6 +1206,14 @@ export const CARD_STYLES = String.raw`
           background: #000000;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(255, 255, 255, 0.10));
           box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
+        }
+
+        @media (max-width: 600px) {
+          .header__action {
+            max-width: 132px;
+            padding: 4px 8px;
+            font-size: 0.64rem;
+          }
         }
 
         .card--theme-light .header__weather {

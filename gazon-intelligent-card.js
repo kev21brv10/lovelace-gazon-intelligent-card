@@ -179,7 +179,8 @@ function renderIconBox(icon, size = "md") {
     return "";
   }
   const sizeClass = size === "sm" ? "gi-icon--sm" : size === "pill" ? "gi-icon--pill" : "";
-  return `<span class="gi-icon ${sizeClass}"><ha-icon icon="${escapeHtml(icon)}"></ha-icon></span>`;
+  const iconSize = size === "sm" ? "13px" : size === "pill" ? "12px" : "16px";
+  return `<span class="gi-icon ${sizeClass}"><ha-icon style="--mdc-icon-size:${iconSize};" icon="${escapeHtml(icon)}"></ha-icon></span>`;
 }
 
 function renderPillIcon(icon) {

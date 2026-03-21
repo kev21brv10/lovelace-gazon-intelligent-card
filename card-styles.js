@@ -120,18 +120,20 @@ export const CARD_STYLES = String.raw`
           flex: none;
           flex-shrink: 0;
           line-height: 0;
-          overflow: hidden;
+          overflow: visible;
+          --mdc-icon-size: 16px;
         }
 
         .gi-icon--sm {
           width: 18px;
           height: 18px;
+          --mdc-icon-size: 13px;
         }
 
         .gi-icon--pill {
           width: 16px;
           height: 16px;
-          overflow: visible;
+          --mdc-icon-size: 12px;
         }
 
         .gi-icon ha-icon,
@@ -1267,7 +1269,7 @@ export const CARD_STYLES = String.raw`
           align-items: center;
           justify-content: center;
           flex: none;
-          overflow: hidden;
+          overflow: visible;
           line-height: 0;
           background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
           color: var(--gazon-section-accent);

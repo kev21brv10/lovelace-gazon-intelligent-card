@@ -678,9 +678,9 @@ class GazonIntelligentCard extends HTMLElement {
     const advanced = Boolean(this._config?.show_advanced_details);
     return {
       rows: minimal ? 4 : compact ? 6 : 7,
-      columns: 12,
+      columns: "full",
       min_rows: minimal ? 3 : compact ? 5 : 6,
-      min_columns: 6,
+      min_columns: 12,
       max_rows: minimal ? 4 : compact ? 7 : advanced ? 9 : 8,
       max_columns: 12,
     };

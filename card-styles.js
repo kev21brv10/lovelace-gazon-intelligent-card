@@ -1516,12 +1516,13 @@ export const CARD_STYLES = String.raw`
           width: var(--gi-card-core-icon-size);
           height: var(--gi-card-core-icon-size);
           border-radius: 999px;
-          display: grid;
-          place-items: center;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           align-self: center;
           flex: none;
           overflow: visible;
-          line-height: 1;
+          line-height: 0;
           background: color-mix(in srgb, var(--gazon-section-accent) 18%, transparent);
           color: var(--gazon-section-accent);
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -1535,15 +1536,21 @@ export const CARD_STYLES = String.raw`
         .gi-card-core__icon .gi-icon {
           width: var(--gi-card-core-icon-glyph-size);
           height: var(--gi-card-core-icon-glyph-size);
-          display: block;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           margin: 0;
-          transform: translateY(var(--gi-icon-shift-core));
+          transform: none;
+          line-height: 0;
         }
 
         .gi-card-core__icon .gi-icon ha-icon,
         .gi-card-core__icon .gi-icon svg {
           width: var(--gi-card-core-icon-glyph-size);
           height: var(--gi-card-core-icon-glyph-size);
+          display: block;
+          margin: 0;
+          transform: none;
         }
 
         .gi-card-core--metric .gi-card-core__icon {
@@ -1555,14 +1562,14 @@ export const CARD_STYLES = String.raw`
         .gi-card-core--metric .gi-card-core__icon .gi-icon {
           width: 11px;
           height: 11px;
-          transform: translateY(var(--gi-icon-shift-core));
+          transform: none;
         }
 
         .gi-card-core--metric .gi-card-core__icon .gi-icon ha-icon,
         .gi-card-core--metric .gi-card-core__icon .gi-icon svg {
           width: 11px;
           height: 11px;
-          transform: translateY(var(--gi-icon-shift-core));
+          transform: none;
         }
 
         .tiles .gi-card-core {

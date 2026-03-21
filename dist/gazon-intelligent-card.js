@@ -1166,9 +1166,9 @@ const CARD_STYLES = String.raw`
         .header__action {
           display: inline-flex;
           align-items: center;
-          gap: 5px;
-          min-height: 28px;
-          padding: 4px 10px;
+          gap: 6px;
+          min-height: 30px;
+          padding: 4px 11px;
           border-radius: 999px;
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 16%, var(--divider-color));
           background:
@@ -1176,11 +1176,11 @@ const CARD_STYLES = String.raw`
             var(--gi-surface-fill);
           color: var(--primary-text-color);
           box-shadow: var(--gi-surface-shadow);
-          font-size: 0.68rem;
+          font-size: 0.72rem;
           font-weight: 700;
           cursor: pointer;
           white-space: nowrap;
-          max-width: 170px;
+          max-width: 184px;
           overflow: hidden;
         }
 
@@ -1210,7 +1210,7 @@ const CARD_STYLES = String.raw`
 
         @media (max-width: 600px) {
           .header__action {
-            max-width: 132px;
+            max-width: 144px;
             padding: 4px 8px;
             font-size: 0.64rem;
           }

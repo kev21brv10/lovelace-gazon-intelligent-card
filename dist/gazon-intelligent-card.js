@@ -49,6 +49,14 @@ const CARD_STYLES = String.raw`
           --gi-card-core-icon-size: 20px;
           --gi-card-core-icon-glyph-size: 12px;
           --gi-card-core-secondary-size: 0.72rem;
+          --gi-surface-border: color-mix(in srgb, var(--gazon-section-accent) 18%, var(--divider-color));
+          --gi-surface-border-strong: color-mix(in srgb, var(--gazon-section-accent) 28%, var(--divider-color));
+          --gi-surface-fill:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 88%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, black) 100%);
+          --gi-surface-fill-accent:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
+          --gi-surface-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+          --gi-surface-shadow-strong: 0 14px 30px rgba(0, 0, 0, 0.14);
         }
 
         @keyframes gazonPulseSoft {
@@ -184,9 +192,9 @@ const CARD_STYLES = String.raw`
           align-items: center;
           gap: var(--gi-nav-item-gap);
           min-width: 0;
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 28%, var(--divider-color));
+          border: 1px solid var(--gi-surface-border);
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, var(--secondary-background-color)) 0%, var(--secondary-background-color) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 12%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, white) 100%);
           color: var(--secondary-text-color);
           border-radius: 12px;
           padding: var(--gi-nav-item-padding);
@@ -194,7 +202,7 @@ const CARD_STYLES = String.raw`
           cursor: pointer;
           user-select: none;
           -webkit-tap-highlight-color: transparent;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+          box-shadow: var(--gi-surface-shadow);
           transition:
             transform var(--gi-motion-fast) var(--gi-ease-standard),
             background-color var(--gi-motion-fast) var(--gi-ease-standard),
@@ -207,9 +215,9 @@ const CARD_STYLES = String.raw`
         .gi-tab:hover,
         .tab-nav__item:hover {
           transform: translateY(-1px);
-          background: color-mix(in srgb, var(--secondary-background-color) 68%, var(--gazon-section-accent) 32%);
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 42%, var(--divider-color));
-          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.09);
+          background: color-mix(in srgb, var(--secondary-background-color) 62%, var(--gazon-section-accent) 38%);
+          border-color: var(--gi-surface-border-strong);
+          box-shadow: var(--gi-surface-shadow-strong);
         }
 
         .gi-tab .gi-icon,
@@ -221,13 +229,13 @@ const CARD_STYLES = String.raw`
         .gi-tab--active,
         .tab-nav__item--active {
           color: var(--primary-text-color);
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 40%, var(--divider-color));
+          border-color: var(--gi-surface-border-strong);
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 22%, transparent) 0%, transparent 100%),
-            var(--secondary-background-color);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 26%, transparent) 0%, transparent 100%),
+            color-mix(in srgb, var(--secondary-background-color) 96%, white);
           box-shadow:
-            0 6px 18px rgba(0, 0, 0, 0.10),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            0 8px 20px rgba(0, 0, 0, 0.11),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
           transform: translateY(-1px);
         }
 
@@ -245,12 +253,13 @@ const CARD_STYLES = String.raw`
         .tab-panel__block {
           display: flex;
           flex-direction: column;
-          border: 1px solid rgba(127, 127, 127, 0.15);
+          border: 1px solid var(--gi-surface-border);
           border-radius: 18px;
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 8%, transparent) 0%, transparent 100%),
-          color-mix(in srgb, var(--secondary-background-color) 92%, white);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 9%, transparent) 0%, transparent 100%),
+            var(--gi-surface-fill);
           padding: 12px 14px;
+          box-shadow: var(--gi-surface-shadow);
           transition:
             transform var(--gi-motion-fast) var(--gi-ease-standard),
             border-color var(--gi-motion-fast) var(--gi-ease-standard),
@@ -260,7 +269,10 @@ const CARD_STYLES = String.raw`
 
         .tab-panel__hero {
           gap: 7px;
-          border-color: color-mix(in srgb, var(--gazon-card-accent) 24%, var(--divider-color));
+          border-color: var(--gi-surface-border-strong);
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 14%, transparent) 0%, transparent 100%),
+            var(--gi-surface-fill-accent);
         }
 
         .tab-panel__hero--pulse {
@@ -316,7 +328,7 @@ const CARD_STYLES = String.raw`
           display: flex;
           flex-direction: column;
           gap: 8px;
-          border-color: color-mix(in srgb, var(--gazon-card-accent) 18%, var(--divider-color));
+          border-color: var(--gi-surface-border);
         }
 
         .tab-panel__section-title {
@@ -442,7 +454,7 @@ const CARD_STYLES = String.raw`
           min-height: var(--gi-action-min-height);
           padding-inline: var(--gi-action-padding-inline) var(--gi-action-padding-inline-end);
           padding-block: var(--gi-action-padding-block);
-          border: 2px solid color-mix(in srgb, var(--gazon-card-accent) 34%, var(--divider-color));
+          border: 1px solid var(--gi-surface-border-strong);
           border-radius: var(--gi-action-radius);
           cursor: pointer;
           color: white;
@@ -451,9 +463,9 @@ const CARD_STYLES = String.raw`
           font-size: 1.04rem;
           letter-spacing: 0.01em;
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 16%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, white) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 18%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 95%, white) 100%);
           box-shadow:
-            0 18px 36px rgba(0, 0, 0, 0.16),
+            0 16px 30px rgba(0, 0, 0, 0.16),
             0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
           text-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
         }
@@ -490,7 +502,7 @@ const CARD_STYLES = String.raw`
             transform: translateY(-1px);
             border-color: color-mix(in srgb, var(--gazon-card-accent) 52%, var(--divider-color));
             box-shadow:
-              0 14px 28px rgba(0, 0, 0, 0.22),
+              0 18px 34px rgba(0, 0, 0, 0.22),
               0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
           }
         }
@@ -514,22 +526,23 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-info {
-          border: 1px solid rgba(127, 127, 127, 0.045);
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 99%, white) 100%);
-          box-shadow: none;
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 7%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, white) 100%);
+          box-shadow: var(--gi-surface-shadow);
         }
 
         .gi-info--main {
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 18%, var(--divider-color));
+          border-color: var(--gi-surface-border);
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 99%, white) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 13%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, white) 100%);
+          box-shadow: var(--gi-surface-shadow-strong);
         }
 
         .gi-info--secondary {
-          border-color: rgba(127, 127, 127, 0.04);
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 10%, var(--divider-color));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 100%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 100%, white) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 4%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 100%, white) 100%);
         }
 
         .gi-alert--critical {
@@ -555,19 +568,20 @@ const CARD_STYLES = String.raw`
         .decision-context,
         .decision-block,
         .decision-footer {
-          border: 1px solid rgba(127, 127, 127, 0.15);
+          border: 1px solid var(--gi-surface-border);
           border-radius: 18px;
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 12%, transparent) 0%, transparent 100%),
-            color-mix(in srgb, var(--secondary-background-color) 92%, white);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, transparent) 0%, transparent 100%),
+            var(--gi-surface-fill);
           padding: 12px 14px;
+          box-shadow: var(--gi-surface-shadow);
         }
 
         .decision-hero {
           display: flex;
           flex-direction: column;
           gap: 7px;
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 28%, var(--divider-color));
+          border-color: var(--gi-surface-border-strong);
         }
 
         .decision-hero--pulse {
@@ -645,7 +659,7 @@ const CARD_STYLES = String.raw`
           display: flex;
           flex-direction: column;
           gap: 8px;
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 24%, var(--divider-color));
+          border-color: var(--gi-surface-border);
         }
 
         .decision-plan__header {
@@ -690,8 +704,12 @@ const CARD_STYLES = String.raw`
           min-height: 28px;
           padding: 2px 10px;
           border-radius: 999px;
-          border: 1px solid rgba(127, 127, 127, 0.15);
-          background: rgba(127, 127, 127, 0.04);
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 96%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.05),
+            0 5px 12px rgba(0, 0, 0, 0.05);
           min-width: 0;
           box-sizing: border-box;
         }
@@ -700,18 +718,22 @@ const CARD_STYLES = String.raw`
           gap: 8px;
           min-height: 32px;
           padding: 4px 12px 4px 8px;
-          background: color-mix(in srgb, var(--gazon-card-accent) 14%, transparent);
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 18%, transparent) 0%, color-mix(in srgb, var(--gazon-card-accent) 8%, transparent) 100%);
           color: var(--primary-text-color);
         }
 
         .gi-pill__icon {
-          width: 18px;
-          height: 18px;
+          width: 20px;
+          height: 20px;
           display: grid;
           place-items: center;
           flex: none;
           overflow: visible;
           line-height: 0;
+          border-radius: 999px;
+          background: color-mix(in srgb, var(--gazon-card-accent) 14%, transparent);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
 
         .gi-pill__icon .gi-icon {
@@ -724,7 +746,7 @@ const CARD_STYLES = String.raw`
           flex: none;
           overflow: visible;
           transform: none;
-          color: var(--gazon-card-accent);
+          color: inherit;
         }
 
         .gi-pill__icon .gi-icon--pill ha-icon,
@@ -771,43 +793,49 @@ const CARD_STYLES = String.raw`
         .gi-pill--danger,
         .pill--danger,
         .context-pill--danger {
-          background: color-mix(in srgb, var(--gazon-danger-color) 14%, transparent);
-          border-color: color-mix(in srgb, var(--gazon-danger-color) 22%, transparent);
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-danger-color) 16%, transparent) 0%, color-mix(in srgb, var(--gazon-danger-color) 8%, transparent) 100%);
+          border-color: color-mix(in srgb, var(--gazon-danger-color) 24%, transparent);
         }
 
         .gi-pill--critical,
         .pill--critical,
         .context-pill--critical {
-          background: color-mix(in srgb, var(--gazon-critical-color) 18%, transparent);
-          border-color: color-mix(in srgb, var(--gazon-critical-color) 26%, transparent);
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-critical-color) 18%, transparent) 0%, color-mix(in srgb, var(--gazon-critical-color) 10%, transparent) 100%);
+          border-color: color-mix(in srgb, var(--gazon-critical-color) 28%, transparent);
         }
 
         .gi-pill--warning,
         .pill--warning,
         .context-pill--warning {
-          background: color-mix(in srgb, var(--gazon-warning-color) 16%, transparent);
-          border-color: color-mix(in srgb, var(--gazon-warning-color) 22%, transparent);
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-warning-color) 16%, transparent) 0%, color-mix(in srgb, var(--gazon-warning-color) 8%, transparent) 100%);
+          border-color: color-mix(in srgb, var(--gazon-warning-color) 24%, transparent);
         }
 
         .gi-pill--success,
         .pill--success,
         .context-pill--success {
-          background: color-mix(in srgb, var(--gazon-success-color) 16%, transparent);
-          border-color: color-mix(in srgb, var(--gazon-success-color) 22%, transparent);
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color) 16%, transparent) 0%, color-mix(in srgb, var(--gazon-success-color) 8%, transparent) 100%);
+          border-color: color-mix(in srgb, var(--gazon-success-color) 24%, transparent);
         }
 
         .gi-pill--accent,
         .pill--accent,
         .context-pill--accent {
-          background: color-mix(in srgb, var(--gazon-accent-tone-color) 14%, transparent);
-          border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 22%, transparent);
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-accent-tone-color) 14%, transparent) 0%, color-mix(in srgb, var(--gazon-accent-tone-color) 7%, transparent) 100%);
+          border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 24%, transparent);
         }
 
         .gi-pill--neutral,
         .pill--neutral,
         .context-pill--neutral {
-          background: rgba(127, 127, 127, 0.06);
-          border-color: rgba(127, 127, 127, 0.15);
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+          border-color: color-mix(in srgb, var(--divider-color) 70%, var(--gazon-section-accent) 10%);
         }
 
         .decision-context {
@@ -1238,6 +1266,13 @@ const CARD_STYLES = String.raw`
           min-height: var(--gi-card-core-min-height);
           height: 100%;
           padding: var(--gi-card-core-padding);
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 6%, transparent) 0%, transparent 100%),
+            var(--gi-surface-fill);
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.04),
+            0 8px 18px rgba(0, 0, 0, 0.06);
           transition:
             transform var(--gi-motion-fast) var(--gi-ease-standard),
             border-color var(--gi-motion-fast) var(--gi-ease-standard),
@@ -1259,7 +1294,8 @@ const CARD_STYLES = String.raw`
         .gi-card-core--tile {
           border: 1px solid color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 26%, transparent);
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 14%, var(--secondary-background-color)) 0%, var(--secondary-background-color) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 16%, transparent) 0%, transparent 100%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 14%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
         }
 
         .gi-card-core__icon {
@@ -1272,8 +1308,9 @@ const CARD_STYLES = String.raw`
           flex: none;
           overflow: visible;
           line-height: 0;
-          background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
+          background: color-mix(in srgb, var(--gazon-section-accent) 16%, transparent);
           color: var(--gazon-section-accent);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .gi-card-core--tile .gi-card-core__icon {
@@ -1436,6 +1473,8 @@ const CARD_STYLES = String.raw`
             --gi-card-core-icon-glyph-size: 11px;
             --gi-decision-grid-gap: 6px;
             --gi-tiles-gap: 6px;
+            --gi-surface-shadow: 0 8px 18px rgba(0, 0, 0, 0.07);
+            --gi-surface-shadow-strong: 0 12px 24px rgba(0, 0, 0, 0.12);
           }
         }
 `;

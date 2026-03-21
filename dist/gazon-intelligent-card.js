@@ -25,7 +25,7 @@ const CARD_STYLES = String.raw`
           --gi-nav-gap: 6px;
           --gi-nav-margin: 4px 0 8px;
           --gi-nav-item-gap: 6px;
-          --gi-nav-item-padding: 7px 10px;
+          --gi-nav-item-padding: 8px 12px;
           --gi-grid-template: repeat(2, minmax(0, 1fr));
           --gi-grid-gap: 8px;
           --gi-action-direction: row;
@@ -45,7 +45,7 @@ const CARD_STYLES = String.raw`
           --gi-card-core-gap: 10px;
           --gi-card-core-padding: 12px 14px;
           --gi-card-core-min-height: 78px;
-          --gi-card-core-radius: 16px;
+          --gi-card-core-radius: 18px;
           --gi-card-core-icon-size: 20px;
           --gi-card-core-icon-glyph-size: 12px;
           --gi-card-core-secondary-size: 0.72rem;
@@ -55,8 +55,8 @@ const CARD_STYLES = String.raw`
             linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 88%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, black) 100%);
           --gi-surface-fill-accent:
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
-          --gi-surface-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
-          --gi-surface-shadow-strong: 0 16px 34px rgba(0, 0, 0, 0.16);
+          --gi-surface-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+          --gi-surface-shadow-strong: 0 14px 28px rgba(0, 0, 0, 0.12);
         }
 
         @keyframes gazonPulseSoft {
@@ -254,7 +254,7 @@ const CARD_STYLES = String.raw`
           display: flex;
           flex-direction: column;
           border: 1px solid var(--gi-surface-border);
-          border-radius: 18px;
+          border-radius: 20px;
           background:
             radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 14%, transparent) 0%, transparent 28%),
             radial-gradient(circle at 10% 92%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 16%, transparent) 0%, transparent 30%),
@@ -471,7 +471,7 @@ const CARD_STYLES = String.raw`
           padding-inline: var(--gi-action-padding-inline) var(--gi-action-padding-inline-end);
           padding-block: var(--gi-action-padding-block);
           border: 1px solid var(--gi-surface-border-strong);
-          border-radius: var(--gi-action-radius);
+          border-radius: 26px;
           cursor: pointer;
           color: white;
           font: inherit;
@@ -986,10 +986,10 @@ const CARD_STYLES = String.raw`
             radial-gradient(circle at 18% 90%, color-mix(in srgb, var(--gi-soil-color, #b8865d) 16%, transparent) 0%, transparent 28%),
             radial-gradient(circle at 92% 86%, color-mix(in srgb, var(--gazon-moss-color, #4d9f58) 10%, transparent) 0%, transparent 22%),
             linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 82%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, black) 100%);
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 30%, var(--divider-color));
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 18%, var(--divider-color));
           box-shadow:
-            0 18px 38px rgba(0, 0, 0, 0.18),
-            0 0 0 1px color-mix(in srgb, var(--gazon-section-accent) 12%, transparent),
+            0 14px 34px rgba(0, 0, 0, 0.14),
+            0 0 0 1px color-mix(in srgb, var(--gazon-section-accent) 8%, transparent),
             0 1px 0 rgba(255, 255, 255, 0.06) inset,
             var(--ha-card-box-shadow, none);
           overflow: hidden;
@@ -1021,9 +1021,9 @@ const CARD_STYLES = String.raw`
           content: "";
           position: absolute;
           inset: 0 0 auto 0;
-          height: 4px;
-          background: linear-gradient(90deg, transparent 0%, var(--gazon-water-color, #44c8ea) 14%, var(--gazon-lawn-color, #80da67) 42%, var(--gazon-section-accent) 62%, var(--gazon-moss-color, #4d9f58) 86%, transparent 100%);
-          opacity: 0.95;
+          height: 3px;
+          background: linear-gradient(90deg, transparent 0%, var(--gazon-water-color, #44c8ea) 12%, var(--gazon-lawn-color, #80da67) 44%, var(--gazon-section-accent) 68%, transparent 100%);
+          opacity: 0.9;
           z-index: 0;
         }
 
@@ -1185,16 +1185,16 @@ const CARD_STYLES = String.raw`
         }
 
         .header__title {
-          font-size: 1.02rem;
-          font-weight: 700;
-          line-height: 1.18;
+          font-size: 1.08rem;
+          font-weight: 800;
+          line-height: 1.16;
           margin-bottom: 2px;
         }
 
         .header__subtitle {
           color: var(--secondary-text-color);
-          font-size: 0.76rem;
-          line-height: 1.2;
+          font-size: 0.81rem;
+          line-height: 1.22;
         }
 
         .header__subtitle::before {
@@ -1220,8 +1220,8 @@ const CARD_STYLES = String.raw`
 
         .hero__lead {
           min-width: 0;
-          border-radius: 16px;
-          padding: var(--gi-hero-lead-padding);
+          border-radius: 20px;
+          padding: 13px 14px;
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 32%, var(--divider-color));
           background:
             radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 14%, transparent) 0%, transparent 34%),
@@ -1251,8 +1251,8 @@ const CARD_STYLES = String.raw`
         }
 
         .hero__lead-icon {
-          width: 18px;
-          height: 18px;
+          width: 20px;
+          height: 20px;
           border-radius: 999px;
           display: flex;
           align-items: center;
@@ -1268,7 +1268,7 @@ const CARD_STYLES = String.raw`
         }
 
         .hero__label {
-          font-size: 0.63rem;
+          font-size: 0.64rem;
           text-transform: uppercase;
           letter-spacing: 0.04em;
           color: var(--secondary-text-color);
@@ -1314,8 +1314,8 @@ const CARD_STYLES = String.raw`
           flex-direction: column;
           justify-content: center;
           flex: 1 1 150px;
-          border-radius: 14px;
-          padding: 10px 11px;
+          border-radius: 18px;
+          padding: 11px 12px;
           border: 1px solid rgba(127, 127, 127, 0.15);
           background:
             radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 8%, transparent) 0%, transparent 30%),
@@ -1360,7 +1360,7 @@ const CARD_STYLES = String.raw`
           width: 100%;
           min-width: 0;
           box-sizing: border-box;
-          border-radius: var(--gi-card-core-radius);
+          border-radius: 18px;
           min-height: var(--gi-card-core-min-height);
           height: 100%;
           padding: var(--gi-card-core-padding);
@@ -1384,12 +1384,12 @@ const CARD_STYLES = String.raw`
         .gi-card-core--stat,
         .gi-card-core--tile,
         .gi-card-core--metric {
-          min-height: 74px;
+          min-height: 76px;
         }
 
         .gi-card-core--metric {
-          min-height: 64px;
-          padding: 11px 13px;
+          min-height: 66px;
+          padding: 12px 13px;
         }
 
         .gi-card-core--interactive {
@@ -1471,9 +1471,9 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-card-core__label {
-          font-size: 0.61rem;
+          font-size: 0.63rem;
           text-transform: uppercase;
-          letter-spacing: 0.03em;
+          letter-spacing: 0.05em;
           color: var(--secondary-text-color);
           line-height: 1.1;
           min-height: 1.1em;
@@ -1484,12 +1484,12 @@ const CARD_STYLES = String.raw`
           min-width: 0;
           overflow-wrap: anywhere;
           hyphens: auto;
-          font-size: 0.82rem;
-          line-height: 1.18;
+          font-size: 0.84rem;
+          line-height: 1.16;
         }
 
         .gi-card-core--metric .gi-card-core__value {
-          font-size: 0.8rem;
+          font-size: 0.82rem;
           line-height: 1.14;
         }
 
@@ -1560,43 +1560,37 @@ const CARD_STYLES = String.raw`
           --gi-theme-base: #ffffff;
           --gi-theme-base-strong: #ffffff;
           --gi-theme-base-soft: #ffffff;
-          --gi-theme-border-override: color-mix(in srgb, var(--gazon-section-accent) 18%, rgba(0, 0, 0, 0.10));
-          --gi-theme-shadow-override: 0 14px 28px rgba(0, 0, 0, 0.08);
+          --gi-theme-border-override: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(0, 0, 0, 0.10));
+          --gi-theme-shadow-override: 0 12px 24px rgba(0, 0, 0, 0.08);
         }
 
         .card--theme-dark {
           --gi-theme-base: #000000;
           --gi-theme-base-strong: #000000;
           --gi-theme-base-soft: #080808;
-          --gi-theme-border-override: color-mix(in srgb, var(--gazon-section-accent) 22%, rgba(255, 255, 255, 0.10));
-          --gi-theme-shadow-override: 0 18px 34px rgba(0, 0, 0, 0.36);
+          --gi-theme-border-override: color-mix(in srgb, var(--gazon-section-accent) 18%, rgba(255, 255, 255, 0.10));
+          --gi-theme-shadow-override: 0 18px 34px rgba(0, 0, 0, 0.34);
         }
 
         .card--theme-light .card {
-          background:
-            radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 16%, transparent) 0%, transparent 30%),
-            radial-gradient(circle at 84% 12%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 0%, transparent 24%),
-            #ffffff;
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 28%, rgba(0, 0, 0, 0.08));
+          background: #ffffff;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 22%, rgba(0, 0, 0, 0.08));
         }
 
         .card--theme-dark .card {
-          background:
-            radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 16%, transparent) 0%, transparent 30%),
-            radial-gradient(circle at 84% 12%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 0%, transparent 24%),
-            #000000;
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 24%, rgba(255, 255, 255, 0.08));
+          background: #000000;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 20%, rgba(255, 255, 255, 0.08));
         }
 
         .card--theme-light :is(.tab-panel__hero, .tab-panel__section, .tab-panel__block, .gi-info, .gi-info--main, .gi-info--secondary, .decision-hero, .decision-plan, .decision-context, .decision-block, .decision-footer, .gi-card-core, .gi-tab, .tab-nav__item, .hero__lead, .decision) {
           background: #ffffff;
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 18%, rgba(0, 0, 0, 0.08));
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 16%, rgba(0, 0, 0, 0.08));
           box-shadow: var(--gi-theme-shadow-override);
         }
 
         .card--theme-dark :is(.tab-panel__hero, .tab-panel__section, .tab-panel__block, .gi-info, .gi-info--main, .gi-info--secondary, .decision-hero, .decision-plan, .decision-context, .decision-block, .decision-footer, .gi-card-core, .gi-tab, .tab-nav__item, .hero__lead, .decision) {
           background: #000000;
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 20%, rgba(255, 255, 255, 0.08));
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 16%, rgba(255, 255, 255, 0.08));
           box-shadow: var(--gi-theme-shadow-override);
         }
 
@@ -1630,6 +1624,13 @@ const CARD_STYLES = String.raw`
           color: color-mix(in srgb, #000000 55%, var(--secondary-text-color));
         }
 
+        .card--theme-light .header__icon--warning { background: color-mix(in srgb, var(--gazon-warning-color) 74%, white); }
+        .card--theme-light .header__icon--danger { background: color-mix(in srgb, var(--gazon-danger-color) 74%, white); }
+        .card--theme-light .header__icon--success { background: color-mix(in srgb, var(--gazon-success-color) 74%, white); }
+        .card--theme-light .header__icon--neutral { background: color-mix(in srgb, var(--gazon-neutral-color) 74%, white); }
+        .card--theme-light .header__icon--accent { background: color-mix(in srgb, var(--gazon-accent-tone-color) 74%, white); }
+        .card--theme-light .header__icon--critical { background: color-mix(in srgb, var(--gazon-critical-color) 74%, white); }
+
         .card--theme-dark .gi-card-core__secondary,
         .card--theme-dark .tab-panel__hero-next,
         .card--theme-dark .tab-panel__hero-hint,
@@ -1651,6 +1652,13 @@ const CARD_STYLES = String.raw`
         .card--theme-dark .footer {
           color: color-mix(in srgb, #ffffff 72%, var(--secondary-text-color));
         }
+
+        .card--theme-dark .header__icon--warning { background: color-mix(in srgb, var(--gazon-warning-color) 74%, black); }
+        .card--theme-dark .header__icon--danger { background: color-mix(in srgb, var(--gazon-danger-color) 74%, black); }
+        .card--theme-dark .header__icon--success { background: color-mix(in srgb, var(--gazon-success-color) 74%, black); }
+        .card--theme-dark .header__icon--neutral { background: color-mix(in srgb, var(--gazon-neutral-color) 74%, black); }
+        .card--theme-dark .header__icon--accent { background: color-mix(in srgb, var(--gazon-accent-tone-color) 74%, black); }
+        .card--theme-dark .header__icon--critical { background: color-mix(in srgb, var(--gazon-critical-color) 74%, black); }
 
         @media (prefers-reduced-motion: reduce) {
           .card,
@@ -1831,7 +1839,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.8";
+const CARD_VERSION = "0.1.10";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

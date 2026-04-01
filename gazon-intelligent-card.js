@@ -5042,19 +5042,11 @@ function renderWateringProgressSection(card, progressState) {
 function renderProductSummarySection(card) {
   const selection = card._productSelectionState();
   const catalogue = card._catalogueState();
-  const windowState = card._windowState();
-  const hasAnyProductContext =
-    selection.entity ||
-    catalogue.entity ||
-    selection.productsCount > 0 ||
-    catalogue.hasProducts ||
-    windowState.nextActionDisplay;
+  const hasAnyProductContext = selection.entity || catalogue.entity || selection.productsCount > 0 || catalogue.hasProducts;
   if (!hasAnyProductContext) {
     return "";
   }
 
-  const nextAction = windowState.nextActionDisplay || windowState.nextAction || windowState.summary || "Aucune échéance";
-  const nextActionTone = windowState.isBlocked ? "danger" : windowState.isAwaiting ? "warning" : windowState.tone;
   const catalogueLabel = catalogue.count === 1 ? "1 produit" : `${catalogue.count || 0} produits`;
 
   return `
@@ -5078,13 +5070,6 @@ function renderProductSummarySection(card) {
             catalogue.hasProducts ? "success" : "neutral",
             "mdi:package-variant-closed",
             catalogue.summary || (catalogue.productNames || catalogue.productIds || ""),
-          )}
-          ${card._renderStatCard(
-            "Prochaine action",
-            nextAction,
-            nextActionTone || "neutral",
-            "mdi:calendar-clock",
-            windowState.nextAction || windowState.summary || "Le moteur reste maître de la décision.",
           )}
         </div>
       </section>

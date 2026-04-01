@@ -194,11 +194,15 @@ ${EDITOR_STYLES}
           <div class="grid">
             ${this._renderCheckbox("show_advanced_details", "Afficher les détails avancés")}
           </div>
+          <div class="row">
+            ${this._renderEntityInput("manual_action_service", "Service du bouton manuel")}
+            ${this._renderEntityInput("manual_action_label", "Libellé du bouton manuel")}
+          </div>
         </section>
 
         <section class="section">
-          <h3>Décision principale</h3>
-          <p>La carte fonctionne même si certaines entités sont absentes. Renseigne au moins les blocs que tu veux afficher.</p>
+          <h3>Résumé et arrosage</h3>
+          <p>Ces entités alimentent le résumé principal et l'onglet Arrosage. Renseigne seulement les blocs que tu veux afficher.</p>
           <datalist id="gazon-intelligent-card-entities">${idList}</datalist>
           <div class="grid">
             ${this._renderEntityInput("entity_fenetre_optimale", "Fenêtre optimale")}
@@ -208,6 +212,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_arrosage_apres_application_autorise", "Arrosage après application autorisé")}
             ${this._renderEntityInput("entity_dernier_arrosage", "Dernier arrosage détecté")}
             ${this._renderEntityInput("entity_derniere_application", "Dernière application")}
+            ${this._renderEntityInput("entity_niveau", "Niveau d'action")}
           </div>
         </section>
 
@@ -221,10 +226,17 @@ ${EDITOR_STYLES}
         </section>
 
         <section class="section">
-          <h3>Contexte principal</h3>
+          <h3>Gazon et tonte</h3>
+          <p>Ces entités alimentent les onglets Gazon et Tonte pour garder une lecture cohérente de la phase, du risque et de la hauteur.</p>
           <div class="grid">
             ${this._renderEntityInput("entity_mode", "Mode du gazon")}
             ${this._renderEntityInput("entity_type_arrosage", "Type d'arrosage")}
+            ${this._renderEntityInput("entity_phase", "Phase dominante")}
+            ${this._renderEntityInput("entity_sous_phase", "Sous-phase")}
+            ${this._renderEntityInput("entity_risque", "Risque gazon")}
+            ${this._renderEntityInput("entity_tonte", "État de tonte")}
+            ${this._renderEntityInput("entity_tonte_autorisee", "Tonte autorisée")}
+            ${this._renderEntityInput("entity_hauteur", "Hauteur de tonte conseillée")}
           </div>
         </section>
 
@@ -247,20 +259,9 @@ ${EDITOR_STYLES}
           <h3>Détails avancés</h3>
           <p>Ces champs alimentent les vues détaillées et les écrans de diagnostic si tu actives l'option correspondante.</p>
           <div class="grid">
-            ${this._renderEntityInput("entity_phase", "Phase dominante")}
-            ${this._renderEntityInput("entity_sous_phase", "Sous-phase")}
-            ${this._renderEntityInput("entity_risque", "Risque gazon")}
             ${this._renderEntityInput("entity_conseil", "Conseil principal")}
             ${this._renderEntityInput("entity_action", "Action recommandée")}
             ${this._renderEntityInput("entity_avoid", "Action à éviter")}
-            ${this._renderEntityInput("entity_niveau", "Niveau d'action")}
-            ${this._renderEntityInput("entity_tonte", "État de tonte")}
-            ${this._renderEntityInput("entity_tonte_autorisee", "Tonte autorisée")}
-            ${this._renderEntityInput("entity_hauteur", "Hauteur de tonte conseillée")}
-          </div>
-          <div class="grid">
-            ${this._renderEntityInput("manual_action_service", "Service du bouton manuel")}
-            ${this._renderEntityInput("manual_action_label", "Libellé du bouton manuel")}
           </div>
         </section>
       </div>

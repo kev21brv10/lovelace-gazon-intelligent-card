@@ -234,13 +234,13 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 ## 🖊️ Éditeur visuel
 
 La carte expose un éditeur visuel natif dans Home Assistant pour :
-- le titre
-- la fenêtre optimale, le plan et le contexte principal
-- le produit courant, le catalogue et le sélecteur d'intervention
-- le mode du gazon, le type d'arrosage et les réglages de tonte
+- la carte elle-même: titre, style, fond, icônes et bouton manuel
+- le résumé et l’arrosage: fenêtre, plan, objectif et dernières actions
+- les produits: catalogue local et produit d’intervention
+- le gazon et la tonte: mode, type d’arrosage, phase, risque et hauteur
 - l’onglet Config avec le switch auto, les débits et les hauteurs
 - les options visuelles de base
-- l’affichage optionnel des détails avancés
+- l’affichage optionnel des détails avancés et des écrans de diagnostic
 
 Dans la carte elle-même, l’onglet **Config** propose aussi des tuiles cliquables qui ouvrent directement le contrôle Home Assistant des entités associées. C’est le chemin le plus simple pour ajuster un switch, un sélecteur ou un nombre sans quitter la vue.
 

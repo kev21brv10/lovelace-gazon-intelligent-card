@@ -212,6 +212,15 @@ ${EDITOR_STYLES}
         </section>
 
         <section class="section">
+          <h3>Produits</h3>
+          <p>Ces entités donnent à la carte le produit sélectionné et le catalogue local pour simplifier la lecture de l’intervention.</p>
+          <div class="grid">
+            ${this._renderEntityInput("entity_catalogue_produits", "Catalogue produits")}
+            ${this._renderEntityInput("entity_produit_intervention", "Produit d'intervention")}
+          </div>
+        </section>
+
+        <section class="section">
           <h3>Contexte principal</h3>
           <div class="grid">
             ${this._renderEntityInput("entity_mode", "Mode du gazon")}

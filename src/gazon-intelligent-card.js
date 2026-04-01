@@ -33,6 +33,8 @@ const DEFAULT_CONFIG = {
   entity_plan_arrosage: "sensor.gazon_intelligent_plan_d_arrosage",
   entity_dernier_arrosage: "sensor.gazon_intelligent_dernier_arrosage_detecte",
   entity_derniere_application: "sensor.gazon_intelligent_derniere_application",
+  entity_catalogue_produits: "sensor.gazon_intelligent_catalogue_produits",
+  entity_produit_intervention: "select.gazon_intelligent_produit_d_intervention",
   entity_conseil: "sensor.gazon_intelligent_conseil_principal",
   entity_action: "sensor.gazon_intelligent_action_recommandee",
   entity_avoid: "sensor.gazon_intelligent_action_a_eviter",
@@ -78,6 +80,8 @@ const ENTITY_KEYS = [
   { key: "entity_arrosage_en_cours", label: "Arrosage en cours", icon: "mdi:progress-clock", domain: ["sensor"] },
   { key: "entity_dernier_arrosage", label: "Dernier arrosage détecté", icon: "mdi:water-check", domain: ["sensor"] },
   { key: "entity_derniere_application", label: "Dernière application", icon: "mdi:spray-bottle", domain: ["sensor"] },
+  { key: "entity_catalogue_produits", label: "Catalogue produits", icon: "mdi:package-variant-closed", domain: ["sensor"] },
+  { key: "entity_produit_intervention", label: "Produit d'intervention", icon: "mdi:package-variant", domain: ["select"] },
   { key: "entity_conseil", label: "Conseil principal", icon: "mdi:message-text-outline", domain: ["sensor"] },
   { key: "entity_action", label: "Action recommandée", icon: "mdi:check-circle-outline", domain: ["sensor"] },
   { key: "entity_avoid", label: "Action à éviter", icon: "mdi:alert-circle-outline", domain: ["sensor"] },
@@ -178,6 +182,8 @@ const RENDER_SIGNATURE_ATTRS = {
   entity_arrosage_en_cours: ["active", "started_at_utc", "last_activity_at_utc", "active_zone_count", "zone_count", "progress_percent"],
   entity_dernier_arrosage: ["source", "date_action", "detected_at", "zone_count"],
   entity_derniere_application: ["source", "application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm"],
+  entity_catalogue_produits: ["products_count", "product_ids", "product_names", "products_summary", "summary"],
+  entity_produit_intervention: ["selected_product_id", "selected_product_name", "summary", "products_count"],
   entity_objectif_arrosage: ["temperature", "etp", "phase_active"],
   entity_arrosage_recommande: ["objectif_mm", "type_arrosage"],
   entity_arrosage_apres_application_autorise: ["application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm"],
@@ -1042,6 +1048,48 @@ class GazonIntelligentCard extends HTMLElement {
     return this._entity("entity_derniere_application");
   }
 
+  _catalogueEntity() {
+    return this._entity("entity_catalogue_produits");
+  }
+
+  _productSelectionEntity() {
+    return this._entity("entity_produit_intervention");
+  }
+
+  _catalogueState() {
+    const entity = this._catalogueEntity();
+    const attrs = entity?.attributes || {};
+    const count = asNumber(attrs.products_count ?? entity?.state);
+    const summary = String(attrs.summary || "").trim();
+    const productNames = String(attrs.product_names || "").trim();
+    const productIds = String(attrs.product_ids || "").trim();
+    return {
+      entity,
+      count: count ?? 0,
+      summary: summary || (count === 0 ? "Aucun produit enregistré" : count === 1 ? "1 produit enregistré" : `${count} produits enregistrés`),
+      productNames,
+      productIds,
+      hasProducts: (count ?? 0) > 0,
+    };
+  }
+
+  _productSelectionState() {
+    const entity = this._productSelectionEntity();
+    const attrs = entity?.attributes || {};
+    const selectedProductId = String(attrs.selected_product_id || "").trim();
+    const selectedProductName = String(attrs.selected_product_name || entity?.state || "").trim();
+    const summary = String(attrs.summary || "").trim();
+    const productsCount = asNumber(attrs.products_count ?? this._catalogueState().count) ?? 0;
+    return {
+      entity,
+      selectedProductId: selectedProductId || null,
+      selectedProductName: selectedProductName || null,
+      summary: summary || (selectedProductName ? `Produit sélectionné : ${selectedProductName}` : productsCount > 0 ? "Choisis un produit dans le catalogue" : "Aucun produit enregistré"),
+      productsCount,
+      label: selectedProductName || "Aucun produit",
+    };
+  }
+
   _objectiveEntity() {
     return this._entity("entity_objectif_arrosage");
   }
@@ -1056,6 +1104,8 @@ class GazonIntelligentCard extends HTMLElement {
     const status = String(attrs.status || "").trim().toLowerCase();
     const summary = String(attrs.summary || entity?.state || "Arrosage prévu").trim();
     const nextAction = String(attrs.next_action || "").trim();
+    const nextActionDisplay = String(attrs.next_action_display || "").trim();
+    const nextActionDate = String(attrs.next_action_date || "").trim();
     const objective = this._objectiveMm() ?? 0;
     const isAwaiting = status === "en_attente";
     const showManualAction = objective > 0 && status === "auto";
@@ -1066,6 +1116,8 @@ class GazonIntelligentCard extends HTMLElement {
       status,
       summary,
       nextAction,
+      nextActionDisplay,
+      nextActionDate,
       objective,
       showManualAction,
       isAwaiting,

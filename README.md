@@ -13,6 +13,7 @@ Gazon Intelligent Card affiche dans Home Assistant les décisions métier les pl
 - tuiles du résumé, de la tonte, du gazon et de la configuration cliquables pour ouvrir le bon `more-info`
 - barre de progression visible quand un arrosage est en cours
 - fenêtre optimale, objectif d'arrosage et type d'arrosage bien lisibles
+- produit courant et catalogue produits lisibles pour guider les interventions
 - bouton unique `Arrosage manuel immédiat` quand un arrosage est possible
 - résumé compact du plan d'arrosage
 - contexte utile dans les détails: dernier arrosage, application, phase et risque
@@ -31,6 +32,7 @@ Gazon Intelligent Card affiche dans Home Assistant les décisions métier les pl
 
 - affiche une lecture claire et hiérarchisée du moteur Gazon Intelligent
 - met en avant la fenêtre optimale, l'objectif d'arrosage et l'action manuelle unique
+- expose le produit d'intervention sélectionné et le catalogue produit du moteur
 - affiche la progression d'arrosage en cours dès qu'une session est active
 - sépare les usages par onglets: arrosage, tonte, configuration et contexte avancé
 - reste lisible même si certaines entités sont absentes
@@ -112,6 +114,8 @@ entity_fenetre_optimale: sensor.gazon_intelligent_fenetre_optimale
 entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
 entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
 entity_derniere_application: sensor.gazon_intelligent_derniere_application
+entity_catalogue_produits: sensor.gazon_intelligent_catalogue_produits
+entity_produit_intervention: select.gazon_intelligent_produit_d_intervention
 entity_mode: select.gazon_intelligent_mode_du_gazon
 entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique_autorise
 entity_arrosage_recommande: binary_sensor.gazon_intelligent_arrosage_recommande
@@ -160,6 +164,8 @@ entity_fenetre_optimale: sensor.gazon_intelligent_fenetre_optimale
 entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
 entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
 entity_derniere_application: sensor.gazon_intelligent_derniere_application
+entity_catalogue_produits: sensor.gazon_intelligent_catalogue_produits
+entity_produit_intervention: select.gazon_intelligent_produit_d_intervention
 entity_mode: select.gazon_intelligent_mode_du_gazon
 entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique_autorise
 entity_arrosage_recommande: binary_sensor.gazon_intelligent_arrosage_recommande
@@ -186,6 +192,8 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 - `entity_arrosage_en_cours`
 - `entity_dernier_arrosage`
 - `entity_derniere_application`
+- `entity_catalogue_produits`
+- `entity_produit_intervention`
 - `entity_mode`
 - `entity_switch_arrosage_automatique`
 - `entity_arrosage_recommande`
@@ -228,6 +236,7 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 La carte expose un éditeur visuel natif dans Home Assistant pour :
 - le titre
 - la fenêtre optimale, le plan et le contexte principal
+- le produit courant, le catalogue et le sélecteur d'intervention
 - le mode du gazon, le type d'arrosage et les réglages de tonte
 - l’onglet Config avec le switch auto, les débits et les hauteurs
 - les options visuelles de base

@@ -2031,6 +2031,8 @@ const DEFAULT_CONFIG = {
   entity_plan_arrosage: "sensor.gazon_intelligent_plan_d_arrosage",
   entity_dernier_arrosage: "sensor.gazon_intelligent_dernier_arrosage_detecte",
   entity_derniere_application: "sensor.gazon_intelligent_derniere_application",
+  entity_catalogue_produits: "sensor.gazon_intelligent_catalogue_produits",
+  entity_produit_intervention: "select.gazon_intelligent_produit_d_intervention",
   entity_conseil: "sensor.gazon_intelligent_conseil_principal",
   entity_action: "sensor.gazon_intelligent_action_recommandee",
   entity_avoid: "sensor.gazon_intelligent_action_a_eviter",
@@ -2076,6 +2078,8 @@ const ENTITY_KEYS = [
   { key: "entity_arrosage_en_cours", label: "Arrosage en cours", icon: "mdi:progress-clock", domain: ["sensor"] },
   { key: "entity_dernier_arrosage", label: "Dernier arrosage détecté", icon: "mdi:water-check", domain: ["sensor"] },
   { key: "entity_derniere_application", label: "Dernière application", icon: "mdi:spray-bottle", domain: ["sensor"] },
+  { key: "entity_catalogue_produits", label: "Catalogue produits", icon: "mdi:package-variant-closed", domain: ["sensor"] },
+  { key: "entity_produit_intervention", label: "Produit d'intervention", icon: "mdi:package-variant", domain: ["select"] },
   { key: "entity_conseil", label: "Conseil principal", icon: "mdi:message-text-outline", domain: ["sensor"] },
   { key: "entity_action", label: "Action recommandée", icon: "mdi:check-circle-outline", domain: ["sensor"] },
   { key: "entity_avoid", label: "Action à éviter", icon: "mdi:alert-circle-outline", domain: ["sensor"] },
@@ -2176,6 +2180,8 @@ const RENDER_SIGNATURE_ATTRS = {
   entity_arrosage_en_cours: ["active", "started_at_utc", "last_activity_at_utc", "active_zone_count", "zone_count", "progress_percent"],
   entity_dernier_arrosage: ["source", "date_action", "detected_at", "zone_count"],
   entity_derniere_application: ["source", "application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm"],
+  entity_catalogue_produits: ["products_count", "product_ids", "product_names", "products_summary", "summary"],
+  entity_produit_intervention: ["selected_product_id", "selected_product_name", "summary", "products_count"],
   entity_objectif_arrosage: ["temperature", "etp", "phase_active"],
   entity_arrosage_recommande: ["objectif_mm", "type_arrosage"],
   entity_arrosage_apres_application_autorise: ["application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm"],
@@ -3040,6 +3046,48 @@ class GazonIntelligentCard extends HTMLElement {
     return this._entity("entity_derniere_application");
   }
 
+  _catalogueEntity() {
+    return this._entity("entity_catalogue_produits");
+  }
+
+  _productSelectionEntity() {
+    return this._entity("entity_produit_intervention");
+  }
+
+  _catalogueState() {
+    const entity = this._catalogueEntity();
+    const attrs = entity?.attributes || {};
+    const count = asNumber(attrs.products_count ?? entity?.state);
+    const summary = String(attrs.summary || "").trim();
+    const productNames = String(attrs.product_names || "").trim();
+    const productIds = String(attrs.product_ids || "").trim();
+    return {
+      entity,
+      count: count ?? 0,
+      summary: summary || (count === 0 ? "Aucun produit enregistré" : count === 1 ? "1 produit enregistré" : `${count} produits enregistrés`),
+      productNames,
+      productIds,
+      hasProducts: (count ?? 0) > 0,
+    };
+  }
+
+  _productSelectionState() {
+    const entity = this._productSelectionEntity();
+    const attrs = entity?.attributes || {};
+    const selectedProductId = String(attrs.selected_product_id || "").trim();
+    const selectedProductName = String(attrs.selected_product_name || entity?.state || "").trim();
+    const summary = String(attrs.summary || "").trim();
+    const productsCount = asNumber(attrs.products_count ?? this._catalogueState().count) ?? 0;
+    return {
+      entity,
+      selectedProductId: selectedProductId || null,
+      selectedProductName: selectedProductName || null,
+      summary: summary || (selectedProductName ? `Produit sélectionné : ${selectedProductName}` : productsCount > 0 ? "Choisis un produit dans le catalogue" : "Aucun produit enregistré"),
+      productsCount,
+      label: selectedProductName || "Aucun produit",
+    };
+  }
+
   _objectiveEntity() {
     return this._entity("entity_objectif_arrosage");
   }
@@ -3054,6 +3102,8 @@ class GazonIntelligentCard extends HTMLElement {
     const status = String(attrs.status || "").trim().toLowerCase();
     const summary = String(attrs.summary || entity?.state || "Arrosage prévu").trim();
     const nextAction = String(attrs.next_action || "").trim();
+    const nextActionDisplay = String(attrs.next_action_display || "").trim();
+    const nextActionDate = String(attrs.next_action_date || "").trim();
     const objective = this._objectiveMm() ?? 0;
     const isAwaiting = status === "en_attente";
     const showManualAction = objective > 0 && status === "auto";
@@ -3064,6 +3114,8 @@ class GazonIntelligentCard extends HTMLElement {
       status,
       summary,
       nextAction,
+      nextActionDisplay,
+      nextActionDate,
       objective,
       showManualAction,
       isAwaiting,
@@ -4987,6 +5039,58 @@ function renderWateringProgressSection(card, progressState) {
   }
 }
 
+function renderProductSummarySection(card) {
+  const selection = card._productSelectionState();
+  const catalogue = card._catalogueState();
+  const windowState = card._windowState();
+  const hasAnyProductContext =
+    selection.entity ||
+    catalogue.entity ||
+    selection.productsCount > 0 ||
+    catalogue.hasProducts ||
+    windowState.nextActionDisplay;
+  if (!hasAnyProductContext) {
+    return "";
+  }
+
+  const nextAction = windowState.nextActionDisplay || windowState.nextAction || windowState.summary || "Aucune échéance";
+  const nextActionTone = windowState.isBlocked ? "danger" : windowState.isAwaiting ? "warning" : windowState.tone;
+  const catalogueLabel = catalogue.count === 1 ? "1 produit" : `${catalogue.count || 0} produits`;
+
+  return `
+      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
+        <div class="tab-panel__section-head">
+          <div class="tab-panel__eyebrow">Produits</div>
+          ${renderStatusPill(catalogue.summary, catalogue.hasProducts ? "success" : "neutral", "mdi:package-variant-closed", "tab-panel__status")}
+        </div>
+        <div class="tab-panel__section-summary">Le sélecteur de produit guide la déclaration d’intervention sans ressaisie technique.</div>
+        <div class="tab-panel__grid tab-panel__grid--overview">
+          ${card._renderStatCard(
+            "Produit courant",
+            selection.selectedProductName || "Aucun produit",
+            selection.selectedProductName ? "accent" : "neutral",
+            "mdi:package-variant",
+            selection.summary || (selection.selectedProductName ? `ID: ${selection.selectedProductId || "inconnu"}` : "Sélectionne un produit dans le sélecteur dédié"),
+          )}
+          ${card._renderStatCard(
+            "Catalogue",
+            catalogueLabel,
+            catalogue.hasProducts ? "success" : "neutral",
+            "mdi:package-variant-closed",
+            catalogue.summary || (catalogue.productNames || catalogue.productIds || ""),
+          )}
+          ${card._renderStatCard(
+            "Prochaine action",
+            nextAction,
+            nextActionTone || "neutral",
+            "mdi:calendar-clock",
+            windowState.nextAction || windowState.summary || "Le moteur reste maître de la décision.",
+          )}
+        </div>
+      </section>
+    `;
+}
+
 function renderHeader(card) {
   if (!card._config?.show_header) {
     return "";
@@ -5053,6 +5157,7 @@ function renderOverviewTab(card) {
         </div>
 
         ${renderWateringProgressSection(card, wateringProgress)}
+        ${renderProductSummarySection(card)}
 
         <div class="tab-panel__grid tab-panel__grid--overview">
           ${facts
@@ -5073,6 +5178,7 @@ function renderOverviewTab(card) {
 
 function renderWateringTab(card) {
   const windowState = card._windowState();
+  const nextActionText = windowState.nextActionDisplay || windowState.nextAction;
   const planState = card._planState();
   const objective = windowState.objective;
   const objectiveLabel = formatMm(objective);
@@ -5136,8 +5242,8 @@ function renderWateringTab(card) {
             ${renderStatusPill(windowState.statusLabel, tone, windowStatusIcon, `tab-panel__hero-status tab-panel__hero-status--${tone}`)}
           </div>
           ${
-            windowState.nextAction
-              ? `<div class="tab-panel__hero-next">${escapeHtml(windowState.nextAction)}</div>`
+            nextActionText
+              ? `<div class="tab-panel__hero-next">${escapeHtml(nextActionText)}</div>`
               : ""
           }
           ${
@@ -5290,15 +5396,15 @@ function renderMowingTab(card) {
       secondary: heightSecondary,
       entityKey: "entity_hauteur",
     },
-    {
-      label: "Fenêtre optimale",
-      value: windowSummary,
-      tone: windowState.tone,
-      icon: "mdi:clock-outline",
-      secondary: windowState.nextAction || "",
-      entityKey: "entity_fenetre_optimale",
-    },
-  ];
+      {
+        label: "Fenêtre optimale",
+        value: windowSummary,
+        tone: windowState.tone,
+        icon: "mdi:clock-outline",
+        secondary: windowState.nextActionDisplay || windowState.nextAction || "",
+        entityKey: "entity_fenetre_optimale",
+      },
+    ];
 
   return `
       <section class="tab-panel gi-panel tab-panel--mowing">
@@ -5323,6 +5429,8 @@ function renderConfigTab(card) {
   const tonteAutorisee = card._entityState("entity_tonte_autorisee", null);
   const mode = card._entityState("entity_mode", null);
   const modeTone = phaseTone(mode);
+  const selection = card._productSelectionState();
+  const catalogue = card._catalogueState();
   const switchIcon = card._config?.show_icons ? "mdi:switch" : null;
   const zoneCards = card._zoneDebitEntries()
     .map((entry) => {
@@ -5338,10 +5446,18 @@ function renderConfigTab(card) {
         <div class="tab-panel__header">
           <div>
             <div class="tab-panel__eyebrow">Configuration</div>
-            <div class="tab-panel__title">Autorisation, débits et hauteurs</div>
+            <div class="tab-panel__title">Autorisation, produits, débits et hauteurs</div>
             <div class="tab-panel__header-hint">Touchez une tuile pour ouvrir le contrôle Home Assistant correspondant.</div>
           </div>
           ${renderStatusPill(switchState.label, switchState.tone, switchIcon, "tab-panel__status")}
+        </div>
+
+        <div class="tab-panel__section tab-panel__section--config-quick">
+          <div class="tab-panel__section-title">Produits</div>
+          <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">
+            ${card._renderConfigActionCard("Produit d'intervention", "entity_produit_intervention", selection.selectedProductName || "Aucun produit", selection.selectedProductName ? "accent" : "neutral", "mdi:package-variant", selection.summary)}
+            ${card._renderConfigActionCard("Catalogue produits", "entity_catalogue_produits", catalogue.count ? `${catalogue.count}` : "0", catalogue.hasProducts ? "success" : "neutral", "mdi:package-variant-closed", catalogue.summary)}
+          </div>
         </div>
 
         <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-top">
@@ -5616,6 +5732,15 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_arrosage_apres_application_autorise", "Arrosage après application autorisé")}
             ${this._renderEntityInput("entity_dernier_arrosage", "Dernier arrosage détecté")}
             ${this._renderEntityInput("entity_derniere_application", "Dernière application")}
+          </div>
+        </section>
+
+        <section class="section">
+          <h3>Produits</h3>
+          <p>Ces entités donnent à la carte le produit sélectionné et le catalogue local pour simplifier la lecture de l’intervention.</p>
+          <div class="grid">
+            ${this._renderEntityInput("entity_catalogue_produits", "Catalogue produits")}
+            ${this._renderEntityInput("entity_produit_intervention", "Produit d'intervention")}
           </div>
         </section>
 

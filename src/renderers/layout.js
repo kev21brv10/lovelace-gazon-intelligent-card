@@ -124,6 +124,58 @@ export function renderWateringProgressSection(card, progressState) {
   }
 }
 
+export function renderProductSummarySection(card) {
+  const selection = card._productSelectionState();
+  const catalogue = card._catalogueState();
+  const windowState = card._windowState();
+  const hasAnyProductContext =
+    selection.entity ||
+    catalogue.entity ||
+    selection.productsCount > 0 ||
+    catalogue.hasProducts ||
+    windowState.nextActionDisplay;
+  if (!hasAnyProductContext) {
+    return "";
+  }
+
+  const nextAction = windowState.nextActionDisplay || windowState.nextAction || windowState.summary || "Aucune échéance";
+  const nextActionTone = windowState.isBlocked ? "danger" : windowState.isAwaiting ? "warning" : windowState.tone;
+  const catalogueLabel = catalogue.count === 1 ? "1 produit" : `${catalogue.count || 0} produits`;
+
+  return `
+      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
+        <div class="tab-panel__section-head">
+          <div class="tab-panel__eyebrow">Produits</div>
+          ${renderStatusPill(catalogue.summary, catalogue.hasProducts ? "success" : "neutral", "mdi:package-variant-closed", "tab-panel__status")}
+        </div>
+        <div class="tab-panel__section-summary">Le sélecteur de produit guide la déclaration d’intervention sans ressaisie technique.</div>
+        <div class="tab-panel__grid tab-panel__grid--overview">
+          ${card._renderStatCard(
+            "Produit courant",
+            selection.selectedProductName || "Aucun produit",
+            selection.selectedProductName ? "accent" : "neutral",
+            "mdi:package-variant",
+            selection.summary || (selection.selectedProductName ? `ID: ${selection.selectedProductId || "inconnu"}` : "Sélectionne un produit dans le sélecteur dédié"),
+          )}
+          ${card._renderStatCard(
+            "Catalogue",
+            catalogueLabel,
+            catalogue.hasProducts ? "success" : "neutral",
+            "mdi:package-variant-closed",
+            catalogue.summary || (catalogue.productNames || catalogue.productIds || ""),
+          )}
+          ${card._renderStatCard(
+            "Prochaine action",
+            nextAction,
+            nextActionTone || "neutral",
+            "mdi:calendar-clock",
+            windowState.nextAction || windowState.summary || "Le moteur reste maître de la décision.",
+          )}
+        </div>
+      </section>
+    `;
+}
+
 export function renderHeader(card) {
   if (!card._config?.show_header) {
     return "";
@@ -190,6 +242,7 @@ export function renderOverviewTab(card) {
         </div>
 
         ${renderWateringProgressSection(card, wateringProgress)}
+        ${renderProductSummarySection(card)}
 
         <div class="tab-panel__grid tab-panel__grid--overview">
           ${facts
@@ -210,6 +263,7 @@ export function renderOverviewTab(card) {
 
 export function renderWateringTab(card) {
   const windowState = card._windowState();
+  const nextActionText = windowState.nextActionDisplay || windowState.nextAction;
   const planState = card._planState();
   const objective = windowState.objective;
   const objectiveLabel = formatMm(objective);
@@ -273,8 +327,8 @@ export function renderWateringTab(card) {
             ${renderStatusPill(windowState.statusLabel, tone, windowStatusIcon, `tab-panel__hero-status tab-panel__hero-status--${tone}`)}
           </div>
           ${
-            windowState.nextAction
-              ? `<div class="tab-panel__hero-next">${escapeHtml(windowState.nextAction)}</div>`
+            nextActionText
+              ? `<div class="tab-panel__hero-next">${escapeHtml(nextActionText)}</div>`
               : ""
           }
           ${
@@ -427,15 +481,15 @@ export function renderMowingTab(card) {
       secondary: heightSecondary,
       entityKey: "entity_hauteur",
     },
-    {
-      label: "Fenêtre optimale",
-      value: windowSummary,
-      tone: windowState.tone,
-      icon: "mdi:clock-outline",
-      secondary: windowState.nextAction || "",
-      entityKey: "entity_fenetre_optimale",
-    },
-  ];
+      {
+        label: "Fenêtre optimale",
+        value: windowSummary,
+        tone: windowState.tone,
+        icon: "mdi:clock-outline",
+        secondary: windowState.nextActionDisplay || windowState.nextAction || "",
+        entityKey: "entity_fenetre_optimale",
+      },
+    ];
 
   return `
       <section class="tab-panel gi-panel tab-panel--mowing">
@@ -460,6 +514,8 @@ export function renderConfigTab(card) {
   const tonteAutorisee = card._entityState("entity_tonte_autorisee", null);
   const mode = card._entityState("entity_mode", null);
   const modeTone = phaseTone(mode);
+  const selection = card._productSelectionState();
+  const catalogue = card._catalogueState();
   const switchIcon = card._config?.show_icons ? "mdi:switch" : null;
   const zoneCards = card._zoneDebitEntries()
     .map((entry) => {
@@ -475,10 +531,18 @@ export function renderConfigTab(card) {
         <div class="tab-panel__header">
           <div>
             <div class="tab-panel__eyebrow">Configuration</div>
-            <div class="tab-panel__title">Autorisation, débits et hauteurs</div>
+            <div class="tab-panel__title">Autorisation, produits, débits et hauteurs</div>
             <div class="tab-panel__header-hint">Touchez une tuile pour ouvrir le contrôle Home Assistant correspondant.</div>
           </div>
           ${renderStatusPill(switchState.label, switchState.tone, switchIcon, "tab-panel__status")}
+        </div>
+
+        <div class="tab-panel__section tab-panel__section--config-quick">
+          <div class="tab-panel__section-title">Produits</div>
+          <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">
+            ${card._renderConfigActionCard("Produit d'intervention", "entity_produit_intervention", selection.selectedProductName || "Aucun produit", selection.selectedProductName ? "accent" : "neutral", "mdi:package-variant", selection.summary)}
+            ${card._renderConfigActionCard("Catalogue produits", "entity_catalogue_produits", catalogue.count ? `${catalogue.count}` : "0", catalogue.hasProducts ? "success" : "neutral", "mdi:package-variant-closed", catalogue.summary)}
+          </div>
         </div>
 
         <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-top">

@@ -8,9 +8,11 @@
 > Une carte Lovelace claire et premium pour lire les décisions de **Gazon Intelligent** en un coup d'œil.
 
 Gazon Intelligent Card affiche dans Home Assistant les décisions métier les plus utiles de ton intégration Gazon Intelligent :
-- navigation par onglets pour séparer clairement arrosage, tonte, gazon et configuration
+- navigation par onglets pour séparer clairement arrosage, tonte, gazon, produits et configuration
+- barre d’onglets horizontale qui se recentre automatiquement quand elle déborde
 - résumé adaptatif qui met en avant les vraies informations utiles selon la situation
-- tuiles du résumé, de la tonte, du gazon et de la configuration cliquables pour ouvrir le bon `more-info`
+- tuiles du résumé, de la tonte, du gazon, des produits et de la configuration cliquables pour ouvrir le bon `more-info`
+- zone produit dédiée pour le catalogue local, le produit d’intervention et la dernière application
 - barre de progression visible quand un arrosage est en cours
 - fenêtre optimale, objectif d'arrosage et type d'arrosage bien lisibles
 - produit courant et catalogue produits lisibles pour guider les interventions
@@ -33,8 +35,9 @@ Gazon Intelligent Card affiche dans Home Assistant les décisions métier les pl
 - affiche une lecture claire et hiérarchisée du moteur Gazon Intelligent
 - met en avant la fenêtre optimale, l'objectif d'arrosage et l'action manuelle unique
 - expose le produit d'intervention sélectionné et le catalogue produit du moteur
+- sépare la zone produit du reste du résumé pour éviter les doublons visuels
 - affiche la progression d'arrosage en cours dès qu'une session est active
-- sépare les usages par onglets: arrosage, tonte, configuration et contexte avancé
+- sépare les usages par onglets: arrosage, tonte, gazon, produits, configuration et contexte avancé
 - reste lisible même si certaines entités sont absentes
 - s’adapte au thème clair ou sombre de Home Assistant
 - propose un éditeur visuel simple pour la configuration de base
@@ -236,9 +239,9 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 La carte expose un éditeur visuel natif dans Home Assistant pour :
 - la carte elle-même: titre, style, fond, icônes et bouton manuel
 - le résumé et l’arrosage: fenêtre, plan, objectif et dernières actions
-- les produits: catalogue local et produit d’intervention
+- la zone produit: catalogue local, produit d’intervention et dernière application
 - le gazon et la tonte: mode, type d’arrosage, phase, risque et hauteur
-- l’onglet Config avec le switch auto, les débits et les hauteurs
+- l'onglet Config avec le switch auto, les débits et les hauteurs
 - les options visuelles de base
 - l’affichage optionnel des détails avancés et des écrans de diagnostic
 

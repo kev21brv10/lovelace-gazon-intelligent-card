@@ -179,6 +179,9 @@ export const CARD_STYLES = String.raw`
           gap: var(--gi-nav-gap);
           flex-wrap: nowrap;
           overflow-x: auto;
+          scroll-behavior: smooth;
+          scroll-padding-inline: 8px;
+          -webkit-overflow-scrolling: touch;
           max-width: 100%;
           scrollbar-width: none;
           padding-bottom: 2px;
@@ -371,6 +374,10 @@ export const CARD_STYLES = String.raw`
         .tab-panel__grid--config {
           grid-template-columns: var(--gi-grid-template);
           gap: var(--gi-grid-gap);
+        }
+
+        .tab-panel__grid--products {
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         }
 
         .tab-panel__grid--config-top,

@@ -940,6 +940,8 @@ class GazonIntelligentCard extends HTMLElement {
         return SECTION_ACCENTS.mowing;
       case "gazon":
         return "#4f8f3a";
+      case "products":
+        return SECTION_ACCENTS.products;
       case "config":
         return SECTION_ACCENTS.details;
       default:
@@ -1014,6 +1016,17 @@ class GazonIntelligentCard extends HTMLElement {
         return "warning";
       }
       return "success";
+    }
+    if (tab === "products") {
+      const selection = this._productSelectionState();
+      const catalogue = this._catalogueState();
+      if (selection.selectedProductId) {
+        return "success";
+      }
+      if (catalogue.hasProducts) {
+        return "accent";
+      }
+      return "neutral";
     }
     if (tab === "config") {
       const autoState = String(this._entityState("entity_switch_arrosage_automatique", "")).trim().toLowerCase();
@@ -1452,6 +1465,8 @@ class GazonIntelligentCard extends HTMLElement {
       "entity_debit_zone_5",
       "entity_hauteur_min_tondeuse",
       "entity_hauteur_max_tondeuse",
+      "entity_catalogue_produits",
+      "entity_produit_intervention",
     ]);
 
     if (this._canShowLegacyDetails()) {
@@ -1462,6 +1477,8 @@ class GazonIntelligentCard extends HTMLElement {
         ["entity_tonte", "entity_hauteur", "entity_tonte_autorisee", "entity_fenetre_optimale"].forEach((key) => keys.add(key));
       } else if (this._activeTab === "gazon") {
         ["entity_phase", "entity_sous_phase", "entity_niveau", "entity_risque", "entity_conseil", "entity_action", "entity_avoid"].forEach((key) => keys.add(key));
+      } else if (this._activeTab === "products") {
+        ["entity_catalogue_produits", "entity_produit_intervention", "entity_derniere_application"].forEach((key) => keys.add(key));
       } else if (this._activeTab === "config") {
         [
           "entity_switch_arrosage_automatique",
@@ -2358,6 +2375,32 @@ class GazonIntelligentCard extends HTMLElement {
     this._render();
   }
 
+  _scrollTabNavIntoView() {
+    if (typeof window === "undefined" || !this.shadowRoot) {
+      return;
+    }
+
+    const sync = (navSelector, activeSelector) => {
+      const nav = this.shadowRoot.querySelector(navSelector);
+      const active = this.shadowRoot.querySelector(activeSelector);
+      if (!nav || !active || typeof active.scrollIntoView !== "function") {
+        return;
+      }
+      const navRect = nav.getBoundingClientRect();
+      const activeRect = active.getBoundingClientRect();
+      if (activeRect.left < navRect.left || activeRect.right > navRect.right) {
+        active.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+      }
+    };
+
+    sync(".tab-nav", ".tab-nav__item--active");
+    sync(".section-nav", ".section-nav__item--active");
+  }
+
   _fieldSection(fieldKey) {
     if (OVERVIEW_ENTITY_KEYS.has(fieldKey)) {
       return "overview";
@@ -2733,6 +2776,14 @@ ${CARD_STYLES}
       `;
 
       this._bindMoreInfoButtons();
+      if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+        window.requestAnimationFrame(() => {
+          if (!this.isConnected) {
+            return;
+          }
+          this._scrollTabNavIntoView();
+        });
+      }
 
       this.shadowRoot.removeEventListener("click", this._onClick);
       this.shadowRoot.removeEventListener("contextmenu", this._onContextMenu);

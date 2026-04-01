@@ -61,6 +61,7 @@ export const TAB_DEFS = [
   { key: "watering", label: "Arrosage", icon: "mdi:water" },
   { key: "mowing", label: "Tonte", icon: "mdi:content-cut" },
   { key: "gazon", label: "Gazon", icon: "mdi:grass" },
+  { key: "products", label: "Produits", icon: "mdi:package-variant-closed" },
   { key: "config", label: "Config", icon: "mdi:cog-outline" },
 ];
 
@@ -140,6 +141,7 @@ export const SECTION_ACCENTS = {
   overview: "#58c27d",
   watering: "#31b8d4",
   mowing: "#97c84b",
+  products: "#58c27d",
   details: "#7b8da0",
 };
 

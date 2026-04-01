@@ -14,7 +14,9 @@ import {
   formatStatusLabel,
   formatNumber,
   formatDurationHuman,
+  humanDateTimeText,
   isEmpty,
+  isUnavailableState,
   phaseTone,
 } from "../utils/formatters.js";
 import { renderIconBox, renderStatusPill } from "./primitives.js";
@@ -127,30 +129,42 @@ export function renderWateringProgressSection(card, progressState) {
 export function renderProductSummarySection(card) {
   const selection = card._productSelectionState();
   const catalogue = card._catalogueState();
-  const hasAnyProductContext = selection.entity || catalogue.entity || selection.productsCount > 0 || catalogue.hasProducts;
-  if (!hasAnyProductContext) {
-    return "";
-  }
-
   const catalogueLabel = catalogue.count === 1 ? "1 produit" : `${catalogue.count || 0} produits`;
   const selectionDetails = selection.selectedProductId ? `ID: ${selection.selectedProductId}` : selection.summary || "Sélection active";
+  const selectionValue = selection.selectedProductName || (catalogue.hasProducts ? "Sélection à faire" : "Aucun produit");
   const catalogueDetails =
     catalogue.count > 0
       ? catalogue.productNames || catalogue.productIds || "Catalogue local"
       : "Aucun produit enregistré";
+  const application = card._applicationEntity();
+  const applicationState = application && !isUnavailableState(application.state) ? formatStatusLabel(application.state) : "Aucune application";
+  const applicationWhen = String(application?.attributes?.last_application_when || "").trim()
+    || (application?.attributes?.declared_at ? humanDateTimeText(application.attributes.declared_at) : "");
+  const applicationSecondaryParts = [];
+  if (applicationWhen) {
+    applicationSecondaryParts.push(applicationWhen);
+  }
+  if (application?.attributes?.application_type) {
+    applicationSecondaryParts.push(`Type: ${formatStatusLabel(application.attributes.application_type)}`);
+  }
+  if (application?.attributes?.application_irrigation_mode) {
+    applicationSecondaryParts.push(`Mode: ${formatStatusLabel(application.attributes.application_irrigation_mode)}`);
+  }
+  const applicationSecondary =
+    applicationSecondaryParts.join(" · ") || "Dernière application enregistrée";
 
   return `
       <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
         <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Produits</div>
+          <div class="tab-panel__eyebrow">Zone produit</div>
           ${renderStatusPill(catalogue.summary, catalogue.hasProducts ? "success" : "neutral", "mdi:package-variant-closed", "tab-panel__status")}
         </div>
-        <div class="tab-panel__section-summary">Sélecteur d’intervention et catalogue local, sans ressaisie technique.</div>
-        <div class="tab-panel__grid tab-panel__grid--overview">
+        <div class="tab-panel__section-summary">Sélecteur d’intervention, catalogue local et dernière application, sans ressaisie technique.</div>
+        <div class="tab-panel__grid tab-panel__grid--products">
           ${card._renderStatCard(
             "Produit courant",
-            selection.selectedProductName || "Aucun produit",
-            selection.selectedProductName ? "accent" : "neutral",
+            selectionValue,
+            selection.selectedProductName ? "accent" : catalogue.hasProducts ? "neutral" : "neutral",
             "mdi:package-variant",
             selectionDetails,
           )}
@@ -161,7 +175,41 @@ export function renderProductSummarySection(card) {
             "mdi:package-variant-closed",
             catalogueDetails,
           )}
+          ${card._renderStatCard(
+            "Dernière application",
+            applicationState,
+            application && !["unknown", "unavailable", "none", "aucune application"].includes(String(application.state || "").trim().toLowerCase()) ? "success" : "neutral",
+            "mdi:spray-bottle",
+            applicationSecondary,
+          )}
         </div>
+      </section>
+    `;
+}
+
+export function renderProductsTab(card) {
+  const selection = card._productSelectionState();
+  const catalogue = card._catalogueState();
+  const productsTone = selection.selectedProductId || catalogue.hasProducts ? "success" : "neutral";
+  const productsSummary = selection.selectedProductName
+    ? `Produit actif: ${selection.selectedProductName}`
+    : catalogue.hasProducts
+      ? "Choisis un produit dans le catalogue"
+      : "Aucun produit enregistré";
+  const productsHint = selection.summary || "Le produit actif et le catalogue local servent à déclarer les interventions.";
+
+  return `
+      <section class="tab-panel gi-panel tab-panel--products">
+        <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${productsTone}">
+          <div class="tab-panel__hero-top">
+            <div class="tab-panel__hero-summary">Zone produit</div>
+            ${renderStatusPill(catalogue.summary, productsTone, "mdi:package-variant-closed", `tab-panel__status tab-panel__status--${productsTone}`)}
+          </div>
+          <div class="tab-panel__hero-next">${escapeHtml(productsSummary)}</div>
+          <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Le sélecteur d’intervention reste séparé du reste de la carte pour éviter les saisies en double.")}</div>
+        </div>
+
+        ${renderProductSummarySection(card)}
       </section>
     `;
 }
@@ -232,7 +280,6 @@ export function renderOverviewTab(card) {
         </div>
 
         ${renderWateringProgressSection(card, wateringProgress)}
-        ${renderProductSummarySection(card)}
 
         <div class="tab-panel__grid tab-panel__grid--overview">
           ${facts
@@ -555,6 +602,8 @@ export function renderActiveTab(card) {
       return renderMowingTab(card);
     case "gazon":
       return renderGazonTab(card);
+    case "products":
+      return renderProductsTab(card);
     case "config":
       return renderConfigTab(card);
     case "watering":

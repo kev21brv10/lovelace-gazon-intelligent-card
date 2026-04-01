@@ -211,17 +211,17 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_arrosage_recommande", "Arrosage recommandé")}
             ${this._renderEntityInput("entity_arrosage_apres_application_autorise", "Arrosage après application autorisé")}
             ${this._renderEntityInput("entity_dernier_arrosage", "Dernier arrosage détecté")}
-            ${this._renderEntityInput("entity_derniere_application", "Dernière application")}
             ${this._renderEntityInput("entity_niveau", "Niveau d'action")}
           </div>
         </section>
 
         <section class="section">
-          <h3>Produits</h3>
-          <p>Ces entités donnent à la carte le produit sélectionné et le catalogue local pour simplifier la lecture de l’intervention.</p>
+          <h3>Zone produit</h3>
+          <p>Ces entités donnent à la carte le produit sélectionné, le catalogue local et la dernière application pour séparer clairement les interventions.</p>
           <div class="grid">
             ${this._renderEntityInput("entity_catalogue_produits", "Catalogue produits")}
             ${this._renderEntityInput("entity_produit_intervention", "Produit d'intervention")}
+            ${this._renderEntityInput("entity_derniere_application", "Dernière application")}
           </div>
         </section>
 

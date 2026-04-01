@@ -129,6 +129,11 @@ export function renderWateringProgressSection(card, progressState) {
 export function renderProductSummarySection(card) {
   const selection = card._productSelectionState();
   const catalogue = card._catalogueState();
+  const application = card._applicationEntity();
+  const hasProductData = Boolean(
+    selection.selectedProductId || selection.selectedProductName || catalogue.hasProducts || application,
+  );
+  const emptyStateMessage = "Aucune donnée produit disponible";
   const catalogueLabel = catalogue.count === 1 ? "1 produit" : `${catalogue.count || 0} produits`;
   const selectionDetails = selection.selectedProductId ? `ID: ${selection.selectedProductId}` : selection.summary || "Sélection active";
   const selectionValue = selection.selectedProductName || (catalogue.hasProducts ? "Sélection à faire" : "Aucun produit");
@@ -152,6 +157,18 @@ export function renderProductSummarySection(card) {
   }
   const applicationSecondary =
     applicationSecondaryParts.join(" · ") || "Dernière application enregistrée";
+
+  if (!hasProductData) {
+    return `
+      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
+        <div class="tab-panel__section-head">
+          <div class="tab-panel__eyebrow">Zone produit</div>
+          ${renderStatusPill(emptyStateMessage, "neutral", "mdi:package-variant-closed", "tab-panel__status")}
+        </div>
+        <div class="tab-panel__section-summary">${escapeHtml(emptyStateMessage)}</div>
+      </section>
+    `;
+  }
 
   return `
       <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
@@ -190,20 +207,33 @@ export function renderProductSummarySection(card) {
 export function renderProductsTab(card) {
   const selection = card._productSelectionState();
   const catalogue = card._catalogueState();
-  const productsTone = selection.selectedProductId || catalogue.hasProducts ? "success" : "neutral";
-  const productsSummary = selection.selectedProductName
-    ? `Produit actif: ${selection.selectedProductName}`
-    : catalogue.hasProducts
-      ? "Choisis un produit dans le catalogue"
-      : "Aucun produit enregistré";
-  const productsHint = selection.summary || "Le produit actif et le catalogue local servent à déclarer les interventions.";
+  const application = card._applicationEntity();
+  const hasProductData = Boolean(
+    selection.selectedProductId || selection.selectedProductName || catalogue.hasProducts || application,
+  );
+  const emptyStateMessage = "Aucune donnée produit disponible";
+  const productsTone = hasProductData
+    ? selection.selectedProductId || catalogue.hasProducts
+      ? "success"
+      : "accent"
+    : "neutral";
+  const productsSummary = hasProductData
+    ? selection.selectedProductName
+      ? `Produit actif: ${selection.selectedProductName}`
+      : catalogue.hasProducts
+        ? "Choisis un produit dans le catalogue"
+        : "Aucun produit enregistré"
+    : emptyStateMessage;
+  const productsHint = hasProductData
+    ? selection.summary || "Le produit actif et le catalogue local servent à déclarer les interventions."
+    : emptyStateMessage;
 
   return `
       <section class="tab-panel gi-panel tab-panel--products">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${productsTone}">
           <div class="tab-panel__hero-top">
             <div class="tab-panel__hero-summary">Zone produit</div>
-            ${renderStatusPill(catalogue.summary, productsTone, "mdi:package-variant-closed", `tab-panel__status tab-panel__status--${productsTone}`)}
+            ${renderStatusPill(hasProductData ? catalogue.summary : emptyStateMessage, productsTone, "mdi:package-variant-closed", `tab-panel__status tab-panel__status--${productsTone}`)}
           </div>
           <div class="tab-panel__hero-next">${escapeHtml(productsSummary)}</div>
           <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Le sélecteur d’intervention reste séparé du reste de la carte pour éviter les saisies en double.")}</div>

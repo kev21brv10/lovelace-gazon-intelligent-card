@@ -72,6 +72,7 @@ const TAB_DEFS = [
   { key: "mowing", label: "Tonte", icon: "mdi:content-cut" },
   { key: "gazon", label: "Gazon", icon: "mdi:grass" },
   { key: "products", label: "Produits", icon: "mdi:package-variant-closed" },
+  { key: "intervention", label: "Intervention", icon: "mdi:spray-bottle" },
   { key: "config", label: "Config", icon: "mdi:cog-outline" },
 ];
 
@@ -1019,6 +1020,17 @@ class GazonIntelligentCard extends HTMLElement {
       return "success";
     }
     if (tab === "products") {
+      const selection = this._productSelectionState();
+      const catalogue = this._catalogueState();
+      if (selection.selectedProductId) {
+        return "success";
+      }
+      if (catalogue.hasProducts) {
+        return "accent";
+      }
+      return "neutral";
+    }
+    if (tab === "intervention") {
       const selection = this._productSelectionState();
       const catalogue = this._catalogueState();
       if (selection.selectedProductId) {

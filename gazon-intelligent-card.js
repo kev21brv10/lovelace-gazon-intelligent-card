@@ -2098,6 +2098,7 @@ const TAB_DEFS = [
   { key: "mowing", label: "Tonte", icon: "mdi:content-cut" },
   { key: "gazon", label: "Gazon", icon: "mdi:grass" },
   { key: "products", label: "Produits", icon: "mdi:package-variant-closed" },
+  { key: "intervention", label: "Intervention", icon: "mdi:spray-bottle" },
   { key: "config", label: "Config", icon: "mdi:cog-outline" },
 ];
 
@@ -3045,6 +3046,17 @@ class GazonIntelligentCard extends HTMLElement {
       return "success";
     }
     if (tab === "products") {
+      const selection = this._productSelectionState();
+      const catalogue = this._catalogueState();
+      if (selection.selectedProductId) {
+        return "success";
+      }
+      if (catalogue.hasProducts) {
+        return "accent";
+      }
+      return "neutral";
+    }
+    if (tab === "intervention") {
       const selection = this._productSelectionState();
       const catalogue = this._catalogueState();
       if (selection.selectedProductId) {
@@ -5271,23 +5283,71 @@ function renderProductsTab(card) {
           <button
             type="button"
             class="gi-action gi-action--primary tab-panel__cta"
-            data-gazon-action="declare-product-intervention"
-            ${quickAction.disabled ? "disabled" : ""}
-            aria-label="${escapeHtml(quickAction.actionLabel)}"
+            data-tab="intervention"
+            aria-label="Ouvrir l'onglet intervention"
           >
             ${renderIconBox("mdi:spray-bottle", "sm")}
-            <span>${escapeHtml(quickAction.actionLabel)}</span>
+            <span>Ouvrir l'intervention</span>
           </button>
           <div class="tab-panel__section-summary">
             ${escapeHtml(
               quickAction.disabled
-                ? "Sélectionne un produit dans le catalogue pour lancer une déclaration directe."
+                ? "Sélectionne un produit dans le catalogue pour préparer une déclaration."
                 : `Produit prêt : ${quickAction.label}`,
             )}
           </div>
         </section>
 
         ${renderProductSummarySection(card)}
+      </section>
+    `;
+}
+
+function renderInterventionTab(card) {
+  const quickAction = card._selectedProductInterventionState();
+  const hasProduct = Boolean(quickAction.record && !quickAction.disabled);
+  const catalogue = card._catalogueState();
+  const productSummary = hasProduct ? quickAction.label : "Aucun produit sélectionné";
+  const productHint = hasProduct
+    ? quickAction.summary
+    : catalogue.hasProducts
+      ? "Choisis d'abord un produit dans l'onglet Produits."
+      : "Aucun produit enregistré.";
+
+  return `
+      <section class="tab-panel gi-panel tab-panel--intervention">
+        <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${hasProduct ? "success" : "neutral"}">
+          <div class="tab-panel__hero-top">
+            <div class="tab-panel__hero-summary">Intervention</div>
+            ${renderStatusPill(hasProduct ? "Prêt" : "En attente", hasProduct ? "success" : "neutral", "mdi:spray-bottle", "tab-panel__status")}
+          </div>
+          <div class="tab-panel__hero-next">${escapeHtml(productSummary)}</div>
+          <div class="tab-panel__hero-hint">${escapeHtml(productHint)}</div>
+        </div>
+
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-action">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Déclaration rapide</div>
+            <div class="tab-panel__section-meta">${escapeHtml(hasProduct ? "Intervention du jour" : "Aucun produit prêt")}</div>
+          </div>
+          <button
+            type="button"
+            class="gi-action gi-action--primary tab-panel__cta"
+            data-gazon-action="declare-product-intervention"
+            ${hasProduct ? "" : "disabled"}
+            aria-label="Déclarer l'intervention rapide"
+          >
+            ${renderIconBox("mdi:spray-bottle", "sm")}
+            <span>Déclarer maintenant</span>
+          </button>
+          <div class="tab-panel__section-summary">
+            ${escapeHtml(
+              hasProduct
+                ? `Produit sélectionné : ${quickAction.label}. La date du jour sera utilisée.`
+                : "Sélectionne un produit dans l'onglet Produits pour activer la déclaration.",
+            )}
+          </div>
+        </section>
       </section>
     `;
 }
@@ -5682,6 +5742,8 @@ function renderActiveTab(card) {
       return renderGazonTab(card);
     case "products":
       return renderProductsTab(card);
+    case "intervention":
+      return renderInterventionTab(card);
     case "config":
       return renderConfigTab(card);
     case "watering":

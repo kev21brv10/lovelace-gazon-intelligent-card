@@ -278,6 +278,7 @@ Process simple :
 4. créer une release GitHub
 
 Le workflow CI valide la carte à chaque push et construit l’artefact pour les tags de release.
+La release GitHub publie le bundle racine `gazon-intelligent-card.js`, qui correspond aussi au fichier servi par HACS.
 
 ---
 

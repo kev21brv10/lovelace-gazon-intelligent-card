@@ -26,4 +26,4 @@ jobs:
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/gazon-intelligent-card.js
+          files: gazon-intelligent-card.js

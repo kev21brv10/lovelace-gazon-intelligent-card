@@ -2097,6 +2097,7 @@ const TAB_DEFS = [
   { key: "watering", label: "Arrosage", icon: "mdi:water" },
   { key: "mowing", label: "Tonte", icon: "mdi:content-cut" },
   { key: "gazon", label: "Gazon", icon: "mdi:grass" },
+  { key: "products", label: "Produits", icon: "mdi:package-variant-closed" },
   { key: "config", label: "Config", icon: "mdi:cog-outline" },
 ];
 

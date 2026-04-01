@@ -161,7 +161,7 @@ export function renderProductSummarySection(card) {
     return `
       <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
         <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Zone produit</div>
+          <div class="tab-panel__eyebrow">Catalogue et historique</div>
           ${renderStatusPill(emptyStateMessage, "neutral", "mdi:package-variant-closed", "tab-panel__status")}
         </div>
         <div class="tab-panel__section-summary">${escapeHtml(emptyStateMessage)}</div>
@@ -172,10 +172,10 @@ export function renderProductSummarySection(card) {
   return `
       <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
         <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Zone produit</div>
+          <div class="tab-panel__eyebrow">Catalogue et historique</div>
           ${renderStatusPill(catalogue.summary, catalogue.hasProducts ? "success" : "neutral", "mdi:package-variant-closed", "tab-panel__status")}
         </div>
-        <div class="tab-panel__section-summary">Sélecteur d’intervention, catalogue local et dernière application, sans ressaisie technique.</div>
+        <div class="tab-panel__section-summary">Produit courant, catalogue local et dernière application, sans ressaisie technique.</div>
         <div class="tab-panel__grid tab-panel__grid--products">
           ${card._renderStatCard(
             "Produit courant",
@@ -231,11 +231,11 @@ export function renderProductsTab(card) {
       <section class="tab-panel gi-panel tab-panel--products">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${productsTone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">Zone produit</div>
+            <div class="tab-panel__hero-summary">Produits</div>
             ${renderStatusPill(hasProductData ? catalogue.summary : emptyStateMessage, productsTone, "mdi:package-variant-closed", `tab-panel__status tab-panel__status--${productsTone}`)}
           </div>
           <div class="tab-panel__hero-next">${escapeHtml(productsSummary)}</div>
-          <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Le sélecteur d’intervention reste séparé du reste de la carte pour éviter les saisies en double.")}</div>
+          <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Le catalogue local sert de source unique pour déclarer les interventions.")}</div>
         </div>
 
         ${renderProductSummarySection(card)}

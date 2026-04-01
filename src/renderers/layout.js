@@ -141,7 +141,6 @@ export function renderProductSummarySection(card) {
     catalogue.count > 0
       ? catalogue.productNames || catalogue.productIds || "Catalogue local"
       : "Aucun produit enregistré";
-  const application = card._applicationEntity();
   const applicationState = application && !isUnavailableState(application.state) ? formatStatusLabel(application.state) : "Aucune application";
   const applicationWhen = String(application?.attributes?.last_application_when || "").trim()
     || (application?.attributes?.declared_at ? humanDateTimeText(application.attributes.declared_at) : "");

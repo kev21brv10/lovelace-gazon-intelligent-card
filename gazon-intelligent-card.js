@@ -3130,6 +3130,64 @@ class GazonIntelligentCard extends HTMLElement {
     };
   }
 
+  _catalogueProducts() {
+    const entity = this._catalogueEntity();
+    const products = entity?.attributes?.products_summary;
+    if (!Array.isArray(products) || products.length === 0) {
+      return [];
+    }
+    return products.filter((product) => product && typeof product === "object");
+  }
+
+  _selectedProductRecord() {
+    const selectedProductId = this._productSelectionState().selectedProductId;
+    const products = this._catalogueProducts();
+    if (products.length === 0) {
+      return null;
+    }
+    if (selectedProductId) {
+      const normalizedSelectedProductId = String(selectedProductId).trim();
+      const record = products.find((product) => String(product.id || "").trim() === normalizedSelectedProductId);
+      if (record) {
+        return record;
+      }
+    }
+    if (products.length === 1) {
+      return products[0];
+    }
+    return null;
+  }
+
+  _todayIsoDate() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  _selectedProductInterventionState() {
+    const record = this._selectedProductRecord();
+    const selectedName = String(record?.nom || record?.id || "").trim();
+    const type = String(record?.type || "").trim();
+    if (!record || !type) {
+      return {
+        record: null,
+        disabled: true,
+        label: "Sélectionne un produit",
+        summary: "Aucune intervention rapide possible sans produit sélectionné.",
+        actionLabel: "Déclarer l'intervention",
+      };
+    }
+    return {
+      record,
+      disabled: false,
+      label: selectedName || "Produit sélectionné",
+      summary: `${formatStatusLabel(type)} · ${this._todayIsoDate()}`,
+      actionLabel: `Déclarer ${formatStatusLabel(type)}`,
+    };
+  }
+
   _objectiveEntity() {
     return this._entity("entity_objectif_arrosage");
   }
@@ -4808,6 +4866,13 @@ ${CARD_STYLES}
       this._triggerManualIrrigation();
       return;
     }
+    const declareTarget = event.target.closest("[data-gazon-action='declare-product-intervention']");
+    if (declareTarget) {
+      event.preventDefault();
+      event.stopPropagation();
+      this._triggerSelectedProductIntervention();
+      return;
+    }
     const tabTarget = event.target.closest("[data-tab]");
     if (tabTarget) {
       event.preventDefault();
@@ -4866,6 +4931,33 @@ ${CARD_STYLES}
     }
     this._hass.callService(service.domain, service.service, {
       objectif_mm: objective,
+    });
+  }
+
+  _triggerSelectedProductIntervention() {
+    if (!this._hass) {
+      return;
+    }
+    const state = this._selectedProductInterventionState();
+    if (!state.record || state.disabled) {
+      return;
+    }
+    const intervention = String(state.record.type || "").trim();
+    const productId = String(state.record.id || "").trim();
+    const productName = String(state.record.nom || state.record.id || "").trim();
+    if (!intervention || !productId) {
+      return;
+    }
+    const service = splitServiceName("gazon_intelligent.declare_intervention");
+    if (!service) {
+      return;
+    }
+    this._hass.callService(service.domain, service.service, {
+      intervention,
+      date_action: this._todayIsoDate(),
+      produit_id: productId,
+      produit: productName,
+      note: "Déclaration rapide depuis la carte",
     });
   }
 
@@ -5139,6 +5231,7 @@ function renderProductsTab(card) {
   const selection = card._productSelectionState();
   const catalogue = card._catalogueState();
   const application = card._applicationEntity();
+  const quickAction = card._selectedProductInterventionState();
   const hasProductData = Boolean(
     selection.selectedProductId || selection.selectedProductName || catalogue.hasProducts || application,
   );
@@ -5169,6 +5262,30 @@ function renderProductsTab(card) {
           <div class="tab-panel__hero-next">${escapeHtml(productsSummary)}</div>
           <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Le catalogue local sert de source unique pour déclarer les interventions.")}</div>
         </div>
+
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-action">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Action rapide</div>
+            <div class="tab-panel__section-meta">${escapeHtml(quickAction.summary)}</div>
+          </div>
+          <button
+            type="button"
+            class="gi-action gi-action--primary tab-panel__cta"
+            data-gazon-action="declare-product-intervention"
+            ${quickAction.disabled ? "disabled" : ""}
+            aria-label="${escapeHtml(quickAction.actionLabel)}"
+          >
+            ${renderIconBox("mdi:spray-bottle", "sm")}
+            <span>${escapeHtml(quickAction.actionLabel)}</span>
+          </button>
+          <div class="tab-panel__section-summary">
+            ${escapeHtml(
+              quickAction.disabled
+                ? "Sélectionne un produit dans le catalogue pour lancer une déclaration directe."
+                : `Produit prêt : ${quickAction.label}`,
+            )}
+          </div>
+        </section>
 
         ${renderProductSummarySection(card)}
       </section>

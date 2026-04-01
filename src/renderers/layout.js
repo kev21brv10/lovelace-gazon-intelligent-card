@@ -207,6 +207,7 @@ export function renderProductsTab(card) {
   const selection = card._productSelectionState();
   const catalogue = card._catalogueState();
   const application = card._applicationEntity();
+  const quickAction = card._selectedProductInterventionState();
   const hasProductData = Boolean(
     selection.selectedProductId || selection.selectedProductName || catalogue.hasProducts || application,
   );
@@ -237,6 +238,30 @@ export function renderProductsTab(card) {
           <div class="tab-panel__hero-next">${escapeHtml(productsSummary)}</div>
           <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Le catalogue local sert de source unique pour déclarer les interventions.")}</div>
         </div>
+
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-action">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Action rapide</div>
+            <div class="tab-panel__section-meta">${escapeHtml(quickAction.summary)}</div>
+          </div>
+          <button
+            type="button"
+            class="gi-action gi-action--primary tab-panel__cta"
+            data-gazon-action="declare-product-intervention"
+            ${quickAction.disabled ? "disabled" : ""}
+            aria-label="${escapeHtml(quickAction.actionLabel)}"
+          >
+            ${renderIconBox("mdi:spray-bottle", "sm")}
+            <span>${escapeHtml(quickAction.actionLabel)}</span>
+          </button>
+          <div class="tab-panel__section-summary">
+            ${escapeHtml(
+              quickAction.disabled
+                ? "Sélectionne un produit dans le catalogue pour lancer une déclaration directe."
+                : `Produit prêt : ${quickAction.label}`,
+            )}
+          </div>
+        </section>
 
         ${renderProductSummarySection(card)}
       </section>

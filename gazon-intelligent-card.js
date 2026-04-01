@@ -5454,16 +5454,6 @@ function renderConfigTab(card) {
           ${card._renderConfigActionCard("Hauteur max tondeuse", "entity_hauteur_max_tondeuse", heightMax.value, heightMax.tone, "mdi:ruler-square")}
         </div>
 
-        <div class="tab-panel__section tab-panel__section--config-quick">
-          <div class="tab-panel__section-title">Accès rapide</div>
-          <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">
-            ${card._renderConfigActionCard("Arrosage auto", "entity_switch_arrosage_automatique", switchState.label, switchState.tone, "mdi:switch")}
-            ${card._renderConfigActionCard("Mode", "entity_mode", formatApplicationMode(mode), modeTone, "mdi:grass")}
-            ${card._renderConfigActionCard("Après application", "entity_arrosage_apres_application_autorise", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off")}
-            ${card._renderConfigActionCard("Tonte", "entity_tonte_autorisee", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", "mdi:content-cut")}
-          </div>
-        </div>
-
         <div class="tab-panel__section tab-panel__section--config-debits">
           <div class="tab-panel__section-title">Débits des zones</div>
           <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">

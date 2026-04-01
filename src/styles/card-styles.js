@@ -396,6 +396,14 @@ export const CARD_STYLES = String.raw`
           gap: 10px;
         }
 
+        .tab-panel__section--products {
+          gap: 7px;
+        }
+
+        .tab-panel__section--products .gi-card-core--stat {
+          min-height: 72px;
+        }
+
         .tab-panel__chips {
           display: flex;
           flex-wrap: wrap;
@@ -1819,6 +1827,19 @@ export const CARD_STYLES = String.raw`
             --gi-tiles-gap: 6px;
             --gi-surface-shadow: 0 8px 18px rgba(0, 0, 0, 0.07);
             --gi-surface-shadow-strong: 0 12px 24px rgba(0, 0, 0, 0.12);
+          }
+
+          .tab-panel__section--products {
+            gap: 6px;
+          }
+
+          .tab-panel__section--products .tab-panel__section-summary {
+            font-size: var(--gi-font-sm);
+            line-height: 1.25;
+          }
+
+          .tab-panel__section--products .gi-card-core--stat {
+            min-height: 68px;
           }
         }
 `;

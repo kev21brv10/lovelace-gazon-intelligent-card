@@ -396,6 +396,14 @@ const CARD_STYLES = String.raw`
           gap: 10px;
         }
 
+        .tab-panel__section--products {
+          gap: 7px;
+        }
+
+        .tab-panel__section--products .gi-card-core--stat {
+          min-height: 72px;
+        }
+
         .tab-panel__chips {
           display: flex;
           flex-wrap: wrap;
@@ -1819,6 +1827,19 @@ const CARD_STYLES = String.raw`
             --gi-tiles-gap: 6px;
             --gi-surface-shadow: 0 8px 18px rgba(0, 0, 0, 0.07);
             --gi-surface-shadow-strong: 0 12px 24px rgba(0, 0, 0, 0.12);
+          }
+
+          .tab-panel__section--products {
+            gap: 6px;
+          }
+
+          .tab-panel__section--products .tab-panel__section-summary {
+            font-size: var(--gi-font-sm);
+            line-height: 1.25;
+          }
+
+          .tab-panel__section--products .gi-card-core--stat {
+            min-height: 68px;
           }
         }
 `;
@@ -5048,6 +5069,11 @@ function renderProductSummarySection(card) {
   }
 
   const catalogueLabel = catalogue.count === 1 ? "1 produit" : `${catalogue.count || 0} produits`;
+  const selectionDetails = selection.selectedProductId ? `ID: ${selection.selectedProductId}` : selection.summary || "Sélection active";
+  const catalogueDetails =
+    catalogue.count > 0
+      ? catalogue.productNames || catalogue.productIds || "Catalogue local"
+      : "Aucun produit enregistré";
 
   return `
       <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
@@ -5055,21 +5081,21 @@ function renderProductSummarySection(card) {
           <div class="tab-panel__eyebrow">Produits</div>
           ${renderStatusPill(catalogue.summary, catalogue.hasProducts ? "success" : "neutral", "mdi:package-variant-closed", "tab-panel__status")}
         </div>
-        <div class="tab-panel__section-summary">Le sélecteur de produit guide la déclaration d’intervention sans ressaisie technique.</div>
+        <div class="tab-panel__section-summary">Sélecteur d’intervention et catalogue local, sans ressaisie technique.</div>
         <div class="tab-panel__grid tab-panel__grid--overview">
           ${card._renderStatCard(
             "Produit courant",
             selection.selectedProductName || "Aucun produit",
             selection.selectedProductName ? "accent" : "neutral",
             "mdi:package-variant",
-            selection.summary || (selection.selectedProductName ? `ID: ${selection.selectedProductId || "inconnu"}` : "Sélectionne un produit dans le sélecteur dédié"),
+            selectionDetails,
           )}
           ${card._renderStatCard(
             "Catalogue",
             catalogueLabel,
             catalogue.hasProducts ? "success" : "neutral",
             "mdi:package-variant-closed",
-            catalogue.summary || (catalogue.productNames || catalogue.productIds || ""),
+            catalogueDetails,
           )}
         </div>
       </section>

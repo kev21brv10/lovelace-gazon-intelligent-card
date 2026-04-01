@@ -133,6 +133,11 @@ export function renderProductSummarySection(card) {
   }
 
   const catalogueLabel = catalogue.count === 1 ? "1 produit" : `${catalogue.count || 0} produits`;
+  const selectionDetails = selection.selectedProductId ? `ID: ${selection.selectedProductId}` : selection.summary || "Sélection active";
+  const catalogueDetails =
+    catalogue.count > 0
+      ? catalogue.productNames || catalogue.productIds || "Catalogue local"
+      : "Aucun produit enregistré";
 
   return `
       <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
@@ -140,21 +145,21 @@ export function renderProductSummarySection(card) {
           <div class="tab-panel__eyebrow">Produits</div>
           ${renderStatusPill(catalogue.summary, catalogue.hasProducts ? "success" : "neutral", "mdi:package-variant-closed", "tab-panel__status")}
         </div>
-        <div class="tab-panel__section-summary">Le sélecteur de produit guide la déclaration d’intervention sans ressaisie technique.</div>
+        <div class="tab-panel__section-summary">Sélecteur d’intervention et catalogue local, sans ressaisie technique.</div>
         <div class="tab-panel__grid tab-panel__grid--overview">
           ${card._renderStatCard(
             "Produit courant",
             selection.selectedProductName || "Aucun produit",
             selection.selectedProductName ? "accent" : "neutral",
             "mdi:package-variant",
-            selection.summary || (selection.selectedProductName ? `ID: ${selection.selectedProductId || "inconnu"}` : "Sélectionne un produit dans le sélecteur dédié"),
+            selectionDetails,
           )}
           ${card._renderStatCard(
             "Catalogue",
             catalogueLabel,
             catalogue.hasProducts ? "success" : "neutral",
             "mdi:package-variant-closed",
-            catalogue.summary || (catalogue.productNames || catalogue.productIds || ""),
+            catalogueDetails,
           )}
         </div>
       </section>

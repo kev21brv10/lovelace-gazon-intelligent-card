@@ -4010,67 +4010,6 @@ class GazonIntelligentCard extends HTMLElement {
     };
   }
 
-  _renderConfigTab() {
-    const switchState = this._configSwitchState();
-    const afterApplication = this._entityState("entity_arrosage_apres_application_autorise", null);
-    const tonteAutorisee = this._entityState("entity_tonte_autorisee", null);
-    const mode = this._entityState("entity_mode", null);
-    const modeTone = phaseTone(mode);
-    const switchIcon = this._config?.show_icons ? "mdi:switch" : null;
-    const zoneCards = this._zoneDebitEntries()
-      .map((entry) => {
-        const config = this._renderConfigValue(entry.key, "mm/h");
-        return this._renderConfigActionCard(entry.label, entry.key, config.value, config.tone, "mdi:sprinkler");
-      })
-      .join("");
-    const heightMin = this._renderConfigValue("entity_hauteur_min_tondeuse", "cm");
-    const heightMax = this._renderConfigValue("entity_hauteur_max_tondeuse", "cm");
-
-    return `
-      <section class="tab-panel gi-panel tab-panel--config">
-        <div class="tab-panel__header">
-          <div>
-            <div class="tab-panel__eyebrow">Configuration</div>
-            <div class="tab-panel__title">Autorisation, débits et hauteurs</div>
-            <div class="tab-panel__header-hint">Touchez une tuile pour ouvrir le contrôle Home Assistant correspondant.</div>
-          </div>
-          ${renderStatusPill(switchState.label, switchState.tone, switchIcon, "tab-panel__status")}
-        </div>
-
-        <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-top">
-          ${this._renderConfigActionCard("Arrosage automatique", "entity_switch_arrosage_automatique", switchState.label, switchState.tone, "mdi:switch")}
-          ${this._renderConfigActionCard("Après application", "entity_arrosage_apres_application_autorise", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off")}
-          ${this._renderConfigActionCard("Tonte autorisée", "entity_tonte_autorisee", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", "mdi:content-cut")}
-          ${this._renderConfigActionCard("Mode du gazon", "entity_mode", formatApplicationMode(mode), modeTone, "mdi:grass")}
-          ${this._renderConfigActionCard("Hauteur min tondeuse", "entity_hauteur_min_tondeuse", heightMin.value, heightMin.tone, "mdi:ruler-square")}
-          ${this._renderConfigActionCard("Hauteur max tondeuse", "entity_hauteur_max_tondeuse", heightMax.value, heightMax.tone, "mdi:ruler-square")}
-        </div>
-
-        <div class="tab-panel__section tab-panel__section--config-quick">
-          <div class="tab-panel__section-title">Accès rapide</div>
-          <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">
-            ${this._renderConfigActionCard("Arrosage auto", "entity_switch_arrosage_automatique", switchState.label, switchState.tone, "mdi:switch")}
-            ${this._renderConfigActionCard("Mode", "entity_mode", formatApplicationMode(mode), modeTone, "mdi:grass")}
-            ${this._renderConfigActionCard("Après application", "entity_arrosage_apres_application_autorise", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off")}
-            ${this._renderConfigActionCard("Tonte", "entity_tonte_autorisee", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", "mdi:content-cut")}
-          </div>
-        </div>
-
-        <div class="tab-panel__section tab-panel__section--config-debits">
-          <div class="tab-panel__section-title">Débits des zones</div>
-          <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">
-            ${zoneCards || `<div class="tab-panel__empty">Débits non configurés.</div>`}
-          </div>
-          <div class="tab-panel__section-title">Hauteurs de tondeuse</div>
-          <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">
-            ${this._renderConfigActionCard("Hauteur min tondeuse", "entity_hauteur_min_tondeuse", heightMin.value, heightMin.tone, "mdi:ruler-square")}
-            ${this._renderConfigActionCard("Hauteur max tondeuse", "entity_hauteur_max_tondeuse", heightMax.value, heightMax.tone, "mdi:ruler-square")}
-          </div>
-        </div>
-      </section>
-    `;
-  }
-
   _renderGazonTab() {
     const phase = this._entityState("entity_phase", null);
     const subPhase = this._entityState("entity_sous_phase", null);
@@ -4824,8 +4763,8 @@ ${CARD_STYLES}
       console.error("[gazon-intelligent-card] render failed", error);
       this.shadowRoot.innerHTML = `
         <div class="empty">
-          <strong>Carte indisponible pendant l'arrosage.</strong>
-          <div>Le rafraîchissement de la progression a rencontré un problème. Recharge la ressource Lovelace si besoin.</div>
+          <strong>Carte indisponible.</strong>
+          <div>Le rendu de la carte a rencontré un problème. Recharge la ressource Lovelace si besoin.</div>
         </div>
       `;
     }

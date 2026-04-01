@@ -5414,8 +5414,6 @@ function renderConfigTab(card) {
   const tonteAutorisee = card._entityState("entity_tonte_autorisee", null);
   const mode = card._entityState("entity_mode", null);
   const modeTone = phaseTone(mode);
-  const selection = card._productSelectionState();
-  const catalogue = card._catalogueState();
   const switchIcon = card._config?.show_icons ? "mdi:switch" : null;
   const zoneCards = card._zoneDebitEntries()
     .map((entry) => {
@@ -5431,18 +5429,10 @@ function renderConfigTab(card) {
         <div class="tab-panel__header">
           <div>
             <div class="tab-panel__eyebrow">Configuration</div>
-            <div class="tab-panel__title">Autorisation, produits, débits et hauteurs</div>
+            <div class="tab-panel__title">Autorisation, débits et hauteurs</div>
             <div class="tab-panel__header-hint">Touchez une tuile pour ouvrir le contrôle Home Assistant correspondant.</div>
           </div>
           ${renderStatusPill(switchState.label, switchState.tone, switchIcon, "tab-panel__status")}
-        </div>
-
-        <div class="tab-panel__section tab-panel__section--config-quick">
-          <div class="tab-panel__section-title">Produits</div>
-          <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">
-            ${card._renderConfigActionCard("Produit d'intervention", "entity_produit_intervention", selection.selectedProductName || "Aucun produit", selection.selectedProductName ? "accent" : "neutral", "mdi:package-variant", selection.summary)}
-            ${card._renderConfigActionCard("Catalogue produits", "entity_catalogue_produits", catalogue.count ? `${catalogue.count}` : "0", catalogue.hasProducts ? "success" : "neutral", "mdi:package-variant-closed", catalogue.summary)}
-          </div>
         </div>
 
         <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-top">

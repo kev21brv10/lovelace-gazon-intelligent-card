@@ -401,8 +401,8 @@ const CARD_STYLES = String.raw`
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 10%, var(--gi-surface-border));
           border-radius: 14px;
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, white) 100%);
-          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 12%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, black) 100%);
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.10);
           color: var(--secondary-text-color);
           font-size: 0.64rem;
           font-weight: 700;
@@ -419,7 +419,7 @@ const CARD_STYLES = String.raw`
           color: var(--primary-text-color);
           border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 30%, var(--gi-surface-border-strong));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 12%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, white) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 15%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 95%, black) 100%);
         }
 
         .tab-panel__workflow-index {
@@ -465,14 +465,29 @@ const CARD_STYLES = String.raw`
           min-width: 0;
           padding: 12px 13px;
           border-radius: 16px;
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 10%, var(--divider-color));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 5%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 99%, white) 100%);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 97%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.05),
+            0 12px 26px rgba(0, 0, 0, 0.12);
+        }
+
+        .tab-panel__intervention-card--picker {
+          border-color: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 18%, var(--divider-color));
+          box-shadow:
+            inset 0 0 0 1px color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent),
+            inset 0 1px 0 rgba(255, 255, 255, 0.04),
+            0 12px 26px rgba(0, 0, 0, 0.12);
         }
 
         .tab-panel__intervention-card--action {
           justify-content: center;
+          border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 18%, var(--divider-color));
+          box-shadow:
+            inset 0 0 0 1px color-mix(in srgb, var(--gazon-success-color, #4fc38c) 10%, transparent),
+            inset 0 1px 0 rgba(255, 255, 255, 0.04),
+            0 12px 26px rgba(0, 0, 0, 0.12);
         }
 
         .tab-panel__intervention-card .tab-panel__section-head {
@@ -487,9 +502,18 @@ const CARD_STYLES = String.raw`
           font-size: var(--gi-font-xs);
         }
 
+        .tab-panel__intervention-card--picker .tab-panel__section-meta {
+          color: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 58%, var(--secondary-text-color));
+        }
+
+        .tab-panel__intervention-card--action .tab-panel__section-meta {
+          color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 58%, var(--secondary-text-color));
+        }
+
         .tab-panel__intervention-card--action .tab-panel__cta {
           width: 100%;
           min-height: 76px;
+          border-radius: 14px;
         }
 
         .tab-panel__select-shell {
@@ -497,12 +521,12 @@ const CARD_STYLES = String.raw`
           display: flex;
           align-items: center;
           min-width: 0;
-          border: 1px solid var(--gi-surface-border-strong);
+          border: 1px solid color-mix(in srgb, var(--gazon-water-color, #44c8ea) 14%, var(--gi-surface-border-strong));
           border-radius: 16px;
           padding: 7px 12px 7px 10px;
           background:
-            radial-gradient(circle at 18% 50%, color-mix(in srgb, var(--gazon-card-accent) 12%, transparent) 0%, transparent 18%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 12%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, white) 100%);
+            radial-gradient(circle at 18% 50%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 14%, transparent) 0%, transparent 18%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 5%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
           box-shadow: var(--gi-surface-shadow-strong);
           gap: 10px;
           min-height: 52px;
@@ -514,7 +538,7 @@ const CARD_STYLES = String.raw`
           width: 30px;
           height: 30px;
           border-radius: 10px;
-          background: color-mix(in srgb, var(--gazon-card-accent) 12%, transparent);
+          background: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 18%, transparent);
           color: var(--primary-text-color);
           flex: none;
         }
@@ -546,9 +570,9 @@ const CARD_STYLES = String.raw`
         }
 
         .tab-panel__select:focus-visible {
-          border-color: color-mix(in srgb, var(--gazon-card-accent) 42%, var(--gi-surface-border-strong));
+          border-color: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 42%, var(--gi-surface-border-strong));
           box-shadow:
-            0 0 0 2px color-mix(in srgb, var(--gazon-card-accent) 24%, transparent),
+            0 0 0 2px color-mix(in srgb, var(--gazon-water-color, #44c8ea) 24%, transparent),
             var(--gi-surface-shadow-strong);
         }
 

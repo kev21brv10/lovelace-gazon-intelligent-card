@@ -371,6 +371,13 @@ export const CARD_STYLES = String.raw`
           line-height: 1.35;
         }
 
+        .tab-panel__intervention-layout {
+          display: grid;
+          grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+          gap: 10px;
+          align-items: stretch;
+        }
+
         .tab-panel__field {
           display: flex;
           flex-direction: column;
@@ -568,6 +575,26 @@ export const CARD_STYLES = String.raw`
 
         .tab-panel__section--products .gi-card-core--stat {
           min-height: 72px;
+        }
+
+        .tab-panel__section--intervention-picker,
+        .tab-panel__section--products-action,
+        .tab-panel__section--application-history {
+          min-height: 100%;
+        }
+
+        .tab-panel__section--intervention-picker {
+          gap: 10px;
+        }
+
+        .tab-panel__section--products-action {
+          justify-content: center;
+          gap: 10px;
+        }
+
+        .tab-panel__section--products-action .tab-panel__cta {
+          width: 100%;
+          min-height: 76px;
         }
 
         .tab-panel__chips {
@@ -2070,6 +2097,26 @@ export const CARD_STYLES = String.raw`
 
           .tab-panel__section--products .gi-card-core--stat {
             min-height: 68px;
+          }
+
+          .tab-panel__intervention-layout {
+            grid-template-columns: 1fr;
+          }
+
+          .tab-panel__workflow {
+            gap: 6px;
+          }
+
+          .tab-panel__workflow-step {
+            padding: 6px 8px;
+          }
+
+          .tab-panel__select-shell {
+            min-height: 48px;
+          }
+
+          .tab-panel__section--products-action .tab-panel__cta {
+            min-height: 70px;
           }
         }
 `;

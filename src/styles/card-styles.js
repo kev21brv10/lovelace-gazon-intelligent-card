@@ -371,13 +371,6 @@ export const CARD_STYLES = String.raw`
           line-height: 1.35;
         }
 
-        .tab-panel__intervention-layout {
-          display: grid;
-          grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-          gap: 10px;
-          align-items: stretch;
-        }
-
         .tab-panel__field {
           display: flex;
           flex-direction: column;
@@ -452,6 +445,51 @@ export const CARD_STYLES = String.raw`
 
         .tab-panel__workflow-label {
           white-space: nowrap;
+        }
+
+        .tab-panel__intervention-workflow {
+          gap: 10px;
+        }
+
+        .tab-panel__intervention-layout {
+          display: grid;
+          grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+          gap: 10px;
+          align-items: stretch;
+        }
+
+        .tab-panel__intervention-card {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          min-width: 0;
+          padding: 12px 13px;
+          border-radius: 16px;
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 5%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 99%, white) 100%);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .tab-panel__intervention-card--action {
+          justify-content: center;
+        }
+
+        .tab-panel__intervention-card .tab-panel__section-head {
+          margin-bottom: 0;
+        }
+
+        .tab-panel__intervention-card .tab-panel__section-summary {
+          font-size: var(--gi-font-sm);
+        }
+
+        .tab-panel__intervention-card .tab-panel__section-hint {
+          font-size: var(--gi-font-xs);
+        }
+
+        .tab-panel__intervention-card--action .tab-panel__cta {
+          width: 100%;
+          min-height: 76px;
         }
 
         .tab-panel__select-shell {
@@ -577,24 +615,8 @@ export const CARD_STYLES = String.raw`
           min-height: 72px;
         }
 
-        .tab-panel__section--intervention-picker,
-        .tab-panel__section--products-action,
         .tab-panel__section--application-history {
           min-height: 100%;
-        }
-
-        .tab-panel__section--intervention-picker {
-          gap: 10px;
-        }
-
-        .tab-panel__section--products-action {
-          justify-content: center;
-          gap: 10px;
-        }
-
-        .tab-panel__section--products-action .tab-panel__cta {
-          width: 100%;
-          min-height: 76px;
         }
 
         .tab-panel__chips {
@@ -2103,6 +2125,10 @@ export const CARD_STYLES = String.raw`
             grid-template-columns: 1fr;
           }
 
+          .tab-panel__intervention-card {
+            padding: 11px 12px;
+          }
+
           .tab-panel__workflow {
             gap: 6px;
           }
@@ -2115,7 +2141,7 @@ export const CARD_STYLES = String.raw`
             min-height: 48px;
           }
 
-          .tab-panel__section--products-action .tab-panel__cta {
+          .tab-panel__intervention-card--action .tab-panel__cta {
             min-height: 70px;
           }
         }

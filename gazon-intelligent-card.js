@@ -371,13 +371,6 @@ const CARD_STYLES = String.raw`
           line-height: 1.35;
         }
 
-        .tab-panel__intervention-layout {
-          display: grid;
-          grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-          gap: 10px;
-          align-items: stretch;
-        }
-
         .tab-panel__field {
           display: flex;
           flex-direction: column;
@@ -452,6 +445,51 @@ const CARD_STYLES = String.raw`
 
         .tab-panel__workflow-label {
           white-space: nowrap;
+        }
+
+        .tab-panel__intervention-workflow {
+          gap: 10px;
+        }
+
+        .tab-panel__intervention-layout {
+          display: grid;
+          grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+          gap: 10px;
+          align-items: stretch;
+        }
+
+        .tab-panel__intervention-card {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          min-width: 0;
+          padding: 12px 13px;
+          border-radius: 16px;
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 5%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 99%, white) 100%);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .tab-panel__intervention-card--action {
+          justify-content: center;
+        }
+
+        .tab-panel__intervention-card .tab-panel__section-head {
+          margin-bottom: 0;
+        }
+
+        .tab-panel__intervention-card .tab-panel__section-summary {
+          font-size: var(--gi-font-sm);
+        }
+
+        .tab-panel__intervention-card .tab-panel__section-hint {
+          font-size: var(--gi-font-xs);
+        }
+
+        .tab-panel__intervention-card--action .tab-panel__cta {
+          width: 100%;
+          min-height: 76px;
         }
 
         .tab-panel__select-shell {
@@ -577,24 +615,8 @@ const CARD_STYLES = String.raw`
           min-height: 72px;
         }
 
-        .tab-panel__section--intervention-picker,
-        .tab-panel__section--products-action,
         .tab-panel__section--application-history {
           min-height: 100%;
-        }
-
-        .tab-panel__section--intervention-picker {
-          gap: 10px;
-        }
-
-        .tab-panel__section--products-action {
-          justify-content: center;
-          gap: 10px;
-        }
-
-        .tab-panel__section--products-action .tab-panel__cta {
-          width: 100%;
-          min-height: 76px;
         }
 
         .tab-panel__chips {
@@ -2103,6 +2125,10 @@ const CARD_STYLES = String.raw`
             grid-template-columns: 1fr;
           }
 
+          .tab-panel__intervention-card {
+            padding: 11px 12px;
+          }
+
           .tab-panel__workflow {
             gap: 6px;
           }
@@ -2115,7 +2141,7 @@ const CARD_STYLES = String.raw`
             min-height: 48px;
           }
 
-          .tab-panel__section--products-action .tab-panel__cta {
+          .tab-panel__intervention-card--action .tab-panel__cta {
             min-height: 70px;
           }
         }
@@ -5809,93 +5835,99 @@ function renderInterventionTab(card) {
           <div class="tab-panel__hero-hint">${escapeHtml(productHint)}</div>
         </div>
 
-        <div class="tab-panel__intervention-layout">
-          <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-picker">
-            <div class="tab-panel__section-head">
-              <div class="tab-panel__eyebrow">Choix du produit</div>
-              <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-workflow">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Produit et déclaration</div>
+            <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
+          </div>
+          <div class="tab-panel__workflow" aria-hidden="true">
+            <div class="tab-panel__workflow-step tab-panel__workflow-step--active">
+              <span class="tab-panel__workflow-index">1</span>
+              <span class="tab-panel__workflow-label">Choisir</span>
             </div>
-            <div class="tab-panel__workflow" aria-hidden="true">
-              <div class="tab-panel__workflow-step tab-panel__workflow-step--active">
-                <span class="tab-panel__workflow-index">1</span>
-                <span class="tab-panel__workflow-label">Choisir</span>
-              </div>
-              <div class="tab-panel__workflow-connector"></div>
-              <div class="tab-panel__workflow-step ${hasProduct ? "tab-panel__workflow-step--done" : ""}">
-                <span class="tab-panel__workflow-index">2</span>
-                <span class="tab-panel__workflow-label">Déclarer</span>
-              </div>
+            <div class="tab-panel__workflow-connector"></div>
+            <div class="tab-panel__workflow-step ${hasProduct ? "tab-panel__workflow-step--done" : ""}">
+              <span class="tab-panel__workflow-index">2</span>
+              <span class="tab-panel__workflow-label">Déclarer</span>
             </div>
-            <label class="tab-panel__field">
-              <span class="tab-panel__field-label">Produit à déclarer</span>
-              <div class="tab-panel__select-shell">
-                <span class="tab-panel__select-prefix" aria-hidden="true">
-                  ${renderIconBox("mdi:package-variant-closed", "sm")}
-                </span>
-                <select
-                  class="tab-panel__select"
-                  data-gazon-action="select-intervention-product"
-                  aria-label="Choisir le produit d'intervention"
-                  ${hasProductOptions ? "" : "disabled"}
-                >
-                  <option value="">${escapeHtml(hasProductOptions ? "Choisir un produit" : "Aucun produit disponible")}</option>
-                  ${productOptions
-                    .map(
-                      (option) => `
-                        <option value="${escapeHtml(option.label)}" ${option.label === selectedProductOptionLabel ? "selected" : ""}>
-                          ${escapeHtml(option.label)}
-                        </option>
-                      `,
-                    )
-                    .join("")}
-                </select>
-                <span class="tab-panel__select-chevron" aria-hidden="true">${renderIconBox("mdi:chevron-down", "sm")}</span>
+          </div>
+          <div class="tab-panel__intervention-layout">
+            <div class="tab-panel__intervention-card tab-panel__intervention-card--picker">
+              <div class="tab-panel__section-head">
+                <div class="tab-panel__eyebrow">Choix du produit</div>
+                <div class="tab-panel__section-meta">${escapeHtml(hasProductOptions ? "Sélection active" : "Vide")}</div>
               </div>
-            </label>
-            <div class="tab-panel__section-summary">
-              ${
-                hasProduct
-                  ? `Produit sélectionné : ${quickAction.label}. Date d'action : ${quickAction.dateActionLabel || "aujourd'hui"}.`
+              <label class="tab-panel__field">
+                <span class="tab-panel__field-label">Produit à déclarer</span>
+                <div class="tab-panel__select-shell">
+                  <span class="tab-panel__select-prefix" aria-hidden="true">
+                    ${renderIconBox("mdi:package-variant-closed", "sm")}
+                  </span>
+                  <select
+                    class="tab-panel__select"
+                    data-gazon-action="select-intervention-product"
+                    aria-label="Choisir le produit d'intervention"
+                    ${hasProductOptions ? "" : "disabled"}
+                  >
+                    <option value="">${escapeHtml(hasProductOptions ? "Choisir un produit" : "Aucun produit disponible")}</option>
+                    ${productOptions
+                      .map(
+                        (option) => `
+                          <option value="${escapeHtml(option.label)}" ${option.label === selectedProductOptionLabel ? "selected" : ""}>
+                            ${escapeHtml(option.label)}
+                          </option>
+                        `,
+                      )
+                      .join("")}
+                  </select>
+                  <span class="tab-panel__select-chevron" aria-hidden="true">${renderIconBox("mdi:chevron-down", "sm")}</span>
+                </div>
+              </label>
+              <div class="tab-panel__section-summary">
+                ${
+                  hasProduct
+                    ? `Produit sélectionné : ${quickAction.label}. Date d'action : ${quickAction.dateActionLabel || "aujourd'hui"}.`
+                    : hasProductOptions
+                      ? "Choisis un produit dans la liste pour préparer la déclaration."
+                      : "Aucun produit disponible dans le catalogue."
+                }
+              </div>
+              <div class="tab-panel__section-hint">
+                ${
+                  hasProduct
+                  ? quickAction.summary
                   : hasProductOptions
-                    ? "Choisis un produit dans la liste pour préparer la déclaration."
-                    : "Aucun produit disponible dans le catalogue."
-              }
+                      ? "La sélection met à jour le produit actif."
+                      : "Ajoute au moins un produit dans le catalogue avant de déclarer une intervention."
+                }
+              </div>
             </div>
-            <div class="tab-panel__section-hint">
-              ${
-                hasProduct
-                ? quickAction.summary
-                : hasProductOptions
-                    ? "La sélection met à jour le produit actif."
-                    : "Ajoute au moins un produit dans le catalogue avant de déclarer une intervention."
-              }
-            </div>
-          </section>
 
-          <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-action">
-            <div class="tab-panel__section-head">
-              <div class="tab-panel__eyebrow">Déclaration rapide</div>
-              <div class="tab-panel__section-meta">${escapeHtml(hasProduct ? "Étape 2 · prête" : "Étape 2 · en attente")}</div>
+            <div class="tab-panel__intervention-card tab-panel__intervention-card--action">
+              <div class="tab-panel__section-head">
+                <div class="tab-panel__eyebrow">Déclaration rapide</div>
+                <div class="tab-panel__section-meta">${escapeHtml(hasProduct ? "Étape 2 · prête" : "Étape 2 · en attente")}</div>
+              </div>
+              <button
+                type="button"
+                class="gi-action gi-action--primary tab-panel__cta"
+                data-gazon-action="declare-product-intervention"
+                ${hasProduct ? "" : "disabled"}
+                aria-label="Déclarer l'intervention rapide"
+              >
+                ${renderIconBox("mdi:spray-bottle", "sm")}
+                <span>Déclarer maintenant</span>
+              </button>
+              <div class="tab-panel__section-summary">
+                ${escapeHtml(
+                  hasProduct
+                    ? `Produit sélectionné : ${quickAction.label}. Date d'action : ${quickAction.dateActionLabel || "aujourd'hui"}.`
+                    : "Sélectionne un produit pour activer la déclaration.",
+                )}
+              </div>
             </div>
-            <button
-              type="button"
-              class="gi-action gi-action--primary tab-panel__cta"
-              data-gazon-action="declare-product-intervention"
-              ${hasProduct ? "" : "disabled"}
-              aria-label="Déclarer l'intervention rapide"
-            >
-              ${renderIconBox("mdi:spray-bottle", "sm")}
-              <span>Déclarer maintenant</span>
-            </button>
-            <div class="tab-panel__section-summary">
-              ${escapeHtml(
-                hasProduct
-                  ? `Produit sélectionné : ${quickAction.label}. Date d'action : ${quickAction.dateActionLabel || "aujourd'hui"}.`
-                  : "Sélectionne un produit pour activer la déclaration.",
-              )}
-            </div>
-          </section>
-        </div>
+          </div>
+        </section>
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
           <div class="tab-panel__section-head">

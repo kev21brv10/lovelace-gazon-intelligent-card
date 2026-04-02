@@ -293,6 +293,20 @@ const CARD_STYLES = String.raw`
             var(--gi-surface-fill-accent);
         }
 
+        .tab-panel--intervention .tab-panel__hero {
+          gap: 8px;
+        }
+
+        .tab-panel--intervention .tab-panel__hero-next {
+          font-size: var(--gi-font-xl);
+          font-weight: 900;
+          line-height: 1.18;
+        }
+
+        .tab-panel--intervention .tab-panel__hero-hint {
+          max-width: 68ch;
+        }
+
         .tab-panel__hero--pulse {
           animation: gazonPulseSoft 2.8s ease-in-out infinite;
         }
@@ -467,19 +481,25 @@ const CARD_STYLES = String.raw`
           border-radius: 16px;
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 10%, var(--divider-color));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 97%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 96%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 91%, black) 100%);
           box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.05),
             0 12px 26px rgba(0, 0, 0, 0.12);
         }
 
         .tab-panel__intervention-card--picker {
-          border-color: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 16%, var(--divider-color));
+          border-color: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 18%, var(--divider-color));
+          background:
+            radial-gradient(circle at 10% 12%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 12%, transparent) 0%, transparent 26%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
         }
 
         .tab-panel__intervention-card--action {
           justify-content: center;
-          border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 16%, var(--divider-color));
+          border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 18%, var(--divider-color));
+          background:
+            radial-gradient(circle at 8% 12%, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 10%, transparent) 0%, transparent 26%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 5%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 91%, black) 100%);
         }
 
         .tab-panel__intervention-card .tab-panel__section-head {
@@ -492,6 +512,16 @@ const CARD_STYLES = String.raw`
 
         .tab-panel__intervention-card .tab-panel__section-hint {
           font-size: var(--gi-font-xs);
+        }
+
+        .tab-panel__intervention-card--picker .tab-panel__section-summary,
+        .tab-panel__intervention-card--picker .tab-panel__section-hint {
+          color: color-mix(in srgb, var(--primary-text-color) 88%, var(--gazon-water-color, #44c8ea));
+        }
+
+        .tab-panel__intervention-card--action .tab-panel__section-summary,
+        .tab-panel__intervention-card--action .tab-panel__section-hint {
+          color: color-mix(in srgb, var(--primary-text-color) 88%, var(--gazon-success-color, #4fc38c));
         }
 
         .tab-panel__intervention-card--picker .tab-panel__section-meta {
@@ -513,12 +543,12 @@ const CARD_STYLES = String.raw`
           display: flex;
           align-items: center;
           min-width: 0;
-          border: 1px solid color-mix(in srgb, var(--gazon-water-color, #44c8ea) 12%, var(--gi-surface-border-strong));
+          border: 1px solid color-mix(in srgb, var(--gazon-water-color, #44c8ea) 16%, var(--gi-surface-border-strong));
           border-radius: 16px;
           padding: 7px 12px 7px 10px;
           background:
-            radial-gradient(circle at 18% 50%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 0%, transparent 18%),
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 96%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
+            radial-gradient(circle at 18% 50%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 12%, transparent) 0%, transparent 18%),
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 97%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 90%, black) 100%);
           box-shadow: var(--gi-surface-shadow-strong);
           gap: 10px;
           min-height: 52px;
@@ -566,6 +596,10 @@ const CARD_STYLES = String.raw`
           box-shadow:
             0 0 0 2px color-mix(in srgb, var(--gazon-water-color, #44c8ea) 24%, transparent),
             var(--gi-surface-shadow-strong);
+        }
+
+        .tab-panel__intervention-card--action .tab-panel__cta {
+          letter-spacing: 0.015em;
         }
 
         .tab-panel__select-chevron {
@@ -5984,8 +6018,8 @@ function renderInterventionTab(card) {
     : "Le bouton restera désactivé tant qu'aucune application n'est présente dans l'historique.";
   const recommendationTone = ui.tone || (canDeclare ? "success" : hasProductOptions ? "warning" : "neutral");
   const recommendationIcon = ui.icon || (canDeclare ? "mdi:spray-bottle" : "mdi:package-variant-closed");
-  const selectionMeta = hasSelection ? "Sélection active" : hasProductOptions ? "À sélectionner" : "Vide";
-  const declarationMeta = canDeclare ? "Étape 2 · prête" : hasSelection ? "Étape 2 · en attente" : "Étape 2 · en attente";
+  const selectionMeta = canDeclare ? "Sélection prête" : hasSelection ? "Déjà choisi" : hasProductOptions ? "À choisir" : "Vide";
+  const declarationMeta = canDeclare ? "Étape 2 · prête" : hasSelection ? "Étape 2 · en attente" : "Étape 2 · verrouillée";
 
   return `
       <section class="tab-panel gi-panel tab-panel--intervention">
@@ -6000,24 +6034,24 @@ function renderInterventionTab(card) {
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-workflow">
           <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Produit et déclaration</div>
+            <div class="tab-panel__eyebrow">Préparation express</div>
             <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
           </div>
           <div class="tab-panel__workflow" aria-hidden="true">
             <div class="tab-panel__workflow-step tab-panel__workflow-step--active">
               <span class="tab-panel__workflow-index">1</span>
-              <span class="tab-panel__workflow-label">Choisir</span>
+              <span class="tab-panel__workflow-label">Choisis</span>
             </div>
             <div class="tab-panel__workflow-connector"></div>
             <div class="tab-panel__workflow-step ${canDeclare ? "tab-panel__workflow-step--done" : hasSelection ? "tab-panel__workflow-step--active" : ""}">
               <span class="tab-panel__workflow-index">2</span>
-              <span class="tab-panel__workflow-label">Déclarer</span>
+              <span class="tab-panel__workflow-label">Déclare</span>
             </div>
           </div>
           <div class="tab-panel__intervention-layout">
             <div class="tab-panel__intervention-card tab-panel__intervention-card--picker">
               <div class="tab-panel__section-head">
-                <div class="tab-panel__eyebrow">Choix du produit</div>
+                <div class="tab-panel__eyebrow">Produit à déclarer</div>
                 <div class="tab-panel__section-meta">${escapeHtml(selectionMeta)}</div>
               </div>
               <label class="tab-panel__field">
@@ -6056,7 +6090,7 @@ function renderInterventionTab(card) {
 
             <div class="tab-panel__intervention-card tab-panel__intervention-card--action">
               <div class="tab-panel__section-head">
-                <div class="tab-panel__eyebrow">Déclaration rapide</div>
+                <div class="tab-panel__eyebrow">Validation finale</div>
                 <div class="tab-panel__section-meta">${escapeHtml(declarationMeta)}</div>
               </div>
               <button
@@ -6064,10 +6098,10 @@ function renderInterventionTab(card) {
                 class="gi-action gi-action--primary tab-panel__cta"
                 data-gazon-action="declare-product-intervention"
                 ${canDeclare ? "" : "disabled"}
-                aria-label="Déclarer l'intervention rapide"
+                aria-label="Déclarer l'intervention"
               >
                 ${renderIconBox("mdi:spray-bottle", "sm")}
-                <span>${escapeHtml(ui.actionLabel || "Déclarer maintenant")}</span>
+                <span>${escapeHtml(ui.actionLabel || "Déclarer")}</span>
               </button>
               <div class="tab-panel__section-summary">
                 ${escapeHtml(ui.declarationSummary || "Sélectionne un produit pour activer la déclaration.")}

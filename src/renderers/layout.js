@@ -271,8 +271,8 @@ export function renderInterventionTab(card) {
     : "Le bouton restera désactivé tant qu'aucune application n'est présente dans l'historique.";
   const recommendationTone = ui.tone || (canDeclare ? "success" : hasProductOptions ? "warning" : "neutral");
   const recommendationIcon = ui.icon || (canDeclare ? "mdi:spray-bottle" : "mdi:package-variant-closed");
-  const selectionMeta = hasSelection ? "Sélection active" : hasProductOptions ? "À sélectionner" : "Vide";
-  const declarationMeta = canDeclare ? "Étape 2 · prête" : hasSelection ? "Étape 2 · en attente" : "Étape 2 · en attente";
+  const selectionMeta = canDeclare ? "Sélection prête" : hasSelection ? "Déjà choisi" : hasProductOptions ? "À choisir" : "Vide";
+  const declarationMeta = canDeclare ? "Étape 2 · prête" : hasSelection ? "Étape 2 · en attente" : "Étape 2 · verrouillée";
 
   return `
       <section class="tab-panel gi-panel tab-panel--intervention">
@@ -287,24 +287,24 @@ export function renderInterventionTab(card) {
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-workflow">
           <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Produit et déclaration</div>
+            <div class="tab-panel__eyebrow">Préparation express</div>
             <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
           </div>
           <div class="tab-panel__workflow" aria-hidden="true">
             <div class="tab-panel__workflow-step tab-panel__workflow-step--active">
               <span class="tab-panel__workflow-index">1</span>
-              <span class="tab-panel__workflow-label">Choisir</span>
+              <span class="tab-panel__workflow-label">Choisis</span>
             </div>
             <div class="tab-panel__workflow-connector"></div>
             <div class="tab-panel__workflow-step ${canDeclare ? "tab-panel__workflow-step--done" : hasSelection ? "tab-panel__workflow-step--active" : ""}">
               <span class="tab-panel__workflow-index">2</span>
-              <span class="tab-panel__workflow-label">Déclarer</span>
+              <span class="tab-panel__workflow-label">Déclare</span>
             </div>
           </div>
           <div class="tab-panel__intervention-layout">
             <div class="tab-panel__intervention-card tab-panel__intervention-card--picker">
               <div class="tab-panel__section-head">
-                <div class="tab-panel__eyebrow">Choix du produit</div>
+                <div class="tab-panel__eyebrow">Produit à déclarer</div>
                 <div class="tab-panel__section-meta">${escapeHtml(selectionMeta)}</div>
               </div>
               <label class="tab-panel__field">
@@ -343,7 +343,7 @@ export function renderInterventionTab(card) {
 
             <div class="tab-panel__intervention-card tab-panel__intervention-card--action">
               <div class="tab-panel__section-head">
-                <div class="tab-panel__eyebrow">Déclaration rapide</div>
+                <div class="tab-panel__eyebrow">Validation finale</div>
                 <div class="tab-panel__section-meta">${escapeHtml(declarationMeta)}</div>
               </div>
               <button
@@ -351,10 +351,10 @@ export function renderInterventionTab(card) {
                 class="gi-action gi-action--primary tab-panel__cta"
                 data-gazon-action="declare-product-intervention"
                 ${canDeclare ? "" : "disabled"}
-                aria-label="Déclarer l'intervention rapide"
+                aria-label="Déclarer l'intervention"
               >
                 ${renderIconBox("mdi:spray-bottle", "sm")}
-                <span>${escapeHtml(ui.actionLabel || "Déclarer maintenant")}</span>
+                <span>${escapeHtml(ui.actionLabel || "Déclarer")}</span>
               </button>
               <div class="tab-panel__section-summary">
                 ${escapeHtml(ui.declarationSummary || "Sélectionne un produit pour activer la déclaration.")}

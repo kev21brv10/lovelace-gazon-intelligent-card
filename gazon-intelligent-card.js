@@ -180,10 +180,12 @@ const CARD_STYLES = String.raw`
           flex-wrap: nowrap;
           overflow-x: auto;
           scroll-behavior: smooth;
-          scroll-padding-inline: 8px;
+          scroll-padding-inline: 10px;
           -webkit-overflow-scrolling: touch;
+          box-sizing: border-box;
           max-width: 100%;
           scrollbar-width: none;
+          padding-inline: 10px;
           padding-bottom: 2px;
           margin: var(--gi-nav-margin);
           scroll-snap-type: x proximity;
@@ -196,10 +198,12 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-tab,
-        .tab-nav__item {
+        .tab-nav__item,
+        .section-nav__item {
           display: flex;
           align-items: center;
           gap: var(--gi-nav-item-gap);
+          flex: 0 0 auto;
           min-width: 0;
           border: 1px solid var(--gi-surface-border);
           background:
@@ -222,20 +226,23 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-tab:hover,
-        .tab-nav__item:hover {
+        .tab-nav__item:hover,
+        .section-nav__item:hover {
           background: color-mix(in srgb, var(--secondary-background-color) 62%, var(--gazon-section-accent) 38%);
           border-color: var(--gi-surface-border-strong);
           box-shadow: var(--gi-surface-shadow-strong);
         }
 
         .gi-tab .gi-icon,
-        .tab-nav__item .gi-icon {
+        .tab-nav__item .gi-icon,
+        .section-nav__item .gi-icon {
           width: 18px;
           height: 18px;
         }
 
         .gi-tab--active,
-        .tab-nav__item--active {
+        .tab-nav__item--active,
+        .section-nav__item--active {
           color: var(--primary-text-color);
           border-color: var(--gi-surface-border-strong);
           background:

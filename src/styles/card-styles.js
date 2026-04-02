@@ -371,6 +371,69 @@ export const CARD_STYLES = String.raw`
           line-height: 1.3;
         }
 
+        .tab-panel__field {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          min-width: 0;
+        }
+
+        .tab-panel__field-label {
+          font-size: var(--gi-font-xxs);
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          color: var(--secondary-text-color);
+        }
+
+        .tab-panel__select-shell {
+          position: relative;
+          display: flex;
+          align-items: center;
+          min-width: 0;
+        }
+
+        .tab-panel__select {
+          appearance: none;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          width: 100%;
+          min-width: 0;
+          min-height: 46px;
+          border: 1px solid var(--gi-surface-border-strong);
+          border-radius: 16px;
+          padding: 12px 42px 12px 14px;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, white) 100%);
+          color: var(--primary-text-color);
+          box-shadow: var(--gi-surface-shadow);
+          font: inherit;
+          font-size: var(--gi-font-md);
+          font-weight: 700;
+          line-height: 1.2;
+          cursor: pointer;
+          outline: none;
+        }
+
+        .tab-panel__select:disabled {
+          cursor: not-allowed;
+          opacity: 0.65;
+        }
+
+        .tab-panel__select:focus-visible {
+          border-color: color-mix(in srgb, var(--gazon-card-accent) 42%, var(--gi-surface-border-strong));
+          box-shadow:
+            0 0 0 2px color-mix(in srgb, var(--gazon-card-accent) 24%, transparent),
+            var(--gi-surface-shadow-strong);
+        }
+
+        .tab-panel__select-chevron {
+          position: absolute;
+          inset-inline-end: 12px;
+          pointer-events: none;
+          color: var(--secondary-text-color);
+          opacity: 0.88;
+        }
+
         .tab-panel__grid {
           display: grid;
           grid-template-columns: var(--gi-grid-template);

@@ -371,6 +371,69 @@ const CARD_STYLES = String.raw`
           line-height: 1.3;
         }
 
+        .tab-panel__field {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          min-width: 0;
+        }
+
+        .tab-panel__field-label {
+          font-size: var(--gi-font-xxs);
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          color: var(--secondary-text-color);
+        }
+
+        .tab-panel__select-shell {
+          position: relative;
+          display: flex;
+          align-items: center;
+          min-width: 0;
+        }
+
+        .tab-panel__select {
+          appearance: none;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          width: 100%;
+          min-width: 0;
+          min-height: 46px;
+          border: 1px solid var(--gi-surface-border-strong);
+          border-radius: 16px;
+          padding: 12px 42px 12px 14px;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, white) 100%);
+          color: var(--primary-text-color);
+          box-shadow: var(--gi-surface-shadow);
+          font: inherit;
+          font-size: var(--gi-font-md);
+          font-weight: 700;
+          line-height: 1.2;
+          cursor: pointer;
+          outline: none;
+        }
+
+        .tab-panel__select:disabled {
+          cursor: not-allowed;
+          opacity: 0.65;
+        }
+
+        .tab-panel__select:focus-visible {
+          border-color: color-mix(in srgb, var(--gazon-card-accent) 42%, var(--gi-surface-border-strong));
+          box-shadow:
+            0 0 0 2px color-mix(in srgb, var(--gazon-card-accent) 24%, transparent),
+            var(--gi-surface-shadow-strong);
+        }
+
+        .tab-panel__select-chevron {
+          position: absolute;
+          inset-inline-end: 12px;
+          pointer-events: none;
+          color: var(--secondary-text-color);
+          opacity: 0.88;
+        }
+
         .tab-panel__grid {
           display: grid;
           grid-template-columns: var(--gi-grid-template);
@@ -2952,6 +3015,7 @@ class GazonIntelligentCard extends HTMLElement {
   disconnectedCallback() {
     this._clearWateringProgressTimer();
     this.shadowRoot?.removeEventListener("click", this._onClick);
+    this.shadowRoot?.removeEventListener("change", this._onChange);
     this.shadowRoot?.removeEventListener("contextmenu", this._onContextMenu);
     this.shadowRoot?.removeEventListener("dblclick", this._onDoubleClick);
     this.shadowRoot?.removeEventListener("keydown", this._onKeyDown);
@@ -3229,6 +3293,63 @@ class GazonIntelligentCard extends HTMLElement {
     return products.filter((product) => product && typeof product === "object");
   }
 
+  _catalogueProductOptions() {
+    const products = this._catalogueProducts();
+    if (!products.length) {
+      return [];
+    }
+    const nameCounts = new Map();
+    for (const product of products) {
+      const productName = String(product.nom || product.id || "").trim();
+      if (!productName) {
+        continue;
+      }
+      const key = productName.toLocaleLowerCase();
+      nameCounts.set(key, (nameCounts.get(key) || 0) + 1);
+    }
+    return products
+      .map((product) => {
+        const id = String(product.id || "").trim();
+        if (!id) {
+          return null;
+        }
+        const name = String(product.nom || id || "").trim() || id;
+        const duplicateCount = nameCounts.get(name.toLocaleLowerCase()) || 0;
+        const label = duplicateCount > 1 && id ? `${name} — ${id}` : name;
+        return {
+          id,
+          name,
+          label,
+        };
+      })
+      .filter(Boolean);
+  }
+
+  _selectedProductOptionLabel() {
+    const options = this._catalogueProductOptions();
+    if (!options.length) {
+      return null;
+    }
+    const selection = this._productSelectionState();
+    if (selection.selectedProductId) {
+      const match = options.find((option) => option.id === selection.selectedProductId);
+      if (match) {
+        return match.label;
+      }
+    }
+    if (selection.selectedProductName) {
+      const normalizedName = String(selection.selectedProductName).trim().toLocaleLowerCase();
+      const match = options.find((option) => option.name.toLocaleLowerCase() === normalizedName);
+      if (match) {
+        return match.label;
+      }
+    }
+    if (options.length === 1) {
+      return options[0].label;
+    }
+    return null;
+  }
+
   _selectedProductRecord() {
     const selectedProductId = this._productSelectionState().selectedProductId;
     const products = this._catalogueProducts();
@@ -3272,12 +3393,14 @@ class GazonIntelligentCard extends HTMLElement {
     const record = this._selectedProductRecord();
     const selectedName = String(record?.nom || record?.id || "").trim();
     const type = String(record?.type || "").trim();
+    const optionLabel = this._selectedProductOptionLabel();
     if (!record || !type) {
       return {
         record: null,
         disabled: true,
         label: "Sélectionne un produit",
         summary: "Aucune intervention rapide possible sans produit sélectionné.",
+        optionLabel,
         actionLabel: "Déclarer l'intervention",
       };
     }
@@ -3287,6 +3410,7 @@ class GazonIntelligentCard extends HTMLElement {
       label: selectedName || "Produit sélectionné",
       summary: `${formatStatusLabel(type)} · ${this._todayDisplayDate()}`,
       dateActionLabel: this._todayDisplayDate(),
+      optionLabel,
       actionLabel: `Déclarer ${formatStatusLabel(type)}`,
     };
   }
@@ -4941,10 +5065,12 @@ ${CARD_STYLES}
       }
 
       this.shadowRoot.removeEventListener("click", this._onClick);
+      this.shadowRoot.removeEventListener("change", this._onChange);
       this.shadowRoot.removeEventListener("contextmenu", this._onContextMenu);
       this.shadowRoot.removeEventListener("dblclick", this._onDoubleClick);
       this.shadowRoot.removeEventListener("keydown", this._onKeyDown);
       this.shadowRoot.addEventListener("click", this._onClick);
+      this.shadowRoot.addEventListener("change", this._onChange);
       this.shadowRoot.addEventListener("contextmenu", this._onContextMenu);
       this.shadowRoot.addEventListener("dblclick", this._onDoubleClick);
       this.shadowRoot.addEventListener("keydown", this._onKeyDown);
@@ -5027,6 +5153,15 @@ ${CARD_STYLES}
     }
   }
 
+  _onChange(event) {
+    const selectTarget = event.target?.closest?.("[data-gazon-action='select-intervention-product']");
+    if (selectTarget) {
+      event.preventDefault();
+      event.stopPropagation();
+      this._triggerInterventionProductSelection(selectTarget.value);
+    }
+  }
+
   _onContextMenu(event) {
     event.preventDefault();
   }
@@ -5036,6 +5171,10 @@ ${CARD_STYLES}
   }
 
   _onKeyDown(event) {
+    const target = event.target;
+    if (target && ["SELECT", "INPUT", "TEXTAREA"].includes(String(target.tagName || "").toUpperCase())) {
+      return;
+    }
     if (event.key !== "Enter" && event.key !== " ") {
       return;
     }
@@ -5102,6 +5241,28 @@ ${CARD_STYLES}
       payload.entity_id = targetEntityId;
     }
     this._hass.callService(service.domain, service.service, payload);
+  }
+
+  _triggerInterventionProductSelection(optionLabel) {
+    if (!this._hass) {
+      return;
+    }
+    const value = String(optionLabel || "").trim();
+    if (!value) {
+      return;
+    }
+    const service = splitServiceName("select.select_option");
+    if (!service) {
+      return;
+    }
+    const targetEntityId = this._entityId("entity_produit_intervention");
+    if (!targetEntityId) {
+      return;
+    }
+    this._hass.callService(service.domain, service.service, {
+      entity_id: targetEntityId,
+      option: value,
+    });
   }
 
   _triggerRemoveLastApplication() {
@@ -5482,6 +5643,9 @@ function renderProductsTab(card) {
 function renderInterventionTab(card) {
   const quickAction = card._selectedProductInterventionState();
   const lastApplication = card._lastApplicationState();
+  const productOptions = card._catalogueProductOptions();
+  const selectedProductOptionLabel = quickAction.optionLabel || (productOptions.length === 1 ? productOptions[0].label : "");
+  const hasProductOptions = productOptions.length > 0;
   const hasProduct = Boolean(quickAction.record && !quickAction.disabled);
   const catalogue = card._catalogueState();
   const productSummary = hasProduct ? quickAction.label : "Aucun produit sélectionné";
@@ -5506,6 +5670,54 @@ function renderInterventionTab(card) {
           <div class="tab-panel__hero-next">${escapeHtml(productSummary)}</div>
           <div class="tab-panel__hero-hint">${escapeHtml(productHint)}</div>
         </div>
+
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-picker">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Choix du produit</div>
+            <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
+          </div>
+          <label class="tab-panel__field">
+            <span class="tab-panel__field-label">Produit à déclarer</span>
+            <div class="tab-panel__select-shell">
+              <select
+                class="tab-panel__select"
+                data-gazon-action="select-intervention-product"
+                aria-label="Choisir le produit d'intervention"
+                ${hasProductOptions ? "" : "disabled"}
+              >
+                <option value="">${escapeHtml(hasProductOptions ? "Choisir un produit" : "Aucun produit disponible")}</option>
+                ${productOptions
+                  .map(
+                    (option) => `
+                      <option value="${escapeHtml(option.label)}" ${option.label === selectedProductOptionLabel ? "selected" : ""}>
+                        ${escapeHtml(option.label)}
+                      </option>
+                    `,
+                  )
+                  .join("")}
+              </select>
+              <span class="tab-panel__select-chevron" aria-hidden="true">${renderIconBox("mdi:chevron-down", "sm")}</span>
+            </div>
+          </label>
+          <div class="tab-panel__section-summary">
+            ${
+              hasProduct
+                ? `Produit sélectionné : ${quickAction.label}. Date d'action : ${quickAction.dateActionLabel || "aujourd'hui"}.`
+                : hasProductOptions
+                  ? "Choisis un produit dans la liste pour préparer la déclaration."
+                  : "Aucun produit disponible dans le catalogue."
+            }
+          </div>
+          <div class="tab-panel__section-hint">
+            ${
+              hasProduct
+              ? quickAction.summary
+              : hasProductOptions
+                  ? "La sélection met à jour le produit actif, puis tu peux déclarer avec le bouton ci-dessous."
+                  : "Ajoute au moins un produit dans le catalogue avant de déclarer une intervention."
+            }
+          </div>
+        </section>
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-action">
           <div class="tab-panel__section-head">

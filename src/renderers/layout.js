@@ -271,6 +271,9 @@ export function renderProductsTab(card) {
 export function renderInterventionTab(card) {
   const quickAction = card._selectedProductInterventionState();
   const lastApplication = card._lastApplicationState();
+  const productOptions = card._catalogueProductOptions();
+  const selectedProductOptionLabel = quickAction.optionLabel || (productOptions.length === 1 ? productOptions[0].label : "");
+  const hasProductOptions = productOptions.length > 0;
   const hasProduct = Boolean(quickAction.record && !quickAction.disabled);
   const catalogue = card._catalogueState();
   const productSummary = hasProduct ? quickAction.label : "Aucun produit sélectionné";
@@ -295,6 +298,54 @@ export function renderInterventionTab(card) {
           <div class="tab-panel__hero-next">${escapeHtml(productSummary)}</div>
           <div class="tab-panel__hero-hint">${escapeHtml(productHint)}</div>
         </div>
+
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-picker">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Choix du produit</div>
+            <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
+          </div>
+          <label class="tab-panel__field">
+            <span class="tab-panel__field-label">Produit à déclarer</span>
+            <div class="tab-panel__select-shell">
+              <select
+                class="tab-panel__select"
+                data-gazon-action="select-intervention-product"
+                aria-label="Choisir le produit d'intervention"
+                ${hasProductOptions ? "" : "disabled"}
+              >
+                <option value="">${escapeHtml(hasProductOptions ? "Choisir un produit" : "Aucun produit disponible")}</option>
+                ${productOptions
+                  .map(
+                    (option) => `
+                      <option value="${escapeHtml(option.label)}" ${option.label === selectedProductOptionLabel ? "selected" : ""}>
+                        ${escapeHtml(option.label)}
+                      </option>
+                    `,
+                  )
+                  .join("")}
+              </select>
+              <span class="tab-panel__select-chevron" aria-hidden="true">${renderIconBox("mdi:chevron-down", "sm")}</span>
+            </div>
+          </label>
+          <div class="tab-panel__section-summary">
+            ${
+              hasProduct
+                ? `Produit sélectionné : ${quickAction.label}. Date d'action : ${quickAction.dateActionLabel || "aujourd'hui"}.`
+                : hasProductOptions
+                  ? "Choisis un produit dans la liste pour préparer la déclaration."
+                  : "Aucun produit disponible dans le catalogue."
+            }
+          </div>
+          <div class="tab-panel__section-hint">
+            ${
+              hasProduct
+              ? quickAction.summary
+              : hasProductOptions
+                  ? "La sélection met à jour le produit actif, puis tu peux déclarer avec le bouton ci-dessous."
+                  : "Ajoute au moins un produit dans le catalogue avant de déclarer une intervention."
+            }
+          </div>
+        </section>
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-action">
           <div class="tab-panel__section-head">

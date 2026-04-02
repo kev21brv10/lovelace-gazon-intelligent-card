@@ -1161,6 +1161,18 @@ class GazonIntelligentCard extends HTMLElement {
     return `${year}-${month}-${day}`;
   }
 
+  _todayDisplayDate() {
+    try {
+      return new Intl.DateTimeFormat(undefined, {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }).format(new Date());
+    } catch (_error) {
+      return this._todayIsoDate();
+    }
+  }
+
   _selectedProductInterventionState() {
     const record = this._selectedProductRecord();
     const selectedName = String(record?.nom || record?.id || "").trim();
@@ -1178,7 +1190,8 @@ class GazonIntelligentCard extends HTMLElement {
       record,
       disabled: false,
       label: selectedName || "Produit sélectionné",
-      summary: `${formatStatusLabel(type)} · ${this._todayIsoDate()}`,
+      summary: `${formatStatusLabel(type)} · ${this._todayDisplayDate()}`,
+      dateActionLabel: this._todayDisplayDate(),
       actionLabel: `Déclarer ${formatStatusLabel(type)}`,
     };
   }

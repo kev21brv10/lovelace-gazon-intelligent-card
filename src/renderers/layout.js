@@ -314,7 +314,7 @@ export function renderInterventionTab(card) {
           <div class="tab-panel__section-summary">
             ${escapeHtml(
               hasProduct
-                ? `Produit sélectionné : ${quickAction.label}. La date du jour sera utilisée.`
+                ? `Produit sélectionné : ${quickAction.label}. Date d'action : ${quickAction.dateActionLabel || "aujourd'hui"}.`
                 : "Sélectionne un produit dans l'onglet Produits pour activer la déclaration.",
             )}
           </div>

@@ -385,11 +385,92 @@ const CARD_STYLES = String.raw`
           color: var(--secondary-text-color);
         }
 
+        .tab-panel__workflow {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 2px 0 4px;
+        }
+
+        .tab-panel__workflow-step {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          min-width: 0;
+          padding: 7px 10px;
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 10%, var(--gi-surface-border));
+          border-radius: 999px;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, white) 100%);
+          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+          color: var(--secondary-text-color);
+          font-size: var(--gi-font-xxs);
+          font-weight: 700;
+          letter-spacing: 0.02em;
+          text-transform: uppercase;
+        }
+
+        .tab-panel__workflow-step--active {
+          color: var(--primary-text-color);
+          border-color: var(--gi-surface-border-strong);
+        }
+
+        .tab-panel__workflow-step--done {
+          color: var(--primary-text-color);
+          border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 30%, var(--gi-surface-border-strong));
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 12%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, white) 100%);
+        }
+
+        .tab-panel__workflow-index {
+          display: inline-grid;
+          place-items: center;
+          width: 20px;
+          height: 20px;
+          border-radius: 999px;
+          background: color-mix(in srgb, var(--gazon-section-accent) 18%, transparent);
+          color: var(--primary-text-color);
+          font-size: 11px;
+          font-weight: 900;
+          flex: none;
+        }
+
+        .tab-panel__workflow-connector {
+          flex: 1 1 auto;
+          height: 1px;
+          border-radius: 999px;
+          background: linear-gradient(90deg, color-mix(in srgb, var(--gazon-section-accent) 38%, transparent), color-mix(in srgb, var(--gazon-section-accent) 8%, transparent));
+          min-width: 12px;
+        }
+
+        .tab-panel__workflow-label {
+          white-space: nowrap;
+        }
+
         .tab-panel__select-shell {
           position: relative;
           display: flex;
           align-items: center;
           min-width: 0;
+          border: 1px solid var(--gi-surface-border-strong);
+          border-radius: 18px;
+          padding: 6px 12px 6px 10px;
+          background:
+            radial-gradient(circle at 18% 50%, color-mix(in srgb, var(--gazon-card-accent) 12%, transparent) 0%, transparent 18%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 12%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, white) 100%);
+          box-shadow: var(--gi-surface-shadow-strong);
+          gap: 8px;
+        }
+
+        .tab-panel__select-prefix {
+          display: inline-grid;
+          place-items: center;
+          width: 34px;
+          height: 34px;
+          border-radius: 12px;
+          background: color-mix(in srgb, var(--gazon-card-accent) 12%, transparent);
+          color: var(--primary-text-color);
+          flex: none;
         }
 
         .tab-panel__select {
@@ -398,14 +479,13 @@ const CARD_STYLES = String.raw`
           -moz-appearance: none;
           width: 100%;
           min-width: 0;
-          min-height: 46px;
-          border: 1px solid var(--gi-surface-border-strong);
-          border-radius: 16px;
-          padding: 12px 42px 12px 14px;
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, white) 100%);
+          min-height: 34px;
+          border: 0;
+          border-radius: 0;
+          padding: 4px 34px 4px 0;
+          background: transparent;
           color: var(--primary-text-color);
-          box-shadow: var(--gi-surface-shadow);
+          box-shadow: none;
           font: inherit;
           font-size: var(--gi-font-md);
           font-weight: 700;
@@ -536,7 +616,7 @@ const CARD_STYLES = String.raw`
           justify-content: flex-start;
           gap: var(--gi-action-gap);
           width: var(--gi-action-width);
-          min-height: var(--gi-action-min-height);
+          min-height: calc(var(--gi-action-min-height) + 2px);
           padding-inline: var(--gi-action-padding-inline) var(--gi-action-padding-inline-end);
           padding-block: var(--gi-action-padding-block);
           border: 1px solid var(--gi-surface-border-strong);
@@ -548,12 +628,14 @@ const CARD_STYLES = String.raw`
           font-size: var(--gi-font-lg);
           letter-spacing: 0.01em;
           background:
-            linear-gradient(135deg, color-mix(in srgb, var(--gazon-card-accent) 94%, white) 0%, color-mix(in srgb, var(--gazon-section-accent) 86%, black) 100%);
+            linear-gradient(135deg, color-mix(in srgb, var(--gazon-card-accent) 95%, white) 0%, color-mix(in srgb, var(--gazon-section-accent) 88%, black) 100%);
           box-shadow:
             0 16px 30px rgba(0, 0, 0, 0.18),
             0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent),
             0 0 24px color-mix(in srgb, var(--gazon-water-color, #44c8ea) 16%, transparent);
           text-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
+          position: relative;
+          overflow: hidden;
         }
 
         .gi-action--primary::after {
@@ -584,7 +666,7 @@ const CARD_STYLES = String.raw`
           justify-content: flex-start;
           gap: var(--gi-action-gap);
           width: var(--gi-action-width);
-          min-height: var(--gi-action-min-height);
+          min-height: calc(var(--gi-action-min-height) + 2px);
           padding-inline: var(--gi-action-padding-inline) var(--gi-action-padding-inline-end);
           padding-block: var(--gi-action-padding-block);
           border: 1px solid color-mix(in srgb, var(--gazon-danger-color, #f15f69) 54%, var(--gi-surface-border-strong));
@@ -596,12 +678,14 @@ const CARD_STYLES = String.raw`
           font-size: var(--gi-font-lg);
           letter-spacing: 0.01em;
           background:
-            linear-gradient(135deg, color-mix(in srgb, var(--gazon-danger-color, #f15f69) 96%, white) 0%, color-mix(in srgb, var(--gazon-danger-color, #c62828) 84%, black) 100%);
+            linear-gradient(135deg, color-mix(in srgb, var(--gazon-danger-color, #f15f69) 97%, white) 0%, color-mix(in srgb, var(--gazon-danger-color, #c62828) 86%, black) 100%);
           box-shadow:
             0 16px 30px rgba(0, 0, 0, 0.18),
             0 0 0 1px color-mix(in srgb, var(--gazon-danger-color, #f15f69) 18%, transparent),
             0 0 24px color-mix(in srgb, var(--gazon-danger-color, #f15f69) 14%, transparent);
           text-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
+          position: relative;
+          overflow: hidden;
         }
 
         .gi-action--danger::after {
@@ -5676,9 +5760,23 @@ function renderInterventionTab(card) {
             <div class="tab-panel__eyebrow">Choix du produit</div>
             <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
           </div>
+          <div class="tab-panel__workflow" aria-hidden="true">
+            <div class="tab-panel__workflow-step tab-panel__workflow-step--active">
+              <span class="tab-panel__workflow-index">1</span>
+              <span class="tab-panel__workflow-label">Choisir</span>
+            </div>
+            <div class="tab-panel__workflow-connector"></div>
+            <div class="tab-panel__workflow-step ${hasProduct ? "tab-panel__workflow-step--done" : ""}">
+              <span class="tab-panel__workflow-index">2</span>
+              <span class="tab-panel__workflow-label">Déclarer</span>
+            </div>
+          </div>
           <label class="tab-panel__field">
             <span class="tab-panel__field-label">Produit à déclarer</span>
             <div class="tab-panel__select-shell">
+              <span class="tab-panel__select-prefix" aria-hidden="true">
+                ${renderIconBox("mdi:package-variant-closed", "sm")}
+              </span>
               <select
                 class="tab-panel__select"
                 data-gazon-action="select-intervention-product"
@@ -5722,7 +5820,7 @@ function renderInterventionTab(card) {
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-action">
           <div class="tab-panel__section-head">
             <div class="tab-panel__eyebrow">Déclaration rapide</div>
-            <div class="tab-panel__section-meta">${escapeHtml(hasProduct ? "Intervention du jour" : "Aucun produit prêt")}</div>
+            <div class="tab-panel__section-meta">${escapeHtml(hasProduct ? "Étape 2 · prête" : "Étape 2 · en attente")}</div>
           </div>
           <button
             type="button"

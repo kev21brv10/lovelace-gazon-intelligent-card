@@ -304,9 +304,23 @@ export function renderInterventionTab(card) {
             <div class="tab-panel__eyebrow">Choix du produit</div>
             <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
           </div>
+          <div class="tab-panel__workflow" aria-hidden="true">
+            <div class="tab-panel__workflow-step tab-panel__workflow-step--active">
+              <span class="tab-panel__workflow-index">1</span>
+              <span class="tab-panel__workflow-label">Choisir</span>
+            </div>
+            <div class="tab-panel__workflow-connector"></div>
+            <div class="tab-panel__workflow-step ${hasProduct ? "tab-panel__workflow-step--done" : ""}">
+              <span class="tab-panel__workflow-index">2</span>
+              <span class="tab-panel__workflow-label">Déclarer</span>
+            </div>
+          </div>
           <label class="tab-panel__field">
             <span class="tab-panel__field-label">Produit à déclarer</span>
             <div class="tab-panel__select-shell">
+              <span class="tab-panel__select-prefix" aria-hidden="true">
+                ${renderIconBox("mdi:package-variant-closed", "sm")}
+              </span>
               <select
                 class="tab-panel__select"
                 data-gazon-action="select-intervention-product"
@@ -350,7 +364,7 @@ export function renderInterventionTab(card) {
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-action">
           <div class="tab-panel__section-head">
             <div class="tab-panel__eyebrow">Déclaration rapide</div>
-            <div class="tab-panel__section-meta">${escapeHtml(hasProduct ? "Intervention du jour" : "Aucun produit prêt")}</div>
+            <div class="tab-panel__section-meta">${escapeHtml(hasProduct ? "Étape 2 · prête" : "Étape 2 · en attente")}</div>
           </div>
           <button
             type="button"

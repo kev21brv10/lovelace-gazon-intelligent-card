@@ -3429,6 +3429,10 @@ class GazonIntelligentCard extends HTMLElement {
     return this._entity("entity_produit_intervention");
   }
 
+  _interventionRecommendationEntity() {
+    return this._entity("entity_prochaine_intervention");
+  }
+
   _catalogueState() {
     const entity = this._catalogueEntity();
     const attrs = entity?.attributes || {};
@@ -3451,12 +3455,16 @@ class GazonIntelligentCard extends HTMLElement {
     const attrs = entity?.attributes || {};
     const selectedProductId = String(attrs.selected_product_id || "").trim();
     const selectedProductName = String(attrs.selected_product_name || entity?.state || "").trim();
+    const selectedProductMonths = attrs.selected_product_months;
+    const selectedProductMonthsLabel = String(attrs.selected_product_months_label || "").trim();
     const summary = String(attrs.summary || "").trim();
     const productsCount = asNumber(attrs.products_count ?? this._catalogueState().count) ?? 0;
     return {
       entity,
       selectedProductId: selectedProductId || null,
       selectedProductName: selectedProductName || null,
+      selectedProductMonths: Array.isArray(selectedProductMonths) ? selectedProductMonths : [],
+      selectedProductMonthsLabel: selectedProductMonthsLabel || null,
       summary: summary || (selectedProductName ? `Produit sélectionné : ${selectedProductName}` : productsCount > 0 ? "Choisis un produit dans le catalogue" : "Aucun produit enregistré"),
       productsCount,
       label: selectedProductName || "Aucun produit",
@@ -3493,15 +3501,169 @@ class GazonIntelligentCard extends HTMLElement {
           return null;
         }
         const name = String(product.nom || id || "").trim() || id;
+        const monthsLabel = String(product.application_months_label || "").trim();
         const duplicateCount = nameCounts.get(name.toLocaleLowerCase()) || 0;
-        const label = duplicateCount > 1 && id ? `${name} — ${id}` : name;
+        const baseLabel = duplicateCount > 1 && id ? `${name} — ${id}` : name;
+        const label = monthsLabel ? `${baseLabel} · ${monthsLabel}` : baseLabel;
         return {
           id,
           name,
           label,
+          monthsLabel: String(product.application_months_label || "").trim() || null,
         };
       })
       .filter(Boolean);
+  }
+
+  _interventionRecommendationState() {
+    const entity = this._interventionRecommendationEntity();
+    const attrs = entity?.attributes || {};
+    const payload = attrs.payload && typeof attrs.payload === "object" ? attrs.payload : attrs;
+    const ui = payload.ui && typeof payload.ui === "object" ? payload.ui : {};
+    const product = payload.product && typeof payload.product === "object" ? payload.product : {};
+    const selection = payload.selection && typeof payload.selection === "object" ? payload.selection : {};
+    const context = payload.context && typeof payload.context === "object" ? payload.context : {};
+    const catalogue = this._catalogueState();
+    const state = String(payload.status || entity?.state || attrs.state || "").trim().toLowerCase();
+    const normalizedState = state || (catalogue.hasProducts ? "possible" : "unavailable");
+    const tone =
+      String(ui.tone || attrs.tone || "").trim() ||
+      (normalizedState === "recommended"
+        ? "success"
+        : normalizedState === "possible"
+          ? "warning"
+          : normalizedState === "blocked"
+            ? "danger"
+            : "neutral");
+    const title =
+      String(ui.title || attrs.title || "").trim() ||
+      (normalizedState === "recommended"
+        ? "Prochaine intervention recommandée"
+        : normalizedState === "possible"
+          ? "Prochaine intervention à préparer"
+          : normalizedState === "blocked"
+            ? "Prochaine intervention bloquée"
+            : "Prochaine intervention indisponible");
+    const badge =
+      String(ui.badge || attrs.badge || "").trim() ||
+      (normalizedState === "recommended"
+        ? "Choisie automatiquement"
+        : normalizedState === "possible"
+          ? "À préparer"
+          : normalizedState === "blocked"
+            ? "En attente"
+            : "Catalogue vide");
+    const icon = String(ui.icon || attrs.icon || "").trim() || null;
+    const summary =
+      String(ui.summary || attrs.summary || "").trim() ||
+      (product?.name
+        ? `${product.type ? `${product.type} · ` : ""}${product.name}`
+        : normalizedState === "unavailable"
+          ? "Aucun produit enregistré"
+          : "Intervention à préparer");
+    const hint =
+      String(ui.hint || attrs.hint || "").trim() ||
+      (normalizedState === "recommended"
+        ? "Le produit recommandé est prêt à être déclaré."
+        : normalizedState === "possible"
+          ? "Choisis un produit pour préparer la déclaration."
+          : normalizedState === "blocked"
+            ? "Une application récente bloque encore toute nouvelle intervention."
+            : "Ajoute au moins un produit au catalogue pour obtenir une recommandation.");
+    const actionLabel =
+      String(ui.action_label || attrs.action_label || "").trim() ||
+      (normalizedState === "recommended"
+        ? "Déclarer maintenant"
+        : normalizedState === "possible"
+          ? "Choisir le produit"
+          : normalizedState === "blocked"
+            ? "Attendre"
+            : "Ajouter un produit");
+    const reasons = Array.isArray(payload.reasons) ? payload.reasons.filter(Boolean).map((reason) => String(reason)) : [];
+    const constraints = Array.isArray(payload.constraints)
+      ? payload.constraints
+          .filter((constraint) => constraint && typeof constraint === "object")
+          .map((constraint) => ({
+            code: String(constraint.code || "").trim() || null,
+            label: String(constraint.label || "").trim() || "",
+            met: Boolean(constraint.met),
+            blocking: Boolean(constraint.blocking),
+          }))
+      : [];
+    const selectedProductId = String(selection.id || attrs.selected_product_id || "").trim() || null;
+    const selectedProductName = String(selection.name || attrs.selected_product_name || "").trim() || null;
+    const selectedProductMonths = Array.isArray(selection.months) ? selection.months : [];
+    const selectedProductMonthsLabel = String(selection.months_label || attrs.selected_product_months_label || "").trim() || null;
+    const recommendedProductMonths = Array.isArray(product.months) ? product.months : [];
+    const recommendedProductMonthsLabel = String(product.months_label || attrs.recommended_product_months_label || "").trim() || null;
+    const recommendedProductId = String(product.id || attrs.recommended_product_id || "").trim() || null;
+    const recommendedProductName = String(product.name || attrs.recommended_product_name || "").trim() || null;
+    const recommendedProductType = String(product.type || attrs.recommended_product_type || "").trim() || null;
+    const readyToDeclare = Boolean(payload.ready_to_declare);
+    return {
+      entity,
+      payload,
+      schemaVersion: asNumber(payload.schema_version) ?? null,
+      status: normalizedState,
+      recommendedAction: String(payload.recommended_action || "").trim() || null,
+      priority: String(payload.priority || "").trim() || null,
+      score: asNumber(payload.score) ?? 0,
+      reason: String(payload.reason || "").trim() || "",
+      whyNow: String(payload.why_now || "").trim() || "",
+      reasons,
+      constraints,
+      missingRequirements: Array.isArray(payload.missing_requirements)
+        ? payload.missing_requirements.filter(Boolean).map((value) => String(value))
+        : [],
+      monthMatch: Boolean(payload.month_match),
+      readyToDeclare,
+      product: {
+        id: recommendedProductId,
+        name: recommendedProductName,
+        type: recommendedProductType,
+        months: recommendedProductMonths,
+        monthsLabel: recommendedProductMonthsLabel,
+        phaseCompatible: Array.isArray(product.phase_compatible) ? product.phase_compatible : [],
+        latestApplicationDate: String(product.latest_application_date || "").trim() || null,
+        nextReapplicationDate: String(product.next_reapplication_date || "").trim() || null,
+        nextReapplicationDisplay: String(product.next_reapplication_display || "").trim() || null,
+        due: Boolean(product.due),
+        phaseMatch: Boolean(product.phase_match),
+        monthMatch: Boolean(product.month_match),
+      },
+      selection: {
+        id: selectedProductId,
+        name: selectedProductName,
+        type: String(selection.type || attrs.selected_product_type || "").trim() || null,
+        months: selectedProductMonths,
+        monthsLabel: selectedProductMonthsLabel,
+        ready: Boolean(payload.selected_product_ready || selection.ready),
+        selected: Boolean(selectedProductId || selectedProductName),
+      },
+      context: {
+        catalogueCount: asNumber(context.catalogue_count ?? attrs.catalogue_count ?? catalogue.count) ?? catalogue.count ?? 0,
+        eligibleCount: asNumber(context.eligible_count ?? attrs.eligible_count) ?? 0,
+        blockedProductsCount: asNumber(context.blocked_products_count ?? attrs.blocked_products_count) ?? 0,
+        currentMonth: asNumber(context.current_month ?? attrs.current_month) ?? null,
+        currentPhase: String((context.current_phase ?? attrs.current_phase) || "").trim() || null,
+        currentSubPhase: String((context.current_sub_phase ?? attrs.current_sub_phase) || "").trim() || null,
+      },
+      ui: {
+        title,
+        badge,
+        tone,
+        icon,
+        summary,
+        hint,
+        actionLabel,
+        selectionSummary: String(ui.selection_summary || attrs.selection_summary || "").trim() || null,
+        selectionHint: String(ui.selection_hint || attrs.selection_hint || "").trim() || null,
+        declarationSummary: String(ui.declaration_summary || attrs.declaration_summary || "").trim() || null,
+        declarationHint: String(ui.declaration_hint || attrs.declaration_hint || "").trim() || null,
+        historySummary: String(ui.history_summary || attrs.history_summary || "").trim() || null,
+        historyHint: String(ui.history_hint || attrs.history_hint || "").trim() || null,
+      },
+    };
   }
 
   _selectedProductOptionLabel() {
@@ -5686,7 +5848,14 @@ function renderProductSummarySection(card) {
   );
   const emptyStateMessage = "Aucune donnée produit disponible";
   const catalogueLabel = catalogue.count === 1 ? "1 produit" : `${catalogue.count || 0} produits`;
-  const selectionDetails = selection.selectedProductId ? `ID: ${selection.selectedProductId}` : selection.summary || "Sélection active";
+  const selectionDetailsParts = [];
+  if (selection.selectedProductId) {
+    selectionDetailsParts.push(`ID: ${selection.selectedProductId}`);
+  }
+  if (selection.selectedProductMonthsLabel) {
+    selectionDetailsParts.push(`Période: ${selection.selectedProductMonthsLabel}`);
+  }
+  const selectionDetails = selectionDetailsParts.join(" · ") || selection.summary || "Sélection active";
   const selectionValue = selection.selectedProductName || (catalogue.hasProducts ? "Sélection à faire" : "Aucun produit");
   const catalogueDetails =
     catalogue.count > 0
@@ -5776,7 +5945,7 @@ function renderProductsTab(card) {
         : "Aucun produit enregistré"
     : emptyStateMessage;
   const productsHint = hasProductData
-    ? selection.summary || "Le produit actif et le catalogue local servent à déclarer les interventions."
+    ? `${selection.summary || "Le produit actif et le catalogue local servent à déclarer les interventions."}${selection.selectedProductMonthsLabel ? ` · Période: ${selection.selectedProductMonthsLabel}` : ""}`
     : emptyStateMessage;
 
   return `
@@ -5796,34 +5965,37 @@ function renderProductsTab(card) {
 }
 
 function renderInterventionTab(card) {
+  const recommendation = card._interventionRecommendationState();
   const quickAction = card._selectedProductInterventionState();
   const lastApplication = card._lastApplicationState();
   const productOptions = card._catalogueProductOptions();
+  const ui = recommendation.ui || {};
+  const product = recommendation.product || {};
+  const selection = recommendation.selection || {};
   const selectedProductOptionLabel = quickAction.optionLabel || (productOptions.length === 1 ? productOptions[0].label : "");
   const hasProductOptions = productOptions.length > 0;
-  const hasProduct = Boolean(quickAction.record && !quickAction.disabled);
+  const hasSelection = Boolean(selection.selected || quickAction.record);
+  const canDeclare = Boolean(recommendation.readyToDeclare && quickAction.record && !quickAction.disabled);
   const catalogue = card._catalogueState();
-  const productSummary = hasProduct ? quickAction.label : "Aucun produit sélectionné";
-  const productHint = hasProduct
-    ? quickAction.summary
-    : catalogue.hasProducts
-      ? "Choisis d'abord un produit dans l'onglet Produits."
-      : "Aucun produit enregistré.";
   const hasApplication = Boolean(lastApplication.hasApplication);
   const lastApplicationSummary = hasApplication ? lastApplication.summary : "Aucune application enregistrée.";
   const lastApplicationHint = hasApplication
     ? lastApplication.detail || "Dernière application détectée."
     : "Le bouton restera désactivé tant qu'aucune application n'est présente dans l'historique.";
+  const recommendationTone = ui.tone || (canDeclare ? "success" : hasProductOptions ? "warning" : "neutral");
+  const recommendationIcon = ui.icon || (canDeclare ? "mdi:spray-bottle" : "mdi:package-variant-closed");
+  const selectionMeta = hasSelection ? "Sélection active" : hasProductOptions ? "À sélectionner" : "Vide";
+  const declarationMeta = canDeclare ? "Étape 2 · prête" : hasSelection ? "Étape 2 · en attente" : "Étape 2 · en attente";
 
   return `
       <section class="tab-panel gi-panel tab-panel--intervention">
-        <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${hasProduct ? "success" : "neutral"}">
+        <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${recommendationTone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">Intervention</div>
-            ${renderStatusPill(hasProduct ? "Prêt" : "En attente", hasProduct ? "success" : "neutral", "mdi:spray-bottle", "tab-panel__status")}
+            <div class="tab-panel__hero-summary">${escapeHtml(ui.title || "Prochaine intervention recommandée")}</div>
+            ${renderStatusPill(ui.badge || "Choisie automatiquement", recommendationTone, recommendationIcon, `tab-panel__status tab-panel__status--${recommendationTone}`)}
           </div>
-          <div class="tab-panel__hero-next">${escapeHtml(productSummary)}</div>
-          <div class="tab-panel__hero-hint">${escapeHtml(productHint)}</div>
+          <div class="tab-panel__hero-next">${escapeHtml(ui.summary || recommendation.summary || "Intervention recommandée")}</div>
+          <div class="tab-panel__hero-hint">${escapeHtml(ui.hint || recommendation.hint || "Le moteur de décision a préparé la prochaine intervention.")}</div>
         </div>
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-workflow">
@@ -5837,7 +6009,7 @@ function renderInterventionTab(card) {
               <span class="tab-panel__workflow-label">Choisir</span>
             </div>
             <div class="tab-panel__workflow-connector"></div>
-            <div class="tab-panel__workflow-step ${hasProduct ? "tab-panel__workflow-step--done" : ""}">
+            <div class="tab-panel__workflow-step ${canDeclare ? "tab-panel__workflow-step--done" : hasSelection ? "tab-panel__workflow-step--active" : ""}">
               <span class="tab-panel__workflow-index">2</span>
               <span class="tab-panel__workflow-label">Déclarer</span>
             </div>
@@ -5846,7 +6018,7 @@ function renderInterventionTab(card) {
             <div class="tab-panel__intervention-card tab-panel__intervention-card--picker">
               <div class="tab-panel__section-head">
                 <div class="tab-panel__eyebrow">Choix du produit</div>
-                <div class="tab-panel__section-meta">${escapeHtml(hasProductOptions ? "Sélection active" : "Vide")}</div>
+                <div class="tab-panel__section-meta">${escapeHtml(selectionMeta)}</div>
               </div>
               <label class="tab-panel__field">
                 <span class="tab-panel__field-label">Produit à déclarer</span>
@@ -5875,46 +6047,33 @@ function renderInterventionTab(card) {
                 </div>
               </label>
               <div class="tab-panel__section-summary">
-                ${
-                  hasProduct
-                    ? `Produit sélectionné : ${quickAction.label}. Date d'action : ${quickAction.dateActionLabel || "aujourd'hui"}.`
-                    : hasProductOptions
-                      ? "Choisis un produit dans la liste pour préparer la déclaration."
-                      : "Aucun produit disponible dans le catalogue."
-                }
+                ${escapeHtml(ui.selectionSummary || "Sélectionne un produit dans la liste pour préparer la déclaration.")}
               </div>
               <div class="tab-panel__section-hint">
-                ${
-                  hasProduct
-                  ? quickAction.summary
-                  : hasProductOptions
-                      ? "La sélection met à jour le produit actif."
-                      : "Ajoute au moins un produit dans le catalogue avant de déclarer une intervention."
-                }
+                ${escapeHtml(ui.selectionHint || "La sélection met à jour le produit actif.")}
               </div>
             </div>
 
             <div class="tab-panel__intervention-card tab-panel__intervention-card--action">
               <div class="tab-panel__section-head">
                 <div class="tab-panel__eyebrow">Déclaration rapide</div>
-                <div class="tab-panel__section-meta">${escapeHtml(hasProduct ? "Étape 2 · prête" : "Étape 2 · en attente")}</div>
+                <div class="tab-panel__section-meta">${escapeHtml(declarationMeta)}</div>
               </div>
               <button
                 type="button"
                 class="gi-action gi-action--primary tab-panel__cta"
                 data-gazon-action="declare-product-intervention"
-                ${hasProduct ? "" : "disabled"}
+                ${canDeclare ? "" : "disabled"}
                 aria-label="Déclarer l'intervention rapide"
               >
                 ${renderIconBox("mdi:spray-bottle", "sm")}
-                <span>Déclarer maintenant</span>
+                <span>${escapeHtml(ui.actionLabel || "Déclarer maintenant")}</span>
               </button>
               <div class="tab-panel__section-summary">
-                ${escapeHtml(
-                  hasProduct
-                    ? `Produit sélectionné : ${quickAction.label}. Date d'action : ${quickAction.dateActionLabel || "aujourd'hui"}.`
-                    : "Sélectionne un produit pour activer la déclaration.",
-                )}
+                ${escapeHtml(ui.declarationSummary || "Sélectionne un produit pour activer la déclaration.")}
+              </div>
+              <div class="tab-panel__section-hint">
+                ${escapeHtml(ui.declarationHint || "Le bouton se débloque dès qu’un produit est prêt.")}
               </div>
             </div>
           </div>
@@ -5923,10 +6082,10 @@ function renderInterventionTab(card) {
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
           <div class="tab-panel__section-head">
             <div class="tab-panel__eyebrow">Dernière application</div>
-            <div class="tab-panel__section-meta">${escapeHtml(hasApplication ? "Peut être supprimée" : "Aucune action possible")}</div>
+            <div class="tab-panel__section-meta">${escapeHtml(ui.historySummary || (hasApplication ? "Peut être supprimée" : "Aucune action possible"))}</div>
           </div>
           <div class="tab-panel__section-summary">${escapeHtml(lastApplicationSummary)}</div>
-          <div class="tab-panel__section-hint">${escapeHtml(lastApplicationHint)}</div>
+          <div class="tab-panel__section-hint">${escapeHtml(ui.historyHint || lastApplicationHint)}</div>
           <button
             type="button"
             class="gi-action gi-action--danger tab-panel__cta"
@@ -6573,6 +6732,7 @@ ${EDITOR_STYLES}
           <div class="grid">
             ${this._renderEntityInput("entity_catalogue_produits", "Catalogue produits")}
             ${this._renderEntityInput("entity_produit_intervention", "Produit d'intervention")}
+            ${this._renderEntityInput("entity_prochaine_intervention", "Prochaine intervention")}
             ${this._renderEntityInput("entity_derniere_application", "Dernière application")}
           </div>
         </section>

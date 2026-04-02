@@ -24,6 +24,7 @@ export const DEFAULT_CONFIG = {
   entity_derniere_application: "sensor.gazon_intelligent_derniere_application",
   entity_catalogue_produits: "sensor.gazon_intelligent_catalogue_produits",
   entity_produit_intervention: "select.gazon_intelligent_produit_d_intervention",
+  entity_prochaine_intervention: "sensor.gazon_intelligent_prochaine_intervention",
   entity_conseil: "sensor.gazon_intelligent_conseil_principal",
   entity_action: "sensor.gazon_intelligent_action_recommandee",
   entity_avoid: "sensor.gazon_intelligent_action_a_eviter",
@@ -73,6 +74,7 @@ export const ENTITY_KEYS = [
   { key: "entity_derniere_application", label: "Dernière application", icon: "mdi:spray-bottle", domain: ["sensor"] },
   { key: "entity_catalogue_produits", label: "Catalogue produits", icon: "mdi:package-variant-closed", domain: ["sensor"] },
   { key: "entity_produit_intervention", label: "Produit d'intervention", icon: "mdi:package-variant", domain: ["select"] },
+  { key: "entity_prochaine_intervention", label: "Prochaine intervention", icon: "mdi:spray-bottle", domain: ["sensor"] },
   { key: "entity_conseil", label: "Conseil principal", icon: "mdi:message-text-outline", domain: ["sensor"] },
   { key: "entity_action", label: "Action recommandée", icon: "mdi:check-circle-outline", domain: ["sensor"] },
   { key: "entity_avoid", label: "Action à éviter", icon: "mdi:alert-circle-outline", domain: ["sensor"] },
@@ -121,6 +123,7 @@ export const SECTION_FIELDS = {
     "entity_plan_arrosage",
     "entity_dernier_arrosage",
     "entity_derniere_application",
+    "entity_prochaine_intervention",
     "entity_switch_arrosage_automatique",
   ],
   watering: [
@@ -176,6 +179,9 @@ export const RENDER_SIGNATURE_ATTRS = {
   entity_derniere_application: ["source", "application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm"],
   entity_catalogue_produits: ["products_count", "product_ids", "product_names", "products_summary", "summary"],
   entity_produit_intervention: ["selected_product_id", "selected_product_name", "summary", "products_count"],
+  entity_prochaine_intervention: [
+    "payload",
+  ],
   entity_objectif_arrosage: ["temperature", "etp", "phase_active"],
   entity_arrosage_recommande: ["objectif_mm", "type_arrosage"],
   entity_arrosage_apres_application_autorise: ["application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm"],

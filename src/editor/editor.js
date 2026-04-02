@@ -217,6 +217,7 @@ ${EDITOR_STYLES}
           <div class="grid">
             ${this._renderEntityInput("entity_catalogue_produits", "Catalogue produits")}
             ${this._renderEntityInput("entity_produit_intervention", "Produit d'intervention")}
+            ${this._renderEntityInput("entity_prochaine_intervention", "Prochaine intervention")}
             ${this._renderEntityInput("entity_derniere_application", "Dernière application")}
           </div>
         </section>

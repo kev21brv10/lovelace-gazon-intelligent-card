@@ -13,6 +13,7 @@ Gazon Intelligent Card affiche dans Home Assistant les décisions métier les pl
 - résumé adaptatif qui met en avant les vraies informations utiles selon la situation
 - tuiles du résumé, de la tonte, du gazon, des produits et de la configuration cliquables pour ouvrir le bon `more-info`
 - zone produit dédiée pour le catalogue local, le produit d’intervention et la dernière application
+- bloc `Intervention` orienté décision avec recommandation automatique, guidage produit et déclaration rapide
 - barre de progression visible quand un arrosage est en cours
 - fenêtre optimale, objectif d'arrosage et type d'arrosage bien lisibles
 - produit courant et catalogue produits lisibles pour guider les interventions
@@ -34,7 +35,9 @@ Gazon Intelligent Card affiche dans Home Assistant les décisions métier les pl
 
 - affiche une lecture claire et hiérarchisée du moteur Gazon Intelligent
 - met en avant la fenêtre optimale, l'objectif d'arrosage et l'action manuelle unique
-- expose le produit d'intervention sélectionné et le catalogue produit du moteur
+- expose le produit d’intervention sélectionné et le catalogue produit du moteur
+- consomme la prochaine intervention recommandée via le `payload` structuré exposé par l’intégration (`schema_version: 3`)
+- lit un contrat stable où les champs racine restent présents, avec `null`, `[]` ou `{}` quand l’information manque
 - sépare la zone produit du reste du résumé pour éviter les doublons visuels
 - affiche la progression d'arrosage en cours dès qu'une session est active
 - sépare les usages par onglets: arrosage, tonte, gazon, produits, configuration et contexte avancé
@@ -119,6 +122,7 @@ entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
 entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
 entity_derniere_application: sensor.gazon_intelligent_derniere_application
 entity_catalogue_produits: sensor.gazon_intelligent_catalogue_produits
+entity_prochaine_intervention: sensor.gazon_intelligent_prochaine_intervention
 entity_produit_intervention: select.gazon_intelligent_produit_d_intervention
 entity_mode: select.gazon_intelligent_mode_du_gazon
 entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique_autorise
@@ -149,6 +153,7 @@ show_advanced_details: false
   - `entity_dernier_arrosage`
   - `entity_derniere_application`
   - `entity_catalogue_produits`
+  - `entity_prochaine_intervention`
   - `entity_produit_intervention`
   - `entity_mode`
   - `entity_switch_arrosage_automatique`
@@ -203,6 +208,7 @@ entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
 entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
 entity_derniere_application: sensor.gazon_intelligent_derniere_application
 entity_catalogue_produits: sensor.gazon_intelligent_catalogue_produits
+entity_prochaine_intervention: sensor.gazon_intelligent_prochaine_intervention
 entity_produit_intervention: select.gazon_intelligent_produit_d_intervention
 entity_mode: select.gazon_intelligent_mode_du_gazon
 entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique_autorise
@@ -231,6 +237,7 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 - `entity_dernier_arrosage`
 - `entity_derniere_application`
 - `entity_catalogue_produits`
+- `entity_prochaine_intervention`
 - `entity_produit_intervention`
 - `entity_mode`
 - `entity_switch_arrosage_automatique`

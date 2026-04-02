@@ -1092,6 +1092,10 @@ class GazonIntelligentCard extends HTMLElement {
     return this._entity("entity_produit_intervention");
   }
 
+  _interventionRecommendationEntity() {
+    return this._entity("entity_prochaine_intervention");
+  }
+
   _catalogueState() {
     const entity = this._catalogueEntity();
     const attrs = entity?.attributes || {};
@@ -1114,12 +1118,16 @@ class GazonIntelligentCard extends HTMLElement {
     const attrs = entity?.attributes || {};
     const selectedProductId = String(attrs.selected_product_id || "").trim();
     const selectedProductName = String(attrs.selected_product_name || entity?.state || "").trim();
+    const selectedProductMonths = attrs.selected_product_months;
+    const selectedProductMonthsLabel = String(attrs.selected_product_months_label || "").trim();
     const summary = String(attrs.summary || "").trim();
     const productsCount = asNumber(attrs.products_count ?? this._catalogueState().count) ?? 0;
     return {
       entity,
       selectedProductId: selectedProductId || null,
       selectedProductName: selectedProductName || null,
+      selectedProductMonths: Array.isArray(selectedProductMonths) ? selectedProductMonths : [],
+      selectedProductMonthsLabel: selectedProductMonthsLabel || null,
       summary: summary || (selectedProductName ? `Produit sélectionné : ${selectedProductName}` : productsCount > 0 ? "Choisis un produit dans le catalogue" : "Aucun produit enregistré"),
       productsCount,
       label: selectedProductName || "Aucun produit",
@@ -1156,15 +1164,169 @@ class GazonIntelligentCard extends HTMLElement {
           return null;
         }
         const name = String(product.nom || id || "").trim() || id;
+        const monthsLabel = String(product.application_months_label || "").trim();
         const duplicateCount = nameCounts.get(name.toLocaleLowerCase()) || 0;
-        const label = duplicateCount > 1 && id ? `${name} — ${id}` : name;
+        const baseLabel = duplicateCount > 1 && id ? `${name} — ${id}` : name;
+        const label = monthsLabel ? `${baseLabel} · ${monthsLabel}` : baseLabel;
         return {
           id,
           name,
           label,
+          monthsLabel: String(product.application_months_label || "").trim() || null,
         };
       })
       .filter(Boolean);
+  }
+
+  _interventionRecommendationState() {
+    const entity = this._interventionRecommendationEntity();
+    const attrs = entity?.attributes || {};
+    const payload = attrs.payload && typeof attrs.payload === "object" ? attrs.payload : attrs;
+    const ui = payload.ui && typeof payload.ui === "object" ? payload.ui : {};
+    const product = payload.product && typeof payload.product === "object" ? payload.product : {};
+    const selection = payload.selection && typeof payload.selection === "object" ? payload.selection : {};
+    const context = payload.context && typeof payload.context === "object" ? payload.context : {};
+    const catalogue = this._catalogueState();
+    const state = String(payload.status || entity?.state || attrs.state || "").trim().toLowerCase();
+    const normalizedState = state || (catalogue.hasProducts ? "possible" : "unavailable");
+    const tone =
+      String(ui.tone || attrs.tone || "").trim() ||
+      (normalizedState === "recommended"
+        ? "success"
+        : normalizedState === "possible"
+          ? "warning"
+          : normalizedState === "blocked"
+            ? "danger"
+            : "neutral");
+    const title =
+      String(ui.title || attrs.title || "").trim() ||
+      (normalizedState === "recommended"
+        ? "Prochaine intervention recommandée"
+        : normalizedState === "possible"
+          ? "Prochaine intervention à préparer"
+          : normalizedState === "blocked"
+            ? "Prochaine intervention bloquée"
+            : "Prochaine intervention indisponible");
+    const badge =
+      String(ui.badge || attrs.badge || "").trim() ||
+      (normalizedState === "recommended"
+        ? "Choisie automatiquement"
+        : normalizedState === "possible"
+          ? "À préparer"
+          : normalizedState === "blocked"
+            ? "En attente"
+            : "Catalogue vide");
+    const icon = String(ui.icon || attrs.icon || "").trim() || null;
+    const summary =
+      String(ui.summary || attrs.summary || "").trim() ||
+      (product?.name
+        ? `${product.type ? `${product.type} · ` : ""}${product.name}`
+        : normalizedState === "unavailable"
+          ? "Aucun produit enregistré"
+          : "Intervention à préparer");
+    const hint =
+      String(ui.hint || attrs.hint || "").trim() ||
+      (normalizedState === "recommended"
+        ? "Le produit recommandé est prêt à être déclaré."
+        : normalizedState === "possible"
+          ? "Choisis un produit pour préparer la déclaration."
+          : normalizedState === "blocked"
+            ? "Une application récente bloque encore toute nouvelle intervention."
+            : "Ajoute au moins un produit au catalogue pour obtenir une recommandation.");
+    const actionLabel =
+      String(ui.action_label || attrs.action_label || "").trim() ||
+      (normalizedState === "recommended"
+        ? "Déclarer maintenant"
+        : normalizedState === "possible"
+          ? "Choisir le produit"
+          : normalizedState === "blocked"
+            ? "Attendre"
+            : "Ajouter un produit");
+    const reasons = Array.isArray(payload.reasons) ? payload.reasons.filter(Boolean).map((reason) => String(reason)) : [];
+    const constraints = Array.isArray(payload.constraints)
+      ? payload.constraints
+          .filter((constraint) => constraint && typeof constraint === "object")
+          .map((constraint) => ({
+            code: String(constraint.code || "").trim() || null,
+            label: String(constraint.label || "").trim() || "",
+            met: Boolean(constraint.met),
+            blocking: Boolean(constraint.blocking),
+          }))
+      : [];
+    const selectedProductId = String(selection.id || attrs.selected_product_id || "").trim() || null;
+    const selectedProductName = String(selection.name || attrs.selected_product_name || "").trim() || null;
+    const selectedProductMonths = Array.isArray(selection.months) ? selection.months : [];
+    const selectedProductMonthsLabel = String(selection.months_label || attrs.selected_product_months_label || "").trim() || null;
+    const recommendedProductMonths = Array.isArray(product.months) ? product.months : [];
+    const recommendedProductMonthsLabel = String(product.months_label || attrs.recommended_product_months_label || "").trim() || null;
+    const recommendedProductId = String(product.id || attrs.recommended_product_id || "").trim() || null;
+    const recommendedProductName = String(product.name || attrs.recommended_product_name || "").trim() || null;
+    const recommendedProductType = String(product.type || attrs.recommended_product_type || "").trim() || null;
+    const readyToDeclare = Boolean(payload.ready_to_declare);
+    return {
+      entity,
+      payload,
+      schemaVersion: asNumber(payload.schema_version) ?? null,
+      status: normalizedState,
+      recommendedAction: String(payload.recommended_action || "").trim() || null,
+      priority: String(payload.priority || "").trim() || null,
+      score: asNumber(payload.score) ?? 0,
+      reason: String(payload.reason || "").trim() || "",
+      whyNow: String(payload.why_now || "").trim() || "",
+      reasons,
+      constraints,
+      missingRequirements: Array.isArray(payload.missing_requirements)
+        ? payload.missing_requirements.filter(Boolean).map((value) => String(value))
+        : [],
+      monthMatch: Boolean(payload.month_match),
+      readyToDeclare,
+      product: {
+        id: recommendedProductId,
+        name: recommendedProductName,
+        type: recommendedProductType,
+        months: recommendedProductMonths,
+        monthsLabel: recommendedProductMonthsLabel,
+        phaseCompatible: Array.isArray(product.phase_compatible) ? product.phase_compatible : [],
+        latestApplicationDate: String(product.latest_application_date || "").trim() || null,
+        nextReapplicationDate: String(product.next_reapplication_date || "").trim() || null,
+        nextReapplicationDisplay: String(product.next_reapplication_display || "").trim() || null,
+        due: Boolean(product.due),
+        phaseMatch: Boolean(product.phase_match),
+        monthMatch: Boolean(product.month_match),
+      },
+      selection: {
+        id: selectedProductId,
+        name: selectedProductName,
+        type: String(selection.type || attrs.selected_product_type || "").trim() || null,
+        months: selectedProductMonths,
+        monthsLabel: selectedProductMonthsLabel,
+        ready: Boolean(payload.selected_product_ready || selection.ready),
+        selected: Boolean(selectedProductId || selectedProductName),
+      },
+      context: {
+        catalogueCount: asNumber(context.catalogue_count ?? attrs.catalogue_count ?? catalogue.count) ?? catalogue.count ?? 0,
+        eligibleCount: asNumber(context.eligible_count ?? attrs.eligible_count) ?? 0,
+        blockedProductsCount: asNumber(context.blocked_products_count ?? attrs.blocked_products_count) ?? 0,
+        currentMonth: asNumber(context.current_month ?? attrs.current_month) ?? null,
+        currentPhase: String((context.current_phase ?? attrs.current_phase) || "").trim() || null,
+        currentSubPhase: String((context.current_sub_phase ?? attrs.current_sub_phase) || "").trim() || null,
+      },
+      ui: {
+        title,
+        badge,
+        tone,
+        icon,
+        summary,
+        hint,
+        actionLabel,
+        selectionSummary: String(ui.selection_summary || attrs.selection_summary || "").trim() || null,
+        selectionHint: String(ui.selection_hint || attrs.selection_hint || "").trim() || null,
+        declarationSummary: String(ui.declaration_summary || attrs.declaration_summary || "").trim() || null,
+        declarationHint: String(ui.declaration_hint || attrs.declaration_hint || "").trim() || null,
+        historySummary: String(ui.history_summary || attrs.history_summary || "").trim() || null,
+        historyHint: String(ui.history_hint || attrs.history_hint || "").trim() || null,
+      },
+    };
   }
 
   _selectedProductOptionLabel() {

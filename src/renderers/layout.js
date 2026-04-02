@@ -135,7 +135,14 @@ export function renderProductSummarySection(card) {
   );
   const emptyStateMessage = "Aucune donnée produit disponible";
   const catalogueLabel = catalogue.count === 1 ? "1 produit" : `${catalogue.count || 0} produits`;
-  const selectionDetails = selection.selectedProductId ? `ID: ${selection.selectedProductId}` : selection.summary || "Sélection active";
+  const selectionDetailsParts = [];
+  if (selection.selectedProductId) {
+    selectionDetailsParts.push(`ID: ${selection.selectedProductId}`);
+  }
+  if (selection.selectedProductMonthsLabel) {
+    selectionDetailsParts.push(`Période: ${selection.selectedProductMonthsLabel}`);
+  }
+  const selectionDetails = selectionDetailsParts.join(" · ") || selection.summary || "Sélection active";
   const selectionValue = selection.selectedProductName || (catalogue.hasProducts ? "Sélection à faire" : "Aucun produit");
   const catalogueDetails =
     catalogue.count > 0
@@ -225,7 +232,7 @@ export function renderProductsTab(card) {
         : "Aucun produit enregistré"
     : emptyStateMessage;
   const productsHint = hasProductData
-    ? selection.summary || "Le produit actif et le catalogue local servent à déclarer les interventions."
+    ? `${selection.summary || "Le produit actif et le catalogue local servent à déclarer les interventions."}${selection.selectedProductMonthsLabel ? ` · Période: ${selection.selectedProductMonthsLabel}` : ""}`
     : emptyStateMessage;
 
   return `
@@ -245,34 +252,37 @@ export function renderProductsTab(card) {
 }
 
 export function renderInterventionTab(card) {
+  const recommendation = card._interventionRecommendationState();
   const quickAction = card._selectedProductInterventionState();
   const lastApplication = card._lastApplicationState();
   const productOptions = card._catalogueProductOptions();
+  const ui = recommendation.ui || {};
+  const product = recommendation.product || {};
+  const selection = recommendation.selection || {};
   const selectedProductOptionLabel = quickAction.optionLabel || (productOptions.length === 1 ? productOptions[0].label : "");
   const hasProductOptions = productOptions.length > 0;
-  const hasProduct = Boolean(quickAction.record && !quickAction.disabled);
+  const hasSelection = Boolean(selection.selected || quickAction.record);
+  const canDeclare = Boolean(recommendation.readyToDeclare && quickAction.record && !quickAction.disabled);
   const catalogue = card._catalogueState();
-  const productSummary = hasProduct ? quickAction.label : "Aucun produit sélectionné";
-  const productHint = hasProduct
-    ? quickAction.summary
-    : catalogue.hasProducts
-      ? "Choisis d'abord un produit dans l'onglet Produits."
-      : "Aucun produit enregistré.";
   const hasApplication = Boolean(lastApplication.hasApplication);
   const lastApplicationSummary = hasApplication ? lastApplication.summary : "Aucune application enregistrée.";
   const lastApplicationHint = hasApplication
     ? lastApplication.detail || "Dernière application détectée."
     : "Le bouton restera désactivé tant qu'aucune application n'est présente dans l'historique.";
+  const recommendationTone = ui.tone || (canDeclare ? "success" : hasProductOptions ? "warning" : "neutral");
+  const recommendationIcon = ui.icon || (canDeclare ? "mdi:spray-bottle" : "mdi:package-variant-closed");
+  const selectionMeta = hasSelection ? "Sélection active" : hasProductOptions ? "À sélectionner" : "Vide";
+  const declarationMeta = canDeclare ? "Étape 2 · prête" : hasSelection ? "Étape 2 · en attente" : "Étape 2 · en attente";
 
   return `
       <section class="tab-panel gi-panel tab-panel--intervention">
-        <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${hasProduct ? "success" : "neutral"}">
+        <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${recommendationTone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">Intervention</div>
-            ${renderStatusPill(hasProduct ? "Prêt" : "En attente", hasProduct ? "success" : "neutral", "mdi:spray-bottle", "tab-panel__status")}
+            <div class="tab-panel__hero-summary">${escapeHtml(ui.title || "Prochaine intervention recommandée")}</div>
+            ${renderStatusPill(ui.badge || "Choisie automatiquement", recommendationTone, recommendationIcon, `tab-panel__status tab-panel__status--${recommendationTone}`)}
           </div>
-          <div class="tab-panel__hero-next">${escapeHtml(productSummary)}</div>
-          <div class="tab-panel__hero-hint">${escapeHtml(productHint)}</div>
+          <div class="tab-panel__hero-next">${escapeHtml(ui.summary || recommendation.summary || "Intervention recommandée")}</div>
+          <div class="tab-panel__hero-hint">${escapeHtml(ui.hint || recommendation.hint || "Le moteur de décision a préparé la prochaine intervention.")}</div>
         </div>
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-workflow">
@@ -286,7 +296,7 @@ export function renderInterventionTab(card) {
               <span class="tab-panel__workflow-label">Choisir</span>
             </div>
             <div class="tab-panel__workflow-connector"></div>
-            <div class="tab-panel__workflow-step ${hasProduct ? "tab-panel__workflow-step--done" : ""}">
+            <div class="tab-panel__workflow-step ${canDeclare ? "tab-panel__workflow-step--done" : hasSelection ? "tab-panel__workflow-step--active" : ""}">
               <span class="tab-panel__workflow-index">2</span>
               <span class="tab-panel__workflow-label">Déclarer</span>
             </div>
@@ -295,7 +305,7 @@ export function renderInterventionTab(card) {
             <div class="tab-panel__intervention-card tab-panel__intervention-card--picker">
               <div class="tab-panel__section-head">
                 <div class="tab-panel__eyebrow">Choix du produit</div>
-                <div class="tab-panel__section-meta">${escapeHtml(hasProductOptions ? "Sélection active" : "Vide")}</div>
+                <div class="tab-panel__section-meta">${escapeHtml(selectionMeta)}</div>
               </div>
               <label class="tab-panel__field">
                 <span class="tab-panel__field-label">Produit à déclarer</span>
@@ -324,46 +334,33 @@ export function renderInterventionTab(card) {
                 </div>
               </label>
               <div class="tab-panel__section-summary">
-                ${
-                  hasProduct
-                    ? `Produit sélectionné : ${quickAction.label}. Date d'action : ${quickAction.dateActionLabel || "aujourd'hui"}.`
-                    : hasProductOptions
-                      ? "Choisis un produit dans la liste pour préparer la déclaration."
-                      : "Aucun produit disponible dans le catalogue."
-                }
+                ${escapeHtml(ui.selectionSummary || "Sélectionne un produit dans la liste pour préparer la déclaration.")}
               </div>
               <div class="tab-panel__section-hint">
-                ${
-                  hasProduct
-                  ? quickAction.summary
-                  : hasProductOptions
-                      ? "La sélection met à jour le produit actif."
-                      : "Ajoute au moins un produit dans le catalogue avant de déclarer une intervention."
-                }
+                ${escapeHtml(ui.selectionHint || "La sélection met à jour le produit actif.")}
               </div>
             </div>
 
             <div class="tab-panel__intervention-card tab-panel__intervention-card--action">
               <div class="tab-panel__section-head">
                 <div class="tab-panel__eyebrow">Déclaration rapide</div>
-                <div class="tab-panel__section-meta">${escapeHtml(hasProduct ? "Étape 2 · prête" : "Étape 2 · en attente")}</div>
+                <div class="tab-panel__section-meta">${escapeHtml(declarationMeta)}</div>
               </div>
               <button
                 type="button"
                 class="gi-action gi-action--primary tab-panel__cta"
                 data-gazon-action="declare-product-intervention"
-                ${hasProduct ? "" : "disabled"}
+                ${canDeclare ? "" : "disabled"}
                 aria-label="Déclarer l'intervention rapide"
               >
                 ${renderIconBox("mdi:spray-bottle", "sm")}
-                <span>Déclarer maintenant</span>
+                <span>${escapeHtml(ui.actionLabel || "Déclarer maintenant")}</span>
               </button>
               <div class="tab-panel__section-summary">
-                ${escapeHtml(
-                  hasProduct
-                    ? `Produit sélectionné : ${quickAction.label}. Date d'action : ${quickAction.dateActionLabel || "aujourd'hui"}.`
-                    : "Sélectionne un produit pour activer la déclaration.",
-                )}
+                ${escapeHtml(ui.declarationSummary || "Sélectionne un produit pour activer la déclaration.")}
+              </div>
+              <div class="tab-panel__section-hint">
+                ${escapeHtml(ui.declarationHint || "Le bouton se débloque dès qu’un produit est prêt.")}
               </div>
             </div>
           </div>
@@ -372,10 +369,10 @@ export function renderInterventionTab(card) {
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
           <div class="tab-panel__section-head">
             <div class="tab-panel__eyebrow">Dernière application</div>
-            <div class="tab-panel__section-meta">${escapeHtml(hasApplication ? "Peut être supprimée" : "Aucune action possible")}</div>
+            <div class="tab-panel__section-meta">${escapeHtml(ui.historySummary || (hasApplication ? "Peut être supprimée" : "Aucune action possible"))}</div>
           </div>
           <div class="tab-panel__section-summary">${escapeHtml(lastApplicationSummary)}</div>
-          <div class="tab-panel__section-hint">${escapeHtml(lastApplicationHint)}</div>
+          <div class="tab-panel__section-hint">${escapeHtml(ui.historyHint || lastApplicationHint)}</div>
           <button
             type="button"
             class="gi-action gi-action--danger tab-panel__cta"

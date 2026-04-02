@@ -228,7 +228,7 @@ export function renderProductsTab(card) {
     ? selection.selectedProductName
       ? `Produit actif: ${selection.selectedProductName}`
       : catalogue.hasProducts
-        ? "Choisis un produit dans le catalogue"
+        ? "Aucun produit sélectionné"
         : "Aucun produit enregistré"
     : emptyStateMessage;
   const productsHint = hasProductData
@@ -271,8 +271,43 @@ export function renderInterventionTab(card) {
     : "Le bouton restera désactivé tant qu'aucune application n'est présente dans l'historique.";
   const recommendationTone = ui.tone || (canDeclare ? "success" : hasProductOptions ? "warning" : "neutral");
   const recommendationIcon = ui.icon || (canDeclare ? "mdi:spray-bottle" : "mdi:package-variant-closed");
-  const selectionMeta = canDeclare ? "Sélection prête" : hasSelection ? "Déjà choisi" : hasProductOptions ? "À choisir" : "Vide";
-  const declarationMeta = canDeclare ? "Étape 2 · prête" : hasSelection ? "Étape 2 · en attente" : "Étape 2 · verrouillée";
+  const hasRecommendedProduct = Boolean(product?.name);
+  const selectionMeta = canDeclare
+    ? "Sélection prête"
+    : hasSelection
+      ? "Déjà choisi"
+      : hasRecommendedProduct
+        ? "Produit conseillé"
+        : hasProductOptions
+          ? "À choisir"
+          : "Vide";
+  const declarationMeta = canDeclare
+    ? "Étape 2 · prête"
+    : hasSelection
+      ? "Étape 2 · en attente"
+      : hasRecommendedProduct
+        ? "Étape 2 · prêt"
+        : "Étape 2 · verrouillée";
+  const pickerSummary = hasSelection
+    ? ui.selectionSummary || "Sélection active."
+    : hasRecommendedProduct
+      ? `Produit conseillé : ${product.name}. Sélectionne-le pour préparer la déclaration.`
+      : ui.selectionSummary || "Sélectionne un produit dans la liste pour préparer la déclaration.";
+  const pickerHint = hasSelection
+    ? ui.selectionHint || "La sélection met à jour le produit actif."
+    : hasRecommendedProduct
+      ? ui.selectionHint || `Le produit conseillé ${product.name} peut être préparé maintenant.`
+      : ui.selectionHint || "La sélection met à jour le produit actif.";
+  const actionSummary = canDeclare
+    ? ui.declarationSummary || "Tu peux déclarer l’intervention maintenant."
+    : hasRecommendedProduct
+      ? ui.declarationSummary || `Produit conseillé : ${product.name}. Sélectionne-le pour déclencher la déclaration.`
+      : ui.declarationSummary || "Sélectionne un produit pour activer la déclaration.";
+  const actionHint = canDeclare
+    ? ui.declarationHint || "Le bouton se débloque dès qu’un produit est prêt."
+    : hasRecommendedProduct
+      ? ui.declarationHint || `Le bouton se débloque dès que ${product.name} est choisi.`
+      : ui.declarationHint || "Le bouton se débloque dès qu’un produit est prêt.";
 
   return `
       <section class="tab-panel gi-panel tab-panel--intervention">
@@ -334,10 +369,10 @@ export function renderInterventionTab(card) {
                 </div>
               </label>
               <div class="tab-panel__section-summary">
-                ${escapeHtml(ui.selectionSummary || "Sélectionne un produit dans la liste pour préparer la déclaration.")}
+                ${escapeHtml(pickerSummary)}
               </div>
               <div class="tab-panel__section-hint">
-                ${escapeHtml(ui.selectionHint || "La sélection met à jour le produit actif.")}
+                ${escapeHtml(pickerHint)}
               </div>
             </div>
 
@@ -357,10 +392,10 @@ export function renderInterventionTab(card) {
                 <span>${escapeHtml(ui.actionLabel || "Déclarer")}</span>
               </button>
               <div class="tab-panel__section-summary">
-                ${escapeHtml(ui.declarationSummary || "Sélectionne un produit pour activer la déclaration.")}
+                ${escapeHtml(actionSummary)}
               </div>
               <div class="tab-panel__section-hint">
-                ${escapeHtml(ui.declarationHint || "Le bouton se débloque dès qu’un produit est prêt.")}
+                ${escapeHtml(actionHint)}
               </div>
             </div>
           </div>

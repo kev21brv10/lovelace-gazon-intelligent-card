@@ -3488,7 +3488,10 @@ class GazonIntelligentCard extends HTMLElement {
     const entity = this._productSelectionEntity();
     const attrs = entity?.attributes || {};
     const selectedProductId = String(attrs.selected_product_id || "").trim();
-    const selectedProductName = String(attrs.selected_product_name || entity?.state || "").trim();
+    const entityState = String(entity?.state || "").trim();
+    const selectedProductName = String(
+      attrs.selected_product_name || (isUnavailableState(entityState) ? "" : entityState) || "",
+    ).trim();
     const selectedProductMonths = attrs.selected_product_months;
     const selectedProductMonthsLabel = String(attrs.selected_product_months_label || "").trim();
     const summary = String(attrs.summary || "").trim();
@@ -3499,9 +3502,15 @@ class GazonIntelligentCard extends HTMLElement {
       selectedProductName: selectedProductName || null,
       selectedProductMonths: Array.isArray(selectedProductMonths) ? selectedProductMonths : [],
       selectedProductMonthsLabel: selectedProductMonthsLabel || null,
-      summary: summary || (selectedProductName ? `Produit sélectionné : ${selectedProductName}` : productsCount > 0 ? "Choisis un produit dans le catalogue" : "Aucun produit enregistré"),
+      summary:
+        summary ||
+        (selectedProductName
+          ? `Produit sélectionné : ${selectedProductName}`
+          : productsCount > 0
+            ? "Aucun produit sélectionné"
+            : "Aucun produit enregistré"),
       productsCount,
-      label: selectedProductName || "Aucun produit",
+      label: selectedProductName || "Aucun produit sélectionné",
     };
   }
 
@@ -5975,7 +5984,7 @@ function renderProductsTab(card) {
     ? selection.selectedProductName
       ? `Produit actif: ${selection.selectedProductName}`
       : catalogue.hasProducts
-        ? "Choisis un produit dans le catalogue"
+        ? "Aucun produit sélectionné"
         : "Aucun produit enregistré"
     : emptyStateMessage;
   const productsHint = hasProductData
@@ -6018,8 +6027,43 @@ function renderInterventionTab(card) {
     : "Le bouton restera désactivé tant qu'aucune application n'est présente dans l'historique.";
   const recommendationTone = ui.tone || (canDeclare ? "success" : hasProductOptions ? "warning" : "neutral");
   const recommendationIcon = ui.icon || (canDeclare ? "mdi:spray-bottle" : "mdi:package-variant-closed");
-  const selectionMeta = canDeclare ? "Sélection prête" : hasSelection ? "Déjà choisi" : hasProductOptions ? "À choisir" : "Vide";
-  const declarationMeta = canDeclare ? "Étape 2 · prête" : hasSelection ? "Étape 2 · en attente" : "Étape 2 · verrouillée";
+  const hasRecommendedProduct = Boolean(product?.name);
+  const selectionMeta = canDeclare
+    ? "Sélection prête"
+    : hasSelection
+      ? "Déjà choisi"
+      : hasRecommendedProduct
+        ? "Produit conseillé"
+        : hasProductOptions
+          ? "À choisir"
+          : "Vide";
+  const declarationMeta = canDeclare
+    ? "Étape 2 · prête"
+    : hasSelection
+      ? "Étape 2 · en attente"
+      : hasRecommendedProduct
+        ? "Étape 2 · prêt"
+        : "Étape 2 · verrouillée";
+  const pickerSummary = hasSelection
+    ? ui.selectionSummary || "Sélection active."
+    : hasRecommendedProduct
+      ? `Produit conseillé : ${product.name}. Sélectionne-le pour préparer la déclaration.`
+      : ui.selectionSummary || "Sélectionne un produit dans la liste pour préparer la déclaration.";
+  const pickerHint = hasSelection
+    ? ui.selectionHint || "La sélection met à jour le produit actif."
+    : hasRecommendedProduct
+      ? ui.selectionHint || `Le produit conseillé ${product.name} peut être préparé maintenant.`
+      : ui.selectionHint || "La sélection met à jour le produit actif.";
+  const actionSummary = canDeclare
+    ? ui.declarationSummary || "Tu peux déclarer l’intervention maintenant."
+    : hasRecommendedProduct
+      ? ui.declarationSummary || `Produit conseillé : ${product.name}. Sélectionne-le pour déclencher la déclaration.`
+      : ui.declarationSummary || "Sélectionne un produit pour activer la déclaration.";
+  const actionHint = canDeclare
+    ? ui.declarationHint || "Le bouton se débloque dès qu’un produit est prêt."
+    : hasRecommendedProduct
+      ? ui.declarationHint || `Le bouton se débloque dès que ${product.name} est choisi.`
+      : ui.declarationHint || "Le bouton se débloque dès qu’un produit est prêt.";
 
   return `
       <section class="tab-panel gi-panel tab-panel--intervention">
@@ -6081,10 +6125,10 @@ function renderInterventionTab(card) {
                 </div>
               </label>
               <div class="tab-panel__section-summary">
-                ${escapeHtml(ui.selectionSummary || "Sélectionne un produit dans la liste pour préparer la déclaration.")}
+                ${escapeHtml(pickerSummary)}
               </div>
               <div class="tab-panel__section-hint">
-                ${escapeHtml(ui.selectionHint || "La sélection met à jour le produit actif.")}
+                ${escapeHtml(pickerHint)}
               </div>
             </div>
 
@@ -6104,10 +6148,10 @@ function renderInterventionTab(card) {
                 <span>${escapeHtml(ui.actionLabel || "Déclarer")}</span>
               </button>
               <div class="tab-panel__section-summary">
-                ${escapeHtml(ui.declarationSummary || "Sélectionne un produit pour activer la déclaration.")}
+                ${escapeHtml(actionSummary)}
               </div>
               <div class="tab-panel__section-hint">
-                ${escapeHtml(ui.declarationHint || "Le bouton se débloque dès qu’un produit est prêt.")}
+                ${escapeHtml(actionHint)}
               </div>
             </div>
           </div>

@@ -1117,7 +1117,10 @@ class GazonIntelligentCard extends HTMLElement {
     const entity = this._productSelectionEntity();
     const attrs = entity?.attributes || {};
     const selectedProductId = String(attrs.selected_product_id || "").trim();
-    const selectedProductName = String(attrs.selected_product_name || entity?.state || "").trim();
+    const entityState = String(entity?.state || "").trim();
+    const selectedProductName = String(
+      attrs.selected_product_name || (isUnavailableState(entityState) ? "" : entityState) || "",
+    ).trim();
     const selectedProductMonths = attrs.selected_product_months;
     const selectedProductMonthsLabel = String(attrs.selected_product_months_label || "").trim();
     const summary = String(attrs.summary || "").trim();
@@ -1128,9 +1131,15 @@ class GazonIntelligentCard extends HTMLElement {
       selectedProductName: selectedProductName || null,
       selectedProductMonths: Array.isArray(selectedProductMonths) ? selectedProductMonths : [],
       selectedProductMonthsLabel: selectedProductMonthsLabel || null,
-      summary: summary || (selectedProductName ? `Produit sélectionné : ${selectedProductName}` : productsCount > 0 ? "Choisis un produit dans le catalogue" : "Aucun produit enregistré"),
+      summary:
+        summary ||
+        (selectedProductName
+          ? `Produit sélectionné : ${selectedProductName}`
+          : productsCount > 0
+            ? "Aucun produit sélectionné"
+            : "Aucun produit enregistré"),
       productsCount,
-      label: selectedProductName || "Aucun produit",
+      label: selectedProductName || "Aucun produit sélectionné",
     };
   }
 

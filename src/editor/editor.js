@@ -197,28 +197,28 @@ ${EDITOR_STYLES}
         </section>
 
         <section class="section">
-          <h3>Résumé et arrosage</h3>
-          <p>Ces entités alimentent le résumé principal et l'onglet Arrosage. Renseigne seulement les blocs que tu veux afficher.</p>
+          <h3>Synthèse et irrigation</h3>
+          <p>Ces entités alimentent la synthèse principale et l'onglet Irrigation. Renseigne seulement les blocs que tu veux afficher.</p>
           <datalist id="gazon-intelligent-card-entities">${idList}</datalist>
           <div class="grid">
             ${this._renderEntityInput("entity_fenetre_optimale", "Fenêtre optimale")}
-            ${this._renderEntityInput("entity_plan_arrosage", "Plan d'arrosage")}
-            ${this._renderEntityInput("entity_objectif_arrosage", "Objectif d'arrosage")}
-            ${this._renderEntityInput("entity_arrosage_recommande", "Arrosage recommandé")}
-            ${this._renderEntityInput("entity_arrosage_apres_application_autorise", "Arrosage après application autorisé")}
-            ${this._renderEntityInput("entity_dernier_arrosage", "Dernier arrosage détecté")}
+            ${this._renderEntityInput("entity_plan_arrosage", "Plan d'irrigation")}
+            ${this._renderEntityInput("entity_objectif_arrosage", "Objectif d'irrigation")}
+            ${this._renderEntityInput("entity_arrosage_recommande", "Irrigation recommandée")}
+            ${this._renderEntityInput("entity_arrosage_apres_application_autorise", "Arrosage post-application")}
+            ${this._renderEntityInput("entity_dernier_arrosage", "Dernier arrosage")}
             ${this._renderEntityInput("entity_niveau", "Niveau d'action")}
           </div>
         </section>
 
         <section class="section">
-          <h3>Zone produit</h3>
-          <p>Ces entités donnent à la carte le produit sélectionné, le catalogue local et la dernière application pour séparer clairement les interventions.</p>
+          <h3>Référentiel produit</h3>
+          <p>Ces entités donnent à la carte le produit sélectionné, le catalogue local et la dernière intervention pour séparer clairement les interventions.</p>
           <div class="grid">
-            ${this._renderEntityInput("entity_catalogue_produits", "Catalogue produits")}
+            ${this._renderEntityInput("entity_catalogue_produits", "Référentiel produits")}
             ${this._renderEntityInput("entity_produit_intervention", "Produit d'intervention")}
             ${this._renderEntityInput("entity_prochaine_intervention", "Prochaine intervention")}
-            ${this._renderEntityInput("entity_derniere_application", "Dernière application")}
+            ${this._renderEntityInput("entity_derniere_application", "Dernière intervention")}
           </div>
         </section>
 
@@ -227,7 +227,7 @@ ${EDITOR_STYLES}
           <p>Ces entités alimentent les onglets Gazon et Tonte pour garder une lecture cohérente de la phase, du risque et de la hauteur.</p>
           <div class="grid">
             ${this._renderEntityInput("entity_mode", "Mode du gazon")}
-            ${this._renderEntityInput("entity_type_arrosage", "Type d'arrosage")}
+            ${this._renderEntityInput("entity_type_arrosage", "Profil d'irrigation")}
             ${this._renderEntityInput("entity_phase", "Phase dominante")}
             ${this._renderEntityInput("entity_sous_phase", "Sous-phase")}
             ${this._renderEntityInput("entity_risque", "Risque gazon")}
@@ -238,10 +238,10 @@ ${EDITOR_STYLES}
         </section>
 
         <section class="section">
-          <h3>Configuration</h3>
-          <p>Ces entités alimentent l'onglet Config pour garder une vue rapide sur l'autorisation, les débits et les hauteurs de tonte.</p>
+          <h3>Réglages</h3>
+          <p>Ces entités alimentent l'onglet Réglages pour garder une vue rapide sur l'autorisation, les débits et les hauteurs de tonte.</p>
           <div class="grid">
-            ${this._renderEntityInput("entity_switch_arrosage_automatique", "Arrosage automatique")}
+            ${this._renderEntityInput("entity_switch_arrosage_automatique", "Irrigation automatique")}
             ${this._renderEntityInput("entity_debit_zone_1", "Débit zone 1")}
             ${this._renderEntityInput("entity_debit_zone_2", "Débit zone 2")}
             ${this._renderEntityInput("entity_debit_zone_3", "Débit zone 3")}

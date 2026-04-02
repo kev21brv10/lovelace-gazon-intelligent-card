@@ -176,7 +176,7 @@ export function renderProductSummarySection(card) {
     return `
       <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
         <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Catalogue et historique</div>
+          <div class="tab-panel__eyebrow">Référentiel produit</div>
           ${renderStatusPill(emptyStateMessage, "neutral", "mdi:package-variant-closed", "tab-panel__status")}
         </div>
         <div class="tab-panel__section-summary">${escapeHtml(emptyStateMessage)}</div>
@@ -187,13 +187,13 @@ export function renderProductSummarySection(card) {
   return `
       <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
         <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Catalogue et historique</div>
+          <div class="tab-panel__eyebrow">Référentiel produit</div>
           ${renderStatusPill(catalogue.summary, catalogue.hasProducts ? "success" : "neutral", "mdi:package-variant-closed", "tab-panel__status")}
         </div>
-        <div class="tab-panel__section-summary">Produit courant, catalogue local et dernière application, sans ressaisie technique.</div>
+        <div class="tab-panel__section-summary">Produit actif, catalogue local et dernière intervention sont regroupés ici pour garder la proposition métier lisible.</div>
         <div class="tab-panel__grid tab-panel__grid--products">
           ${card._renderStatCard(
-            "Produit courant",
+            "Produit actif",
             selectionValue,
             selection.selectedProductName ? "accent" : catalogue.hasProducts ? "neutral" : "neutral",
             "mdi:package-variant",
@@ -207,7 +207,7 @@ export function renderProductSummarySection(card) {
             catalogueDetails,
           )}
           ${card._renderStatCard(
-            "Dernière application",
+            "Dernière intervention",
             applicationState,
             application && !["unknown", "unavailable", "none", "aucune application"].includes(String(application.state || "").trim().toLowerCase()) ? "success" : "neutral",
             "mdi:spray-bottle",
@@ -233,9 +233,9 @@ export function renderProductsTab(card) {
     : "neutral";
   const productsSummary = hasProductData
     ? selection.selectedProductName
-      ? `Produit actif: ${selection.selectedProductName}`
+      ? `Produit actif : ${selection.selectedProductName}`
       : catalogue.hasProducts
-        ? "Aucun produit sélectionné"
+        ? "Aucun produit n’est sélectionné"
         : "Aucun produit enregistré"
     : emptyStateMessage;
   const productsHintParts = [
@@ -244,18 +244,18 @@ export function renderProductsTab(card) {
     selection.maxApplicationsPerYearLabel ? `Max/an: ${selection.maxApplicationsPerYearLabel}` : "",
   ].filter(Boolean);
   const productsHint = hasProductData
-    ? `${selection.summary || "Le produit actif et le catalogue local servent à déclarer les interventions."}${productsHintParts.length ? ` · ${productsHintParts.join(" · ")}` : ""}`
+    ? `${selection.summary || "Le référentiel produit alimente la prochaine recommandation."}${productsHintParts.length ? ` · ${productsHintParts.join(" · ")}` : ""}`
     : emptyStateMessage;
 
   return `
       <section class="tab-panel gi-panel tab-panel--products">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${productsTone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">Catalogue produit</div>
+            <div class="tab-panel__hero-summary">Référentiel produit</div>
             ${renderStatusPill(hasProductData ? catalogue.summary : emptyStateMessage, productsTone, "mdi:package-variant-closed", `tab-panel__status tab-panel__status--${productsTone}`)}
           </div>
           <div class="tab-panel__hero-next">${escapeHtml(productsSummary)}</div>
-          <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Référentiel produit, catalogue local et historique d'application.")}</div>
+          <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Le référentiel produit sert de base à la recommandation et à la déclaration.")}</div>
         </div>
 
         ${renderProductSummarySection(card)}
@@ -294,36 +294,40 @@ export function renderInterventionTab(card) {
           ? "À choisir"
           : "Vide";
   const declarationMeta = canDeclare
-    ? "Étape 2 · prête"
+    ? "Sélection activée"
     : hasSelection
       ? "Étape 2 · en attente"
       : hasRecommendedProduct
-        ? "Étape 2 · prêt"
+        ? "Action prête"
         : "Étape 2 · verrouillée";
   const pickerSummary = hasSelection
-    ? ui.selectionSummary || "Sélection active."
+    ? ui.selectionSummary || "Produit choisi."
     : hasRecommendedProduct
-      ? `Produit conseillé : ${product.name}. Sélectionne-le pour préparer la déclaration.`
+      ? `Produit conseillé : ${product.name}.`
       : ui.selectionSummary || "Sélectionne un produit dans la liste pour préparer la déclaration.";
   const pickerHint = hasSelection
     ? ui.selectionHint || "La sélection met à jour le produit actif."
     : hasRecommendedProduct
-      ? ui.selectionHint || `Le produit conseillé ${product.name} peut être préparé maintenant.`
+      ? ui.selectionHint || `Le moteur a retenu ${product.name} parmi les produits enregistrés.`
       : ui.selectionHint || "La sélection met à jour le produit actif.";
   const actionSummary = canDeclare
-    ? ui.declarationSummary || "Tu peux déclarer l’intervention maintenant."
+    ? ui.declarationSummary || "La déclaration peut être lancée maintenant."
     : hasRecommendedProduct
-      ? ui.declarationSummary || `Produit conseillé : ${product.name}. Sélectionne-le pour déclencher la déclaration.`
+      ? ui.declarationSummary || `Produit conseillé : ${product.name}. Sélectionne-le pour activer la déclaration.`
       : ui.declarationSummary || "Sélectionne un produit pour activer la déclaration.";
   const actionHint = canDeclare
-    ? ui.declarationHint || "Le bouton se débloque dès qu’un produit est prêt."
+    ? ui.declarationHint || "Le bouton est déjà actif."
     : hasRecommendedProduct
-      ? ui.declarationHint || `Le bouton se débloque dès que ${product.name} est choisi.`
+      ? ui.declarationHint || `Sélectionne ${product.name} pour débloquer la déclaration.`
       : ui.declarationHint || "Le bouton se débloque dès qu’un produit est prêt.";
   const temperatureConstraint = (Array.isArray(recommendation.constraints)
     ? recommendation.constraints.find((constraint) => constraint?.code === "temperature_range")
     : null);
   const temperatureConstraintState = formatTemperatureRangeConstraint(temperatureConstraint);
+  const decisionHint =
+    recommendation.status === "possible"
+      ? "Le moteur compare tous les produits enregistrés, la dernière intervention et la météo pour retenir la prochaine action."
+      : "Le moteur compare le catalogue, la dernière intervention et la météo pour préparer la prochaine action.";
 
   return `
       <section class="tab-panel gi-panel tab-panel--intervention">
@@ -360,9 +364,10 @@ export function renderInterventionTab(card) {
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-workflow">
           <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Préparation express</div>
+            <div class="tab-panel__eyebrow">Assistant de décision</div>
             <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
           </div>
+          <div class="tab-panel__section-hint">${escapeHtml(decisionHint)}</div>
           <div class="tab-panel__workflow" aria-hidden="true">
             <div class="tab-panel__workflow-step tab-panel__workflow-step--active">
               <span class="tab-panel__workflow-index">1</span>
@@ -377,7 +382,7 @@ export function renderInterventionTab(card) {
           <div class="tab-panel__intervention-layout">
             <div class="tab-panel__intervention-card tab-panel__intervention-card--picker">
               <div class="tab-panel__section-head">
-                <div class="tab-panel__eyebrow">Produit à déclarer</div>
+                <div class="tab-panel__eyebrow">Produit conseillé</div>
                 <div class="tab-panel__section-meta">${escapeHtml(selectionMeta)}</div>
               </div>
               <label class="tab-panel__field">
@@ -416,7 +421,7 @@ export function renderInterventionTab(card) {
 
             <div class="tab-panel__intervention-card tab-panel__intervention-card--action">
               <div class="tab-panel__section-head">
-                <div class="tab-panel__eyebrow">Validation finale</div>
+                <div class="tab-panel__eyebrow">Déclaration activable</div>
                 <div class="tab-panel__section-meta">${escapeHtml(declarationMeta)}</div>
               </div>
               <button
@@ -519,7 +524,7 @@ export function renderOverviewTab(card) {
       <section class="tab-panel gi-panel tab-panel--overview">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${overviewTone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">Résumé proposé</div>
+            <div class="tab-panel__hero-summary">Synthèse recommandée</div>
             ${renderStatusPill(proposal.title, overviewTone, overviewIcon, `tab-panel__status tab-panel__status--${overviewTone}`)}
           </div>
           <div class="tab-panel__hero-next">${escapeHtml(windowState.summary || planState.summary || "Vue d’ensemble de la carte.")}</div>
@@ -536,7 +541,7 @@ export function renderOverviewTab(card) {
 
         ${
           `<section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--overview-brief">
-            <div class="tab-panel__eyebrow">À retenir</div>
+            <div class="tab-panel__eyebrow">Lecture rapide</div>
             <div class="tab-panel__section-summary">${escapeHtml(proposal.title)}</div>
             <div class="tab-panel__block-hint">${escapeHtml(proposal.hint)}</div>
           </section>`
@@ -575,8 +580,8 @@ export function renderWateringTab(card) {
   const planTypeLabel = formatPlanType(planState.planType);
 
   const contextPills = [
-    card._renderTabPill("Arrosage recommandé", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
-    card._renderTabPill("Après application", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off"),
+    card._renderTabPill("Irrigation recommandée", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
+    card._renderTabPill("Post-application", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off"),
     card._renderTabPill("Type", formatStatusLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
     card._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
     card._renderTabPill("Risque gazon", context.risk, computeRisqueTone(context.risk), "mdi:shield-alert-outline"),
@@ -607,7 +612,7 @@ export function renderWateringTab(card) {
       <section class="tab-panel gi-panel tab-panel--watering">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${tone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">${escapeHtml(windowState.summary || "Arrosage prévu")}</div>
+            <div class="tab-panel__hero-summary">${escapeHtml(windowState.summary || "Irrigation recommandée")}</div>
             ${renderStatusPill(windowState.statusLabel, tone, windowStatusIcon, `tab-panel__hero-status tab-panel__hero-status--${tone}`)}
           </div>
           ${
@@ -626,7 +631,7 @@ export function renderWateringTab(card) {
 
         <section class="gi-info gi-info--main tab-panel__section">
           <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Résumé du plan</div>
+            <div class="tab-panel__eyebrow">Plan d'irrigation</div>
             <div class="tab-panel__section-meta">${escapeHtml(planState.durationHuman)} · ${escapeHtml(planTypeLabel)}</div>
           </div>
           <div class="tab-panel__section-summary">${escapeHtml(planState.summary)}</div>
@@ -638,7 +643,7 @@ export function renderWateringTab(card) {
         </section>
 
         <section class="gi-info gi-info--main tab-panel__section">
-          <div class="tab-panel__eyebrow">Contexte</div>
+          <div class="tab-panel__eyebrow">Contexte de décision</div>
           <div class="tab-panel__grid">
             ${contextPills.join("")}
           </div>
@@ -812,16 +817,16 @@ export function renderConfigTab(card) {
       <section class="tab-panel gi-panel tab-panel--config">
         <div class="tab-panel__header">
           <div>
-            <div class="tab-panel__eyebrow">Configuration</div>
-            <div class="tab-panel__title">Autorisation, débits et hauteurs</div>
+            <div class="tab-panel__eyebrow">Réglages</div>
+            <div class="tab-panel__title">Autorisations, débits et hauteurs</div>
             <div class="tab-panel__header-hint">Touchez une tuile pour ouvrir le contrôle Home Assistant correspondant.</div>
           </div>
           ${renderStatusPill(switchState.label, switchState.tone, switchIcon, "tab-panel__status")}
         </div>
 
         <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-top">
-          ${card._renderConfigActionCard("Arrosage automatique", "entity_switch_arrosage_automatique", switchState.label, switchState.tone, "mdi:switch")}
-          ${card._renderConfigActionCard("Après application", "entity_arrosage_apres_application_autorise", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off")}
+          ${card._renderConfigActionCard("Irrigation automatique", "entity_switch_arrosage_automatique", switchState.label, switchState.tone, "mdi:switch")}
+          ${card._renderConfigActionCard("Post-application", "entity_arrosage_apres_application_autorise", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off")}
           ${card._renderConfigActionCard("Tonte autorisée", "entity_tonte_autorisee", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", "mdi:content-cut")}
           ${card._renderConfigActionCard("Mode du gazon", "entity_mode", formatApplicationMode(mode), modeTone, "mdi:grass")}
         </div>

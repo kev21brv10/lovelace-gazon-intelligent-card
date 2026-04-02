@@ -474,20 +474,12 @@ const CARD_STYLES = String.raw`
         }
 
         .tab-panel__intervention-card--picker {
-          border-color: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 18%, var(--divider-color));
-          box-shadow:
-            inset 0 0 0 1px color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent),
-            inset 0 1px 0 rgba(255, 255, 255, 0.04),
-            0 12px 26px rgba(0, 0, 0, 0.12);
+          border-color: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 16%, var(--divider-color));
         }
 
         .tab-panel__intervention-card--action {
           justify-content: center;
-          border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 18%, var(--divider-color));
-          box-shadow:
-            inset 0 0 0 1px color-mix(in srgb, var(--gazon-success-color, #4fc38c) 10%, transparent),
-            inset 0 1px 0 rgba(255, 255, 255, 0.04),
-            0 12px 26px rgba(0, 0, 0, 0.12);
+          border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 16%, var(--divider-color));
         }
 
         .tab-panel__intervention-card .tab-panel__section-head {
@@ -503,11 +495,11 @@ const CARD_STYLES = String.raw`
         }
 
         .tab-panel__intervention-card--picker .tab-panel__section-meta {
-          color: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 58%, var(--secondary-text-color));
+          color: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 42%, var(--secondary-text-color));
         }
 
         .tab-panel__intervention-card--action .tab-panel__section-meta {
-          color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 58%, var(--secondary-text-color));
+          color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 42%, var(--secondary-text-color));
         }
 
         .tab-panel__intervention-card--action .tab-panel__cta {
@@ -521,12 +513,12 @@ const CARD_STYLES = String.raw`
           display: flex;
           align-items: center;
           min-width: 0;
-          border: 1px solid color-mix(in srgb, var(--gazon-water-color, #44c8ea) 14%, var(--gi-surface-border-strong));
+          border: 1px solid color-mix(in srgb, var(--gazon-water-color, #44c8ea) 12%, var(--gi-surface-border-strong));
           border-radius: 16px;
           padding: 7px 12px 7px 10px;
           background:
-            radial-gradient(circle at 18% 50%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 14%, transparent) 0%, transparent 18%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 5%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+            radial-gradient(circle at 18% 50%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 0%, transparent 18%),
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 96%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
           box-shadow: var(--gi-surface-shadow-strong);
           gap: 10px;
           min-height: 52px;
@@ -538,7 +530,7 @@ const CARD_STYLES = String.raw`
           width: 30px;
           height: 30px;
           border-radius: 10px;
-          background: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 18%, transparent);
+          background: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 12%, transparent);
           color: var(--primary-text-color);
           flex: none;
         }

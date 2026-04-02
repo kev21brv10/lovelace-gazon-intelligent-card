@@ -532,6 +532,62 @@ export const CARD_STYLES = String.raw`
           color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 42%, var(--secondary-text-color));
         }
 
+        .tab-panel__temperature-constraint {
+          display: flex;
+          align-items: flex-start;
+          flex-wrap: wrap;
+          gap: 8px 10px;
+          margin-top: 4px;
+          padding: 10px 12px;
+          border: 1px solid var(--gi-surface-border);
+          border-radius: 16px;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 96%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 90%, black) 100%);
+        }
+
+        .tab-panel__temperature-constraint--success {
+          border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 18%, var(--divider-color));
+          background:
+            radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 10%, transparent) 0%, transparent 22%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+        }
+
+        .tab-panel__temperature-constraint--warning {
+          border-color: color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 18%, var(--divider-color));
+          background:
+            radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 10%, transparent) 0%, transparent 22%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+        }
+
+        .tab-panel__temperature-constraint--danger {
+          border-color: color-mix(in srgb, var(--gazon-danger-color, #e16b73) 18%, var(--divider-color));
+          background:
+            radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--gazon-danger-color, #e16b73) 10%, transparent) 0%, transparent 22%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-danger-color, #e16b73) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+        }
+
+        .tab-panel__temperature-copy {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          min-width: 0;
+          flex: 1 1 220px;
+        }
+
+        .tab-panel__temperature-detail {
+          font-size: var(--gi-font-xs);
+          line-height: 1.35;
+          color: var(--secondary-text-color);
+          overflow-wrap: anywhere;
+        }
+
+        .tab-panel__temperature-hint {
+          font-size: var(--gi-font-xxs);
+          line-height: 1.32;
+          color: var(--secondary-text-color);
+          overflow-wrap: anywhere;
+        }
+
         .tab-panel__intervention-card--action .tab-panel__cta {
           width: 100%;
           min-height: 76px;

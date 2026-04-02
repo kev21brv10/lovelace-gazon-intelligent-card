@@ -532,6 +532,62 @@ const CARD_STYLES = String.raw`
           color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 42%, var(--secondary-text-color));
         }
 
+        .tab-panel__temperature-constraint {
+          display: flex;
+          align-items: flex-start;
+          flex-wrap: wrap;
+          gap: 8px 10px;
+          margin-top: 4px;
+          padding: 10px 12px;
+          border: 1px solid var(--gi-surface-border);
+          border-radius: 16px;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 96%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 90%, black) 100%);
+        }
+
+        .tab-panel__temperature-constraint--success {
+          border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 18%, var(--divider-color));
+          background:
+            radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 10%, transparent) 0%, transparent 22%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+        }
+
+        .tab-panel__temperature-constraint--warning {
+          border-color: color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 18%, var(--divider-color));
+          background:
+            radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 10%, transparent) 0%, transparent 22%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+        }
+
+        .tab-panel__temperature-constraint--danger {
+          border-color: color-mix(in srgb, var(--gazon-danger-color, #e16b73) 18%, var(--divider-color));
+          background:
+            radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--gazon-danger-color, #e16b73) 10%, transparent) 0%, transparent 22%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-danger-color, #e16b73) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+        }
+
+        .tab-panel__temperature-copy {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          min-width: 0;
+          flex: 1 1 220px;
+        }
+
+        .tab-panel__temperature-detail {
+          font-size: var(--gi-font-xs);
+          line-height: 1.35;
+          color: var(--secondary-text-color);
+          overflow-wrap: anywhere;
+        }
+
+        .tab-panel__temperature-hint {
+          font-size: var(--gi-font-xxs);
+          line-height: 1.32;
+          color: var(--secondary-text-color);
+          overflow-wrap: anywhere;
+        }
+
         .tab-panel__intervention-card--action .tab-panel__cta {
           width: 100%;
           min-height: 76px;
@@ -2555,7 +2611,18 @@ const RENDER_SIGNATURE_ATTRS = {
   entity_dernier_arrosage: ["source", "date_action", "detected_at", "zone_count"],
   entity_derniere_application: ["source", "application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm"],
   entity_catalogue_produits: ["products_count", "product_ids", "product_names", "products_summary", "summary"],
-  entity_produit_intervention: ["selected_product_id", "selected_product_name", "summary", "products_count"],
+  entity_produit_intervention: [
+    "selected_product_id",
+    "selected_product_name",
+    "selected_product_months",
+    "selected_product_months_label",
+    "selected_product_usage_mode",
+    "selected_product_usage_mode_label",
+    "selected_product_max_applications_per_year",
+    "selected_product_max_applications_per_year_label",
+    "summary",
+    "products_count",
+  ],
   entity_objectif_arrosage: ["temperature", "etp", "phase_active"],
   entity_arrosage_recommande: ["objectif_mm", "type_arrosage"],
   entity_arrosage_apres_application_autorise: ["application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm"],
@@ -3494,6 +3561,10 @@ class GazonIntelligentCard extends HTMLElement {
     ).trim();
     const selectedProductMonths = attrs.selected_product_months;
     const selectedProductMonthsLabel = String(attrs.selected_product_months_label || "").trim();
+    const selectedProductUsageMode = String(attrs.selected_product_usage_mode || "").trim();
+    const selectedProductUsageModeLabel = String(attrs.selected_product_usage_mode_label || "").trim();
+    const selectedProductMaxApplicationsPerYear = asNumber(attrs.selected_product_max_applications_per_year);
+    const selectedProductMaxApplicationsPerYearLabel = String(attrs.selected_product_max_applications_per_year_label || "").trim();
     const summary = String(attrs.summary || "").trim();
     const productsCount = asNumber(attrs.products_count ?? this._catalogueState().count) ?? 0;
     return {
@@ -3502,6 +3573,14 @@ class GazonIntelligentCard extends HTMLElement {
       selectedProductName: selectedProductName || null,
       selectedProductMonths: Array.isArray(selectedProductMonths) ? selectedProductMonths : [],
       selectedProductMonthsLabel: selectedProductMonthsLabel || null,
+      selectedProductUsageMode: selectedProductUsageMode || null,
+      selectedProductUsageModeLabel:
+        selectedProductUsageModeLabel ||
+        formatProductUsageMode(selectedProductUsageMode),
+      selectedProductMaxApplicationsPerYear: selectedProductMaxApplicationsPerYear,
+      selectedProductMaxApplicationsPerYearLabel:
+        selectedProductMaxApplicationsPerYearLabel ||
+        formatProductAnnualLimit(selectedProductMaxApplicationsPerYear),
       summary:
         summary ||
         (selectedProductName
@@ -3545,14 +3624,31 @@ class GazonIntelligentCard extends HTMLElement {
         }
         const name = String(product.nom || id || "").trim() || id;
         const monthsLabel = String(product.application_months_label || "").trim();
+        const usageMode = String(product.usage_mode || "").trim();
+        const usageModeLabel = formatProductUsageMode(usageMode);
+        const annualLimit = asNumber(product.max_applications_per_year);
+        const annualLimitLabel = formatProductAnnualLimit(annualLimit);
         const duplicateCount = nameCounts.get(name.toLocaleLowerCase()) || 0;
         const baseLabel = duplicateCount > 1 && id ? `${name} — ${id}` : name;
-        const label = monthsLabel ? `${baseLabel} · ${monthsLabel}` : baseLabel;
+        const labelParts = [baseLabel];
+        if (monthsLabel) {
+          labelParts.push(monthsLabel);
+        }
+        if (usageModeLabel) {
+          labelParts.push(`Mode ${usageModeLabel}`);
+        }
+        if (annualLimitLabel) {
+          labelParts.push(`Max ${annualLimitLabel}`);
+        }
         return {
           id,
           name,
-          label,
+          label: labelParts.join(" · "),
           monthsLabel: String(product.application_months_label || "").trim() || null,
+          usageMode: usageMode || null,
+          usageModeLabel: usageModeLabel || null,
+          maxApplicationsPerYear: annualLimit,
+          maxApplicationsPerYearLabel: annualLimitLabel,
         };
       })
       .filter(Boolean);
@@ -3629,6 +3725,8 @@ class GazonIntelligentCard extends HTMLElement {
           .map((constraint) => ({
             code: String(constraint.code || "").trim() || null,
             label: String(constraint.label || "").trim() || "",
+            value: constraint.value ?? null,
+            hint: String(constraint.hint || "").trim() || null,
             met: Boolean(constraint.met),
             blocking: Boolean(constraint.blocking),
           }))
@@ -3637,6 +3735,14 @@ class GazonIntelligentCard extends HTMLElement {
     const selectedProductName = String(selection.name || attrs.selected_product_name || "").trim() || null;
     const selectedProductMonths = Array.isArray(selection.months) ? selection.months : [];
     const selectedProductMonthsLabel = String(selection.months_label || attrs.selected_product_months_label || "").trim() || null;
+    const selectedProductUsageMode = String(selection.usage_mode || attrs.selected_product_usage_mode || "").trim() || null;
+    const selectedProductUsageModeLabel = String(selection.usage_mode_label || attrs.selected_product_usage_mode_label || "").trim() || null;
+    const selectedProductMaxApplicationsPerYear = asNumber(
+      selection.max_applications_per_year ?? attrs.selected_product_max_applications_per_year,
+    );
+    const selectedProductMaxApplicationsPerYearLabel = String(
+      selection.max_applications_per_year_label || attrs.selected_product_max_applications_per_year_label || "",
+    ).trim() || null;
     const recommendedProductMonths = Array.isArray(product.months) ? product.months : [];
     const recommendedProductMonthsLabel = String(product.months_label || attrs.recommended_product_months_label || "").trim() || null;
     const recommendedProductId = String(product.id || attrs.recommended_product_id || "").trim() || null;
@@ -3680,6 +3786,12 @@ class GazonIntelligentCard extends HTMLElement {
         type: String(selection.type || attrs.selected_product_type || "").trim() || null,
         months: selectedProductMonths,
         monthsLabel: selectedProductMonthsLabel,
+        usageMode: selectedProductUsageMode,
+        usageModeLabel: selectedProductUsageModeLabel || formatProductUsageMode(selectedProductUsageMode),
+        maxApplicationsPerYear: selectedProductMaxApplicationsPerYear,
+        maxApplicationsPerYearLabel:
+          selectedProductMaxApplicationsPerYearLabel ||
+          formatProductAnnualLimit(selectedProductMaxApplicationsPerYear),
         ready: Boolean(payload.selected_product_ready || selection.ready),
         selected: Boolean(selectedProductId || selectedProductName),
       },
@@ -5898,6 +6010,12 @@ function renderProductSummarySection(card) {
   if (selection.selectedProductMonthsLabel) {
     selectionDetailsParts.push(`Période: ${selection.selectedProductMonthsLabel}`);
   }
+  if (selection.usageModeLabel) {
+    selectionDetailsParts.push(`Mode: ${selection.usageModeLabel}`);
+  }
+  if (selection.maxApplicationsPerYearLabel) {
+    selectionDetailsParts.push(`Max/an: ${selection.maxApplicationsPerYearLabel}`);
+  }
   const selectionDetails = selectionDetailsParts.join(" · ") || selection.summary || "Sélection active";
   const selectionValue = selection.selectedProductName || (catalogue.hasProducts ? "Sélection à faire" : "Aucun produit");
   const catalogueDetails =
@@ -5987,8 +6105,13 @@ function renderProductsTab(card) {
         ? "Aucun produit sélectionné"
         : "Aucun produit enregistré"
     : emptyStateMessage;
+  const productsHintParts = [
+    selection.selectedProductMonthsLabel ? `Période: ${selection.selectedProductMonthsLabel}` : "",
+    selection.usageModeLabel ? `Mode: ${selection.usageModeLabel}` : "",
+    selection.maxApplicationsPerYearLabel ? `Max/an: ${selection.maxApplicationsPerYearLabel}` : "",
+  ].filter(Boolean);
   const productsHint = hasProductData
-    ? `${selection.summary || "Le produit actif et le catalogue local servent à déclarer les interventions."}${selection.selectedProductMonthsLabel ? ` · Période: ${selection.selectedProductMonthsLabel}` : ""}`
+    ? `${selection.summary || "Le produit actif et le catalogue local servent à déclarer les interventions."}${productsHintParts.length ? ` · ${productsHintParts.join(" · ")}` : ""}`
     : emptyStateMessage;
 
   return `
@@ -6064,6 +6187,10 @@ function renderInterventionTab(card) {
     : hasRecommendedProduct
       ? ui.declarationHint || `Le bouton se débloque dès que ${product.name} est choisi.`
       : ui.declarationHint || "Le bouton se débloque dès qu’un produit est prêt.";
+  const temperatureConstraint = (Array.isArray(recommendation.constraints)
+    ? recommendation.constraints.find((constraint) => constraint?.code === "temperature_range")
+    : null);
+  const temperatureConstraintState = formatTemperatureRangeConstraint(temperatureConstraint);
 
   return `
       <section class="tab-panel gi-panel tab-panel--intervention">
@@ -6074,6 +6201,28 @@ function renderInterventionTab(card) {
           </div>
           <div class="tab-panel__hero-next">${escapeHtml(ui.summary || recommendation.summary || "Intervention recommandée")}</div>
           <div class="tab-panel__hero-hint">${escapeHtml(ui.hint || recommendation.hint || "Le moteur de décision a préparé la prochaine intervention.")}</div>
+          ${
+            temperatureConstraintState
+              ? `
+                <div class="tab-panel__temperature-constraint tab-panel__temperature-constraint--${temperatureConstraintState.tone}">
+                  ${renderStatusPill(
+                    temperatureConstraintState.title,
+                    temperatureConstraintState.tone,
+                    temperatureConstraintState.icon,
+                    `tab-panel__status tab-panel__status--${temperatureConstraintState.tone}`,
+                  )}
+                  <div class="tab-panel__temperature-copy">
+                    <div class="tab-panel__temperature-detail">${escapeHtml(temperatureConstraintState.detail)}</div>
+                    ${
+                      temperatureConstraintState.hint
+                        ? `<div class="tab-panel__temperature-hint">${escapeHtml(temperatureConstraintState.hint)}</div>`
+                        : ""
+                    }
+                  </div>
+                </div>
+              `
+              : ""
+          }
         </div>
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-workflow">

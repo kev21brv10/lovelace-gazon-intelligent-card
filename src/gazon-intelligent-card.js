@@ -7,6 +7,11 @@ import {
   renderTabNav,
   renderWateringProgressSection,
 } from "./renderers/layout.js";
+import {
+  asNumber,
+  formatProductAnnualLimit,
+  formatProductUsageMode,
+} from "./utils/formatters.js";
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
@@ -184,7 +189,18 @@ const RENDER_SIGNATURE_ATTRS = {
   entity_dernier_arrosage: ["source", "date_action", "detected_at", "zone_count"],
   entity_derniere_application: ["source", "application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm"],
   entity_catalogue_produits: ["products_count", "product_ids", "product_names", "products_summary", "summary"],
-  entity_produit_intervention: ["selected_product_id", "selected_product_name", "summary", "products_count"],
+  entity_produit_intervention: [
+    "selected_product_id",
+    "selected_product_name",
+    "selected_product_months",
+    "selected_product_months_label",
+    "selected_product_usage_mode",
+    "selected_product_usage_mode_label",
+    "selected_product_max_applications_per_year",
+    "selected_product_max_applications_per_year_label",
+    "summary",
+    "products_count",
+  ],
   entity_objectif_arrosage: ["temperature", "etp", "phase_active"],
   entity_arrosage_recommande: ["objectif_mm", "type_arrosage"],
   entity_arrosage_apres_application_autorise: ["application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm"],
@@ -1123,6 +1139,10 @@ class GazonIntelligentCard extends HTMLElement {
     ).trim();
     const selectedProductMonths = attrs.selected_product_months;
     const selectedProductMonthsLabel = String(attrs.selected_product_months_label || "").trim();
+    const selectedProductUsageMode = String(attrs.selected_product_usage_mode || "").trim();
+    const selectedProductUsageModeLabel = String(attrs.selected_product_usage_mode_label || "").trim();
+    const selectedProductMaxApplicationsPerYear = asNumber(attrs.selected_product_max_applications_per_year);
+    const selectedProductMaxApplicationsPerYearLabel = String(attrs.selected_product_max_applications_per_year_label || "").trim();
     const summary = String(attrs.summary || "").trim();
     const productsCount = asNumber(attrs.products_count ?? this._catalogueState().count) ?? 0;
     return {
@@ -1131,6 +1151,14 @@ class GazonIntelligentCard extends HTMLElement {
       selectedProductName: selectedProductName || null,
       selectedProductMonths: Array.isArray(selectedProductMonths) ? selectedProductMonths : [],
       selectedProductMonthsLabel: selectedProductMonthsLabel || null,
+      selectedProductUsageMode: selectedProductUsageMode || null,
+      selectedProductUsageModeLabel:
+        selectedProductUsageModeLabel ||
+        formatProductUsageMode(selectedProductUsageMode),
+      selectedProductMaxApplicationsPerYear: selectedProductMaxApplicationsPerYear,
+      selectedProductMaxApplicationsPerYearLabel:
+        selectedProductMaxApplicationsPerYearLabel ||
+        formatProductAnnualLimit(selectedProductMaxApplicationsPerYear),
       summary:
         summary ||
         (selectedProductName
@@ -1174,14 +1202,31 @@ class GazonIntelligentCard extends HTMLElement {
         }
         const name = String(product.nom || id || "").trim() || id;
         const monthsLabel = String(product.application_months_label || "").trim();
+        const usageMode = String(product.usage_mode || "").trim();
+        const usageModeLabel = formatProductUsageMode(usageMode);
+        const annualLimit = asNumber(product.max_applications_per_year);
+        const annualLimitLabel = formatProductAnnualLimit(annualLimit);
         const duplicateCount = nameCounts.get(name.toLocaleLowerCase()) || 0;
         const baseLabel = duplicateCount > 1 && id ? `${name} — ${id}` : name;
-        const label = monthsLabel ? `${baseLabel} · ${monthsLabel}` : baseLabel;
+        const labelParts = [baseLabel];
+        if (monthsLabel) {
+          labelParts.push(monthsLabel);
+        }
+        if (usageModeLabel) {
+          labelParts.push(`Mode ${usageModeLabel}`);
+        }
+        if (annualLimitLabel) {
+          labelParts.push(`Max ${annualLimitLabel}`);
+        }
         return {
           id,
           name,
-          label,
+          label: labelParts.join(" · "),
           monthsLabel: String(product.application_months_label || "").trim() || null,
+          usageMode: usageMode || null,
+          usageModeLabel: usageModeLabel || null,
+          maxApplicationsPerYear: annualLimit,
+          maxApplicationsPerYearLabel: annualLimitLabel,
         };
       })
       .filter(Boolean);
@@ -1258,6 +1303,8 @@ class GazonIntelligentCard extends HTMLElement {
           .map((constraint) => ({
             code: String(constraint.code || "").trim() || null,
             label: String(constraint.label || "").trim() || "",
+            value: constraint.value ?? null,
+            hint: String(constraint.hint || "").trim() || null,
             met: Boolean(constraint.met),
             blocking: Boolean(constraint.blocking),
           }))
@@ -1266,6 +1313,14 @@ class GazonIntelligentCard extends HTMLElement {
     const selectedProductName = String(selection.name || attrs.selected_product_name || "").trim() || null;
     const selectedProductMonths = Array.isArray(selection.months) ? selection.months : [];
     const selectedProductMonthsLabel = String(selection.months_label || attrs.selected_product_months_label || "").trim() || null;
+    const selectedProductUsageMode = String(selection.usage_mode || attrs.selected_product_usage_mode || "").trim() || null;
+    const selectedProductUsageModeLabel = String(selection.usage_mode_label || attrs.selected_product_usage_mode_label || "").trim() || null;
+    const selectedProductMaxApplicationsPerYear = asNumber(
+      selection.max_applications_per_year ?? attrs.selected_product_max_applications_per_year,
+    );
+    const selectedProductMaxApplicationsPerYearLabel = String(
+      selection.max_applications_per_year_label || attrs.selected_product_max_applications_per_year_label || "",
+    ).trim() || null;
     const recommendedProductMonths = Array.isArray(product.months) ? product.months : [];
     const recommendedProductMonthsLabel = String(product.months_label || attrs.recommended_product_months_label || "").trim() || null;
     const recommendedProductId = String(product.id || attrs.recommended_product_id || "").trim() || null;
@@ -1309,6 +1364,12 @@ class GazonIntelligentCard extends HTMLElement {
         type: String(selection.type || attrs.selected_product_type || "").trim() || null,
         months: selectedProductMonths,
         monthsLabel: selectedProductMonthsLabel,
+        usageMode: selectedProductUsageMode,
+        usageModeLabel: selectedProductUsageModeLabel || formatProductUsageMode(selectedProductUsageMode),
+        maxApplicationsPerYear: selectedProductMaxApplicationsPerYear,
+        maxApplicationsPerYearLabel:
+          selectedProductMaxApplicationsPerYearLabel ||
+          formatProductAnnualLimit(selectedProductMaxApplicationsPerYear),
         ready: Boolean(payload.selected_product_ready || selection.ready),
         selected: Boolean(selectedProductId || selectedProductName),
       },

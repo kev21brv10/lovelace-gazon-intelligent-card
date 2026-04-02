@@ -104,6 +104,86 @@ export function formatStateLabel(value) {
   return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
 }
 
+const PRODUCT_USAGE_MODE_LABELS = {
+  preventif: "Préventif",
+  curatif: "Curatif",
+  entretien: "Entretien",
+  rattrapage: "Rattrapage",
+};
+
+export function formatProductUsageMode(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+  return PRODUCT_USAGE_MODE_LABELS[normalized] || formatStateLabel(value);
+}
+
+export function formatProductAnnualLimit(value) {
+  const number = asNumber(value);
+  if (number === null || number <= 0) {
+    return null;
+  }
+  const limit = Math.max(1, Math.floor(number));
+  return `${limit}/an`;
+}
+
+export function formatTemperatureRangeConstraint(constraint) {
+  if (!constraint || typeof constraint !== "object") {
+    return null;
+  }
+  const value = constraint.value && typeof constraint.value === "object" ? constraint.value : {};
+  const current = asNumber(value.current ?? value.temperature ?? value.current_temperature ?? value.temperature_current);
+  const min = asNumber(value.min ?? value.temperature_min);
+  const max = asNumber(value.max ?? value.temperature_max);
+  const currentLabel = current === null ? null : `${formatNumber(current, 1)} °C`;
+  let expectedLabel = null;
+  if (min !== null && max !== null) {
+    expectedLabel = `${formatNumber(min, 1)} à ${formatNumber(max, 1)} °C`;
+  } else if (min !== null) {
+    expectedLabel = `au moins ${formatNumber(min, 1)} °C`;
+  } else if (max !== null) {
+    expectedLabel = `au plus ${formatNumber(max, 1)} °C`;
+  }
+  const tone = Boolean(constraint.blocking)
+    ? "danger"
+    : Boolean(constraint.met)
+      ? "success"
+      : "warning";
+  const icon = Boolean(constraint.blocking)
+    ? "mdi:thermometer-alert"
+    : Boolean(constraint.met)
+      ? "mdi:thermometer-check"
+      : "mdi:thermometer";
+  const title = Boolean(constraint.blocking)
+    ? "Température bloquante"
+    : Boolean(constraint.met)
+      ? "Température compatible"
+      : "Température hors plage";
+  const detailParts = [];
+  if (currentLabel) {
+    detailParts.push(`Actuelle: ${currentLabel}`);
+  }
+  if (expectedLabel) {
+    detailParts.push(`Attendu: ${expectedLabel}`);
+  }
+  const detail = detailParts.length ? detailParts.join(" · ") : "Température non disponible";
+  const hint = String(constraint.hint || "").trim() || null;
+  return {
+    code: String(constraint.code || "").trim() || null,
+    title,
+    tone,
+    icon,
+    detail,
+    hint,
+    current,
+    min,
+    max,
+    met: Boolean(constraint.met),
+    blocking: Boolean(constraint.blocking),
+  };
+}
+
 export function formatWeatherConditionLabel(value) {
   const normalized = String(value ?? "").trim().toLowerCase();
   if (!normalized) {

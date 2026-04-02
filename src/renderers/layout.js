@@ -17,6 +17,7 @@ import {
   humanDateTimeText,
   isEmpty,
   isUnavailableState,
+  formatTemperatureRangeConstraint,
   phaseTone,
 } from "../utils/formatters.js";
 import { renderIconBox, renderStatusPill } from "./primitives.js";
@@ -142,6 +143,12 @@ export function renderProductSummarySection(card) {
   if (selection.selectedProductMonthsLabel) {
     selectionDetailsParts.push(`Période: ${selection.selectedProductMonthsLabel}`);
   }
+  if (selection.usageModeLabel) {
+    selectionDetailsParts.push(`Mode: ${selection.usageModeLabel}`);
+  }
+  if (selection.maxApplicationsPerYearLabel) {
+    selectionDetailsParts.push(`Max/an: ${selection.maxApplicationsPerYearLabel}`);
+  }
   const selectionDetails = selectionDetailsParts.join(" · ") || selection.summary || "Sélection active";
   const selectionValue = selection.selectedProductName || (catalogue.hasProducts ? "Sélection à faire" : "Aucun produit");
   const catalogueDetails =
@@ -231,8 +238,13 @@ export function renderProductsTab(card) {
         ? "Aucun produit sélectionné"
         : "Aucun produit enregistré"
     : emptyStateMessage;
+  const productsHintParts = [
+    selection.selectedProductMonthsLabel ? `Période: ${selection.selectedProductMonthsLabel}` : "",
+    selection.usageModeLabel ? `Mode: ${selection.usageModeLabel}` : "",
+    selection.maxApplicationsPerYearLabel ? `Max/an: ${selection.maxApplicationsPerYearLabel}` : "",
+  ].filter(Boolean);
   const productsHint = hasProductData
-    ? `${selection.summary || "Le produit actif et le catalogue local servent à déclarer les interventions."}${selection.selectedProductMonthsLabel ? ` · Période: ${selection.selectedProductMonthsLabel}` : ""}`
+    ? `${selection.summary || "Le produit actif et le catalogue local servent à déclarer les interventions."}${productsHintParts.length ? ` · ${productsHintParts.join(" · ")}` : ""}`
     : emptyStateMessage;
 
   return `
@@ -308,6 +320,10 @@ export function renderInterventionTab(card) {
     : hasRecommendedProduct
       ? ui.declarationHint || `Le bouton se débloque dès que ${product.name} est choisi.`
       : ui.declarationHint || "Le bouton se débloque dès qu’un produit est prêt.";
+  const temperatureConstraint = (Array.isArray(recommendation.constraints)
+    ? recommendation.constraints.find((constraint) => constraint?.code === "temperature_range")
+    : null);
+  const temperatureConstraintState = formatTemperatureRangeConstraint(temperatureConstraint);
 
   return `
       <section class="tab-panel gi-panel tab-panel--intervention">
@@ -318,6 +334,28 @@ export function renderInterventionTab(card) {
           </div>
           <div class="tab-panel__hero-next">${escapeHtml(ui.summary || recommendation.summary || "Intervention recommandée")}</div>
           <div class="tab-panel__hero-hint">${escapeHtml(ui.hint || recommendation.hint || "Le moteur de décision a préparé la prochaine intervention.")}</div>
+          ${
+            temperatureConstraintState
+              ? `
+                <div class="tab-panel__temperature-constraint tab-panel__temperature-constraint--${temperatureConstraintState.tone}">
+                  ${renderStatusPill(
+                    temperatureConstraintState.title,
+                    temperatureConstraintState.tone,
+                    temperatureConstraintState.icon,
+                    `tab-panel__status tab-panel__status--${temperatureConstraintState.tone}`,
+                  )}
+                  <div class="tab-panel__temperature-copy">
+                    <div class="tab-panel__temperature-detail">${escapeHtml(temperatureConstraintState.detail)}</div>
+                    ${
+                      temperatureConstraintState.hint
+                        ? `<div class="tab-panel__temperature-hint">${escapeHtml(temperatureConstraintState.hint)}</div>`
+                        : ""
+                    }
+                  </div>
+                </div>
+              `
+              : ""
+          }
         </div>
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-workflow">

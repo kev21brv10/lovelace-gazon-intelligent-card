@@ -5341,6 +5341,7 @@ function renderProductSummarySection(card) {
       : "Aucun produit enregistré";
   const applicationState = application && !isUnavailableState(application.state) ? formatStatusLabel(application.state) : "Aucune application";
   const applicationWhen = String(application?.attributes?.last_application_when || "").trim()
+    || (application?.attributes?.date_action ? humanDateTimeText(application.attributes.date_action) : "")
     || (application?.attributes?.declared_at ? humanDateTimeText(application.attributes.declared_at) : "");
   const applicationSecondaryParts = [];
   if (applicationWhen) {

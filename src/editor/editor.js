@@ -176,10 +176,6 @@ ${EDITOR_STYLES}
           </div>
           <div class="row">
             <label class="field">
-              <span>Hauteur de carte (px)</span>
-              <input data-config-key="card_height" type="number" min="0" step="1" value="${escapeHtml(this._config.card_height || "")}" placeholder="auto" />
-            </label>
-            <label class="field">
               <span>Taille des icônes (px)</span>
               <input data-config-key="icon_size" type="number" min="16" step="1" value="${escapeHtml(this._config.icon_size ?? 24)}" />
             </label>

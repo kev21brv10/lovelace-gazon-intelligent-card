@@ -1,6 +1,6 @@
 export const CARD_TYPE = "gazon-intelligent-card";
 export const CARD_NAME = "Gazon Intelligent Card";
-export const CARD_VERSION = "0.1.38";
+export const CARD_VERSION = "0.1.39";
 
 export const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -12,7 +12,6 @@ export const DEFAULT_CONFIG = {
   show_advanced_details: false,
   theme_mode: "auto",
   accent_color: "",
-  card_height: "",
   icon_size: 24,
   border_radius: 24,
   background_style: "solid",

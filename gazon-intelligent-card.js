@@ -318,6 +318,7 @@ const CARD_STYLES = String.raw`
         .tab-panel__hero-next,
         .tab-panel__hero-hint,
         .tab-panel__block-hint,
+        .tab-panel__section-hint,
         .tab-panel__section-meta,
         .tab-panel__section-title,
         .tab-panel__eyebrow,
@@ -329,6 +330,7 @@ const CARD_STYLES = String.raw`
         .tab-panel__hero-next,
         .tab-panel__hero-hint,
         .tab-panel__block-hint,
+        .tab-panel__section-hint,
         .tab-panel__header-hint,
         .tab-panel__stat-secondary,
         .tab-panel__empty {
@@ -505,12 +507,73 @@ const CARD_STYLES = String.raw`
           height: var(--gi-action-icon-glyph-size);
         }
 
+        .gi-action--danger {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: flex-start;
+          gap: var(--gi-action-gap);
+          width: var(--gi-action-width);
+          min-height: var(--gi-action-min-height);
+          padding-inline: var(--gi-action-padding-inline) var(--gi-action-padding-inline-end);
+          padding-block: var(--gi-action-padding-block);
+          border: 1px solid color-mix(in srgb, var(--gazon-danger-color, #f15f69) 54%, var(--gi-surface-border-strong));
+          border-radius: 26px;
+          cursor: pointer;
+          color: white;
+          font: inherit;
+          font-weight: 900;
+          font-size: var(--gi-font-lg);
+          letter-spacing: 0.01em;
+          background:
+            linear-gradient(135deg, color-mix(in srgb, var(--gazon-danger-color, #f15f69) 96%, white) 0%, color-mix(in srgb, var(--gazon-danger-color, #c62828) 84%, black) 100%);
+          box-shadow:
+            0 16px 30px rgba(0, 0, 0, 0.18),
+            0 0 0 1px color-mix(in srgb, var(--gazon-danger-color, #f15f69) 18%, transparent),
+            0 0 24px color-mix(in srgb, var(--gazon-danger-color, #f15f69) 14%, transparent);
+          text-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
+        }
+
+        .gi-action--danger::after {
+          content: "›";
+          margin-left: auto;
+          font-size: var(--gi-font-2xl);
+          line-height: 1;
+          opacity: 0.94;
+          flex: none;
+        }
+
+        .gi-action--danger .gi-icon {
+          width: var(--gi-action-icon-size);
+          height: var(--gi-action-icon-size);
+          border-radius: 999px;
+          background: var(--gi-action-icon-bg);
+        }
+
+        .gi-action--danger .gi-icon ha-icon {
+          width: var(--gi-action-icon-glyph-size);
+          height: var(--gi-action-icon-glyph-size);
+        }
+
+        .gi-action--danger:disabled {
+          cursor: not-allowed;
+          opacity: 0.62;
+          filter: grayscale(0.2);
+          box-shadow: none;
+        }
+
         @media (hover: hover) {
           .gi-action--primary:hover {
               border-color: color-mix(in srgb, var(--gazon-card-accent) 52%, var(--divider-color));
             box-shadow:
               0 18px 34px rgba(0, 0, 0, 0.22),
               0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
+          }
+          .gi-action--danger:hover:not(:disabled) {
+            border-color: color-mix(in srgb, var(--gazon-danger-color, #f15f69) 60%, var(--divider-color));
+            box-shadow:
+              0 18px 34px rgba(0, 0, 0, 0.22),
+              0 0 0 1px color-mix(in srgb, var(--gazon-danger-color, #f15f69) 18%, transparent);
           }
         }
 
@@ -959,7 +1022,6 @@ const CARD_STYLES = String.raw`
           width: 100%;
           max-width: 100%;
           min-width: 0;
-          min-height: var(--gazon-card-height);
           border-radius: var(--gazon-border-radius);
           color: var(--primary-text-color);
           background: var(--gi-theme-base, var(--secondary-background-color));
@@ -1008,7 +1070,6 @@ const CARD_STYLES = String.raw`
           content: "";
           position: absolute;
           inset: auto 0 0 0;
-          height: 140px;
           pointer-events: none;
           background: transparent;
           opacity: 0;
@@ -1688,7 +1749,6 @@ const CARD_STYLES = String.raw`
           content: "";
           position: absolute;
           inset: auto 0 0 0;
-          height: 140px;
           pointer-events: none;
           background: linear-gradient(180deg, transparent 0%, transparent 100%);
           opacity: 0;
@@ -1719,6 +1779,7 @@ const CARD_STYLES = String.raw`
         .card--theme-light .tab-panel__hero-next,
         .card--theme-light .tab-panel__hero-hint,
         .card--theme-light .tab-panel__block-hint,
+        .card--theme-light .tab-panel__section-hint,
         .card--theme-light .tab-panel__section-meta,
         .card--theme-light .tab-panel__section-title,
         .card--theme-light .tab-panel__eyebrow,
@@ -1753,6 +1814,7 @@ const CARD_STYLES = String.raw`
         .card--theme-dark .tab-panel__hero-next,
         .card--theme-dark .tab-panel__hero-hint,
         .card--theme-dark .tab-panel__block-hint,
+        .card--theme-dark .tab-panel__section-hint,
         .card--theme-dark .tab-panel__section-meta,
         .card--theme-dark .tab-panel__section-title,
         .card--theme-dark .tab-panel__eyebrow,
@@ -2036,7 +2098,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.38";
+const CARD_VERSION = "0.1.39";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -2048,7 +2110,6 @@ const DEFAULT_CONFIG = {
   show_advanced_details: false,
   theme_mode: "auto",
   accent_color: "",
-  card_height: "",
   icon_size: 24,
   border_radius: 24,
   background_style: "solid",
@@ -2625,10 +2686,7 @@ function mergeConfig(base, update) {
 
 function normalizeConfig(config) {
   const next = { ...config };
-  if (next.show_advanced_details === undefined && next.show_legacy_details !== undefined) {
-    next.show_advanced_details = Boolean(next.show_legacy_details);
-  }
-  delete next.show_legacy_details;
+  delete next.card_height;
   return next;
 }
 
@@ -2849,25 +2907,29 @@ class GazonIntelligentCard extends HTMLElement {
 
   getCardSize() {
     if (!this._config) {
-      return 5;
+      return 6;
     }
     if (this._isMinimalMode()) {
       return this._config.show_header ? 4 : 3;
     }
-    return this._config.compact ? 6 : 7;
+    let size = this._config.compact ? 7 : 8;
+    if (!this._config.show_header) {
+      size -= 1;
+    }
+    if (this._config.show_advanced_details) {
+      size += 3;
+    }
+    return Math.max(4, size);
   }
 
   getGridOptions() {
-    const minimal = this._isMinimalMode();
-    const compact = Boolean(this._config?.compact);
-    const advanced = Boolean(this._config?.show_advanced_details);
+    const size = this.getCardSize();
+    const rows = Math.max(3, Math.ceil((size * 50 + 8) / 64));
     return {
-      rows: minimal ? 4 : compact ? 6 : 7,
+      rows,
       columns: 12,
-      min_rows: minimal ? 3 : compact ? 5 : 6,
-      min_columns: 12,
-      max_rows: minimal ? 4 : compact ? 7 : advanced ? 9 : 8,
-      max_columns: 12,
+      min_rows: rows,
+      min_columns: 6,
     };
   }
 
@@ -2901,6 +2963,15 @@ class GazonIntelligentCard extends HTMLElement {
 
   _entityId(entityKey) {
     return isEmpty(this._config?.[entityKey]) ? null : this._config[entityKey];
+  }
+
+  _serviceTargetEntityId() {
+    return (
+      this._entityId("entity_derniere_application") ||
+      this._entityId("entity_produit_intervention") ||
+      this._entityId("entity_catalogue_produits") ||
+      null
+    );
   }
 
   _entityState(entityKey, fallback = "Non disponible") {
@@ -3200,6 +3271,39 @@ class GazonIntelligentCard extends HTMLElement {
     };
   }
 
+  _lastApplicationState() {
+    const entity = this._applicationEntity();
+    const rawState = String(entity?.state || "").trim();
+    const normalizedState = rawState.toLowerCase();
+    const hasApplication =
+      Boolean(entity)
+      && !isUnavailableState(rawState)
+      && !["aucune application", "aucune application détectée"].includes(normalizedState);
+    const attrs = entity?.attributes || {};
+    const summary = String(attrs.summary || "").trim();
+    const when = String(attrs.last_application_when || "").trim() || (attrs.declared_at ? humanDateTimeText(attrs.declared_at) : "");
+    const detailParts = [];
+    if (when) {
+      detailParts.push(when);
+    }
+    if (attrs.application_type) {
+      detailParts.push(`Type: ${formatStatusLabel(attrs.application_type)}`);
+    }
+    if (attrs.application_irrigation_mode) {
+      detailParts.push(`Mode: ${formatStatusLabel(attrs.application_irrigation_mode)}`);
+    }
+    return {
+      entity,
+      hasApplication,
+      label: hasApplication ? rawState : "Aucune application",
+      summary: summary || (hasApplication ? "Dernière application enregistrée" : "Aucune application enregistrée"),
+      detail: detailParts.join(" · "),
+      productId: String(attrs.produit_id || "").trim() || null,
+      productName: String(attrs.produit || attrs.libelle || "").trim() || null,
+      when,
+    };
+  }
+
   _objectiveEntity() {
     return this._entity("entity_objectif_arrosage");
   }
@@ -3490,7 +3594,7 @@ class GazonIntelligentCard extends HTMLElement {
     return pathname.includes("/config/lovelace");
   }
 
-  _applyHostVariables({ accent, activeTone, sectionAccent, borderRadius, iconSize, height }) {
+  _applyHostVariables({ accent, activeTone, sectionAccent, borderRadius, iconSize }) {
     if (!this.style) {
       return;
     }
@@ -3512,7 +3616,6 @@ class GazonIntelligentCard extends HTMLElement {
       "--gazon-critical-color": STATUS_COLORS.critical,
       "--gazon-border-radius": borderRadius,
       "--gazon-icon-size": iconSize,
-      "--gazon-card-height": height || "auto",
       "--gazon-card-gap": this._config?.compact ? "10px" : "16px",
       "--gazon-card-padding": this._config?.compact ? "12px" : "18px",
     };
@@ -3633,7 +3736,6 @@ class GazonIntelligentCard extends HTMLElement {
         show_advanced_details: Boolean(this._config.show_advanced_details),
         theme_mode: this._config.theme_mode,
         accent_color: this._config.accent_color,
-        card_height: this._config.card_height,
         icon_size: this._config.icon_size,
         border_radius: this._config.border_radius,
         background_style: this._config.background_style,
@@ -4767,8 +4869,6 @@ class GazonIntelligentCard extends HTMLElement {
       const backgroundStyle = this._config.background_style || "solid";
       const themeMode = this._config.theme_mode || "auto";
       const resolvedThemeMode = themeMode === "auto" ? (this._hass?.themes?.darkMode ? "dark" : "light") : themeMode;
-      const numericHeight = asNumber(this._config.card_height);
-      const height = numericHeight && numericHeight > 0 ? `${numericHeight}px` : "";
       const borderRadius = `${this._config.border_radius ?? 24}px`;
       const iconSize = `${this._config.icon_size ?? 24}px`;
       const actionCritical = this._actionTone() === "critical";
@@ -4780,7 +4880,6 @@ class GazonIntelligentCard extends HTMLElement {
         sectionAccent,
         borderRadius,
         iconSize,
-        height,
       });
 
       const rootClass = [
@@ -4885,6 +4984,13 @@ ${CARD_STYLES}
       this._triggerSelectedProductIntervention();
       return;
     }
+    const removeLastApplicationTarget = event.target.closest("[data-gazon-action='remove-last-application']");
+    if (removeLastApplicationTarget) {
+      event.preventDefault();
+      event.stopPropagation();
+      this._triggerRemoveLastApplication();
+      return;
+    }
     const tabTarget = event.target.closest("[data-tab]");
     if (tabTarget) {
       event.preventDefault();
@@ -4964,13 +5070,62 @@ ${CARD_STYLES}
     if (!service) {
       return;
     }
-    this._hass.callService(service.domain, service.service, {
+    const payload = {
       intervention,
       date_action: this._todayIsoDate(),
       produit_id: productId,
       produit: productName,
       note: "Déclaration rapide depuis la carte",
-    });
+    };
+    const targetEntityId = this._serviceTargetEntityId();
+    if (targetEntityId) {
+      payload.entity_id = targetEntityId;
+    }
+    this._hass.callService(service.domain, service.service, payload);
+  }
+
+  _triggerRemoveLastApplication() {
+    if (!this._hass) {
+      return;
+    }
+    const lastApplication = this._lastApplicationState();
+    if (!lastApplication.hasApplication) {
+      return;
+    }
+    const confirmationLabel = lastApplication.productName || lastApplication.label || "la dernière application";
+    const confirmationDetails = [];
+    if (lastApplication.when) {
+      confirmationDetails.push(`Date: ${lastApplication.when}`);
+    }
+    if (lastApplication.productId) {
+      confirmationDetails.push(`Produit: ${lastApplication.productName || lastApplication.productId}`);
+    }
+    if (lastApplication.summary) {
+      confirmationDetails.push(lastApplication.summary);
+    }
+    if (lastApplication.detail) {
+      confirmationDetails.push(lastApplication.detail);
+    }
+    const confirmationMessage = [
+      `Supprimer ${confirmationLabel} ? Cette action supprimera la dernière application enregistrée et ne peut pas être annulée.`,
+      ...confirmationDetails.map((line) => `\n${line}`),
+    ].join("");
+    const confirmed = window.confirm(
+      confirmationMessage,
+    );
+    if (!confirmed) {
+      return;
+    }
+    const service = splitServiceName("gazon_intelligent.remove_last_application");
+    if (!service) {
+      return;
+    }
+    const payload = {};
+    const targetEntityId = this._serviceTargetEntityId();
+    if (targetEntityId) {
+      payload.entity_id = targetEntityId;
+    }
+    this._hass.callService(service.domain, service.service, payload);
   }
 
   _performAction(action, fallbackEntityId) {
@@ -5305,6 +5460,7 @@ function renderProductsTab(card) {
 
 function renderInterventionTab(card) {
   const quickAction = card._selectedProductInterventionState();
+  const lastApplication = card._lastApplicationState();
   const hasProduct = Boolean(quickAction.record && !quickAction.disabled);
   const catalogue = card._catalogueState();
   const productSummary = hasProduct ? quickAction.label : "Aucun produit sélectionné";
@@ -5313,6 +5469,11 @@ function renderInterventionTab(card) {
     : catalogue.hasProducts
       ? "Choisis d'abord un produit dans l'onglet Produits."
       : "Aucun produit enregistré.";
+  const hasApplication = Boolean(lastApplication.hasApplication);
+  const lastApplicationSummary = hasApplication ? lastApplication.summary : "Aucune application enregistrée.";
+  const lastApplicationHint = hasApplication
+    ? lastApplication.detail || "Dernière application détectée."
+    : "Le bouton restera désactivé tant qu'aucune application n'est présente dans l'historique.";
 
   return `
       <section class="tab-panel gi-panel tab-panel--intervention">
@@ -5347,6 +5508,25 @@ function renderInterventionTab(card) {
                 : "Sélectionne un produit dans l'onglet Produits pour activer la déclaration.",
             )}
           </div>
+        </section>
+
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Dernière application</div>
+            <div class="tab-panel__section-meta">${escapeHtml(hasApplication ? "Peut être supprimée" : "Aucune action possible")}</div>
+          </div>
+          <div class="tab-panel__section-summary">${escapeHtml(lastApplicationSummary)}</div>
+          <div class="tab-panel__section-hint">${escapeHtml(lastApplicationHint)}</div>
+          <button
+            type="button"
+            class="gi-action gi-action--danger tab-panel__cta"
+            data-gazon-action="remove-last-application"
+            ${hasApplication ? "" : "disabled"}
+            aria-label="Supprimer la dernière application"
+          >
+            ${renderIconBox("mdi:delete-outline", "sm")}
+            <span>Supprimer la dernière application</span>
+          </button>
         </section>
       </section>
     `;
@@ -5941,10 +6121,6 @@ ${EDITOR_STYLES}
             ${this._renderCheckbox("use_gradient", "Utiliser un dégradé")}
           </div>
           <div class="row">
-            <label class="field">
-              <span>Hauteur de carte (px)</span>
-              <input data-config-key="card_height" type="number" min="0" step="1" value="${escapeHtml(this._config.card_height || "")}" placeholder="auto" />
-            </label>
             <label class="field">
               <span>Taille des icônes (px)</span>
               <input data-config-key="icon_size" type="number" min="16" step="1" value="${escapeHtml(this._config.icon_size ?? 24)}" />

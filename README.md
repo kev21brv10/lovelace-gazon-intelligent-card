@@ -91,6 +91,7 @@ resources:
 - thème clair / sombre
 - dashboard classique et sections
 - installations HACS et manuelles
+- la carte fournit ses tailles via `getCardSize()` et `getGridOptions()` sans hauteur fixe forcée, avec une largeur par défaut de 12 colonnes et une largeur minimale de 6 colonnes en sections
 
 ---
 
@@ -136,6 +137,41 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 show_advanced_details: false
 ```
 
+### Dépendances entités
+
+- **Obligatoire**
+  - `type: custom:gazon-intelligent-card`
+- **Optionnelles pour le rendu**
+  - toutes les entités `sensor.*`, `binary_sensor.*`, `select.*`, `switch.*` et `number.*` déclarées par la carte
+- **Recommandées pour une carte utile**
+  - `entity_fenetre_optimale`
+  - `entity_plan_arrosage`
+  - `entity_dernier_arrosage`
+  - `entity_derniere_application`
+  - `entity_catalogue_produits`
+  - `entity_produit_intervention`
+  - `entity_mode`
+  - `entity_switch_arrosage_automatique`
+  - `entity_arrosage_recommande`
+  - `entity_objectif_arrosage`
+  - `entity_type_arrosage`
+  - `entity_tonte`
+  - `entity_hauteur`
+  - `entity_debit_zone_1` à `entity_debit_zone_5`
+  - `entity_hauteur_min_tondeuse`
+  - `entity_hauteur_max_tondeuse`
+
+Même si une entité est absente ou renvoie `unknown` / `unavailable`, la carte garde la structure des onglets et affiche un fallback propre.
+
+### Exemple minimal
+
+```yaml
+type: custom:gazon-intelligent-card
+title: Gazon Intelligent
+```
+
+Cette version affiche la structure complète avec des fallbacks quand les entités ne sont pas encore branchées.
+
 ---
 
 ## 🧱 Exemple YAML complet
@@ -151,7 +187,6 @@ minimal_mode: false
 show_advanced_details: false
 theme_mode: auto
 accent_color: ""
-card_height: ""
 icon_size: 24
 border_radius: 24
 background_style: solid
@@ -225,7 +260,6 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 - `tap_action`
 - `hold_action`
 - `double_tap_action`
-- `card_height`
 - `icon_size`
 - `border_radius`
 - `background_style`

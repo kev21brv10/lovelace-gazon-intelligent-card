@@ -1,4 +1,4 @@
-import { SECTION_ACCENTS, STATUS_COLORS, STATUS_LABELS, WEATHER_LABELS } from "../constants.js";
+import { STATUS_COLORS, STATUS_LABELS, WEATHER_LABELS } from "../constants.js";
 
 export function isEmpty(value) {
   return value === undefined || value === null || String(value).trim() === "";
@@ -268,12 +268,7 @@ export function mergeConfig(base, update) {
 }
 
 export function normalizeConfig(config) {
-  const next = { ...config };
-  if (next.show_advanced_details === undefined && next.show_legacy_details !== undefined) {
-    next.show_advanced_details = Boolean(next.show_legacy_details);
-  }
-  delete next.show_legacy_details;
-  return next;
+  return { ...config };
 }
 
 export function domainMatches(entity, acceptedDomains) {

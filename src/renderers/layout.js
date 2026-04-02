@@ -269,6 +269,7 @@ export function renderProductsTab(card) {
 
 export function renderInterventionTab(card) {
   const quickAction = card._selectedProductInterventionState();
+  const lastApplication = card._lastApplicationState();
   const hasProduct = Boolean(quickAction.record && !quickAction.disabled);
   const catalogue = card._catalogueState();
   const productSummary = hasProduct ? quickAction.label : "Aucun produit sélectionné";
@@ -277,6 +278,11 @@ export function renderInterventionTab(card) {
     : catalogue.hasProducts
       ? "Choisis d'abord un produit dans l'onglet Produits."
       : "Aucun produit enregistré.";
+  const hasApplication = Boolean(lastApplication.hasApplication);
+  const lastApplicationSummary = hasApplication ? lastApplication.summary : "Aucune application enregistrée.";
+  const lastApplicationHint = hasApplication
+    ? lastApplication.detail || "Dernière application détectée."
+    : "Le bouton restera désactivé tant qu'aucune application n'est présente dans l'historique.";
 
   return `
       <section class="tab-panel gi-panel tab-panel--intervention">
@@ -311,6 +317,25 @@ export function renderInterventionTab(card) {
                 : "Sélectionne un produit dans l'onglet Produits pour activer la déclaration.",
             )}
           </div>
+        </section>
+
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Dernière application</div>
+            <div class="tab-panel__section-meta">${escapeHtml(hasApplication ? "Peut être supprimée" : "Aucune action possible")}</div>
+          </div>
+          <div class="tab-panel__section-summary">${escapeHtml(lastApplicationSummary)}</div>
+          <div class="tab-panel__section-hint">${escapeHtml(lastApplicationHint)}</div>
+          <button
+            type="button"
+            class="gi-action gi-action--danger tab-panel__cta"
+            data-gazon-action="remove-last-application"
+            ${hasApplication ? "" : "disabled"}
+            aria-label="Supprimer la dernière application"
+          >
+            ${renderIconBox("mdi:delete-outline", "sm")}
+            <span>Supprimer la dernière application</span>
+          </button>
         </section>
       </section>
     `;

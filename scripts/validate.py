@@ -107,4 +107,12 @@ for marker in ("customElements.define", "getConfigForm", "window.customCards"):
     if marker not in main_src:
         raise SystemExit(f"Missing expected marker: {marker}")
 
+for marker in (
+    "function formatProductUsageMode",
+    "function formatProductAnnualLimit",
+    "function formatTemperatureRangeConstraint",
+):
+    if marker not in root_src:
+        raise SystemExit(f"Missing expected helper in bundled file: {marker}")
+
 print("Validation OK")

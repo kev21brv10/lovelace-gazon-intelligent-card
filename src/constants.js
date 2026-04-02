@@ -80,7 +80,7 @@ export const ENTITY_KEYS = [
   { key: "entity_avoid", label: "Action à éviter", icon: "mdi:alert-circle-outline", domain: ["sensor"] },
   { key: "entity_mode", label: "Mode du gazon", icon: "mdi:grass", domain: ["select"] },
   { key: "entity_switch_arrosage_automatique", label: "Irrigation automatique", icon: "mdi:switch", domain: ["switch"] },
-  { key: "entity_arrosage_apres_application_autorise", label: "Arrosage post-application", icon: "mdi:water-check", domain: ["binary_sensor"] },
+  { key: "entity_arrosage_apres_application_autorise", label: "Post-application", icon: "mdi:water-check", domain: ["binary_sensor"] },
   { key: "entity_tonte_autorisee", label: "Tonte autorisée", icon: "mdi:content-cut", domain: ["binary_sensor"] },
   { key: "entity_phase", label: "Phase dominante", icon: "mdi:grass", domain: ["sensor"] },
   { key: "entity_sous_phase", label: "Sous-phase", icon: "mdi:sprout", domain: ["sensor"] },

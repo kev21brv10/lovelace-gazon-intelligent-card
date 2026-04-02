@@ -17,7 +17,6 @@ import {
   humanDateTimeText,
   isEmpty,
   isUnavailableState,
-  formatTemperatureRangeConstraint,
   phaseTone,
 } from "../utils/formatters.js";
 import { renderIconBox, renderStatusPill } from "./primitives.js";
@@ -66,7 +65,63 @@ export function renderSectionNav(card) {
           `;
         }).join("")}
       </nav>
-    `;
+  `;
+}
+
+function formatTemperatureRangeConstraint(constraint) {
+  if (!constraint || typeof constraint !== "object") {
+    return null;
+  }
+  const value = constraint.value && typeof constraint.value === "object" ? constraint.value : {};
+  const current = asNumber(value.current ?? value.temperature ?? value.current_temperature ?? value.temperature_current);
+  const min = asNumber(value.min ?? value.temperature_min);
+  const max = asNumber(value.max ?? value.temperature_max);
+  const currentLabel = current === null ? null : `${formatNumber(current, 1)} °C`;
+  let expectedLabel = null;
+  if (min !== null && max !== null) {
+    expectedLabel = `${formatNumber(min, 1)} à ${formatNumber(max, 1)} °C`;
+  } else if (min !== null) {
+    expectedLabel = `au moins ${formatNumber(min, 1)} °C`;
+  } else if (max !== null) {
+    expectedLabel = `au plus ${formatNumber(max, 1)} °C`;
+  }
+  const tone = Boolean(constraint.blocking)
+    ? "danger"
+    : Boolean(constraint.met)
+      ? "success"
+      : "warning";
+  const icon = Boolean(constraint.blocking)
+    ? "mdi:thermometer-alert"
+    : Boolean(constraint.met)
+      ? "mdi:thermometer-check"
+      : "mdi:thermometer";
+  const title = Boolean(constraint.blocking)
+    ? "Température bloquante"
+    : Boolean(constraint.met)
+      ? "Température compatible"
+      : "Température hors plage";
+  const detailParts = [];
+  if (currentLabel) {
+    detailParts.push(`Actuelle: ${currentLabel}`);
+  }
+  if (expectedLabel) {
+    detailParts.push(`Attendu: ${expectedLabel}`);
+  }
+  const detail = detailParts.length ? detailParts.join(" · ") : "Température non disponible";
+  const hint = String(constraint.hint || "").trim() || null;
+  return {
+    code: String(constraint.code || "").trim() || null,
+    title,
+    tone,
+    icon,
+    detail,
+    hint,
+    current,
+    min,
+    max,
+    met: Boolean(constraint.met),
+    blocking: Boolean(constraint.blocking),
+  };
 }
 
 export function renderWateringProgressSection(card, progressState) {
@@ -80,7 +135,7 @@ export function renderWateringProgressSection(card, progressState) {
       progressState.remainingSeconds !== undefined && progressState.remainingSeconds !== null
         ? formatDurationHuman(remainingSeconds / 60.0)
         : "0 min";
-    const summary = String(progressState.summary || "Arrosage en cours").trim();
+    const summary = String(progressState.summary || "Irrigation en cours").trim();
     const detail = String(progressState.detail || "").trim();
     const metaParts = [];
     if (progressState.startedAtLabel) {
@@ -95,7 +150,7 @@ export function renderWateringProgressSection(card, progressState) {
     return `
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--watering-progress">
           <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Arrosage en cours</div>
+            <div class="tab-panel__eyebrow">Irrigation en cours</div>
             <div class="tab-panel__section-meta">${escapeHtml(`${Math.round(percent)} %`)}</div>
           </div>
           <div class="tab-panel__section-summary">${escapeHtml(summary)}</div>
@@ -112,7 +167,7 @@ export function renderWateringProgressSection(card, progressState) {
     return `
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--watering-progress">
           <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Arrosage en cours</div>
+            <div class="tab-panel__eyebrow">Irrigation en cours</div>
             <div class="tab-panel__section-meta">—</div>
           </div>
           <div class="tab-panel__section-summary">Suivi de progression indisponible</div>
@@ -566,11 +621,11 @@ export function renderWateringTab(card) {
   const isBlocked = windowState.isBlocked;
   const isAwaiting = windowState.isAwaiting;
   const noActionText = windowState.isNoActionRequired ? "Aucune irrigation nécessaire" : "";
-  const noActionHint = windowState.isNoActionRequired ? windowState.summary || "Le plan actuel ne demande pas d'arrosage." : "";
+  const noActionHint = windowState.isNoActionRequired ? windowState.summary || "Le plan actuel ne demande pas d'irrigation." : "";
   const blockText = isBlocked
-    ? windowState.summary || "Arrosage bloqué"
+    ? windowState.summary || "Irrigation bloquée"
     : isAwaiting
-      ? windowState.summary || "Arrosage prévu"
+      ? windowState.summary || "Irrigation prévue"
       : noActionText;
   const blockHint = isBlocked
     ? windowState.nextAction || ""
@@ -582,7 +637,7 @@ export function renderWateringTab(card) {
   const contextPills = [
     card._renderTabPill("Irrigation recommandée", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
     card._renderTabPill("Post-application", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off"),
-    card._renderTabPill("Type", formatStatusLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
+    card._renderTabPill("Profil d'irrigation", formatStatusLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
     card._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
     card._renderTabPill("Risque gazon", context.risk, computeRisqueTone(context.risk), "mdi:shield-alert-outline"),
     card._renderTabPill(
@@ -603,7 +658,7 @@ export function renderWateringTab(card) {
     card._renderTabPill("Zones", planState.zoneCount ? `${planState.zoneCount}` : "0", planState.zoneCount > 1 ? "accent" : "neutral", "mdi:pipe"),
     card._renderTabPill("Passages", planState.passages ? `${planState.passages}` : "1", planState.fractionation ? "warning" : "neutral", "mdi:cached"),
     card._renderTabPill("Fractionnement", planState.fractionation ? "Oui" : "Non", planState.fractionation ? "warning" : "neutral", "mdi:call-split"),
-    card._renderTabPill("Type", planTypeLabel, card._planTypeTone(planState.planType), "mdi:shape"),
+    card._renderTabPill("Type de plan", planTypeLabel, card._planTypeTone(planState.planType), "mdi:shape"),
     card._renderTabPill("Objectif", objectiveLabel, objective > 0 ? "success" : "neutral", "mdi:water"),
   ];
   const wateringProgress = card._wateringProgressState();

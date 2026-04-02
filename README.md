@@ -8,20 +8,20 @@
 > Une carte Lovelace claire et premium pour lire les décisions de **Gazon Intelligent** en un coup d'œil.
 
 Gazon Intelligent Card affiche dans Home Assistant les décisions métier les plus utiles de ton intégration Gazon Intelligent :
-- navigation par onglets pour séparer clairement arrosage, tonte, gazon, produits et configuration
+- navigation par onglets pour séparer clairement irrigation, tonte, gazon, produits et réglages
 - barre d’onglets horizontale qui se recentre automatiquement quand elle déborde
 - résumé adaptatif qui met en avant les vraies informations utiles selon la situation
-- tuiles du résumé, de la tonte, du gazon, des produits et de la configuration cliquables pour ouvrir le bon `more-info`
+- tuiles de la synthèse, de la tonte, du gazon, des produits et des réglages cliquables pour ouvrir le bon `more-info`
 - zone produit dédiée pour le catalogue local, le produit d’intervention et la dernière application
 - bloc `Intervention` orienté décision avec recommandation automatique, guidage produit et déclaration rapide
-- barre de progression visible quand un arrosage est en cours
-- fenêtre optimale, objectif d'arrosage et type d'arrosage bien lisibles
-- produit courant et catalogue produits lisibles pour guider les interventions
-- bouton unique `Arrosage manuel immédiat` quand un arrosage est possible
-- résumé compact du plan d'arrosage
+- barre de progression visible quand une irrigation est en cours
+- fenêtre optimale, objectif d'irrigation et profil d'irrigation bien lisibles
+- produit courant et référentiel produits lisibles pour guider les interventions
+- bouton unique `Irrigation manuelle immédiate` quand une irrigation est possible
+- résumé compact du plan d'irrigation
 - contexte utile dans les détails: dernier arrosage, application, phase et risque
 - blocage explicite quand aucune action n'est possible
-- pied de carte avec le mode du gazon et l'autorisation d'arrosage
+- pied de carte avec le mode du gazon et l'autorisation d'irrigation
 
 ---
 
@@ -34,13 +34,13 @@ Gazon Intelligent Card affiche dans Home Assistant les décisions métier les pl
 ## ✨ Ce que fait la carte
 
 - affiche une lecture claire et hiérarchisée du moteur Gazon Intelligent
-- met en avant la fenêtre optimale, l'objectif d'arrosage et l'action manuelle unique
+- met en avant la fenêtre optimale, l'objectif d'irrigation et l'action manuelle unique
 - expose le produit d’intervention sélectionné et le catalogue produit du moteur
 - consomme la prochaine intervention recommandée via le `payload` structuré exposé par l’intégration (`schema_version: 3`)
 - lit un contrat stable où les champs racine restent présents, avec `null`, `[]` ou `{}` quand l’information manque
 - sépare la zone produit du reste du résumé pour éviter les doublons visuels
-- affiche la progression d'arrosage en cours dès qu'une session est active
-- sépare les usages par onglets: arrosage, tonte, gazon, produits, configuration et contexte avancé
+- affiche la progression d'irrigation en cours dès qu'une session est active
+- sépare les usages par onglets: irrigation, tonte, gazon, produits, réglages et contexte avancé
 - reste lisible même si certaines entités sont absentes
 - s’adapte au thème clair ou sombre de Home Assistant
 - propose un éditeur visuel simple pour la configuration de base
@@ -279,14 +279,14 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 
 La carte expose un éditeur visuel natif dans Home Assistant pour :
 - la carte elle-même: titre, style, fond, icônes et bouton manuel
-- le résumé et l’arrosage: fenêtre, plan, objectif et dernières actions
+- la synthèse et l’irrigation: fenêtre, plan, objectif et dernières actions
 - la zone produit: catalogue local, produit d’intervention et dernière application
-- le gazon et la tonte: mode, type d’arrosage, phase, risque et hauteur
-- l'onglet Config avec le switch auto, les débits et les hauteurs
+- le gazon et la tonte: mode, profil d’irrigation, phase, risque et hauteur
+- l'onglet Réglages avec le switch auto, les débits et les hauteurs
 - les options visuelles de base
 - l’affichage optionnel des détails avancés et des écrans de diagnostic
 
-Dans la carte elle-même, l’onglet **Config** propose aussi des tuiles cliquables qui ouvrent directement le contrôle Home Assistant des entités associées. C’est le chemin le plus simple pour ajuster un switch, un sélecteur ou un nombre sans quitter la vue.
+Dans la carte elle-même, l’onglet **Réglages** propose aussi des tuiles cliquables qui ouvrent directement le contrôle Home Assistant des entités associées. C’est le chemin le plus simple pour ajuster un switch, un sélecteur ou un nombre sans quitter la vue.
 
 Par défaut, le switch d’autorisation pointe vers `switch.gazon_intelligent_arrosage_automatique_autorise`. Si ton instance expose un identifiant différent, ajuste `entity_switch_arrosage_automatique`.
 

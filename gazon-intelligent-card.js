@@ -2504,8 +2504,8 @@ const TAB_DEFS = [
 
 const ENTITY_KEYS = [
   { key: "entity_fenetre_optimale", label: "Fenêtre optimale", icon: "mdi:clock-outline", domain: ["sensor"] },
-  { key: "entity_plan_arrosage", label: "Plan d'arrosage", icon: "mdi:timer-outline", domain: ["sensor"] },
-  { key: "entity_arrosage_en_cours", label: "Arrosage en cours", icon: "mdi:progress-clock", domain: ["sensor"] },
+  { key: "entity_plan_arrosage", label: "Plan d'irrigation", icon: "mdi:timer-outline", domain: ["sensor"] },
+  { key: "entity_arrosage_en_cours", label: "Irrigation en cours", icon: "mdi:progress-clock", domain: ["sensor"] },
   { key: "entity_dernier_arrosage", label: "Dernier arrosage", icon: "mdi:water-check", domain: ["sensor"] },
   { key: "entity_derniere_application", label: "Dernière application", icon: "mdi:spray-bottle", domain: ["sensor"] },
   { key: "entity_catalogue_produits", label: "Référentiel produits", icon: "mdi:package-variant-closed", domain: ["sensor"] },
@@ -2515,7 +2515,7 @@ const ENTITY_KEYS = [
   { key: "entity_avoid", label: "Action à éviter", icon: "mdi:alert-circle-outline", domain: ["sensor"] },
   { key: "entity_mode", label: "Mode du gazon", icon: "mdi:grass", domain: ["select"] },
   { key: "entity_switch_arrosage_automatique", label: "Irrigation automatique", icon: "mdi:switch", domain: ["switch"] },
-  { key: "entity_arrosage_apres_application_autorise", label: "Arrosage post-application", icon: "mdi:water-check", domain: ["binary_sensor"] },
+  { key: "entity_arrosage_apres_application_autorise", label: "Post-application", icon: "mdi:water-check", domain: ["binary_sensor"] },
   { key: "entity_tonte_autorisee", label: "Tonte autorisée", icon: "mdi:content-cut", domain: ["binary_sensor"] },
   { key: "entity_phase", label: "Phase dominante", icon: "mdi:grass", domain: ["sensor"] },
   { key: "entity_sous_phase", label: "Sous-phase", icon: "mdi:sprout", domain: ["sensor"] },
@@ -2802,21 +2802,10 @@ function formatMm(value) {
     return "—";
   }
   if (number <= 0) {
-    return "Aucun arrosage nécessaire";
+    return "Aucune irrigation nécessaire";
   }
   const formatted = formatNumber(number, 1);
   return `${formatted} mm`;
-}
-
-function formatBoolState(value) {
-  const normalized = String(value ?? "").trim().toLowerCase();
-  if (["on", "true", "yes", "1", "oui"].includes(normalized)) {
-    return "Oui";
-  }
-  if (["off", "false", "no", "0", "non"].includes(normalized)) {
-    return "Non";
-  }
-  return isUnavailableState(value) ? "Non disponible" : String(value);
 }
 
 function formatRecommendationState(value) {
@@ -2854,6 +2843,30 @@ function formatStateLabel(value) {
     return "Non disponible";
   }
   return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
+const PRODUCT_USAGE_MODE_LABELS = {
+  preventif: "Préventif",
+  curatif: "Curatif",
+  entretien: "Entretien",
+  rattrapage: "Rattrapage",
+};
+
+function formatProductUsageMode(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+  return PRODUCT_USAGE_MODE_LABELS[normalized] || formatStateLabel(value);
+}
+
+function formatProductAnnualLimit(value) {
+  const number = asNumber(value);
+  if (number === null || number <= 0) {
+    return null;
+  }
+  const limit = Math.max(1, Math.floor(number));
+  return `${limit}/an`;
 }
 
 const WEATHER_LABELS = {
@@ -3956,7 +3969,7 @@ class GazonIntelligentCard extends HTMLElement {
     const entity = this._windowEntity();
     const attrs = entity?.attributes || {};
     const status = String(attrs.status || "").trim().toLowerCase();
-    const summary = String(attrs.summary || entity?.state || "Arrosage prévu").trim();
+    const summary = String(attrs.summary || entity?.state || "Irrigation prévue").trim();
     const nextAction = String(attrs.next_action || "").trim();
     const nextActionDisplay = String(attrs.next_action_display || "").trim();
     const nextActionDate = String(attrs.next_action_date || "").trim();
@@ -4075,7 +4088,7 @@ class GazonIntelligentCard extends HTMLElement {
       return {
         active: false,
         progressPercent: 0,
-        summary: "Aucun arrosage en cours",
+        summary: "Aucune irrigation en cours",
         detail: "Aucune session active",
       };
     }
@@ -4101,7 +4114,7 @@ class GazonIntelligentCard extends HTMLElement {
     if (totalSeconds > 0) {
       detailParts.push(`Restant ${formatDurationHuman(remainingSeconds / 60.0)}`);
     }
-    const summary = `Arrosage en cours ${formatNumber(progressPercent, 0) || 0}%`;
+    const summary = `Irrigation en cours ${formatNumber(progressPercent, 0) || 0}%`;
     return {
       active: true,
       progressPercent,
@@ -4150,7 +4163,7 @@ class GazonIntelligentCard extends HTMLElement {
     const entity = this._lastWateringEntity();
     if (!entity) {
       return {
-        label: "Aucun arrosage détecté",
+        label: "Aucune irrigation détectée",
         detail: "Historique vide",
         value: null,
       };
@@ -4161,7 +4174,7 @@ class GazonIntelligentCard extends HTMLElement {
     const zoneCount = asNumber(entity.attributes?.zone_count);
     if (source === "none" || rawValue === null || rawValue <= 0) {
       return {
-        label: "Aucun arrosage détecté",
+        label: "Aucune irrigation détectée",
         detail: "Historique vide",
         value: null,
       };
@@ -4749,7 +4762,7 @@ class GazonIntelligentCard extends HTMLElement {
       icon = "mdi:shield-alert-outline";
     } else if (arrosageRecommande === "on") {
       title = "Irrigation recommandée";
-      hint = `${conseil || planState.summary || objectiveLabel}${arrosageApresApplication === "off" ? " · Après application non autorisé" : ""}`;
+      hint = `${conseil || planState.summary || objectiveLabel}${arrosageApresApplication === "off" ? " · Post-application non autorisé" : ""}`;
       tone = "success";
       icon = "mdi:water-check";
     } else if (switchState.tone === "danger") {
@@ -5024,11 +5037,11 @@ class GazonIntelligentCard extends HTMLElement {
     const isBlocked = windowState.isBlocked;
     const isAwaiting = windowState.isAwaiting;
     const noActionText = windowState.isNoActionRequired ? "Aucune irrigation nécessaire" : "";
-    const noActionHint = windowState.isNoActionRequired ? windowState.summary || "Le plan actuel ne demande pas d'arrosage." : "";
+    const noActionHint = windowState.isNoActionRequired ? windowState.summary || "Le plan actuel ne demande pas d'irrigation." : "";
     const blockText = isBlocked
-      ? windowState.summary || "Arrosage bloqué"
+      ? windowState.summary || "Irrigation bloquée"
       : isAwaiting
-        ? windowState.summary || "Arrosage prévu"
+        ? windowState.summary || "Irrigation prévue"
         : noActionText;
     const blockHint = isBlocked
       ? windowState.nextAction || ""
@@ -5040,7 +5053,7 @@ class GazonIntelligentCard extends HTMLElement {
     const contextPills = [
       this._renderTabPill("Irrigation recommandée", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
       this._renderTabPill("Post-application", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off"),
-      this._renderTabPill("Type", formatStateLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
+      this._renderTabPill("Profil d'irrigation", formatStateLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
       this._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
       this._renderTabPill("Risque gazon", context.risk, computeRisqueTone(context.risk), "mdi:shield-alert-outline"),
       this._renderTabPill(
@@ -5061,7 +5074,7 @@ class GazonIntelligentCard extends HTMLElement {
       this._renderTabPill("Zones", planState.zoneCount ? `${planState.zoneCount}` : "0", planState.zoneCount > 1 ? "accent" : "neutral", "mdi:pipe"),
       this._renderTabPill("Passages", planState.passages ? `${planState.passages}` : "1", planState.fractionation ? "warning" : "neutral", "mdi:cached"),
       this._renderTabPill("Fractionnement", planState.fractionation ? "Oui" : "Non", planState.fractionation ? "warning" : "neutral", "mdi:call-split"),
-      this._renderTabPill("Type", planTypeLabel, this._planTypeTone(planState.planType), "mdi:shape"),
+      this._renderTabPill("Type de plan", planTypeLabel, this._planTypeTone(planState.planType), "mdi:shape"),
       this._renderTabPill("Objectif", objectiveLabel, objective > 0 ? "success" : "neutral", "mdi:water"),
     ];
     const wateringProgress = this._wateringProgressState();
@@ -5315,7 +5328,7 @@ class GazonIntelligentCard extends HTMLElement {
           ${this._renderMetric("Objectif", objectiveLabel, objective !== null && objective > 0 ? "success" : "neutral", "mdi:water-percent")}
           ${this._renderMetric("Profil d'irrigation", formatApplicationMode(typeArrosage), isEmpty(typeArrosage) ? "neutral" : "accent", "mdi:sprinkler")}
           ${this._renderMetric("Tonte", tonte, computeTonteTone(tonte), this._heroMetricIcon("entity_tonte", tonte))}
-          ${this._renderMetric("Arrosage", formatRecommendationState(arrosage), arrosage === "on" ? "success" : "neutral", this._heroMetricIcon("entity_arrosage_recommande", arrosage))}
+          ${this._renderMetric("Irrigation", formatRecommendationState(arrosage), arrosage === "on" ? "success" : "neutral", this._heroMetricIcon("entity_arrosage_recommande", arrosage))}
           ${this._renderMetric("Tonte autorisée", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", this._heroMetricIcon("entity_tonte_autorisee", tonteAutorisee))}
           ${this._renderMetric("Post-application", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", this._heroMetricIcon("entity_arrosage_apres_application_autorise", afterApplication))}
           ${this._renderMetric("Hauteur", formatCm(hauteur), this._phaseTone(), this._heroMetricIcon("entity_hauteur", hauteur))}
@@ -5933,7 +5946,63 @@ function renderSectionNav(card) {
           `;
         }).join("")}
       </nav>
-    `;
+  `;
+}
+
+function formatTemperatureRangeConstraint(constraint) {
+  if (!constraint || typeof constraint !== "object") {
+    return null;
+  }
+  const value = constraint.value && typeof constraint.value === "object" ? constraint.value : {};
+  const current = asNumber(value.current ?? value.temperature ?? value.current_temperature ?? value.temperature_current);
+  const min = asNumber(value.min ?? value.temperature_min);
+  const max = asNumber(value.max ?? value.temperature_max);
+  const currentLabel = current === null ? null : `${formatNumber(current, 1)} °C`;
+  let expectedLabel = null;
+  if (min !== null && max !== null) {
+    expectedLabel = `${formatNumber(min, 1)} à ${formatNumber(max, 1)} °C`;
+  } else if (min !== null) {
+    expectedLabel = `au moins ${formatNumber(min, 1)} °C`;
+  } else if (max !== null) {
+    expectedLabel = `au plus ${formatNumber(max, 1)} °C`;
+  }
+  const tone = Boolean(constraint.blocking)
+    ? "danger"
+    : Boolean(constraint.met)
+      ? "success"
+      : "warning";
+  const icon = Boolean(constraint.blocking)
+    ? "mdi:thermometer-alert"
+    : Boolean(constraint.met)
+      ? "mdi:thermometer-check"
+      : "mdi:thermometer";
+  const title = Boolean(constraint.blocking)
+    ? "Température bloquante"
+    : Boolean(constraint.met)
+      ? "Température compatible"
+      : "Température hors plage";
+  const detailParts = [];
+  if (currentLabel) {
+    detailParts.push(`Actuelle: ${currentLabel}`);
+  }
+  if (expectedLabel) {
+    detailParts.push(`Attendu: ${expectedLabel}`);
+  }
+  const detail = detailParts.length ? detailParts.join(" · ") : "Température non disponible";
+  const hint = String(constraint.hint || "").trim() || null;
+  return {
+    code: String(constraint.code || "").trim() || null,
+    title,
+    tone,
+    icon,
+    detail,
+    hint,
+    current,
+    min,
+    max,
+    met: Boolean(constraint.met),
+    blocking: Boolean(constraint.blocking),
+  };
 }
 
 function renderWateringProgressSection(card, progressState) {
@@ -5947,7 +6016,7 @@ function renderWateringProgressSection(card, progressState) {
       progressState.remainingSeconds !== undefined && progressState.remainingSeconds !== null
         ? formatDurationHuman(remainingSeconds / 60.0)
         : "0 min";
-    const summary = String(progressState.summary || "Arrosage en cours").trim();
+    const summary = String(progressState.summary || "Irrigation en cours").trim();
     const detail = String(progressState.detail || "").trim();
     const metaParts = [];
     if (progressState.startedAtLabel) {
@@ -5962,7 +6031,7 @@ function renderWateringProgressSection(card, progressState) {
     return `
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--watering-progress">
           <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Arrosage en cours</div>
+            <div class="tab-panel__eyebrow">Irrigation en cours</div>
             <div class="tab-panel__section-meta">${escapeHtml(`${Math.round(percent)} %`)}</div>
           </div>
           <div class="tab-panel__section-summary">${escapeHtml(summary)}</div>
@@ -5979,7 +6048,7 @@ function renderWateringProgressSection(card, progressState) {
     return `
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--watering-progress">
           <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Arrosage en cours</div>
+            <div class="tab-panel__eyebrow">Irrigation en cours</div>
             <div class="tab-panel__section-meta">—</div>
           </div>
           <div class="tab-panel__section-summary">Suivi de progression indisponible</div>
@@ -6433,11 +6502,11 @@ function renderWateringTab(card) {
   const isBlocked = windowState.isBlocked;
   const isAwaiting = windowState.isAwaiting;
   const noActionText = windowState.isNoActionRequired ? "Aucune irrigation nécessaire" : "";
-  const noActionHint = windowState.isNoActionRequired ? windowState.summary || "Le plan actuel ne demande pas d'arrosage." : "";
+  const noActionHint = windowState.isNoActionRequired ? windowState.summary || "Le plan actuel ne demande pas d'irrigation." : "";
   const blockText = isBlocked
-    ? windowState.summary || "Arrosage bloqué"
+    ? windowState.summary || "Irrigation bloquée"
     : isAwaiting
-      ? windowState.summary || "Arrosage prévu"
+      ? windowState.summary || "Irrigation prévue"
       : noActionText;
   const blockHint = isBlocked
     ? windowState.nextAction || ""
@@ -6449,7 +6518,7 @@ function renderWateringTab(card) {
   const contextPills = [
     card._renderTabPill("Irrigation recommandée", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
     card._renderTabPill("Post-application", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off"),
-    card._renderTabPill("Type", formatStatusLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
+    card._renderTabPill("Profil d'irrigation", formatStatusLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
     card._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
     card._renderTabPill("Risque gazon", context.risk, computeRisqueTone(context.risk), "mdi:shield-alert-outline"),
     card._renderTabPill(
@@ -6470,7 +6539,7 @@ function renderWateringTab(card) {
     card._renderTabPill("Zones", planState.zoneCount ? `${planState.zoneCount}` : "0", planState.zoneCount > 1 ? "accent" : "neutral", "mdi:pipe"),
     card._renderTabPill("Passages", planState.passages ? `${planState.passages}` : "1", planState.fractionation ? "warning" : "neutral", "mdi:cached"),
     card._renderTabPill("Fractionnement", planState.fractionation ? "Oui" : "Non", planState.fractionation ? "warning" : "neutral", "mdi:call-split"),
-    card._renderTabPill("Type", planTypeLabel, card._planTypeTone(planState.planType), "mdi:shape"),
+    card._renderTabPill("Type de plan", planTypeLabel, card._planTypeTone(planState.planType), "mdi:shape"),
     card._renderTabPill("Objectif", objectiveLabel, objective > 0 ? "success" : "neutral", "mdi:water"),
   ];
   const wateringProgress = card._wateringProgressState();
@@ -6952,7 +7021,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_plan_arrosage", "Plan d'irrigation")}
             ${this._renderEntityInput("entity_objectif_arrosage", "Objectif d'irrigation")}
             ${this._renderEntityInput("entity_arrosage_recommande", "Irrigation recommandée")}
-            ${this._renderEntityInput("entity_arrosage_apres_application_autorise", "Arrosage post-application")}
+            ${this._renderEntityInput("entity_arrosage_apres_application_autorise", "Post-application")}
             ${this._renderEntityInput("entity_dernier_arrosage", "Dernier arrosage")}
             ${this._renderEntityInput("entity_niveau", "Niveau d'action")}
           </div>

@@ -366,9 +366,9 @@ export const CARD_STYLES = String.raw`
         }
 
         .tab-panel__section-summary {
-          font-size: var(--gi-font-md);
+          font-size: var(--gi-font-sm);
           font-weight: 700;
-          line-height: 1.3;
+          line-height: 1.35;
         }
 
         .tab-panel__field {
@@ -389,7 +389,7 @@ export const CARD_STYLES = String.raw`
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 2px 0 4px;
+          padding: 0;
         }
 
         .tab-panel__workflow-step {
@@ -397,14 +397,14 @@ export const CARD_STYLES = String.raw`
           align-items: center;
           gap: 8px;
           min-width: 0;
-          padding: 7px 10px;
+          padding: 6px 10px;
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 10%, var(--gi-surface-border));
-          border-radius: 999px;
+          border-radius: 14px;
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, white) 100%);
-          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
           color: var(--secondary-text-color);
-          font-size: var(--gi-font-xxs);
+          font-size: 0.64rem;
           font-weight: 700;
           letter-spacing: 0.02em;
           text-transform: uppercase;
@@ -425,12 +425,12 @@ export const CARD_STYLES = String.raw`
         .tab-panel__workflow-index {
           display: inline-grid;
           place-items: center;
-          width: 20px;
-          height: 20px;
+          width: 18px;
+          height: 18px;
           border-radius: 999px;
           background: color-mix(in srgb, var(--gazon-section-accent) 18%, transparent);
           color: var(--primary-text-color);
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 900;
           flex: none;
         }
@@ -453,21 +453,22 @@ export const CARD_STYLES = String.raw`
           align-items: center;
           min-width: 0;
           border: 1px solid var(--gi-surface-border-strong);
-          border-radius: 18px;
-          padding: 6px 12px 6px 10px;
+          border-radius: 16px;
+          padding: 7px 12px 7px 10px;
           background:
             radial-gradient(circle at 18% 50%, color-mix(in srgb, var(--gazon-card-accent) 12%, transparent) 0%, transparent 18%),
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 12%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, white) 100%);
           box-shadow: var(--gi-surface-shadow-strong);
-          gap: 8px;
+          gap: 10px;
+          min-height: 52px;
         }
 
         .tab-panel__select-prefix {
           display: inline-grid;
           place-items: center;
-          width: 34px;
-          height: 34px;
-          border-radius: 12px;
+          width: 30px;
+          height: 30px;
+          border-radius: 10px;
           background: color-mix(in srgb, var(--gazon-card-accent) 12%, transparent);
           color: var(--primary-text-color);
           flex: none;
@@ -479,7 +480,7 @@ export const CARD_STYLES = String.raw`
           -moz-appearance: none;
           width: 100%;
           min-width: 0;
-          min-height: 34px;
+          min-height: 32px;
           border: 0;
           border-radius: 0;
           padding: 4px 34px 4px 0;
@@ -487,7 +488,7 @@ export const CARD_STYLES = String.raw`
           color: var(--primary-text-color);
           box-shadow: none;
           font: inherit;
-          font-size: var(--gi-font-md);
+          font-size: var(--gi-font-sm);
           font-weight: 700;
           line-height: 1.2;
           cursor: pointer;
@@ -512,6 +513,12 @@ export const CARD_STYLES = String.raw`
           pointer-events: none;
           color: var(--secondary-text-color);
           opacity: 0.88;
+        }
+
+        .tab-panel__section--intervention-picker,
+        .tab-panel__section--products-action,
+        .tab-panel__section--application-history {
+          gap: 10px;
         }
 
         .tab-panel__grid {
@@ -616,11 +623,11 @@ export const CARD_STYLES = String.raw`
           justify-content: flex-start;
           gap: var(--gi-action-gap);
           width: var(--gi-action-width);
-          min-height: calc(var(--gi-action-min-height) + 2px);
+          min-height: 72px;
           padding-inline: var(--gi-action-padding-inline) var(--gi-action-padding-inline-end);
           padding-block: var(--gi-action-padding-block);
           border: 1px solid var(--gi-surface-border-strong);
-          border-radius: 26px;
+          border-radius: 20px;
           cursor: pointer;
           color: white;
           font: inherit;
@@ -666,11 +673,11 @@ export const CARD_STYLES = String.raw`
           justify-content: flex-start;
           gap: var(--gi-action-gap);
           width: var(--gi-action-width);
-          min-height: calc(var(--gi-action-min-height) + 2px);
+          min-height: 72px;
           padding-inline: var(--gi-action-padding-inline) var(--gi-action-padding-inline-end);
           padding-block: var(--gi-action-padding-block);
           border: 1px solid color-mix(in srgb, var(--gazon-danger-color, #f15f69) 54%, var(--gi-surface-border-strong));
-          border-radius: 26px;
+          border-radius: 20px;
           cursor: pointer;
           color: white;
           font: inherit;

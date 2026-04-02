@@ -577,7 +577,6 @@ export const CARD_STYLES = String.raw`
         }
 
         .tab-panel__section--intervention-picker,
-        .tab-panel__section--products-action,
         .tab-panel__section--application-history {
           gap: 10px;
         }

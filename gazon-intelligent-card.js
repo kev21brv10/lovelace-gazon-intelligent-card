@@ -577,7 +577,6 @@ const CARD_STYLES = String.raw`
         }
 
         .tab-panel__section--intervention-picker,
-        .tab-panel__section--products-action,
         .tab-panel__section--application-history {
           gap: 10px;
         }
@@ -5760,7 +5759,6 @@ function renderProductsTab(card) {
   const selection = card._productSelectionState();
   const catalogue = card._catalogueState();
   const application = card._applicationEntity();
-  const quickAction = card._selectedProductInterventionState();
   const hasProductData = Boolean(
     selection.selectedProductId || selection.selectedProductName || catalogue.hasProducts || application,
   );
@@ -5785,35 +5783,12 @@ function renderProductsTab(card) {
       <section class="tab-panel gi-panel tab-panel--products">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${productsTone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">Produits</div>
+            <div class="tab-panel__hero-summary">Catalogue produit</div>
             ${renderStatusPill(hasProductData ? catalogue.summary : emptyStateMessage, productsTone, "mdi:package-variant-closed", `tab-panel__status tab-panel__status--${productsTone}`)}
           </div>
           <div class="tab-panel__hero-next">${escapeHtml(productsSummary)}</div>
-          <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Le catalogue local sert de source unique pour déclarer les interventions.")}</div>
+          <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Référentiel produit, catalogue local et historique d'application.")}</div>
         </div>
-
-        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-action">
-          <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Action rapide</div>
-            <div class="tab-panel__section-meta">${escapeHtml(quickAction.summary)}</div>
-          </div>
-          <button
-            type="button"
-            class="gi-action gi-action--primary tab-panel__cta"
-            data-tab="intervention"
-            aria-label="Ouvrir l'onglet intervention"
-          >
-            ${renderIconBox("mdi:spray-bottle", "sm")}
-            <span>Ouvrir l'intervention</span>
-          </button>
-          <div class="tab-panel__section-summary">
-            ${escapeHtml(
-              quickAction.disabled
-                ? "Sélectionne un produit dans le catalogue pour préparer une déclaration."
-                : `Produit prêt : ${quickAction.label}`,
-            )}
-          </div>
-        </section>
 
         ${renderProductSummarySection(card)}
       </section>

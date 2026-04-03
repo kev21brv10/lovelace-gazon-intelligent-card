@@ -36,6 +36,8 @@ UNIQUE_HELPERS = (
     "formatPostApplicationStatusPresentation",
     "formatWateringBlockReason",
     "formatMonthLabel",
+    "formatProductUsageMode",
+    "formatProductAnnualLimit",
 )
 
 src_files = {name: (ROOT / name).read_text(encoding="utf-8") for name in SRC_FILES}

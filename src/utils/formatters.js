@@ -338,6 +338,30 @@ export function formatStatusLabel(status) {
   return formatStateLabel(status);
 }
 
+const PRODUCT_USAGE_MODE_LABELS = {
+  preventif: "Préventif",
+  curatif: "Curatif",
+  entretien: "Entretien",
+  rattrapage: "Rattrapage",
+};
+
+export function formatProductUsageMode(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+  return PRODUCT_USAGE_MODE_LABELS[normalized] || formatStateLabel(value);
+}
+
+export function formatProductAnnualLimit(value) {
+  const number = asNumber(value);
+  if (number === null || number <= 0) {
+    return null;
+  }
+  const limit = Math.max(1, Math.floor(number));
+  return `${limit}/an`;
+}
+
 const MONTH_LABELS = {
   1: "Janvier",
   2: "Février",

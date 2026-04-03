@@ -1074,7 +1074,7 @@ export function renderOverviewTab(card) {
       <section class="tab-panel gi-panel tab-panel--overview">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${overviewTone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">Synthèse recommandée</div>
+            <div class="tab-panel__hero-summary">Vue prioritaire</div>
             ${renderStatusPill(proposal.title, overviewTone, overviewIcon, `tab-panel__status tab-panel__status--${overviewTone}`)}
           </div>
           <div class="tab-panel__hero-next">${escapeHtml(windowState.displaySummary || windowState.summary || planState.summary || "Vue d’ensemble de la carte.")}</div>

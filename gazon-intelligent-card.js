@@ -6560,7 +6560,17 @@ function renderDebugInterventionSection(card, debug) {
   const statusIcon = debug.statusIcon || presentation.icon || "mdi:bug-outline";
   const summary = debug.summary || presentation.summary || "Recommandation disponible";
   const nextReason = debug.reason || debug.uiSummary || summary;
-  const detailHint = debug.whyNow || debug.uiHint || "Lecture directe du moteur décisionnel.";
+  const detailHintParts = [];
+  if (debug.context?.phase) {
+    detailHintParts.push(`Phase actuelle: ${formatStatusLabel(debug.context.phase)}`);
+  }
+  if (debug.context?.month !== null && debug.context?.month !== undefined) {
+    detailHintParts.push(`Mois: ${debug.context.month}`);
+  }
+  if (debug.context?.temperature !== null && debug.context?.temperature !== undefined) {
+    detailHintParts.push(`Température: ${formatNumber(debug.context.temperature, 1)} °C`);
+  }
+  const detailHint = detailHintParts.join(" · ") || debug.uiHint || "Lecture directe du moteur décisionnel.";
   const productName = debug.productName || "Aucun produit identifié";
   const productHeadingLabel =
     debug.status === "recommended" || debug.status === "ready"

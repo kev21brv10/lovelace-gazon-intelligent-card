@@ -15,6 +15,7 @@ import {
   formatNumber,
   formatDurationHuman,
   formatInterventionStatusPresentation,
+  formatWateringBlockReason,
   humanDateTimeText,
   isEmpty,
   isUnavailableState,

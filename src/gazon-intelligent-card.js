@@ -15,7 +15,7 @@ import {
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.41";
+const CARD_VERSION = "0.1.42";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

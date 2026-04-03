@@ -204,7 +204,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_fenetre_optimale", "Fenêtre optimale")}
             ${this._renderEntityInput("entity_plan_arrosage", "Plan d'irrigation")}
             ${this._renderEntityInput("entity_objectif_arrosage", "Objectif d'irrigation")}
-            ${this._renderEntityInput("entity_arrosage_recommande", "Irrigation recommandée")}
+            ${this._renderEntityInput("entity_arrosage_recommande", "Irrigation")}
             ${this._renderEntityInput("entity_arrosage_apres_application_autorise", "Post-application")}
             ${this._renderEntityInput("entity_dernier_arrosage", "Dernier arrosage")}
             ${this._renderEntityInput("entity_niveau", "Niveau d'action")}

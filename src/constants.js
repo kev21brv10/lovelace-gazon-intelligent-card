@@ -1,6 +1,6 @@
 export const CARD_TYPE = "gazon-intelligent-card";
 export const CARD_NAME = "Gazon Intelligent Card";
-export const CARD_VERSION = "0.1.43";
+export const CARD_VERSION = "0.1.44";
 
 export const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -76,7 +76,7 @@ export const ENTITY_KEYS = [
   { key: "entity_catalogue_produits", label: "Référentiel produits", icon: "mdi:package-variant-closed", domain: ["sensor"] },
   { key: "entity_produit_intervention", label: "Produit sélectionné", icon: "mdi:package-variant", domain: ["select"] },
   { key: "entity_debug_intervention", label: "Debug métier", icon: "mdi:bug-outline", domain: ["sensor"] },
-  { key: "entity_prochaine_intervention", label: "Intervention recommandée", icon: "mdi:spray-bottle", domain: ["sensor"] },
+  { key: "entity_prochaine_intervention", label: "À préparer", icon: "mdi:spray-bottle", domain: ["sensor"] },
   { key: "entity_conseil", label: "Conseil principal", icon: "mdi:message-text-outline", domain: ["sensor"] },
   { key: "entity_action", label: "Action recommandée", icon: "mdi:check-circle-outline", domain: ["sensor"] },
   { key: "entity_avoid", label: "Action à éviter", icon: "mdi:alert-circle-outline", domain: ["sensor"] },
@@ -89,7 +89,7 @@ export const ENTITY_KEYS = [
   { key: "entity_niveau", label: "Niveau d'action", icon: "mdi:signal", domain: ["sensor"] },
   { key: "entity_tonte", label: "État de tonte", icon: "mdi:content-cut", domain: ["sensor"] },
   { key: "entity_hauteur", label: "Hauteur de tonte conseillée", icon: "mdi:ruler-square", domain: ["sensor"] },
-  { key: "entity_arrosage_recommande", label: "Irrigation recommandée", icon: "mdi:water-check", domain: ["binary_sensor"] },
+  { key: "entity_arrosage_recommande", label: "Irrigation", icon: "mdi:water-check", domain: ["binary_sensor"] },
   { key: "entity_objectif_arrosage", label: "Objectif d'irrigation", icon: "mdi:water-percent", domain: ["sensor"] },
   { key: "entity_type_arrosage", label: "Profil d'irrigation", icon: "mdi:sprinkler", domain: ["sensor"] },
   { key: "entity_risque", label: "Risque gazon", icon: "mdi:shield-alert-outline", domain: ["sensor"] },

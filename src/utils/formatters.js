@@ -50,7 +50,7 @@ export function formatMm(value) {
     return "—";
   }
   if (number <= 0) {
-    return "Aucune irrigation nécessaire";
+    return "Non requis";
   }
   const formatted = formatNumber(number, 1);
   return `${formatted} mm`;
@@ -59,10 +59,10 @@ export function formatMm(value) {
 export function formatRecommendationState(value) {
   const normalized = String(value ?? "").trim().toLowerCase();
   if (["on", "true", "yes", "1", "oui"].includes(normalized)) {
-    return "Recommandé";
+    return "Autorisé";
   }
   if (["off", "false", "no", "0", "non"].includes(normalized)) {
-    return "Non recommandé";
+    return "Non requis";
   }
   return isUnavailableState(value) ? "Non disponible" : String(value);
 }
@@ -340,11 +340,11 @@ export function formatStatusLabel(status) {
 
 const INTERVENTION_STATUS_PRESENTATIONS = {
   recommended: {
-    title: "Intervention recommandée",
+    title: "Recommandé",
     badge: "Recommandé",
     tone: "success",
     icon: "mdi:spray-bottle",
-    summary: "Intervention recommandée",
+    summary: "Recommandé",
     hint: "La prochaine intervention est prête à être déclarée.",
     actionLabel: "Déclarer maintenant",
     selectionSummary: "Produit sélectionné",
@@ -355,14 +355,14 @@ const INTERVENTION_STATUS_PRESENTATIONS = {
     historyHint: "Historique local des applications enregistrées.",
   },
   possible: {
-    title: "Intervention à préparer",
+    title: "À préparer",
     badge: "À préparer",
     tone: "warning",
     icon: "mdi:spray-bottle",
-    summary: "Intervention à préparer",
-    hint: "La prochaine intervention est disponible, mais pas encore prête.",
-    actionLabel: "Préparer",
-    selectionSummary: "Produit sélectionné",
+    summary: "À préparer",
+    hint: "La prochaine intervention est à préparer.",
+    actionLabel: "Choisir le produit",
+    selectionSummary: "Produit à sélectionner",
     selectionHint: "Le produit sélectionné alimente la déclaration.",
     declarationSummary: "À préparer",
     declarationHint: "La déclaration n’est pas encore prête.",
@@ -370,11 +370,11 @@ const INTERVENTION_STATUS_PRESENTATIONS = {
     historyHint: "Historique local des applications enregistrées.",
   },
   ready: {
-    title: "Intervention prête",
+    title: "Prêt à déclarer",
     badge: "Prêt à déclarer",
     tone: "success",
     icon: "mdi:spray-bottle",
-    summary: "Déclaration possible",
+    summary: "Prêt à déclarer",
     hint: "Le produit peut être déclaré maintenant.",
     actionLabel: "Déclarer",
     selectionSummary: "Produit sélectionné",
@@ -385,11 +385,11 @@ const INTERVENTION_STATUS_PRESENTATIONS = {
     historyHint: "Historique local des applications enregistrées.",
   },
   blocked: {
-    title: "Intervention bloquée",
+    title: "Bloqué",
     badge: "Bloqué",
     tone: "danger",
     icon: "mdi:cancel",
-    summary: "Intervention bloquée",
+    summary: "Bloqué",
     hint: "Une contrainte bloque la prochaine intervention.",
     actionLabel: "Attendre",
     selectionSummary: "Produit sélectionné",
@@ -400,11 +400,11 @@ const INTERVENTION_STATUS_PRESENTATIONS = {
     historyHint: "Historique local des applications enregistrées.",
   },
   unavailable: {
-    title: "Intervention indisponible",
+    title: "Non disponible",
     badge: "Non disponible",
     tone: "neutral",
     icon: "mdi:package-variant-closed",
-    summary: "Intervention indisponible",
+    summary: "Non disponible",
     hint: "Aucun statut exploitable n’est disponible.",
     actionLabel: "Non disponible",
     selectionSummary: "Aucun produit disponible",

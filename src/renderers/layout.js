@@ -314,7 +314,13 @@ function renderDebugInterventionSection(card, debug) {
   const summary = debug.summary || presentation.summary || "Recommandation disponible";
   const nextReason = debug.reason || debug.uiSummary || summary;
   const detailHint = debug.whyNow || debug.uiHint || "Lecture directe du moteur décisionnel.";
-  const productName = debug.productName || "Aucun produit retenu";
+  const productName = debug.productName || "Aucun produit identifié";
+  const productHeadingLabel =
+    debug.status === "recommended" || debug.status === "ready"
+      ? "Produit retenu"
+      : debug.status === "possible"
+        ? "Produit candidat"
+        : "Produit proposé";
   const productType = debug.productType ? formatStatusLabel(debug.productType) : null;
   const productId = debug.productId ? `ID: ${debug.productId}` : "";
   const actionLabel = debug.recommendedActionLabel || formatDebugRecommendedAction(debug.recommendedAction);
@@ -360,7 +366,7 @@ function renderDebugInterventionSection(card, debug) {
 
         <div class="decision-plan">
           <div class="decision-plan__header">
-            <div class="decision-plan__label">Produit retenu</div>
+            <div class="decision-plan__label">${escapeHtml(productHeadingLabel)}</div>
             <div class="decision-plan__meta">${escapeHtml(actionLabel)}</div>
           </div>
           <div class="decision-plan__summary">${escapeHtml(productName)}</div>
@@ -655,10 +661,10 @@ export function renderInterventionTab(card) {
       <section class="tab-panel gi-panel tab-panel--intervention">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${recommendationTone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">${escapeHtml(ui.title || "Intervention indisponible")}</div>
+            <div class="tab-panel__hero-summary">${escapeHtml(ui.title || "Non disponible")}</div>
             ${renderStatusPill(ui.badge || "Non disponible", recommendationTone, recommendationIcon, `tab-panel__status tab-panel__status--${recommendationTone}`)}
           </div>
-          <div class="tab-panel__hero-next">${escapeHtml(ui.summary || "Intervention indisponible")}</div>
+          <div class="tab-panel__hero-next">${escapeHtml(ui.summary || "Non disponible")}</div>
           <div class="tab-panel__hero-hint">${escapeHtml(ui.hint || "Aucune recommandation disponible.")}</div>
           ${
             temperatureConstraintState
@@ -890,8 +896,8 @@ export function renderWateringTab(card) {
   const windowStatusIcon = card._config?.show_icons ? windowIcon : null;
   const isBlocked = windowState.isBlocked;
   const isAwaiting = windowState.isAwaiting;
-  const noActionText = windowState.isNoActionRequired ? "Aucune irrigation nécessaire" : "";
-  const noActionHint = windowState.isNoActionRequired ? windowState.displaySummary || windowState.summary || "Le plan actuel ne demande pas d'irrigation." : "";
+  const noActionText = windowState.isNoActionRequired ? "Non requis" : "";
+  const noActionHint = windowState.isNoActionRequired ? windowState.displaySummary || windowState.summary || "Non requis" : "";
   const blockText = isBlocked
     ? windowState.displaySummary || "Irrigation bloquée"
     : isAwaiting
@@ -905,7 +911,7 @@ export function renderWateringTab(card) {
   const planTypeLabel = formatPlanType(planState.planType);
 
   const contextPills = [
-    card._renderTabPill("Irrigation recommandée", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
+    card._renderTabPill("Irrigation", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
     card._renderTabPill("Post-application", afterApplicationInfo.label, afterApplicationInfo.tone, "mdi:water-off"),
     card._renderTabPill("Profil d'irrigation", formatStatusLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
     card._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
@@ -937,7 +943,7 @@ export function renderWateringTab(card) {
       <section class="tab-panel gi-panel tab-panel--watering">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${tone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">${escapeHtml(windowState.displaySummary || windowState.summary || "Irrigation recommandée")}</div>
+            <div class="tab-panel__hero-summary">${escapeHtml(windowState.displaySummary || windowState.summary || "Irrigation")}</div>
             ${renderStatusPill(windowState.statusLabel, tone, windowStatusIcon, `tab-panel__hero-status tab-panel__hero-status--${tone}`)}
           </div>
           ${

@@ -15,7 +15,7 @@ import {
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.43";
+const CARD_VERSION = "0.1.44";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -101,7 +101,7 @@ const ENTITY_KEYS = [
   { key: "entity_niveau", label: "Niveau d'action", icon: "mdi:signal", domain: ["sensor"] },
   { key: "entity_tonte", label: "État de tonte", icon: "mdi:content-cut", domain: ["sensor"] },
   { key: "entity_hauteur", label: "Hauteur de tonte conseillée", icon: "mdi:ruler-square", domain: ["sensor"] },
-  { key: "entity_arrosage_recommande", label: "Irrigation recommandée", icon: "mdi:water-check", domain: ["binary_sensor"] },
+  { key: "entity_arrosage_recommande", label: "Irrigation", icon: "mdi:water-check", domain: ["binary_sensor"] },
   { key: "entity_objectif_arrosage", label: "Objectif d'irrigation", icon: "mdi:water-percent", domain: ["sensor"] },
   { key: "entity_type_arrosage", label: "Profil d'irrigation", icon: "mdi:sprinkler", domain: ["sensor"] },
   { key: "entity_risque", label: "Risque gazon", icon: "mdi:shield-alert-outline", domain: ["sensor"] },
@@ -390,7 +390,7 @@ function formatMm(value) {
     return "—";
   }
   if (number <= 0) {
-    return "Aucune irrigation nécessaire";
+    return "Non requis";
   }
   const formatted = formatNumber(number, 1);
   return `${formatted} mm`;
@@ -399,10 +399,10 @@ function formatMm(value) {
 function formatRecommendationState(value) {
   const normalized = String(value ?? "").trim().toLowerCase();
   if (["on", "true", "yes", "1", "oui"].includes(normalized)) {
-    return "Recommandé";
+    return "Autorisé";
   }
   if (["off", "false", "no", "0", "non"].includes(normalized)) {
-    return "Non recommandé";
+    return "Non requis";
   }
   return isUnavailableState(value) ? "Non disponible" : String(value);
 }
@@ -2389,7 +2389,7 @@ class GazonIntelligentCard extends HTMLElement {
       tone = computeRisqueTone(risk);
       icon = "mdi:shield-alert-outline";
     } else if (arrosageRecommande === "on") {
-      title = "Irrigation recommandée";
+      title = "Autorisé";
       hint = `${conseil || planState.summary || objectiveLabel}${
         ["bloque", "en_attente", "non_autorise"].includes(afterApplicationInfo.kind)
           ? ` · Post-application ${afterApplicationInfo.label.toLowerCase()}`
@@ -2669,8 +2669,8 @@ class GazonIntelligentCard extends HTMLElement {
     const windowStatusIcon = this._config?.show_icons ? windowIcon : null;
     const isBlocked = windowState.isBlocked;
     const isAwaiting = windowState.isAwaiting;
-    const noActionText = windowState.isNoActionRequired ? "Aucune irrigation nécessaire" : "";
-    const noActionHint = windowState.isNoActionRequired ? windowState.summary || "Le plan actuel ne demande pas d'irrigation." : "";
+    const noActionText = windowState.isNoActionRequired ? "Non requis" : "";
+    const noActionHint = windowState.isNoActionRequired ? windowState.summary || "Non requis" : "";
     const blockText = isBlocked
       ? windowState.summary || "Irrigation bloquée"
       : isAwaiting
@@ -2684,7 +2684,7 @@ class GazonIntelligentCard extends HTMLElement {
     const planTypeLabel = formatPlanType(planState.planType);
 
     const contextPills = [
-      this._renderTabPill("Irrigation recommandée", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
+      this._renderTabPill("Irrigation", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
       this._renderTabPill("Post-application", afterApplicationInfo.label, afterApplicationInfo.tone, "mdi:water-off"),
       this._renderTabPill("Profil d'irrigation", formatStateLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
       this._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
@@ -2717,7 +2717,7 @@ class GazonIntelligentCard extends HTMLElement {
       <section class="tab-panel gi-panel tab-panel--watering">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${tone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">${escapeHtml(windowState.summary || "Irrigation recommandée")}</div>
+            <div class="tab-panel__hero-summary">${escapeHtml(windowState.summary || "Irrigation")}</div>
             ${renderStatusPill(windowState.statusLabel, tone, windowStatusIcon, `tab-panel__hero-status tab-panel__hero-status--${tone}`)}
           </div>
           ${

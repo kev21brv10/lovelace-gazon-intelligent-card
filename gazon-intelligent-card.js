@@ -2453,7 +2453,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.43";
+const CARD_VERSION = "0.1.44";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -2539,7 +2539,7 @@ const ENTITY_KEYS = [
   { key: "entity_niveau", label: "Niveau d'action", icon: "mdi:signal", domain: ["sensor"] },
   { key: "entity_tonte", label: "État de tonte", icon: "mdi:content-cut", domain: ["sensor"] },
   { key: "entity_hauteur", label: "Hauteur de tonte conseillée", icon: "mdi:ruler-square", domain: ["sensor"] },
-  { key: "entity_arrosage_recommande", label: "Irrigation recommandée", icon: "mdi:water-check", domain: ["binary_sensor"] },
+  { key: "entity_arrosage_recommande", label: "Irrigation", icon: "mdi:water-check", domain: ["binary_sensor"] },
   { key: "entity_objectif_arrosage", label: "Objectif d'irrigation", icon: "mdi:water-percent", domain: ["sensor"] },
   { key: "entity_type_arrosage", label: "Profil d'irrigation", icon: "mdi:sprinkler", domain: ["sensor"] },
   { key: "entity_risque", label: "Risque gazon", icon: "mdi:shield-alert-outline", domain: ["sensor"] },
@@ -2828,7 +2828,7 @@ function formatMm(value) {
     return "—";
   }
   if (number <= 0) {
-    return "Aucune irrigation nécessaire";
+    return "Non requis";
   }
   const formatted = formatNumber(number, 1);
   return `${formatted} mm`;
@@ -2837,10 +2837,10 @@ function formatMm(value) {
 function formatRecommendationState(value) {
   const normalized = String(value ?? "").trim().toLowerCase();
   if (["on", "true", "yes", "1", "oui"].includes(normalized)) {
-    return "Recommandé";
+    return "Autorisé";
   }
   if (["off", "false", "no", "0", "non"].includes(normalized)) {
-    return "Non recommandé";
+    return "Non requis";
   }
   return isUnavailableState(value) ? "Non disponible" : String(value);
 }
@@ -4827,7 +4827,7 @@ class GazonIntelligentCard extends HTMLElement {
       tone = computeRisqueTone(risk);
       icon = "mdi:shield-alert-outline";
     } else if (arrosageRecommande === "on") {
-      title = "Irrigation recommandée";
+      title = "Autorisé";
       hint = `${conseil || planState.summary || objectiveLabel}${
         ["bloque", "en_attente", "non_autorise"].includes(afterApplicationInfo.kind)
           ? ` · Post-application ${afterApplicationInfo.label.toLowerCase()}`
@@ -5107,8 +5107,8 @@ class GazonIntelligentCard extends HTMLElement {
     const windowStatusIcon = this._config?.show_icons ? windowIcon : null;
     const isBlocked = windowState.isBlocked;
     const isAwaiting = windowState.isAwaiting;
-    const noActionText = windowState.isNoActionRequired ? "Aucune irrigation nécessaire" : "";
-    const noActionHint = windowState.isNoActionRequired ? windowState.summary || "Le plan actuel ne demande pas d'irrigation." : "";
+    const noActionText = windowState.isNoActionRequired ? "Non requis" : "";
+    const noActionHint = windowState.isNoActionRequired ? windowState.summary || "Non requis" : "";
     const blockText = isBlocked
       ? windowState.summary || "Irrigation bloquée"
       : isAwaiting
@@ -5122,7 +5122,7 @@ class GazonIntelligentCard extends HTMLElement {
     const planTypeLabel = formatPlanType(planState.planType);
 
     const contextPills = [
-      this._renderTabPill("Irrigation recommandée", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
+      this._renderTabPill("Irrigation", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
       this._renderTabPill("Post-application", afterApplicationInfo.label, afterApplicationInfo.tone, "mdi:water-off"),
       this._renderTabPill("Profil d'irrigation", formatStateLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
       this._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
@@ -5155,7 +5155,7 @@ class GazonIntelligentCard extends HTMLElement {
       <section class="tab-panel gi-panel tab-panel--watering">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${tone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">${escapeHtml(windowState.summary || "Irrigation recommandée")}</div>
+            <div class="tab-panel__hero-summary">${escapeHtml(windowState.summary || "Irrigation")}</div>
             ${renderStatusPill(windowState.statusLabel, tone, windowStatusIcon, `tab-panel__hero-status tab-panel__hero-status--${tone}`)}
           </div>
           ${
@@ -6268,7 +6268,13 @@ function renderDebugInterventionSection(card, debug) {
   const summary = debug.summary || presentation.summary || "Recommandation disponible";
   const nextReason = debug.reason || debug.uiSummary || summary;
   const detailHint = debug.whyNow || debug.uiHint || "Lecture directe du moteur décisionnel.";
-  const productName = debug.productName || "Aucun produit retenu";
+  const productName = debug.productName || "Aucun produit identifié";
+  const productHeadingLabel =
+    debug.status === "recommended" || debug.status === "ready"
+      ? "Produit retenu"
+      : debug.status === "possible"
+        ? "Produit candidat"
+        : "Produit proposé";
   const productType = debug.productType ? formatStatusLabel(debug.productType) : null;
   const productId = debug.productId ? `ID: ${debug.productId}` : "";
   const actionLabel = debug.recommendedActionLabel || formatDebugRecommendedAction(debug.recommendedAction);
@@ -6314,7 +6320,7 @@ function renderDebugInterventionSection(card, debug) {
 
         <div class="decision-plan">
           <div class="decision-plan__header">
-            <div class="decision-plan__label">Produit retenu</div>
+            <div class="decision-plan__label">${escapeHtml(productHeadingLabel)}</div>
             <div class="decision-plan__meta">${escapeHtml(actionLabel)}</div>
           </div>
           <div class="decision-plan__summary">${escapeHtml(productName)}</div>
@@ -6609,10 +6615,10 @@ function renderInterventionTab(card) {
       <section class="tab-panel gi-panel tab-panel--intervention">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${recommendationTone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">${escapeHtml(ui.title || "Intervention indisponible")}</div>
+            <div class="tab-panel__hero-summary">${escapeHtml(ui.title || "Non disponible")}</div>
             ${renderStatusPill(ui.badge || "Non disponible", recommendationTone, recommendationIcon, `tab-panel__status tab-panel__status--${recommendationTone}`)}
           </div>
-          <div class="tab-panel__hero-next">${escapeHtml(ui.summary || "Intervention indisponible")}</div>
+          <div class="tab-panel__hero-next">${escapeHtml(ui.summary || "Non disponible")}</div>
           <div class="tab-panel__hero-hint">${escapeHtml(ui.hint || "Aucune recommandation disponible.")}</div>
           ${
             temperatureConstraintState
@@ -6844,8 +6850,8 @@ function renderWateringTab(card) {
   const windowStatusIcon = card._config?.show_icons ? windowIcon : null;
   const isBlocked = windowState.isBlocked;
   const isAwaiting = windowState.isAwaiting;
-  const noActionText = windowState.isNoActionRequired ? "Aucune irrigation nécessaire" : "";
-  const noActionHint = windowState.isNoActionRequired ? windowState.displaySummary || windowState.summary || "Le plan actuel ne demande pas d'irrigation." : "";
+  const noActionText = windowState.isNoActionRequired ? "Non requis" : "";
+  const noActionHint = windowState.isNoActionRequired ? windowState.displaySummary || windowState.summary || "Non requis" : "";
   const blockText = isBlocked
     ? windowState.displaySummary || "Irrigation bloquée"
     : isAwaiting
@@ -6859,7 +6865,7 @@ function renderWateringTab(card) {
   const planTypeLabel = formatPlanType(planState.planType);
 
   const contextPills = [
-    card._renderTabPill("Irrigation recommandée", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
+    card._renderTabPill("Irrigation", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
     card._renderTabPill("Post-application", afterApplicationInfo.label, afterApplicationInfo.tone, "mdi:water-off"),
     card._renderTabPill("Profil d'irrigation", formatStatusLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
     card._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
@@ -6891,7 +6897,7 @@ function renderWateringTab(card) {
       <section class="tab-panel gi-panel tab-panel--watering">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${tone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">${escapeHtml(windowState.displaySummary || windowState.summary || "Irrigation recommandée")}</div>
+            <div class="tab-panel__hero-summary">${escapeHtml(windowState.displaySummary || windowState.summary || "Irrigation")}</div>
             ${renderStatusPill(windowState.statusLabel, tone, windowStatusIcon, `tab-panel__hero-status tab-panel__hero-status--${tone}`)}
           </div>
           ${
@@ -7364,7 +7370,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_fenetre_optimale", "Fenêtre optimale")}
             ${this._renderEntityInput("entity_plan_arrosage", "Plan d'irrigation")}
             ${this._renderEntityInput("entity_objectif_arrosage", "Objectif d'irrigation")}
-            ${this._renderEntityInput("entity_arrosage_recommande", "Irrigation recommandée")}
+            ${this._renderEntityInput("entity_arrosage_recommande", "Irrigation")}
             ${this._renderEntityInput("entity_arrosage_apres_application_autorise", "Post-application")}
             ${this._renderEntityInput("entity_dernier_arrosage", "Dernier arrosage")}
             ${this._renderEntityInput("entity_niveau", "Niveau d'action")}

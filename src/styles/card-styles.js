@@ -2322,8 +2322,18 @@ export const CARD_STYLES = String.raw`
 
         @media (max-width: 393px) {
           :host {
-            --gi-header-gap: 8px;
-            --gi-header-margin-bottom: 10px;
+            --gi-header-gap: 6px;
+            --gi-header-margin-bottom: 8px;
+            --gi-hero-margin: 1px 0 4px;
+            --gi-hero-gap: 6px;
+            --gi-hero-lead-padding: 9px 10px;
+            --gi-hero-lead-gap: 6px;
+            --gi-hero-metrics-gap: 4px;
+            --gi-card-core-gap: 8px;
+            --gi-card-core-padding: 10px 12px;
+            --gi-card-core-min-height: 70px;
+            --gi-card-core-icon-size: 18px;
+            --gi-card-core-icon-glyph-size: 11px;
           }
 
           .header {
@@ -2332,6 +2342,7 @@ export const CARD_STYLES = String.raw`
 
           .header__title-wrap {
             width: 100%;
+            gap: 8px;
           }
 
           .header__meta {
@@ -2347,9 +2358,69 @@ export const CARD_STYLES = String.raw`
             max-width: 100%;
           }
 
+          .header__icon {
+            width: calc(var(--gazon-icon-size) * 1.02);
+            height: calc(var(--gazon-icon-size) * 1.02);
+          }
+
+          .header__icon .gi-icon {
+            width: 11px;
+            height: 11px;
+          }
+
+          .header__title {
+            font-size: var(--gi-font-md);
+            line-height: 1.12;
+          }
+
+          .header__subtitle {
+            font-size: var(--gi-font-xxs);
+            line-height: 1.18;
+          }
+
           .header__action {
             max-width: 100%;
             align-self: flex-end;
+          }
+
+          .hero {
+            gap: 6px;
+            margin: 1px 0 4px;
+          }
+
+          .hero__lead {
+            padding: 9px 10px;
+            gap: 6px;
+            flex-basis: 220px;
+          }
+
+          .hero__lead-icon {
+            width: 18px;
+            height: 18px;
+          }
+
+          .hero__lead-icon .gi-icon {
+            width: 11px;
+            height: 11px;
+          }
+
+          .hero__label {
+            margin-bottom: 2px;
+          }
+
+          .hero__value {
+            font-size: var(--gi-font-sm);
+            line-height: 1.16;
+            -webkit-line-clamp: 1;
+          }
+
+          .hero__metrics {
+            gap: 4px;
+          }
+
+          .hero__metrics .gi-card-core {
+            flex-basis: 100px;
+            min-height: 70px;
           }
 
           .tab-panel--products .tab-panel__hero-top,
@@ -2372,6 +2443,21 @@ export const CARD_STYLES = String.raw`
 
           .tab-panel--products .tab-panel__grid--products {
             grid-template-columns: 1fr;
+          }
+
+          .tab-panel__hero {
+            padding: 11px 12px;
+          }
+
+          .tab-panel__hero-summary {
+            font-size: var(--gi-font-md);
+            line-height: 1.18;
+          }
+
+          .tab-panel__hero-next,
+          .tab-panel__hero-hint {
+            font-size: var(--gi-font-xs);
+            line-height: 1.18;
           }
 
           .tab-panel--products .gi-card-core--stat {

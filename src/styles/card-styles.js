@@ -1570,16 +1570,18 @@ export const CARD_STYLES = String.raw`
 
         .header__meta {
           display: flex;
-          flex-wrap: wrap;
+          flex-direction: column;
+          flex-wrap: nowrap;
           justify-content: flex-end;
-          align-items: center;
-          gap: 8px;
+          align-items: flex-end;
+          gap: 6px;
           min-width: 0;
           margin-left: auto;
         }
 
         .header__weather {
           max-width: min(240px, 100%);
+          width: 100%;
         }
 
         .header__weather .gi-pill__value {
@@ -1607,6 +1609,7 @@ export const CARD_STYLES = String.raw`
           white-space: nowrap;
           width: auto;
           flex: 0 0 auto;
+          width: 100%;
           max-width: 184px;
           overflow: hidden;
           text-shadow: none;
@@ -2347,17 +2350,11 @@ export const CARD_STYLES = String.raw`
 
           .header__meta {
             width: 100%;
-            flex-direction: column;
-            flex-wrap: nowrap;
-            align-items: flex-end;
-            justify-content: flex-start;
             gap: 6px;
             margin-left: 0;
           }
 
           .header__weather {
-            max-width: 100%;
-            width: 100%;
             align-self: flex-end;
           }
 
@@ -2382,8 +2379,6 @@ export const CARD_STYLES = String.raw`
           }
 
           .header__action {
-            max-width: 100%;
-            width: 100%;
             align-self: flex-end;
           }
 

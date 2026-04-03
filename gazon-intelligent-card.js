@@ -2362,7 +2362,9 @@ const CARD_STYLES = String.raw`
           }
 
           .header__title-row {
-            gap: 4px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 3px;
           }
 
           .header__badge .gi-pill {
@@ -7605,7 +7607,7 @@ function renderHeader(card) {
             <div class="header__title-row">
               <div class="header__title">${escapeHtml(card._config.title || "Gazon Intelligent")}</div>
               <div class="header__badge">
-                ${renderStatusPill(`${CARD_NAME} ${CARD_VERSION}`, "neutral", "mdi:tag", "header__badge-pill")}
+                ${renderStatusPill(`Version ${CARD_VERSION}`, "neutral", "mdi:tag", "header__badge-pill")}
               </div>
             </div>
             <div class="header__subtitle">

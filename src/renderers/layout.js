@@ -1027,7 +1027,7 @@ export function renderHeader(card) {
             <div class="header__title-row">
               <div class="header__title">${escapeHtml(card._config.title || "Gazon Intelligent")}</div>
               <div class="header__badge">
-                ${renderStatusPill(`${CARD_NAME} ${CARD_VERSION}`, "neutral", "mdi:tag", "header__badge-pill")}
+                ${renderStatusPill(`Version ${CARD_VERSION}`, "neutral", "mdi:tag", "header__badge-pill")}
               </div>
             </div>
             <div class="header__subtitle">

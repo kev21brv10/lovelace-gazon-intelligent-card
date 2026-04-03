@@ -2352,5 +2352,81 @@ export const CARD_STYLES = String.raw`
             max-width: 100%;
             align-self: flex-end;
           }
+
+          .tab-panel--products .tab-panel__hero-top,
+          .tab-panel--products .tab-panel__section-head,
+          .tab-panel--intervention .tab-panel__hero-top,
+          .tab-panel--intervention .tab-panel__section-head,
+          .tab-panel--intervention .tab-panel__debug-foldout-summary {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+          }
+
+          .tab-panel--products .tab-panel__status,
+          .tab-panel--intervention .tab-panel__status,
+          .tab-panel--intervention .tab-panel__debug-foldout-meta {
+            width: 100%;
+            text-align: left;
+            max-width: 100%;
+          }
+
+          .tab-panel--products .tab-panel__grid--products {
+            grid-template-columns: 1fr;
+          }
+
+          .tab-panel--products .gi-card-core--stat {
+            min-height: 64px;
+          }
+
+          .tab-panel--products .tab-panel__section-summary,
+          .tab-panel--products .tab-panel__section-hint {
+            font-size: var(--gi-font-sm);
+            line-height: 1.22;
+          }
+
+          .tab-panel--intervention .tab-panel__decision-strip {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .tab-panel--intervention .tab-panel__intervention-layout {
+            gap: 8px;
+          }
+
+          .tab-panel--intervention .tab-panel__intervention-card {
+            padding: 10px 11px;
+            gap: 8px;
+          }
+
+          .tab-panel--intervention .tab-panel__intervention-card .tab-panel__section-summary,
+          .tab-panel--intervention .tab-panel__intervention-card .tab-panel__section-hint {
+            font-size: var(--gi-font-xs);
+            line-height: 1.22;
+          }
+
+          .tab-panel--intervention .tab-panel__select-shell {
+            min-height: 44px;
+            padding: 6px 10px 6px 8px;
+            gap: 8px;
+          }
+
+          .tab-panel--intervention .tab-panel__select {
+            padding-right: 30px;
+          }
+
+          .tab-panel--intervention .tab-panel__select-prefix {
+            width: 26px;
+            height: 26px;
+          }
+
+          .tab-panel--intervention .tab-panel__select-chevron {
+            inset-inline-end: 10px;
+          }
+
+          .tab-panel--intervention .tab-panel__intervention-card--action .tab-panel__cta {
+            min-height: 64px;
+            border-radius: 12px;
+          }
         }
 `;

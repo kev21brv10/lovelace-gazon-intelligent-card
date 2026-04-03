@@ -73,7 +73,7 @@ export function formatAuthorizationState(value) {
     return "Autorisé";
   }
   if (["off", "false", "no", "0", "non"].includes(normalized)) {
-    return "Interdit";
+    return "Non autorisé";
   }
   return isUnavailableState(value) ? "Non disponible" : String(value);
 }
@@ -336,6 +336,148 @@ export function formatApplicationMode(value) {
 
 export function formatStatusLabel(status) {
   return formatStateLabel(status);
+}
+
+const INTERVENTION_STATUS_PRESENTATIONS = {
+  recommended: {
+    title: "Intervention recommandée",
+    badge: "Recommandé",
+    tone: "success",
+    icon: "mdi:spray-bottle",
+    summary: "Intervention recommandée",
+    hint: "La prochaine intervention est prête à être déclarée.",
+    actionLabel: "Déclarer maintenant",
+    selectionSummary: "Produit sélectionné",
+    selectionHint: "Le produit sélectionné alimente la déclaration.",
+    declarationSummary: "Prêt à déclarer",
+    declarationHint: "La déclaration peut être lancée maintenant.",
+    historySummary: "Dernière application",
+    historyHint: "Historique local des applications enregistrées.",
+  },
+  possible: {
+    title: "Intervention à préparer",
+    badge: "À préparer",
+    tone: "warning",
+    icon: "mdi:spray-bottle",
+    summary: "Intervention à préparer",
+    hint: "La prochaine intervention est disponible, mais pas encore prête.",
+    actionLabel: "Préparer",
+    selectionSummary: "Produit sélectionné",
+    selectionHint: "Le produit sélectionné alimente la déclaration.",
+    declarationSummary: "À préparer",
+    declarationHint: "La déclaration n’est pas encore prête.",
+    historySummary: "Dernière application",
+    historyHint: "Historique local des applications enregistrées.",
+  },
+  ready: {
+    title: "Intervention prête",
+    badge: "Prêt à déclarer",
+    tone: "success",
+    icon: "mdi:spray-bottle",
+    summary: "Déclaration possible",
+    hint: "Le produit peut être déclaré maintenant.",
+    actionLabel: "Déclarer",
+    selectionSummary: "Produit sélectionné",
+    selectionHint: "Le produit sélectionné est prêt à être confirmé.",
+    declarationSummary: "Prêt à déclarer",
+    declarationHint: "La déclaration peut être lancée maintenant.",
+    historySummary: "Dernière application",
+    historyHint: "Historique local des applications enregistrées.",
+  },
+  blocked: {
+    title: "Intervention bloquée",
+    badge: "Bloqué",
+    tone: "danger",
+    icon: "mdi:cancel",
+    summary: "Intervention bloquée",
+    hint: "Une contrainte bloque la prochaine intervention.",
+    actionLabel: "Attendre",
+    selectionSummary: "Produit sélectionné",
+    selectionHint: "La sélection reste disponible, mais la déclaration est bloquée.",
+    declarationSummary: "Bloqué",
+    declarationHint: "Une contrainte bloque la déclaration.",
+    historySummary: "Dernière application",
+    historyHint: "Historique local des applications enregistrées.",
+  },
+  unavailable: {
+    title: "Intervention indisponible",
+    badge: "Non disponible",
+    tone: "neutral",
+    icon: "mdi:package-variant-closed",
+    summary: "Intervention indisponible",
+    hint: "Aucun statut exploitable n’est disponible.",
+    actionLabel: "Non disponible",
+    selectionSummary: "Aucun produit disponible",
+    selectionHint: "Sélectionne un produit dans la liste pour préparer la déclaration.",
+    declarationSummary: "Non disponible",
+    declarationHint: "Aucune recommandation n’est disponible pour l’instant.",
+    historySummary: "Dernière application",
+    historyHint: "Historique local des applications enregistrées.",
+  },
+};
+
+export function formatInterventionStatusPresentation(status) {
+  const normalized = String(status ?? "").trim().toLowerCase();
+  if (normalized === "recommended") {
+    return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.recommended };
+  }
+  if (normalized === "possible") {
+    return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.possible };
+  }
+  if (normalized === "ready") {
+    return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.ready };
+  }
+  if (normalized === "blocked") {
+    return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.blocked };
+  }
+  if (normalized === "unavailable" || normalized === "non_disponible") {
+    return { status: normalized || "unavailable", ...INTERVENTION_STATUS_PRESENTATIONS.unavailable };
+  }
+  return { status: normalized || "unavailable", ...INTERVENTION_STATUS_PRESENTATIONS.unavailable };
+}
+
+const POST_APPLICATION_STATUS_PRESENTATIONS = {
+  autorise: { label: "Autorisé", tone: "success", active: true, kind: "autorise" },
+  en_attente: { label: "En attente", tone: "warning", active: false, kind: "en_attente" },
+  bloque: { label: "Bloqué", tone: "danger", active: false, kind: "bloque" },
+  non_requis: { label: "Non requis", tone: "neutral", active: false, kind: "non_requis" },
+  non_autorise: { label: "Non autorisé", tone: "danger", active: false, kind: "non_autorise" },
+  indisponible: { label: "Non disponible", tone: "neutral", active: false, kind: "unavailable" },
+  non_disponible: { label: "Non disponible", tone: "neutral", active: false, kind: "unavailable" },
+};
+
+export function formatPostApplicationStatusPresentation(status) {
+  const normalized = String(status ?? "").trim().toLowerCase();
+  return POST_APPLICATION_STATUS_PRESENTATIONS[normalized] || POST_APPLICATION_STATUS_PRESENTATIONS.indisponible;
+}
+
+const WATERING_BLOCK_REASON_LABELS = {
+  sol_deja_humide: "Sol déjà humide",
+  cooldown_24h: "Délai de 24 h",
+  pluie_proche: "Pluie proche",
+  pluie_significative: "Pluie significative",
+  pluie: "Pluie",
+  application: "Bloc application",
+  post_application: "Bloc post-application",
+  temperature: "Température",
+  meteorologie: "Météo",
+  meteo: "Météo",
+  weather: "Météo",
+};
+
+export function formatWateringBlockReason(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return "Blocage";
+  }
+  if (WATERING_BLOCK_REASON_LABELS[normalized]) {
+    return WATERING_BLOCK_REASON_LABELS[normalized];
+  }
+  const cleaned = normalized.replaceAll("_", " ").replaceAll("-", " ").replace(/\s+/g, " ").trim();
+  if (!cleaned) {
+    return "Blocage";
+  }
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
 }
 
 export function formatSwitchState(value) {

@@ -216,7 +216,7 @@ ${EDITOR_STYLES}
           <p>Ces entités donnent à la carte le produit sélectionné, le catalogue local et la dernière intervention pour séparer clairement les interventions.</p>
           <div class="grid">
             ${this._renderEntityInput("entity_catalogue_produits", "Référentiel produits")}
-            ${this._renderEntityInput("entity_produit_intervention", "Produit d'intervention")}
+            ${this._renderEntityInput("entity_produit_intervention", "Produit sélectionné")}
             ${this._renderEntityInput("entity_prochaine_intervention", "Prochaine intervention")}
             ${this._renderEntityInput("entity_derniere_application", "Dernière intervention")}
           </div>

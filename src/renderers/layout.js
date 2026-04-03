@@ -324,11 +324,8 @@ export function renderInterventionTab(card) {
   const lastApplication = card._lastApplicationState();
   const productOptions = card._catalogueProductOptions();
   const ui = recommendation.ui || {};
-  const product = recommendation.product || {};
-  const selection = recommendation.selection || {};
   const selectedProductOptionLabel = quickAction.optionLabel || (productOptions.length === 1 ? productOptions[0].label : "");
   const hasProductOptions = productOptions.length > 0;
-  const hasSelection = Boolean(selection.selected || quickAction.record);
   const canDeclare = Boolean(recommendation.readyToDeclare && quickAction.record && !quickAction.disabled);
   const catalogue = card._catalogueState();
   const hasApplication = Boolean(lastApplication.hasApplication);
@@ -336,63 +333,33 @@ export function renderInterventionTab(card) {
   const lastApplicationHint = hasApplication
     ? lastApplication.detail || "Dernière application détectée."
     : "Le bouton restera désactivé tant qu'aucune application n'est présente dans l'historique.";
-  const recommendationTone = ui.tone || (canDeclare ? "success" : hasProductOptions ? "warning" : "neutral");
-  const recommendationIcon = ui.icon || (canDeclare ? "mdi:spray-bottle" : "mdi:package-variant-closed");
-  const hasRecommendedProduct = Boolean(product?.name);
-  const selectionMeta = canDeclare
-    ? "Sélection prête"
-    : hasSelection
-      ? "Déjà choisi"
-      : hasRecommendedProduct
-        ? "Produit conseillé"
-        : hasProductOptions
-          ? "À choisir"
-          : "Vide";
-  const declarationMeta = canDeclare
-    ? "Sélection activée"
-    : hasSelection
-      ? "Étape 2 · en attente"
-      : hasRecommendedProduct
-        ? "Action prête"
-        : "Étape 2 · verrouillée";
-  const pickerSummary = hasSelection
-    ? ui.selectionSummary || "Produit choisi."
-    : hasRecommendedProduct
-      ? `Produit conseillé : ${product.name}.`
-      : ui.selectionSummary || "Sélectionne un produit dans la liste pour préparer la déclaration.";
-  const pickerHint = hasSelection
-    ? ui.selectionHint || "La sélection met à jour le produit actif."
-    : hasRecommendedProduct
-      ? ui.selectionHint || `Le moteur a retenu ${product.name} parmi les produits enregistrés.`
-      : ui.selectionHint || "La sélection met à jour le produit actif.";
-  const actionSummary = canDeclare
-    ? ui.declarationSummary || "La déclaration peut être lancée maintenant."
-    : hasRecommendedProduct
-      ? ui.declarationSummary || `Produit conseillé : ${product.name}. Sélectionne-le pour activer la déclaration.`
-      : ui.declarationSummary || "Sélectionne un produit pour activer la déclaration.";
-  const actionHint = canDeclare
-    ? ui.declarationHint || "Le bouton est déjà actif."
-    : hasRecommendedProduct
-      ? ui.declarationHint || `Sélectionne ${product.name} pour débloquer la déclaration.`
-      : ui.declarationHint || "Le bouton se débloque dès qu’un produit est prêt.";
+  const recommendationTone = ui.tone || "neutral";
+  const recommendationIcon = ui.icon || "mdi:spray-bottle";
+  const selectionMeta = quickAction.record
+    ? "Produit sélectionné"
+    : hasProductOptions
+      ? "Produit à sélectionner"
+      : "Aucun produit disponible";
+  const declarationMeta = ui.badge || formatStatusLabel(recommendation.status) || "Non disponible";
+  const pickerSummary = ui.selectionSummary || (quickAction.record ? "Produit sélectionné." : hasProductOptions ? "Sélectionne un produit dans la liste." : "Aucun produit disponible.");
+  const pickerHint = ui.selectionHint || "La sélection met à jour le produit actif.";
+  const actionSummary = ui.declarationSummary || "Déclaration indisponible.";
+  const actionHint = ui.declarationHint || "Le moteur compare le catalogue, la dernière intervention et la météo.";
   const temperatureConstraint = (Array.isArray(recommendation.constraints)
     ? recommendation.constraints.find((constraint) => constraint?.code === "temperature_range")
     : null);
   const temperatureConstraintState = formatTemperatureRangeConstraint(temperatureConstraint);
-  const decisionHint =
-    recommendation.status === "possible"
-      ? "Le moteur compare tous les produits enregistrés, la dernière intervention et la météo pour retenir la prochaine action."
-      : "Le moteur compare le catalogue, la dernière intervention et la météo pour préparer la prochaine action.";
+  const decisionHint = ui.hint || "Le moteur compare le catalogue, la dernière intervention et la météo.";
 
   return `
       <section class="tab-panel gi-panel tab-panel--intervention">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${recommendationTone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">${escapeHtml(ui.title || "Prochaine intervention recommandée")}</div>
-            ${renderStatusPill(ui.badge || "Choisie automatiquement", recommendationTone, recommendationIcon, `tab-panel__status tab-panel__status--${recommendationTone}`)}
+            <div class="tab-panel__hero-summary">${escapeHtml(ui.title || "Intervention indisponible")}</div>
+            ${renderStatusPill(ui.badge || "Non disponible", recommendationTone, recommendationIcon, `tab-panel__status tab-panel__status--${recommendationTone}`)}
           </div>
-          <div class="tab-panel__hero-next">${escapeHtml(ui.summary || recommendation.summary || "Intervention recommandée")}</div>
-          <div class="tab-panel__hero-hint">${escapeHtml(ui.hint || recommendation.hint || "Le moteur de décision a préparé la prochaine intervention.")}</div>
+          <div class="tab-panel__hero-next">${escapeHtml(ui.summary || "Intervention indisponible")}</div>
+          <div class="tab-panel__hero-hint">${escapeHtml(ui.hint || "Aucune recommandation disponible.")}</div>
           ${
             temperatureConstraintState
               ? `
@@ -437,7 +404,7 @@ export function renderInterventionTab(card) {
           <div class="tab-panel__intervention-layout">
             <div class="tab-panel__intervention-card tab-panel__intervention-card--picker">
               <div class="tab-panel__section-head">
-                <div class="tab-panel__eyebrow">Produit conseillé</div>
+                <div class="tab-panel__eyebrow">Produit sélectionné</div>
                 <div class="tab-panel__section-meta">${escapeHtml(selectionMeta)}</div>
               </div>
               <label class="tab-panel__field">
@@ -582,7 +549,7 @@ export function renderOverviewTab(card) {
             <div class="tab-panel__hero-summary">Synthèse recommandée</div>
             ${renderStatusPill(proposal.title, overviewTone, overviewIcon, `tab-panel__status tab-panel__status--${overviewTone}`)}
           </div>
-          <div class="tab-panel__hero-next">${escapeHtml(windowState.summary || planState.summary || "Vue d’ensemble de la carte.")}</div>
+          <div class="tab-panel__hero-next">${escapeHtml(windowState.displaySummary || windowState.summary || planState.summary || "Vue d’ensemble de la carte.")}</div>
           <div class="tab-panel__hero-hint">${escapeHtml("Le résumé s’adapte automatiquement à la situation réelle et remonte les informations utiles en premier.")}</div>
         </div>
 
@@ -607,28 +574,29 @@ export function renderOverviewTab(card) {
 
 export function renderWateringTab(card) {
   const windowState = card._windowState();
-  const nextActionText = windowState.nextActionDisplay || windowState.nextAction;
+  const nextActionText = windowState.displayNextAction || windowState.nextActionDisplay || windowState.nextAction;
   const planState = card._planState();
   const objective = windowState.objective;
   const objectiveLabel = formatMm(objective);
   const context = card._objectiveContext();
   const lastWatering = card._lastWateringState();
   const arrosageRecommande = card._entityState("entity_arrosage_recommande", null);
-  const afterApplication = card._entityState("entity_arrosage_apres_application_autorise", null);
+  const afterApplication = card._entity("entity_arrosage_apres_application_autorise");
+  const afterApplicationInfo = card._postApplicationState(afterApplication);
   const tone = windowState.tone;
   const windowIcon = card._statusIcon(windowState.status);
   const windowStatusIcon = card._config?.show_icons ? windowIcon : null;
   const isBlocked = windowState.isBlocked;
   const isAwaiting = windowState.isAwaiting;
   const noActionText = windowState.isNoActionRequired ? "Aucune irrigation nécessaire" : "";
-  const noActionHint = windowState.isNoActionRequired ? windowState.summary || "Le plan actuel ne demande pas d'irrigation." : "";
+  const noActionHint = windowState.isNoActionRequired ? windowState.displaySummary || windowState.summary || "Le plan actuel ne demande pas d'irrigation." : "";
   const blockText = isBlocked
-    ? windowState.summary || "Irrigation bloquée"
+    ? windowState.displaySummary || "Irrigation bloquée"
     : isAwaiting
       ? windowState.summary || "Irrigation prévue"
       : noActionText;
   const blockHint = isBlocked
-    ? windowState.nextAction || ""
+    ? windowState.blockReasonLabel || windowState.displayNextAction || windowState.nextAction || ""
     : isAwaiting
       ? windowState.nextAction || "Attendre le créneau prévu"
       : noActionHint;
@@ -636,7 +604,7 @@ export function renderWateringTab(card) {
 
   const contextPills = [
     card._renderTabPill("Irrigation recommandée", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
-    card._renderTabPill("Post-application", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off"),
+    card._renderTabPill("Post-application", afterApplicationInfo.label, afterApplicationInfo.tone, "mdi:water-off"),
     card._renderTabPill("Profil d'irrigation", formatStatusLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
     card._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
     card._renderTabPill("Risque gazon", context.risk, computeRisqueTone(context.risk), "mdi:shield-alert-outline"),
@@ -667,7 +635,7 @@ export function renderWateringTab(card) {
       <section class="tab-panel gi-panel tab-panel--watering">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${tone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">${escapeHtml(windowState.summary || "Irrigation recommandée")}</div>
+            <div class="tab-panel__hero-summary">${escapeHtml(windowState.displaySummary || windowState.summary || "Irrigation recommandée")}</div>
             ${renderStatusPill(windowState.statusLabel, tone, windowStatusIcon, `tab-panel__hero-status tab-panel__hero-status--${tone}`)}
           </div>
           ${
@@ -798,7 +766,7 @@ export function renderMowingTab(card) {
   const heightMin = asNumber(height?.attributes?.hauteur_tonte_min_cm);
   const heightMax = asNumber(height?.attributes?.hauteur_tonte_max_cm);
   const heightSecondary = heightMin !== null && heightMax !== null ? `${formatCm(heightMin)} → ${formatCm(heightMax)}` : "";
-  const windowSummary = windowState.entity ? windowState.summary : "Fenêtre optimale non disponible";
+  const windowSummary = windowState.entity ? windowState.displaySummary || windowState.summary : "Fenêtre optimale non disponible";
   const mowingStatusIcon = card._config?.show_icons ? "mdi:content-cut" : null;
   const mowingFacts = [
     {
@@ -854,7 +822,8 @@ export function renderMowingTab(card) {
 
 export function renderConfigTab(card) {
   const switchState = card._configSwitchState();
-  const afterApplication = card._entityState("entity_arrosage_apres_application_autorise", null);
+  const afterApplication = card._entity("entity_arrosage_apres_application_autorise");
+  const afterApplicationInfo = card._postApplicationState(afterApplication);
   const tonteAutorisee = card._entityState("entity_tonte_autorisee", null);
   const mode = card._entityState("entity_mode", null);
   const modeTone = phaseTone(mode);
@@ -881,7 +850,7 @@ export function renderConfigTab(card) {
 
         <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-top">
           ${card._renderConfigActionCard("Irrigation automatique", "entity_switch_arrosage_automatique", switchState.label, switchState.tone, "mdi:switch")}
-          ${card._renderConfigActionCard("Post-application", "entity_arrosage_apres_application_autorise", formatAuthorizationState(afterApplication), afterApplication === "on" ? "success" : "danger", "mdi:water-off")}
+          ${card._renderConfigActionCard("Post-application", "entity_arrosage_apres_application_autorise", afterApplicationInfo.label, afterApplicationInfo.tone, "mdi:water-off")}
           ${card._renderConfigActionCard("Tonte autorisée", "entity_tonte_autorisee", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", "mdi:content-cut")}
           ${card._renderConfigActionCard("Mode du gazon", "entity_mode", formatApplicationMode(mode), modeTone, "mdi:grass")}
         </div>

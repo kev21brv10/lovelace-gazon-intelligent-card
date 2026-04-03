@@ -2348,6 +2348,7 @@ export const CARD_STYLES = String.raw`
           .header__meta {
             width: 100%;
             flex-direction: column;
+            flex-wrap: nowrap;
             align-items: flex-end;
             justify-content: flex-start;
             gap: 6px;
@@ -2356,6 +2357,8 @@ export const CARD_STYLES = String.raw`
 
           .header__weather {
             max-width: 100%;
+            width: 100%;
+            align-self: flex-end;
           }
 
           .header__icon {
@@ -2380,6 +2383,7 @@ export const CARD_STYLES = String.raw`
 
           .header__action {
             max-width: 100%;
+            width: 100%;
             align-self: flex-end;
           }
 

@@ -25,6 +25,19 @@ CRITICAL_HELPERS = (
     "formatWateringBlockReason",
 )
 
+UNIQUE_HELPERS = (
+    "isEmpty",
+    "isUnavailableState",
+    "escapeHtml",
+    "asNumber",
+    "formatNumber",
+    "formatDurationHuman",
+    "formatInterventionStatusPresentation",
+    "formatPostApplicationStatusPresentation",
+    "formatWateringBlockReason",
+    "formatMonthLabel",
+)
+
 src_files = {name: (ROOT / name).read_text(encoding="utf-8") for name in SRC_FILES}
 root_bundle = ROOT / "gazon-intelligent-card.js"
 root_bundle_gz = ROOT / DIST_GZ_FILE
@@ -142,6 +155,11 @@ for marker in CRITICAL_HELPERS:
     helper_marker = f"function {marker}"
     if helper_marker not in root_src:
         raise SystemExit(f"Missing critical helper in bundled file: {helper_marker}")
+
+for helper in UNIQUE_HELPERS:
+    occurrences = len(re.findall(rf"(?m)^function\s+{re.escape(helper)}\s*\(", root_src))
+    if occurrences != 1:
+        raise SystemExit(f"Bundled helper {helper} must be defined exactly once (found {occurrences})")
 
 for marker in (
     "sensor.gazon_intelligent_niveau_de_pertinence",

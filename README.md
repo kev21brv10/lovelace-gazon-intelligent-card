@@ -305,6 +305,7 @@ Le fichier distribué est généré à la racine du dépôt :
 
 ```text
 gazon-intelligent-card.js
+gazon-intelligent-card.js.gz
 ```
 
 ---
@@ -316,10 +317,20 @@ Process simple :
 1. mettre à jour la version dans `package.json`
 2. lancer `python3 scripts/build.py`
 3. vérifier `python3 scripts/validate.py`
-4. créer une release GitHub
+4. créer un tag Git `vX.Y.Z`
+5. publier la release GitHub
+6. mettre à jour la ressource HACS / Home Assistant avec le bundle publié
+
+Vérification post-release simple :
+
+```bash
+python3 scripts/check_bundle_sync.py \
+  /Volumes/config/www/community/lovelace-gazon-intelligent-card/gazon-intelligent-card.js \
+  /Volumes/config/www/community/lovelace-gazon-intelligent-card/gazon-intelligent-card.js.gz
+```
 
 Le workflow CI valide la carte à chaque push et construit l’artefact pour les tags de release.
-La release GitHub publie le bundle racine `gazon-intelligent-card.js`, qui correspond aussi au fichier servi par HACS.
+La release GitHub publie les deux artefacts racine `gazon-intelligent-card.js` et `gazon-intelligent-card.js.gz`, qui correspondent aussi aux fichiers servis par HACS quand la ressource est mise à jour.
 
 ---
 

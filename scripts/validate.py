@@ -1,4 +1,5 @@
 from pathlib import Path
+import gzip
 import json
 import re
 
@@ -17,9 +18,16 @@ SRC_FILES = [
     "src/styles/editor-styles.js",
 ]
 DIST_FILE = "gazon-intelligent-card.js"
+DIST_GZ_FILE = "gazon-intelligent-card.js.gz"
+CRITICAL_HELPERS = (
+    "formatInterventionStatusPresentation",
+    "formatPostApplicationStatusPresentation",
+    "formatWateringBlockReason",
+)
 
 src_files = {name: (ROOT / name).read_text(encoding="utf-8") for name in SRC_FILES}
 root_bundle = ROOT / "gazon-intelligent-card.js"
+root_bundle_gz = ROOT / DIST_GZ_FILE
 root_src = root_bundle.read_text(encoding="utf-8")
 readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
@@ -63,6 +71,20 @@ if dist_dir.exists():
     dist_entries = [p.name for p in dist_dir.iterdir() if p.is_file()]
     if dist_entries:
         raise SystemExit("dist/ must be empty when publishing gazon-intelligent-card.js at root")
+
+if not root_bundle.exists():
+    raise SystemExit("gazon-intelligent-card.js must exist at repo root")
+
+if not root_bundle_gz.exists():
+    raise SystemExit("gazon-intelligent-card.js.gz must exist at repo root")
+
+try:
+    gz_text = gzip.decompress(root_bundle_gz.read_bytes()).decode("utf-8")
+except Exception as exc:  # pragma: no cover - defensive validation
+    raise SystemExit(f"gazon-intelligent-card.js.gz must be a valid gzip bundle: {exc}") from exc
+
+if gz_text != root_src:
+    raise SystemExit("gazon-intelligent-card.js.gz must decompress to gazon-intelligent-card.js")
 
 if "/local/gazon-intelligent-card/gazon-intelligent-card.js" not in readme:
     raise SystemExit("README.md must document the local Lovelace resource path")
@@ -115,13 +137,10 @@ for marker in (
     if marker not in root_src:
         raise SystemExit(f"Missing expected helper in bundled file: {marker}")
 
-for marker in (
-    "function formatInterventionStatusPresentation",
-    "function formatPostApplicationStatusPresentation",
-    "function formatWateringBlockReason",
-):
-    if marker not in root_src:
-        raise SystemExit(f"Missing critical helper in bundled file: {marker}")
+for marker in CRITICAL_HELPERS:
+    helper_marker = f"function {marker}"
+    if helper_marker not in root_src:
+        raise SystemExit(f"Missing critical helper in bundled file: {helper_marker}")
 
 for marker in (
     "sensor.gazon_intelligent_niveau_de_pertinence",

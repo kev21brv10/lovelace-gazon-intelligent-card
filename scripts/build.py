@@ -1,4 +1,5 @@
 from pathlib import Path
+import gzip
 import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -9,6 +10,7 @@ SRC_CARD_STYLES = ROOT / "src" / "styles" / "card-styles.js"
 SRC_EDITOR_STYLES = ROOT / "src" / "styles" / "editor-styles.js"
 DIST_DIR = ROOT / "dist"
 ROOT_MAIN = ROOT / "gazon-intelligent-card.js"
+ROOT_MAIN_GZ = ROOT / "gazon-intelligent-card.js.gz"
 
 def strip_module_source(text: str) -> str:
     lines = []
@@ -51,5 +53,6 @@ bundle = (
 if DIST_DIR.exists():
     shutil.rmtree(DIST_DIR)
 ROOT_MAIN.write_text(bundle, encoding="utf-8")
+ROOT_MAIN_GZ.write_bytes(gzip.compress(bundle.encode("utf-8"), mtime=0))
 
 print(f"Built {ROOT_MAIN.relative_to(ROOT)}")

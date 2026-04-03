@@ -1699,11 +1699,37 @@ const CARD_STYLES = String.raw`
           min-width: 0;
         }
 
+        .header__title-row {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 6px;
+          min-width: 0;
+          margin-bottom: 2px;
+        }
+
         .header__title {
           font-size: var(--gi-font-lg);
           font-weight: 800;
           line-height: 1.2;
-          margin-bottom: 2px;
+          margin-bottom: 0;
+        }
+
+        .header__badge {
+          min-width: 0;
+        }
+
+        .header__badge .gi-pill {
+          padding: 3px 8px;
+          gap: 6px;
+          border-radius: 999px;
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .header__badge .gi-pill__value {
+          font-size: var(--gi-font-xxs);
+          font-weight: 800;
+          letter-spacing: 0.01em;
         }
 
         .header__subtitle {
@@ -2333,6 +2359,14 @@ const CARD_STYLES = String.raw`
 
           .header__title-wrap {
             width: 100%;
+          }
+
+          .header__title-row {
+            gap: 4px;
+          }
+
+          .header__badge .gi-pill {
+            padding: 2px 7px;
           }
 
           .header__meta {
@@ -7568,7 +7602,12 @@ function renderHeader(card) {
             ${card._config.show_icons ? renderIconBox("mdi:grass", "md") : ""}
           </div>
           <div class="header__titles">
-            <div class="header__title">${escapeHtml(card._config.title || "Gazon Intelligent")}</div>
+            <div class="header__title-row">
+              <div class="header__title">${escapeHtml(card._config.title || "Gazon Intelligent")}</div>
+              <div class="header__badge">
+                ${renderStatusPill(`${CARD_NAME} ${CARD_VERSION}`, "neutral", "mdi:tag", "header__badge-pill")}
+              </div>
+            </div>
             <div class="header__subtitle">
               ${phase ? escapeHtml(phase) : "Phase non disponible"}
               ${subPhase ? ` · ${escapeHtml(subPhase)}` : ""}

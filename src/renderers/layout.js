@@ -1,4 +1,4 @@
-import { SECTION_DEFS, TAB_DEFS } from "../constants.js";
+import { CARD_NAME, CARD_VERSION, SECTION_DEFS, TAB_DEFS } from "../constants.js";
 import {
   asNumber,
   computeActionTone,
@@ -1024,7 +1024,12 @@ export function renderHeader(card) {
             ${card._config.show_icons ? renderIconBox("mdi:grass", "md") : ""}
           </div>
           <div class="header__titles">
-            <div class="header__title">${escapeHtml(card._config.title || "Gazon Intelligent")}</div>
+            <div class="header__title-row">
+              <div class="header__title">${escapeHtml(card._config.title || "Gazon Intelligent")}</div>
+              <div class="header__badge">
+                ${renderStatusPill(`${CARD_NAME} ${CARD_VERSION}`, "neutral", "mdi:tag", "header__badge-pill")}
+              </div>
+            </div>
             <div class="header__subtitle">
               ${phase ? escapeHtml(phase) : "Phase non disponible"}
               ${subPhase ? ` · ${escapeHtml(subPhase)}` : ""}

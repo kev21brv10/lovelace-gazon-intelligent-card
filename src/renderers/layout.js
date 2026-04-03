@@ -653,7 +653,7 @@ export function renderProductSummarySection(card) {
     return `
       <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
         <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Référentiel produit</div>
+          <div class="tab-panel__eyebrow">Vue produit</div>
           ${renderStatusPill(emptyStateMessage, "neutral", "mdi:package-variant-closed", "tab-panel__status")}
         </div>
         <div class="tab-panel__section-summary">${escapeHtml(emptyStateMessage)}</div>
@@ -664,7 +664,7 @@ export function renderProductSummarySection(card) {
   return `
       <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
         <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Référentiel produit</div>
+          <div class="tab-panel__eyebrow">Vue produit</div>
           ${renderStatusPill(catalogue.summary, catalogue.hasProducts ? "success" : "neutral", "mdi:package-variant-closed", "tab-panel__status")}
         </div>
         <div class="tab-panel__grid tab-panel__grid--products">

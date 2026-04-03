@@ -9,7 +9,6 @@ import {
 } from "./renderers/layout.js";
 import {
   formatInterventionStatusPresentation,
-  formatPostApplicationStatusPresentation,
   formatWateringBlockReason,
 } from "./utils/formatters.js";
 
@@ -748,6 +747,21 @@ function formatStatusLabel(status) {
   return formatStateLabel(status);
 }
 
+const POST_APPLICATION_STATUS_PRESENTATIONS = {
+  autorise: { label: "Autorisé", tone: "success", active: true, kind: "autorise" },
+  en_attente: { label: "En attente", tone: "warning", active: false, kind: "en_attente" },
+  bloque: { label: "Bloqué", tone: "danger", active: false, kind: "bloque" },
+  non_requis: { label: "Non requis", tone: "neutral", active: false, kind: "non_requis" },
+  non_autorise: { label: "Non autorisé", tone: "danger", active: false, kind: "non_autorise" },
+  indisponible: { label: "Non disponible", tone: "neutral", active: false, kind: "unavailable" },
+  non_disponible: { label: "Non disponible", tone: "neutral", active: false, kind: "unavailable" },
+};
+
+function formatPostApplicationStatusPresentation(status) {
+  const normalized = String(status ?? "").trim().toLowerCase();
+  return POST_APPLICATION_STATUS_PRESENTATIONS[normalized] || POST_APPLICATION_STATUS_PRESENTATIONS.indisponible;
+}
+
 function formatSwitchState(value) {
   const normalized = String(value ?? "").trim().toLowerCase();
   if (["on", "true", "yes", "1", "oui"].includes(normalized)) {
@@ -1013,13 +1027,21 @@ class GazonIntelligentCard extends HTMLElement {
     const attrs = application.attributes ?? {};
     const explicitStatus = String(attrs.application_post_watering_status ?? "").trim().toLowerCase();
     const normalizedStatus = explicitStatus || (["autorise", "en_attente", "bloque", "non_requis", "non_autorise", "indisponible", "non_disponible"].includes(rawState) ? rawState : "indisponible");
-    const presentation = formatPostApplicationStatusPresentation(normalizedStatus);
+    const presentation = typeof formatPostApplicationStatusPresentation === "function"
+      ? formatPostApplicationStatusPresentation(normalizedStatus)
+      : {
+          kind: normalizedStatus || "indisponible",
+          label: isEmpty(normalizedStatus) ? "Non disponible" : formatStateLabel(normalizedStatus),
+          tone: "neutral",
+          active: false,
+        };
     return {
       status: normalizedStatus,
       kind: presentation.kind,
       label: presentation.label,
       tone: presentation.tone,
       active: presentation.active,
+      value: explicitStatus || "Non disponible",
       rawStatus: rawState,
     };
   }

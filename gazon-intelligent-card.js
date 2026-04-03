@@ -7277,16 +7277,6 @@ function renderWateringTab(card) {
   const planState = card._planState();
   const objective = windowState.objective;
   const objectiveLabel = formatMm(objective);
-  const context = card._objectiveContext();
-  const lastWatering = card._lastWateringState();
-  const arrosageRecommande = card._entityState("entity_arrosage_recommande", null);
-  const afterApplication = card._entity("entity_arrosage_apres_application_autorise");
-  const afterApplicationInfo = card._postApplicationState(afterApplication);
-  const irrigationSignal = getDerivedSignalPresentation(
-    card._entity("entity_signal_irrigation"),
-    "Signal irrigation",
-    "mdi:sprinkler",
-  );
   const tone = windowState.tone;
   const windowIcon = card._statusIcon(windowState.status);
   const windowStatusIcon = card._config?.show_icons ? windowIcon : null;
@@ -7294,40 +7284,12 @@ function renderWateringTab(card) {
   const isAwaiting = windowState.isAwaiting;
   const noActionText = windowState.isNoActionRequired ? "Non requis" : "";
   const noActionHint = windowState.isNoActionRequired ? windowState.displaySummary || windowState.summary || "Non requis" : "";
-  const blockText = isBlocked
-    ? windowState.displaySummary || "Irrigation bloquée"
-    : isAwaiting
-      ? windowState.summary || "Irrigation prévue"
-      : noActionText;
   const blockHint = isBlocked
     ? windowState.blockReasonLabel || windowState.displayNextAction || windowState.nextAction || ""
     : isAwaiting
       ? windowState.nextAction || "Attendre le créneau prévu"
       : noActionHint;
   const planTypeLabel = formatPlanType(planState.planType);
-
-  const contextPills = [
-    card._renderTabPill("Irrigation", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
-    card._renderTabPill("Post-application", afterApplicationInfo.label, afterApplicationInfo.tone, "mdi:water-off"),
-    irrigationSignal
-      ? card._renderTabPill(irrigationSignal.label, irrigationSignal.value, irrigationSignal.tone, irrigationSignal.icon)
-      : null,
-    card._renderTabPill("Profil d'irrigation", formatStatusLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
-    card._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
-    card._renderTabPill("Risque gazon", context.risk, computeRisqueTone(context.risk), "mdi:shield-alert-outline"),
-    card._renderTabPill(
-      "Température",
-      context.temperature === null ? "Non disponible" : `${formatNumber(context.temperature, 1)} °C`,
-      context.temperature !== null && context.temperature >= 24 ? "warning" : "neutral",
-      "mdi:thermometer",
-    ),
-    card._renderTabPill(
-      "ETP",
-      context.etp === null ? "Non disponible" : `${formatNumber(context.etp, 1)} mm`,
-      context.etp !== null && context.etp >= 4 ? "warning" : "neutral",
-      "mdi:weather-sunny",
-    ),
-  ];
 
   const planChips = [
     card._renderTabPill("Zones", planState.zoneCount ? `${planState.zoneCount}` : "0", planState.zoneCount > 1 ? "accent" : "neutral", "mdi:pipe"),
@@ -7370,13 +7332,6 @@ function renderWateringTab(card) {
               ? `<div class="tab-panel__chips">${planChips.join("")}</div>`
               : ""
           }
-        </section>
-
-        <section class="gi-info gi-info--main tab-panel__section">
-          <div class="tab-panel__eyebrow">Contexte de décision</div>
-          <div class="tab-panel__grid">
-            ${contextPills.join("")}
-          </div>
         </section>
       </section>
     `;

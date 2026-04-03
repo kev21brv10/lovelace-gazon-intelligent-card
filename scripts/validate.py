@@ -32,12 +32,27 @@ UNIQUE_HELPERS = (
     "asNumber",
     "formatNumber",
     "formatDurationHuman",
+    "renderIconBox",
     "formatInterventionStatusPresentation",
     "formatPostApplicationStatusPresentation",
     "formatWateringBlockReason",
     "formatMonthLabel",
     "formatProductUsageMode",
     "formatProductAnnualLimit",
+)
+
+UNIQUE_CONSTANTS = (
+    "CARD_TYPE",
+    "CARD_NAME",
+    "CARD_VERSION",
+    "DEFAULT_CONFIG",
+    "TAB_DEFS",
+    "SECTION_DEFS",
+    "ENTITY_KEYS",
+    "RENDER_SIGNATURE_ATTRS",
+    "STATUS_COLORS",
+    "STATUS_LABELS",
+    "WEATHER_LABELS",
 )
 
 src_files = {name: (ROOT / name).read_text(encoding="utf-8") for name in SRC_FILES}
@@ -57,12 +72,11 @@ if hacs.get("content_in_root") is not True:
 
 main_src = src_files["src/gazon-intelligent-card.js"]
 constants_src = src_files["src/constants.js"]
-version_match = re.search(r'CARD_VERSION\s*=\s*"([^"]+)"', main_src)
-if not version_match:
-    raise SystemExit("Could not find CARD_VERSION in src/gazon-intelligent-card.js")
+if 'from "./constants.js"' not in main_src:
+    raise SystemExit('src/gazon-intelligent-card.js must import shared constants')
 
-if version_match.group(1) != package.get("version"):
-    raise SystemExit("CARD_VERSION must match package.json version")
+if 'const CARD_VERSION =' in main_src:
+    raise SystemExit("src/gazon-intelligent-card.js must not define CARD_VERSION locally")
 
 constants_version_match = re.search(r'CARD_VERSION\s*=\s*"([^"]+)"', constants_src)
 if not constants_version_match:
@@ -106,6 +120,24 @@ if "/local/gazon-intelligent-card/gazon-intelligent-card.js" not in readme:
 
 if 'import { CARD_STYLES } from "./styles/card-styles.js";' not in main_src:
     raise SystemExit('Missing CARD_STYLES import in src/gazon-intelligent-card.js')
+
+if 'from "./constants.js"' not in main_src:
+    raise SystemExit('Missing constants import in src/gazon-intelligent-card.js')
+
+for marker in (
+    "const CARD_TYPE =",
+    "const CARD_NAME =",
+    "const CARD_VERSION =",
+    "const DEFAULT_CONFIG =",
+    "const TAB_DEFS =",
+    "const SECTION_DEFS =",
+    "const ENTITY_KEYS =",
+    "const RENDER_SIGNATURE_ATTRS =",
+    "const STATUS_COLORS =",
+    "const STATUS_LABELS =",
+):
+    if marker in main_src:
+        raise SystemExit(f"src/gazon-intelligent-card.js must not define {marker}")
 
 if 'from "./renderers/layout.js";' not in main_src:
     raise SystemExit("src/gazon-intelligent-card.js must import the layout renderer module")
@@ -162,6 +194,11 @@ for helper in UNIQUE_HELPERS:
     occurrences = len(re.findall(rf"(?m)^function\s+{re.escape(helper)}\s*\(", root_src))
     if occurrences != 1:
         raise SystemExit(f"Bundled helper {helper} must be defined exactly once (found {occurrences})")
+
+for constant in UNIQUE_CONSTANTS:
+    occurrences = len(re.findall(rf"(?m)^const\s+{re.escape(constant)}\s*=", root_src))
+    if occurrences != 1:
+        raise SystemExit(f"Bundled constant {constant} must be defined exactly once (found {occurrences})")
 
 for marker in (
     "sensor.gazon_intelligent_niveau_de_pertinence",

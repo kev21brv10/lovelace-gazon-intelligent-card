@@ -109,6 +109,7 @@ resources:
 - `src/styles/card-styles.js` : styles de la carte Lovelace
 - `src/styles/editor-styles.js` : styles de l'éditeur
 - `gazon-intelligent-card.js` : bundle final consommé par Home Assistant et HACS
+- `docs/frontend-dependency-manifest.md` : manifeste léger des dépendances frontend critiques
 
 ---
 

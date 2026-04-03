@@ -1,4 +1,4 @@
-import { escapeHtml, isEmpty } from "../utils/formatters.js";
+import { escapeHtml, isEmpty, safeRenderIconBox } from "../utils/formatters.js";
 
 export function renderIconBox(icon, size = "md") {
   if (!icon) {
@@ -13,7 +13,7 @@ export function renderPillIcon(icon) {
   if (!icon) {
     return "";
   }
-  return `<span class="gi-pill__icon">${renderIconBox(icon, "pill")}</span>`;
+  return `<span class="gi-pill__icon">${safeRenderIconBox(icon, "pill")}</span>`;
 }
 
 export function renderPillContent({ label = "", value = "", compact = false }) {
@@ -66,10 +66,10 @@ export function renderCardCore({
   if (interactive) {
     classes.push("gi-card-core--interactive");
   }
-  const iconHtml = icon ? renderIconBox(icon, iconSize) : "";
+  const iconHtml = icon ? safeRenderIconBox(icon, iconSize) : "";
   const secondaryValue = isEmpty(secondary) ? "&nbsp;" : escapeHtml(secondary);
   const affordanceHtml = interactive
-    ? `<div class="gi-card-core__affordance" aria-hidden="true">${renderIconBox("mdi:chevron-right", "sm")}</div>`
+    ? `<div class="gi-card-core__affordance" aria-hidden="true">${safeRenderIconBox("mdi:chevron-right", "sm")}</div>`
     : "";
   return `
     <section class="${classes.join(" ")}"${style ? ` style="${escapeHtml(style)}"` : ""}>

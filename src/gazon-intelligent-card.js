@@ -34,7 +34,7 @@ import {
   formatStatusLabel,
   formatSwitchState,
   formatWateringBlockReason,
-  formatWeatherConditionLabel,
+  safeFormatWeatherConditionLabel as formatWeatherConditionLabel,
   formatNumber,
   iconForField,
   humanDateTimeText,
@@ -50,6 +50,8 @@ import {
   toneToColor,
   weatherIconForState,
   weatherToneForState,
+  safeRenderIconBox as renderIconBox,
+  safeRenderStatusPill as renderStatusPill,
 } from "./utils/formatters.js";
 import {
   renderActiveTab,

@@ -2506,7 +2506,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.50";
+const CARD_VERSION = "0.1.51";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -2865,8 +2865,9 @@ function formatStateLabel(value) {
     return "Non disponible";
   }
   const normalized = String(value).trim().toLowerCase();
-  if (STATUS_LABELS[normalized]) {
-    return STATUS_LABELS[normalized];
+  const labels = typeof STATUS_LABELS !== "undefined" && STATUS_LABELS ? STATUS_LABELS : {};
+  if (labels[normalized]) {
+    return labels[normalized];
   }
   const cleaned = normalized.replaceAll("_", " ").replaceAll("-", " ").replace(/\s+/g, " ").trim();
   if (!cleaned) {
@@ -2880,8 +2881,9 @@ function formatWeatherConditionLabel(value) {
   if (!normalized) {
     return "Météo";
   }
-  if (WEATHER_LABELS[normalized]) {
-    return WEATHER_LABELS[normalized];
+  const labels = typeof WEATHER_LABELS !== "undefined" && WEATHER_LABELS ? WEATHER_LABELS : {};
+  if (labels[normalized]) {
+    return labels[normalized];
   }
   const cleaned = normalized.replaceAll("_", " ").replaceAll("-", " ").replace(/\s+/g, " ").trim();
   if (!cleaned) {
@@ -3012,7 +3014,8 @@ function phaseTone(value) {
 }
 
 function toneToColor(tone) {
-  return STATUS_COLORS[tone] || STATUS_COLORS.neutral;
+  const colors = typeof STATUS_COLORS !== "undefined" && STATUS_COLORS ? STATUS_COLORS : { neutral: "#7a8c9d" };
+  return colors[tone] || colors.neutral;
 }
 
 function sectionToAccent(section) {
@@ -3136,7 +3139,8 @@ function iconForField(field) {
   if (!key) {
     return "mdi:information-outline";
   }
-  const match = ENTITY_KEYS.find((entry) => entry.key === key);
+  const keys = typeof ENTITY_KEYS !== "undefined" && Array.isArray(ENTITY_KEYS) ? ENTITY_KEYS : [];
+  const match = keys.find((entry) => entry.key === key);
   return String(match?.icon || "mdi:information-outline");
 }
 
@@ -3186,6 +3190,84 @@ function formatMonthLabel(value) {
   }
   const month = Math.trunc(number);
   return MONTH_LABELS[month] || String(month);
+}
+
+function renderIconBoxFallback(icon, size = "md") {
+  if (!icon) {
+    return "";
+  }
+  const sizeClass = size === "sm" ? "gi-icon--sm" : size === "pill" ? "gi-icon--pill" : "";
+  const iconSize = size === "sm" ? "13px" : size === "pill" ? "14px" : "16px";
+  return `<span class="gi-icon ${sizeClass}"><ha-icon style="--mdc-icon-size:${iconSize};" icon="${escapeHtml(icon)}"></ha-icon></span>`;
+}
+
+function renderStatusPillFallback(text, tone = "neutral", icon = null, extraClass = "") {
+  const classes = ["gi-pill", "gi-pill--status", `gi-pill--${tone}`];
+  if (extraClass) {
+    classes.push(extraClass);
+  }
+  const iconHtml = icon ? `<span class="gi-pill__icon">${renderIconBoxFallback(icon, "pill")}</span>` : "";
+  return `
+    <div class="${classes.join(" ")}">
+      ${iconHtml}
+      <div class="gi-pill__content">
+        <span class="gi-pill__value">${escapeHtml(text)}</span>
+      </div>
+    </div>
+  `;
+}
+
+function monthLabelFallback(value) {
+  const number = asNumber(value);
+  if (number === null) {
+    return isUnavailableState(value) ? "Non disponible" : String(value ?? "").trim() || "Non disponible";
+  }
+  const month = Math.trunc(number);
+  return MONTH_LABELS[month] || String(month);
+}
+
+function weatherConditionLabelFallback(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return "Météo";
+  }
+  const labels = typeof WEATHER_LABELS !== "undefined" && WEATHER_LABELS ? WEATHER_LABELS : {};
+  if (labels[normalized]) {
+    return labels[normalized];
+  }
+  const cleaned = normalized.replaceAll("_", " ").replaceAll("-", " ").replace(/\s+/g, " ").trim();
+  if (!cleaned) {
+    return "Météo";
+  }
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
+function safeRenderIconBox(icon, size = "md") {
+  if (typeof renderIconBox === "function") {
+    return renderIconBox(icon, size);
+  }
+  return renderIconBoxFallback(icon, size);
+}
+
+function safeRenderStatusPill(text, tone = "neutral", icon = null, extraClass = "") {
+  if (typeof renderStatusPill === "function") {
+    return renderStatusPill(text, tone, icon, extraClass);
+  }
+  return renderStatusPillFallback(text, tone, icon, extraClass);
+}
+
+function safeFormatMonthLabel(value) {
+  if (typeof formatMonthLabel === "function") {
+    return formatMonthLabel(value);
+  }
+  return monthLabelFallback(value);
+}
+
+function safeFormatWeatherConditionLabel(value) {
+  if (typeof formatWeatherConditionLabel === "function") {
+    return formatWeatherConditionLabel(value);
+  }
+  return weatherConditionLabelFallback(value);
 }
 
 const INTERVENTION_STATUS_PRESENTATIONS = {
@@ -3370,7 +3452,7 @@ function renderPillIcon(icon) {
   if (!icon) {
     return "";
   }
-  return `<span class="gi-pill__icon">${renderIconBox(icon, "pill")}</span>`;
+  return `<span class="gi-pill__icon">${safeRenderIconBox(icon, "pill")}</span>`;
 }
 
 function renderPillContent({ label = "", value = "", compact = false }) {
@@ -3423,10 +3505,10 @@ function renderCardCore({
   if (interactive) {
     classes.push("gi-card-core--interactive");
   }
-  const iconHtml = icon ? renderIconBox(icon, iconSize) : "";
+  const iconHtml = icon ? safeRenderIconBox(icon, iconSize) : "";
   const secondaryValue = isEmpty(secondary) ? "&nbsp;" : escapeHtml(secondary);
   const affordanceHtml = interactive
-    ? `<div class="gi-card-core__affordance" aria-hidden="true">${renderIconBox("mdi:chevron-right", "sm")}</div>`
+    ? `<div class="gi-card-core__affordance" aria-hidden="true">${safeRenderIconBox("mdi:chevron-right", "sm")}</div>`
     : "";
   return `
     <section class="${classes.join(" ")}"${style ? ` style="${escapeHtml(style)}"` : ""}>

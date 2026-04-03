@@ -23,6 +23,10 @@ CRITICAL_HELPERS = (
     "formatInterventionStatusPresentation",
     "formatPostApplicationStatusPresentation",
     "formatWateringBlockReason",
+    "safeRenderIconBox",
+    "safeRenderStatusPill",
+    "safeFormatMonthLabel",
+    "safeFormatWeatherConditionLabel",
 )
 
 UNIQUE_HELPERS = (
@@ -34,12 +38,17 @@ UNIQUE_HELPERS = (
     "formatDurationHuman",
     "iconForField",
     "renderIconBox",
+    "renderStatusPill",
     "formatInterventionStatusPresentation",
     "formatPostApplicationStatusPresentation",
     "formatWateringBlockReason",
     "formatMonthLabel",
     "formatProductUsageMode",
     "formatProductAnnualLimit",
+    "safeRenderIconBox",
+    "safeRenderStatusPill",
+    "safeFormatMonthLabel",
+    "safeFormatWeatherConditionLabel",
 )
 
 UNIQUE_CONSTANTS = (
@@ -176,6 +185,28 @@ for marker in constants_markers:
 for marker in ("customElements.define", "getConfigForm", "window.customCards"):
     if marker not in main_src:
         raise SystemExit(f"Missing expected marker: {marker}")
+
+required_safe_imports = {
+    "src/gazon-intelligent-card.js": (
+        "safeRenderIconBox as renderIconBox",
+        "safeRenderStatusPill as renderStatusPill",
+        "safeFormatWeatherConditionLabel as formatWeatherConditionLabel",
+    ),
+    "src/renderers/layout.js": (
+        "safeFormatMonthLabel as formatMonthLabel",
+        "safeRenderIconBox as renderIconBox",
+        "safeRenderStatusPill as renderStatusPill",
+    ),
+    "src/renderers/primitives.js": (
+        "safeRenderIconBox",
+    ),
+}
+
+for source_name, markers in required_safe_imports.items():
+    source_text = src_files[source_name]
+    for marker in markers:
+        if marker not in source_text:
+            raise SystemExit(f"{source_name} must import {marker}")
 
 for marker in (
     "function formatProductUsageMode",

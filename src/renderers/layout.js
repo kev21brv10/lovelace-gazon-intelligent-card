@@ -9,7 +9,6 @@ import {
   formatAuthorizationState,
   formatCm,
   formatMm,
-  formatMonthLabel,
   formatPlanType,
   formatRecommendationState,
   formatStatusLabel,
@@ -17,12 +16,14 @@ import {
   formatDurationHuman,
   formatInterventionStatusPresentation,
   formatWateringBlockReason,
+  safeFormatMonthLabel as formatMonthLabel,
+  safeRenderIconBox as renderIconBox,
+  safeRenderStatusPill as renderStatusPill,
   humanDateTimeText,
   isEmpty,
   isUnavailableState,
   phaseTone,
 } from "../utils/formatters.js";
-import { renderIconBox, renderStatusPill } from "./primitives.js";
 
 export function renderTabNav(card) {
   return `

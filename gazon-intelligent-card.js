@@ -7131,29 +7131,6 @@ function renderInterventionTab(card) {
           </div>
         </section>
 
-        ${
-          signalIntervention
-            ? `
-              <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--derived-signals">
-                <div class="tab-panel__section-head">
-                  <div class="tab-panel__eyebrow">Signal dérivé</div>
-                  <div class="tab-panel__section-meta">Lecture rapide</div>
-                </div>
-                <div class="tab-panel__grid">
-                  ${card._renderLinkedStatCard({
-                    label: signalIntervention.label,
-                    value: signalIntervention.value,
-                    tone: signalIntervention.tone,
-                    icon: signalIntervention.icon,
-                    secondary: signalIntervention.secondary,
-                    entityKey: "entity_signal_intervention",
-                  })}
-                </div>
-              </section>
-            `
-            : ""
-        }
-
         ${renderDebugInterventionSection(card, debug)}
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">

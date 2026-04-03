@@ -1314,7 +1314,6 @@ export function renderDecisionLayout(card) {
         ${
           card._canShowLegacyDetails()
             ? `<section class="decision-advanced">
-                ${renderSectionNav(card)}
                 ${card._buildDecisionBlocks()}
                 ${card._buildContent()}
                 ${card._buildFooter()}

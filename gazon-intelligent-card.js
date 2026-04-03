@@ -3918,6 +3918,7 @@ class GazonIntelligentCard extends HTMLElement {
     const entity = this._interventionRecommendationEntity();
     const attrs = entity?.attributes || {};
     const payload = attrs.payload && typeof attrs.payload === "object" ? attrs.payload : attrs;
+    const catalogue = this._catalogueState();
     const product = payload.product && typeof payload.product === "object" ? payload.product : {};
     const selection = payload.selection && typeof payload.selection === "object" ? payload.selection : {};
     const context = payload.context && typeof payload.context === "object" ? payload.context : {};

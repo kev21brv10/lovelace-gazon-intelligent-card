@@ -6903,7 +6903,6 @@ function renderProductSummarySection(card) {
           <div class="tab-panel__eyebrow">Référentiel produit</div>
           ${renderStatusPill(catalogue.summary, catalogue.hasProducts ? "success" : "neutral", "mdi:package-variant-closed", "tab-panel__status")}
         </div>
-        <div class="tab-panel__section-summary">Produit actif, catalogue local et dernière intervention sont regroupés ici pour garder la proposition métier lisible.</div>
         <div class="tab-panel__grid tab-panel__grid--products">
           ${card._renderStatCard(
             "Produit actif",
@@ -7009,12 +7008,11 @@ function renderInterventionTab(card) {
   const pickerSummary = ui.selectionSummary || (quickAction.record ? "Produit sélectionné." : hasProductOptions ? "Sélectionne un produit dans la liste." : "Aucun produit disponible.");
   const pickerHint = ui.selectionHint || "La sélection met à jour le produit actif.";
   const actionSummary = ui.declarationSummary || "Déclaration indisponible.";
-  const actionHint = ui.declarationHint || "Le moteur compare le catalogue, la dernière intervention et la météo.";
+  const actionHint = ui.declarationHint || "La déclaration suit le produit sélectionné.";
   const temperatureConstraint = (Array.isArray(recommendation.constraints)
     ? recommendation.constraints.find((constraint) => constraint?.code === "temperature_range")
     : null);
   const temperatureConstraintState = formatTemperatureRangeConstraint(temperatureConstraint);
-  const decisionHint = ui.hint || "Le moteur compare le catalogue, la dernière intervention et la météo.";
 
   return `
       <section class="tab-panel gi-panel tab-panel--intervention">
@@ -7054,7 +7052,6 @@ function renderInterventionTab(card) {
             <div class="tab-panel__eyebrow">Assistant de décision</div>
             <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
           </div>
-          <div class="tab-panel__section-hint">${escapeHtml(decisionHint)}</div>
           <div class="tab-panel__workflow" aria-hidden="true">
             <div class="tab-panel__workflow-step tab-panel__workflow-step--active">
               <span class="tab-panel__workflow-index">1</span>
@@ -7260,13 +7257,6 @@ function renderOverviewTab(card) {
             : ""
         }
 
-        ${
-          `<section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--overview-brief">
-            <div class="tab-panel__eyebrow">Lecture rapide</div>
-            <div class="tab-panel__section-summary">${escapeHtml(proposal.title)}</div>
-            <div class="tab-panel__block-hint">${escapeHtml(proposal.hint)}</div>
-          </section>`
-        }
       </section>
     `;
 }

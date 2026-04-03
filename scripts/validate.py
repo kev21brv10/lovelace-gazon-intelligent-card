@@ -133,6 +133,7 @@ for marker in (
     "function formatProductUsageMode",
     "function formatProductAnnualLimit",
     "function formatTemperatureRangeConstraint",
+    "function formatMonthLabel",
 ):
     if marker not in root_src:
         raise SystemExit(f"Missing expected helper in bundled file: {marker}")

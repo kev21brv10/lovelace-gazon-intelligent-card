@@ -7000,12 +7000,12 @@ function renderInterventionTab(card) {
   const recommendationTone = ui.tone || "neutral";
   const recommendationIcon = ui.icon || "mdi:spray-bottle";
   const selectionMeta = quickAction.record
-    ? "Choix actif"
+    ? "Sélection active"
     : hasProductOptions
       ? "Produit à sélectionner"
       : "Aucun produit disponible";
   const declarationMeta = ui.badge || formatStatusLabel(recommendation.status) || "Non disponible";
-  const pickerSummary = ui.selectionSummary || (quickAction.record ? "Sélection en cours." : hasProductOptions ? "Sélectionne un produit dans la liste." : "Aucun produit disponible.");
+  const pickerSummary = ui.selectionSummary || (quickAction.record ? "Sélection active." : hasProductOptions ? "Sélectionne un produit dans la liste." : "Aucun produit disponible.");
   const pickerHint = ui.selectionHint || "La sélection met à jour le produit actif.";
   const actionSummary = ui.declarationSummary || "Déclaration indisponible.";
   const actionHint = ui.declarationHint || "La déclaration suit le produit sélectionné.";

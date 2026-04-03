@@ -170,6 +170,94 @@ function formatDebugConstraintImpact(constraint) {
   };
 }
 
+function resolveInterventionStatusPresentation(status) {
+  if (typeof formatInterventionStatusPresentation === "function") {
+    return formatInterventionStatusPresentation(status);
+  }
+  const normalized = String(status ?? "").trim().toLowerCase();
+  const presentations = {
+    recommended: {
+      title: "Recommandé",
+      badge: "Recommandé",
+      tone: "success",
+      icon: "mdi:spray-bottle",
+      summary: "Recommandé",
+      hint: "La prochaine intervention est prête à être déclarée.",
+      actionLabel: "Déclarer maintenant",
+      selectionSummary: "Produit sélectionné",
+      selectionHint: "Le produit sélectionné alimente la déclaration.",
+      declarationSummary: "Prêt à déclarer",
+      declarationHint: "La déclaration peut être lancée maintenant.",
+      historySummary: "Dernière application",
+      historyHint: "Historique local des applications enregistrées.",
+    },
+    possible: {
+      title: "À préparer",
+      badge: "À préparer",
+      tone: "warning",
+      icon: "mdi:spray-bottle",
+      summary: "À préparer",
+      hint: "La prochaine intervention est à préparer.",
+      actionLabel: "Choisir le produit",
+      selectionSummary: "Produit à sélectionner",
+      selectionHint: "Le produit sélectionné alimente la déclaration.",
+      declarationSummary: "À préparer",
+      declarationHint: "La déclaration n’est pas encore prête.",
+      historySummary: "Dernière application",
+      historyHint: "Historique local des applications enregistrées.",
+    },
+    ready: {
+      title: "Prêt à déclarer",
+      badge: "Prêt à déclarer",
+      tone: "success",
+      icon: "mdi:spray-bottle",
+      summary: "Prêt à déclarer",
+      hint: "Le produit peut être déclaré maintenant.",
+      actionLabel: "Déclarer",
+      selectionSummary: "Produit sélectionné",
+      selectionHint: "Le produit sélectionné est prêt à être confirmé.",
+      declarationSummary: "Prêt à déclarer",
+      declarationHint: "La déclaration peut être lancée maintenant.",
+      historySummary: "Dernière application",
+      historyHint: "Historique local des applications enregistrées.",
+    },
+    blocked: {
+      title: "Bloqué",
+      badge: "Bloqué",
+      tone: "danger",
+      icon: "mdi:cancel",
+      summary: "Bloqué",
+      hint: "Une contrainte bloque la prochaine intervention.",
+      actionLabel: "Attendre",
+      selectionSummary: "Produit sélectionné",
+      selectionHint: "La sélection reste disponible, mais la déclaration est bloquée.",
+      declarationSummary: "Bloqué",
+      declarationHint: "Une contrainte bloque la déclaration.",
+      historySummary: "Dernière application",
+      historyHint: "Historique local des applications enregistrées.",
+    },
+    unavailable: {
+      title: "Non disponible",
+      badge: "Non disponible",
+      tone: "neutral",
+      icon: "mdi:package-variant-closed",
+      summary: "Non disponible",
+      hint: "Aucun statut exploitable n’est disponible.",
+      actionLabel: "Non disponible",
+      selectionSummary: "Aucun produit disponible",
+      selectionHint: "Sélectionne un produit dans la liste pour préparer la déclaration.",
+      declarationSummary: "Non disponible",
+      declarationHint: "Aucune recommandation n’est disponible pour l’instant.",
+      historySummary: "Dernière application",
+      historyHint: "Historique local des applications enregistrées.",
+    },
+  };
+  return {
+    status: normalized || "unavailable",
+    ...(presentations[normalized] || presentations.unavailable),
+  };
+}
+
 function renderDebugConstraintCards(card, constraints, emptyText) {
   const items = Array.isArray(constraints) ? constraints : [];
   if (!items.length) {
@@ -213,7 +301,7 @@ function getDebugInterventionState(card) {
   const attrs = entity.attributes || {};
   const payload = attrs.payload && typeof attrs.payload === "object" ? attrs.payload : attrs;
   const status = String(payload.status || entity.state || attrs.status || "").trim().toLowerCase() || "unavailable";
-  const presentation = formatInterventionStatusPresentation(status);
+  const presentation = resolveInterventionStatusPresentation(status);
   const product = payload.product && typeof payload.product === "object" ? payload.product : {};
   const selection = payload.selection && typeof payload.selection === "object" ? payload.selection : {};
   const context = payload.context && typeof payload.context === "object" ? payload.context : {};
@@ -308,7 +396,7 @@ function renderDebugInterventionSection(card, debug, wrapped = true) {
   }
 
   const score = debug.score === null || debug.score === undefined ? 0 : formatNumber(debug.score, 0);
-  const presentation = formatInterventionStatusPresentation(debug.status);
+  const presentation = resolveInterventionStatusPresentation(debug.status);
   const statusLabel = debug.statusLabel || presentation.badge || presentation.summary || "Non disponible";
   const statusTone = debug.statusTone || presentation.tone || "neutral";
   const statusIcon = debug.statusIcon || presentation.icon || "mdi:bug-outline";

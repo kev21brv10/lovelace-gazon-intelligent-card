@@ -338,6 +338,30 @@ export function formatStatusLabel(status) {
   return formatStateLabel(status);
 }
 
+const MONTH_LABELS = {
+  1: "Janvier",
+  2: "Février",
+  3: "Mars",
+  4: "Avril",
+  5: "Mai",
+  6: "Juin",
+  7: "Juillet",
+  8: "Août",
+  9: "Septembre",
+  10: "Octobre",
+  11: "Novembre",
+  12: "Décembre",
+};
+
+export function formatMonthLabel(value) {
+  const number = asNumber(value);
+  if (number === null) {
+    return isUnavailableState(value) ? "Non disponible" : String(value ?? "").trim() || "Non disponible";
+  }
+  const month = Math.trunc(number);
+  return MONTH_LABELS[month] || String(month);
+}
+
 const INTERVENTION_STATUS_PRESENTATIONS = {
   recommended: {
     title: "Recommandé",

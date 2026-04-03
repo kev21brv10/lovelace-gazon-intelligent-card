@@ -9,6 +9,7 @@ import {
   formatAuthorizationState,
   formatCm,
   formatMm,
+  formatMonthLabel,
   formatPlanType,
   formatRecommendationState,
   formatStatusLabel,
@@ -318,7 +319,7 @@ function renderDebugInterventionSection(card, debug) {
     detailHintParts.push(`Phase actuelle: ${formatStatusLabel(debug.context.phase)}`);
   }
   if (debug.context?.month !== null && debug.context?.month !== undefined) {
-    detailHintParts.push(`Mois: ${debug.context.month}`);
+    detailHintParts.push(`Mois: ${formatMonthLabel(debug.context.month)}`);
   }
   if (debug.context?.temperature !== null && debug.context?.temperature !== undefined) {
     detailHintParts.push(`Température: ${formatNumber(debug.context.temperature, 1)} °C`);
@@ -339,7 +340,7 @@ function renderDebugInterventionSection(card, debug) {
     contextPills.push(renderStatusPill(`Phase: ${formatStatusLabel(debug.context.phase)}`, "neutral", "mdi:grass", "debug-chip"));
   }
   if (debug.context?.month !== null && debug.context?.month !== undefined) {
-    contextPills.push(renderStatusPill(`Mois: ${debug.context.month}`, "neutral", "mdi:calendar-month", "debug-chip"));
+    contextPills.push(renderStatusPill(`Mois: ${formatMonthLabel(debug.context.month)}`, "neutral", "mdi:calendar-month", "debug-chip"));
   }
   if (debug.context?.temperature !== null && debug.context?.temperature !== undefined) {
     contextPills.push(

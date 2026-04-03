@@ -465,6 +465,13 @@ export const CARD_STYLES = String.raw`
           gap: 10px;
         }
 
+        .tab-panel__decision-strip {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          padding: 0 2px;
+        }
+
         .tab-panel__intervention-layout {
           display: grid;
           grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
@@ -669,6 +676,53 @@ export const CARD_STYLES = String.raw`
         .tab-panel__section--intervention-picker,
         .tab-panel__section--application-history {
           gap: 10px;
+        }
+
+        .tab-panel__debug-foldout {
+          display: block;
+          margin-top: 10px;
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 10%, var(--divider-color));
+          border-radius: 18px;
+          overflow: hidden;
+          background:
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 8%, transparent) 0%, transparent 34%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 4%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 100%, white) 100%);
+          box-shadow: var(--gi-surface-shadow);
+        }
+
+        .tab-panel__debug-foldout[open] {
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 16%, var(--divider-color));
+        }
+
+        .tab-panel__debug-foldout-summary {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 12px 14px;
+          cursor: pointer;
+          list-style: none;
+          user-select: none;
+        }
+
+        .tab-panel__debug-foldout-summary::-webkit-details-marker {
+          display: none;
+        }
+
+        .tab-panel__debug-foldout-meta {
+          min-width: 0;
+          text-align: right;
+          font-size: var(--gi-font-xs);
+          line-height: 1.3;
+          color: var(--secondary-text-color);
+          overflow-wrap: anywhere;
+        }
+
+        .tab-panel__debug-foldout-body {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          padding: 0 14px 14px;
         }
 
         .tab-panel__grid {

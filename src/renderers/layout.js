@@ -302,7 +302,7 @@ function getDebugInterventionState(card) {
   };
 }
 
-function renderDebugInterventionSection(card, debug) {
+function renderDebugInterventionSection(card, debug, wrapped = true) {
   if (!debug || !debug.entity) {
     return "";
   }
@@ -359,8 +359,7 @@ function renderDebugInterventionSection(card, debug) {
   const blockingConstraints = Array.isArray(debug.blockingConstraints) ? debug.blockingConstraints : [];
   const nonBlockingConstraints = Array.isArray(debug.nonBlockingConstraints) ? debug.nonBlockingConstraints : [];
 
-  return `
-      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--debug-intervention">
+  const inner = `
         <div class="tab-panel__section-head">
           <div class="tab-panel__eyebrow">Debug métier</div>
           <div class="tab-panel__section-meta">${escapeHtml(summary)}</div>
@@ -436,6 +435,15 @@ function renderDebugInterventionSection(card, debug) {
             }
           </div>
         </div>
+    `;
+
+  if (!wrapped) {
+    return `<div class="tab-panel__debug-foldout-body">${inner}</div>`;
+  }
+
+  return `
+      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--debug-intervention">
+        ${inner}
       </section>
     `;
 }
@@ -745,11 +753,6 @@ export function renderInterventionTab(card) {
   const quickAction = card._selectedProductInterventionState();
   const lastApplication = card._lastApplicationState();
   const productOptions = card._catalogueProductOptions();
-  const signalIntervention = getDerivedSignalPresentation(
-    card._entity("entity_signal_intervention"),
-    "Signal intervention",
-    "mdi:spray-bottle",
-  );
   const ui = recommendation.ui || {};
   const selectedProductOptionLabel = quickAction.optionLabel || (productOptions.length === 1 ? productOptions[0].label : "");
   const hasProductOptions = productOptions.length > 0;
@@ -769,6 +772,7 @@ export function renderInterventionTab(card) {
       ? "Produit à sélectionner"
       : "Aucun produit disponible";
   const declarationMeta = ui.badge || formatStatusLabel(recommendation.status) || "Non disponible";
+  const decisionSummary = [selectionMeta, declarationMeta].filter(Boolean).join(" · ");
   const pickerSummary = ui.selectionSummary || (quickAction.record ? "Sélection active." : hasProductOptions ? "Sélectionne un produit dans la liste." : "Aucun produit disponible.");
   const pickerHint = ui.selectionHint || "La sélection met à jour le produit actif.";
   const actionSummary = ui.declarationSummary || "Déclaration indisponible.";
@@ -811,26 +815,19 @@ export function renderInterventionTab(card) {
           }
         </div>
 
-        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-workflow">
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-decision">
           <div class="tab-panel__section-head">
             <div class="tab-panel__eyebrow">Assistant de décision</div>
             <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
           </div>
-          <div class="tab-panel__workflow" aria-hidden="true">
-            <div class="tab-panel__workflow-step tab-panel__workflow-step--active">
-              <span class="tab-panel__workflow-index">1</span>
-              <span class="tab-panel__workflow-label">Choisis</span>
-            </div>
-            <div class="tab-panel__workflow-connector"></div>
-            <div class="tab-panel__workflow-step ${canDeclare ? "tab-panel__workflow-step--done" : hasSelection ? "tab-panel__workflow-step--active" : ""}">
-              <span class="tab-panel__workflow-index">2</span>
-              <span class="tab-panel__workflow-label">Déclare</span>
-            </div>
+          <div class="tab-panel__decision-strip" aria-hidden="true">
+            ${card._renderTabPill("Sélection", selectionMeta, quickAction.record ? "success" : hasProductOptions ? "warning" : "neutral", "mdi:package-variant")}
+            ${card._renderTabPill("Déclaration", declarationMeta, canDeclare ? "success" : recommendationTone, recommendationIcon)}
           </div>
           <div class="tab-panel__intervention-layout">
             <div class="tab-panel__intervention-card tab-panel__intervention-card--picker">
               <div class="tab-panel__section-head">
-                <div class="tab-panel__eyebrow">Produit sélectionné</div>
+                <div class="tab-panel__eyebrow">Sélection</div>
                 <div class="tab-panel__section-meta">${escapeHtml(selectionMeta)}</div>
               </div>
               <label class="tab-panel__field">
@@ -892,7 +889,13 @@ export function renderInterventionTab(card) {
           </div>
         </section>
 
-        ${renderDebugInterventionSection(card, debug)}
+        <details class="tab-panel__debug-foldout">
+          <summary class="tab-panel__debug-foldout-summary">
+            <span class="tab-panel__eyebrow">Debug métier</span>
+            <span class="tab-panel__debug-foldout-meta">${escapeHtml(debug ? `Score ${formatNumber(debug.score ?? 0, 0)} · ${debug.statusLabel || debug.summary || "Analyse moteur"}` : decisionSummary || "Analyse moteur")}</span>
+          </summary>
+          ${renderDebugInterventionSection(card, debug, false)}
+        </details>
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
           <div class="tab-panel__section-head">

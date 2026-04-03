@@ -1290,6 +1290,22 @@ export const CARD_STYLES = String.raw`
           gap: 8px;
         }
 
+        .tab-panel__section--debug-intervention {
+          gap: 12px;
+        }
+
+        .tab-panel__debug-columns {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 10px;
+        }
+
+        .tab-panel__debug-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 8px;
+        }
+
         .decision-block {
           display: flex;
           flex-direction: column;

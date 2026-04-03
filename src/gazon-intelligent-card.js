@@ -15,7 +15,7 @@ import {
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.40";
+const CARD_VERSION = "0.1.41";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -39,6 +39,7 @@ const DEFAULT_CONFIG = {
   entity_derniere_application: "sensor.gazon_intelligent_derniere_application",
   entity_catalogue_produits: "sensor.gazon_intelligent_catalogue_produits",
   entity_produit_intervention: "select.gazon_intelligent_produit_d_intervention",
+  entity_debug_intervention: "sensor.gazon_intelligent_debug_intervention",
   entity_conseil: "sensor.gazon_intelligent_conseil_principal",
   entity_action: "sensor.gazon_intelligent_action_recommandee",
   entity_avoid: "sensor.gazon_intelligent_action_a_eviter",
@@ -780,6 +781,7 @@ class GazonIntelligentCard extends HTMLElement {
       entity_switch_arrosage_automatique: DEFAULT_CONFIG.entity_switch_arrosage_automatique,
       entity_arrosage_recommande: DEFAULT_CONFIG.entity_arrosage_recommande,
       entity_arrosage_apres_application_autorise: DEFAULT_CONFIG.entity_arrosage_apres_application_autorise,
+      entity_debug_intervention: DEFAULT_CONFIG.entity_debug_intervention,
       entity_tonte_autorisee: DEFAULT_CONFIG.entity_tonte_autorisee,
       entity_objectif_arrosage: DEFAULT_CONFIG.entity_objectif_arrosage,
       entity_type_arrosage: DEFAULT_CONFIG.entity_type_arrosage,
@@ -819,6 +821,7 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_switch_arrosage_automatique", selector: { entity: { domain: ["switch"] } } },
         { name: "entity_arrosage_recommande", selector: { entity: { domain: ["binary_sensor"] } } },
         { name: "entity_arrosage_apres_application_autorise", selector: { entity: { domain: ["binary_sensor"] } } },
+        { name: "entity_debug_intervention", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_tonte_autorisee", selector: { entity: { domain: ["binary_sensor"] } } },
         { name: "entity_objectif_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_type_arrosage", selector: { entity: { domain: ["sensor"] } } },
@@ -1884,6 +1887,7 @@ class GazonIntelligentCard extends HTMLElement {
       "entity_arrosage_en_cours",
       "entity_arrosage_recommande",
       "entity_arrosage_apres_application_autorise",
+      "entity_debug_intervention",
       "entity_tonte_autorisee",
       "entity_niveau",
       "entity_risque",
@@ -1941,6 +1945,7 @@ class GazonIntelligentCard extends HTMLElement {
           "entity_plan_arrosage",
           "entity_dernier_arrosage",
           "entity_derniere_application",
+          "entity_debug_intervention",
           "entity_conseil",
           "entity_action",
           "entity_avoid",

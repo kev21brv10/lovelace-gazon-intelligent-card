@@ -259,6 +259,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_conseil", "Conseil principal")}
             ${this._renderEntityInput("entity_action", "Action recommandée")}
             ${this._renderEntityInput("entity_avoid", "Action à éviter")}
+            ${this._renderEntityInput("entity_debug_intervention", "Debug métier")}
           </div>
         </section>
       </div>

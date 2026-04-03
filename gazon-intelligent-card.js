@@ -1290,6 +1290,22 @@ const CARD_STYLES = String.raw`
           gap: 8px;
         }
 
+        .tab-panel__section--debug-intervention {
+          gap: 12px;
+        }
+
+        .tab-panel__debug-columns {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 10px;
+        }
+
+        .tab-panel__debug-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 8px;
+        }
+
         .decision-block {
           display: flex;
           flex-direction: column;
@@ -2437,7 +2453,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.40";
+const CARD_VERSION = "0.1.41";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -2461,6 +2477,7 @@ const DEFAULT_CONFIG = {
   entity_derniere_application: "sensor.gazon_intelligent_derniere_application",
   entity_catalogue_produits: "sensor.gazon_intelligent_catalogue_produits",
   entity_produit_intervention: "select.gazon_intelligent_produit_d_intervention",
+  entity_debug_intervention: "sensor.gazon_intelligent_debug_intervention",
   entity_conseil: "sensor.gazon_intelligent_conseil_principal",
   entity_action: "sensor.gazon_intelligent_action_recommandee",
   entity_avoid: "sensor.gazon_intelligent_action_a_eviter",
@@ -3202,6 +3219,7 @@ class GazonIntelligentCard extends HTMLElement {
       entity_switch_arrosage_automatique: DEFAULT_CONFIG.entity_switch_arrosage_automatique,
       entity_arrosage_recommande: DEFAULT_CONFIG.entity_arrosage_recommande,
       entity_arrosage_apres_application_autorise: DEFAULT_CONFIG.entity_arrosage_apres_application_autorise,
+      entity_debug_intervention: DEFAULT_CONFIG.entity_debug_intervention,
       entity_tonte_autorisee: DEFAULT_CONFIG.entity_tonte_autorisee,
       entity_objectif_arrosage: DEFAULT_CONFIG.entity_objectif_arrosage,
       entity_type_arrosage: DEFAULT_CONFIG.entity_type_arrosage,
@@ -3241,6 +3259,7 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_switch_arrosage_automatique", selector: { entity: { domain: ["switch"] } } },
         { name: "entity_arrosage_recommande", selector: { entity: { domain: ["binary_sensor"] } } },
         { name: "entity_arrosage_apres_application_autorise", selector: { entity: { domain: ["binary_sensor"] } } },
+        { name: "entity_debug_intervention", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_tonte_autorisee", selector: { entity: { domain: ["binary_sensor"] } } },
         { name: "entity_objectif_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_type_arrosage", selector: { entity: { domain: ["sensor"] } } },
@@ -4306,6 +4325,7 @@ class GazonIntelligentCard extends HTMLElement {
       "entity_arrosage_en_cours",
       "entity_arrosage_recommande",
       "entity_arrosage_apres_application_autorise",
+      "entity_debug_intervention",
       "entity_tonte_autorisee",
       "entity_niveau",
       "entity_risque",
@@ -4363,6 +4383,7 @@ class GazonIntelligentCard extends HTMLElement {
           "entity_plan_arrosage",
           "entity_dernier_arrosage",
           "entity_derniere_application",
+          "entity_debug_intervention",
           "entity_conseil",
           "entity_action",
           "entity_avoid",
@@ -6030,6 +6051,303 @@ function formatTemperatureRangeConstraint(constraint) {
   };
 }
 
+function formatDebugRecommendedAction(action) {
+  const normalized = String(action ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return "Non disponible";
+  }
+  if (normalized === "select_product") {
+    return "Sélectionner le produit";
+  }
+  if (normalized === "declare_intervention") {
+    return "Déclarer maintenant";
+  }
+  if (normalized === "wait") {
+    return "Attendre";
+  }
+  if (normalized === "add_product") {
+    return "Ajouter un produit";
+  }
+  return formatStatusLabel(normalized);
+}
+
+function formatDebugConstraintImpact(constraint) {
+  const impact = String(constraint?.impact || "").trim().toLowerCase();
+  if (impact === "bloquant") {
+    return {
+      label: "Bloquant",
+      tone: "danger",
+      icon: "mdi:alert-circle-outline",
+    };
+  }
+  if (impact === "dégradant" || impact === "degradant") {
+    return {
+      label: "Dégradant",
+      tone: "warning",
+      icon: "mdi:shield-alert-outline",
+    };
+  }
+  return {
+    label: "Neutre",
+    tone: "neutral",
+    icon: "mdi:check-circle-outline",
+  };
+}
+
+function renderDebugConstraintCards(card, constraints, emptyText) {
+  const items = Array.isArray(constraints) ? constraints : [];
+  if (!items.length) {
+    return `<div class="tab-panel__empty">${escapeHtml(emptyText)}</div>`;
+  }
+  return items
+    .map((constraint) => {
+      if (!constraint || typeof constraint !== "object") {
+        return "";
+      }
+      const code = String(constraint.code || "").trim() || "contrainte";
+      const label = String(constraint.label || "").trim() || "Sans libellé";
+      const hint = String(constraint.hint || "").trim();
+      const impact = formatDebugConstraintImpact(constraint);
+      const metLabel = constraint.met === false ? "Non satisfaite" : "Satisfaite";
+      const secondaryParts = [
+        `Code: ${code}`,
+        `Impact: ${impact.label}`,
+        `État: ${metLabel}`,
+      ];
+      if (hint) {
+        secondaryParts.push(hint);
+      }
+      return card._renderStatCard(
+        code,
+        label,
+        impact.tone,
+        impact.icon,
+        secondaryParts.join(" · "),
+      );
+    })
+    .filter(Boolean)
+    .join("");
+}
+
+function getDebugInterventionState(card) {
+  const entity = card._entity("entity_debug_intervention");
+  if (!entity) {
+    return null;
+  }
+  const attrs = entity.attributes || {};
+  const payload = attrs.payload && typeof attrs.payload === "object" ? attrs.payload : attrs;
+  const status = String(payload.status || entity.state || attrs.status || "").trim().toLowerCase() || "unavailable";
+  const presentation = formatInterventionStatusPresentation(status);
+  const product = payload.product && typeof payload.product === "object" ? payload.product : {};
+  const selection = payload.selection && typeof payload.selection === "object" ? payload.selection : {};
+  const context = payload.context && typeof payload.context === "object" ? payload.context : {};
+  const rawConstraints = Array.isArray(payload.constraints) ? payload.constraints : Array.isArray(attrs.constraints) ? attrs.constraints : [];
+  const normalizeConstraint = (constraint) => {
+    const item = { ...constraint };
+    const impact = String(item.impact || "").trim().toLowerCase();
+    if (!impact) {
+      item.impact = item.blocking ? "bloquant" : item.met === false ? "dégradant" : "neutre";
+    }
+    return item;
+  };
+  const constraints = rawConstraints.filter((constraint) => constraint && typeof constraint === "object").map(normalizeConstraint);
+  const blockingConstraints = Array.isArray(payload.blocking_constraints)
+    ? payload.blocking_constraints.filter((constraint) => constraint && typeof constraint === "object")
+    : constraints.filter((constraint) => String(constraint.impact || "").trim().toLowerCase() === "bloquant");
+  const nonBlockingConstraints = Array.isArray(payload.non_blocking_constraints)
+    ? payload.non_blocking_constraints.filter((constraint) => constraint && typeof constraint === "object")
+    : constraints.filter((constraint) => String(constraint.impact || "").trim().toLowerCase() !== "bloquant");
+  const reasons = Array.isArray(payload.reasons)
+    ? payload.reasons.filter(Boolean).map((value) => String(value).trim()).filter(Boolean)
+    : [];
+  const missingRequirements = Array.isArray(payload.missing_requirements)
+    ? payload.missing_requirements
+        .filter(Boolean)
+        .map((value) => {
+          if (typeof value === "string") {
+            return value.trim();
+          }
+          if (typeof value !== "object") {
+            return "";
+          }
+          return String(value.label || value.code || "").trim();
+        })
+        .filter(Boolean)
+    : [];
+  const productId = String(payload.product_id || product.id || "").trim() || null;
+  const productName = String(payload.product_name || product.name || "").trim() || null;
+  const productType = String(product.type || "").trim() || null;
+  const temperature = context.temperature ?? product.temperature_value ?? context.current_temperature ?? null;
+  const month = context.month ?? context.current_month ?? null;
+  return {
+    entity,
+    status,
+    statusLabel: presentation.badge || presentation.summary || "Non disponible",
+    statusTone: presentation.tone || "neutral",
+    statusIcon: presentation.icon || "mdi:bug-outline",
+    summary: String(payload.summary || attrs.summary || presentation.summary || "").trim() || presentation.summary || "Recommandation disponible",
+    reason: String(payload.reason || attrs.reason || "").trim(),
+    whyNow: String(payload.why_now || attrs.why_now || "").trim(),
+    recommendedAction: String(payload.recommended_action || attrs.recommended_action || "").trim() || null,
+    recommendedActionLabel: formatDebugRecommendedAction(payload.recommended_action || attrs.recommended_action),
+    score: asNumber(payload.score ?? attrs.score) ?? 0,
+    productId,
+    productName,
+    productType,
+    product: {
+      id: productId,
+      name: productName,
+      type: productType,
+      months: Array.isArray(product.months) ? product.months : [],
+      monthsLabel: String(product.months_label || "").trim() || null,
+    },
+    selection: {
+      id: String(selection.id || "").trim() || null,
+      name: String(selection.name || "").trim() || null,
+      months: Array.isArray(selection.months) ? selection.months : [],
+      monthsLabel: String(selection.months_label || "").trim() || null,
+      ready: Boolean(payload.selected_product_ready || selection.ready),
+    },
+    context: {
+      phase: String(context.current_phase || context.phase || "").trim() || null,
+      month,
+      temperature,
+      temperatureSource: String(context.temperature_source || product.temperature_source || "").trim() || null,
+    },
+    constraints,
+    blockingConstraints,
+    nonBlockingConstraints,
+    reasons,
+    missingRequirements,
+    readyToDeclare: Boolean(payload.ready_to_declare),
+    selectedProductReady: Boolean(payload.selected_product_ready),
+    uiSummary: String(payload.ui_summary || attrs.ui_summary || "").trim(),
+    uiHint: String(payload.ui_hint || attrs.ui_hint || "").trim(),
+  };
+}
+
+function renderDebugInterventionSection(card, debug) {
+  if (!debug || !debug.entity) {
+    return "";
+  }
+
+  const score = debug.score === null || debug.score === undefined ? 0 : formatNumber(debug.score, 0);
+  const presentation = formatInterventionStatusPresentation(debug.status);
+  const statusLabel = debug.statusLabel || presentation.badge || presentation.summary || "Non disponible";
+  const statusTone = debug.statusTone || presentation.tone || "neutral";
+  const statusIcon = debug.statusIcon || presentation.icon || "mdi:bug-outline";
+  const summary = debug.summary || presentation.summary || "Recommandation disponible";
+  const nextReason = debug.reason || debug.uiSummary || summary;
+  const detailHint = debug.whyNow || debug.uiHint || "Lecture directe du moteur décisionnel.";
+  const productName = debug.productName || "Aucun produit retenu";
+  const productType = debug.productType ? formatStatusLabel(debug.productType) : null;
+  const productId = debug.productId ? `ID: ${debug.productId}` : "";
+  const actionLabel = debug.recommendedActionLabel || formatDebugRecommendedAction(debug.recommendedAction);
+  const contextPills = [];
+  if (debug.context?.phase) {
+    contextPills.push(renderStatusPill(`Phase: ${formatStatusLabel(debug.context.phase)}`, "neutral", "mdi:grass", "debug-chip"));
+  }
+  if (debug.context?.month !== null && debug.context?.month !== undefined) {
+    contextPills.push(renderStatusPill(`Mois: ${debug.context.month}`, "neutral", "mdi:calendar-month", "debug-chip"));
+  }
+  if (debug.context?.temperature !== null && debug.context?.temperature !== undefined) {
+    contextPills.push(
+      renderStatusPill(`Température: ${formatNumber(debug.context.temperature, 1)} °C`, "neutral", "mdi:thermometer", "debug-chip"),
+    );
+  }
+  if (debug.context?.temperatureSource) {
+    contextPills.push(
+      renderStatusPill(`Source: ${formatStatusLabel(debug.context.temperatureSource)}`, "neutral", "mdi:database", "debug-chip"),
+    );
+  }
+  const reasons = Array.isArray(debug.reasons) ? debug.reasons.filter(Boolean).map((value) => String(value).trim()).filter(Boolean) : [];
+  const missingRequirements = Array.isArray(debug.missingRequirements)
+    ? debug.missingRequirements.filter(Boolean).map((value) => String(value).trim()).filter(Boolean)
+    : [];
+  const blockingConstraints = Array.isArray(debug.blockingConstraints) ? debug.blockingConstraints : [];
+  const nonBlockingConstraints = Array.isArray(debug.nonBlockingConstraints) ? debug.nonBlockingConstraints : [];
+
+  return `
+      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--debug-intervention">
+        <div class="tab-panel__section-head">
+          <div class="tab-panel__eyebrow">Debug métier</div>
+          <div class="tab-panel__section-meta">${escapeHtml(summary)}</div>
+        </div>
+
+        <div class="decision-hero">
+          <div class="decision-hero__top">
+            <div class="decision-hero__summary">Score ${escapeHtml(String(score))}</div>
+            ${renderStatusPill(statusLabel, statusTone, statusIcon, `decision-status decision-status--${statusTone}`)}
+          </div>
+          <div class="decision-hero__next">${escapeHtml(nextReason)}</div>
+          <div class="decision-hero__hint">${escapeHtml(detailHint)}</div>
+        </div>
+
+        <div class="decision-plan">
+          <div class="decision-plan__header">
+            <div class="decision-plan__label">Produit retenu</div>
+            <div class="decision-plan__meta">${escapeHtml(actionLabel)}</div>
+          </div>
+          <div class="decision-plan__summary">${escapeHtml(productName)}</div>
+          <div class="decision-plan__chips">
+            ${productId ? renderStatusPill(productId, "neutral", "mdi:identifier", "debug-chip") : ""}
+            ${productType ? renderStatusPill(`Type: ${productType}`, "neutral", "mdi:package-variant", "debug-chip") : ""}
+            ${contextPills.join("")}
+          </div>
+        </div>
+
+        <div class="tab-panel__debug-columns">
+          <div class="decision-context">
+            <div class="decision-plan__header">
+              <div class="decision-plan__label">Contraintes bloquantes</div>
+              <div class="decision-plan__meta">${escapeHtml(String(blockingConstraints.length))}</div>
+            </div>
+            <div class="tab-panel__debug-grid">
+              ${renderDebugConstraintCards(card, blockingConstraints, "Aucune contrainte bloquante.")}
+            </div>
+          </div>
+
+          <div class="decision-context">
+            <div class="decision-plan__header">
+              <div class="decision-plan__label">Contraintes non bloquantes</div>
+              <div class="decision-plan__meta">${escapeHtml(String(nonBlockingConstraints.length))}</div>
+            </div>
+            <div class="tab-panel__debug-grid">
+              ${renderDebugConstraintCards(card, nonBlockingConstraints, "Aucune contrainte non bloquante.")}
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-plan">
+          <div class="decision-plan__header">
+            <div class="decision-plan__label">Raisons</div>
+            <div class="decision-plan__meta">${escapeHtml(String(reasons.length))}</div>
+          </div>
+          <div class="decision-plan__chips">
+            ${
+              reasons.length
+                ? reasons.map((reason) => renderStatusPill(reason, "neutral", "mdi:check-circle-outline", "debug-chip")).join("")
+                : renderStatusPill("Aucune raison détaillée", "neutral", "mdi:check-circle-outline", "debug-chip")
+            }
+          </div>
+          <div class="decision-plan__header" style="margin-top: 10px;">
+            <div class="decision-plan__label">Manquants</div>
+            <div class="decision-plan__meta">${escapeHtml(String(missingRequirements.length))}</div>
+          </div>
+          <div class="decision-plan__chips">
+            ${
+              missingRequirements.length
+                ? missingRequirements
+                    .map((requirement) => renderStatusPill(requirement, "warning", "mdi:alert-circle-outline", "debug-chip"))
+                    .join("")
+                : renderStatusPill("Aucun manque déclaré", "success", "mdi:check-circle-outline", "debug-chip")
+            }
+          </div>
+        </div>
+      </section>
+    `;
+}
+
 function renderWateringProgressSection(card, progressState) {
   try {
     if (!progressState?.active) {
@@ -6226,6 +6544,7 @@ function renderProductsTab(card) {
 
 function renderInterventionTab(card) {
   const recommendation = card._interventionRecommendationState();
+  const debug = getDebugInterventionState(card);
   const quickAction = card._selectedProductInterventionState();
   const lastApplication = card._lastApplicationState();
   const productOptions = card._catalogueProductOptions();
@@ -6349,7 +6668,7 @@ function renderInterventionTab(card) {
 
             <div class="tab-panel__intervention-card tab-panel__intervention-card--action">
               <div class="tab-panel__section-head">
-                <div class="tab-panel__eyebrow">Déclaration activable</div>
+                <div class="tab-panel__eyebrow">Déclaration</div>
                 <div class="tab-panel__section-meta">${escapeHtml(declarationMeta)}</div>
               </div>
               <button
@@ -6357,7 +6676,7 @@ function renderInterventionTab(card) {
                 class="gi-action gi-action--primary tab-panel__cta"
                 data-gazon-action="declare-product-intervention"
                 ${canDeclare ? "" : "disabled"}
-                aria-label="Déclarer l'intervention"
+                aria-label="${escapeHtml(ui.actionLabel || "Déclarer l'intervention")}"
               >
                 ${renderIconBox("mdi:spray-bottle", "sm")}
                 <span>${escapeHtml(ui.actionLabel || "Déclarer")}</span>
@@ -6371,6 +6690,8 @@ function renderInterventionTab(card) {
             </div>
           </div>
         </section>
+
+        ${renderDebugInterventionSection(card, debug)}
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
           <div class="tab-panel__section-head">
@@ -7069,6 +7390,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_conseil", "Conseil principal")}
             ${this._renderEntityInput("entity_action", "Action recommandée")}
             ${this._renderEntityInput("entity_avoid", "Action à éviter")}
+            ${this._renderEntityInput("entity_debug_intervention", "Debug métier")}
           </div>
         </section>
       </div>

@@ -1,6 +1,6 @@
 export const CARD_TYPE = "gazon-intelligent-card";
 export const CARD_NAME = "Gazon Intelligent Card";
-export const CARD_VERSION = "0.1.40";
+export const CARD_VERSION = "0.1.41";
 
 export const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -24,6 +24,7 @@ export const DEFAULT_CONFIG = {
   entity_derniere_application: "sensor.gazon_intelligent_derniere_application",
   entity_catalogue_produits: "sensor.gazon_intelligent_catalogue_produits",
   entity_produit_intervention: "select.gazon_intelligent_produit_d_intervention",
+  entity_debug_intervention: "sensor.gazon_intelligent_debug_intervention",
   entity_prochaine_intervention: "sensor.gazon_intelligent_prochaine_intervention",
   entity_conseil: "sensor.gazon_intelligent_conseil_principal",
   entity_action: "sensor.gazon_intelligent_action_recommandee",
@@ -74,6 +75,7 @@ export const ENTITY_KEYS = [
   { key: "entity_derniere_application", label: "Dernière application", icon: "mdi:spray-bottle", domain: ["sensor"] },
   { key: "entity_catalogue_produits", label: "Référentiel produits", icon: "mdi:package-variant-closed", domain: ["sensor"] },
   { key: "entity_produit_intervention", label: "Produit sélectionné", icon: "mdi:package-variant", domain: ["select"] },
+  { key: "entity_debug_intervention", label: "Debug métier", icon: "mdi:bug-outline", domain: ["sensor"] },
   { key: "entity_prochaine_intervention", label: "Intervention recommandée", icon: "mdi:spray-bottle", domain: ["sensor"] },
   { key: "entity_conseil", label: "Conseil principal", icon: "mdi:message-text-outline", domain: ["sensor"] },
   { key: "entity_action", label: "Action recommandée", icon: "mdi:check-circle-outline", domain: ["sensor"] },
@@ -121,10 +123,11 @@ export const SECTION_FIELDS = {
     "entity_mode",
     "entity_fenetre_optimale",
     "entity_plan_arrosage",
-    "entity_dernier_arrosage",
-    "entity_derniere_application",
-    "entity_prochaine_intervention",
-    "entity_switch_arrosage_automatique",
+  "entity_dernier_arrosage",
+  "entity_derniere_application",
+  "entity_debug_intervention",
+  "entity_prochaine_intervention",
+  "entity_switch_arrosage_automatique",
   ],
   watering: [
     "entity_arrosage_recommande",
@@ -179,6 +182,7 @@ export const RENDER_SIGNATURE_ATTRS = {
   entity_derniere_application: ["source", "application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm", "application_post_watering_status"],
   entity_catalogue_produits: ["products_count", "product_ids", "product_names", "products_summary", "summary"],
   entity_produit_intervention: ["selected_product_id", "selected_product_name", "summary", "products_count"],
+  entity_debug_intervention: ["score", "status", "recommended_action", "product_id", "product_name", "summary", "reason", "why_now", "reasons", "constraints", "blocking_constraints", "non_blocking_constraints", "missing_requirements", "context", "ready_to_declare", "selected_product_ready", "ui_summary", "ui_hint"],
   entity_prochaine_intervention: [
     "payload",
   ],

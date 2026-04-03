@@ -123,4 +123,14 @@ for marker in (
     if marker not in root_src:
         raise SystemExit(f"Missing critical helper in bundled file: {marker}")
 
+for marker in (
+    "sensor.gazon_intelligent_niveau_de_pertinence",
+    "sensor.gazon_intelligent_prochaine_fenetre_optimale",
+    "sensor.gazon_intelligent_prochain_blocage_attendu",
+    "binary_sensor.gazon_intelligent_signal_intervention",
+    "binary_sensor.gazon_intelligent_signal_irrigation",
+):
+    if marker not in root_src:
+        raise SystemExit(f"Missing derived entity reference in bundled file: {marker}")
+
 print("Validation OK")

@@ -10,7 +10,7 @@ import {
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.44";
+const CARD_VERSION = "0.1.45";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -35,6 +35,11 @@ const DEFAULT_CONFIG = {
   entity_catalogue_produits: "sensor.gazon_intelligent_catalogue_produits",
   entity_produit_intervention: "select.gazon_intelligent_produit_d_intervention",
   entity_debug_intervention: "sensor.gazon_intelligent_debug_intervention",
+  entity_niveau_pertinence: "sensor.gazon_intelligent_niveau_de_pertinence",
+  entity_prochaine_fenetre_optimale: "sensor.gazon_intelligent_prochaine_fenetre_optimale",
+  entity_prochain_blocage_attendu: "sensor.gazon_intelligent_prochain_blocage_attendu",
+  entity_signal_intervention: "binary_sensor.gazon_intelligent_signal_intervention",
+  entity_signal_irrigation: "binary_sensor.gazon_intelligent_signal_irrigation",
   entity_conseil: "sensor.gazon_intelligent_conseil_principal",
   entity_action: "sensor.gazon_intelligent_action_recommandee",
   entity_avoid: "sensor.gazon_intelligent_action_a_eviter",
@@ -87,10 +92,15 @@ const ENTITY_KEYS = [
   { key: "entity_conseil", label: "Conseil principal", icon: "mdi:message-text-outline", domain: ["sensor"] },
   { key: "entity_action", label: "Action recommandée", icon: "mdi:check-circle-outline", domain: ["sensor"] },
   { key: "entity_avoid", label: "Action à éviter", icon: "mdi:alert-circle-outline", domain: ["sensor"] },
+  { key: "entity_niveau_pertinence", label: "Niveau de pertinence", icon: "mdi:signal", domain: ["sensor"] },
+  { key: "entity_prochaine_fenetre_optimale", label: "Prochaine fenêtre optimale", icon: "mdi:clock-outline", domain: ["sensor"] },
+  { key: "entity_prochain_blocage_attendu", label: "Prochain blocage attendu", icon: "mdi:alert-circle-outline", domain: ["sensor"] },
   { key: "entity_mode", label: "Mode du gazon", icon: "mdi:grass", domain: ["select"] },
   { key: "entity_switch_arrosage_automatique", label: "Irrigation automatique", icon: "mdi:switch", domain: ["switch"] },
   { key: "entity_arrosage_apres_application_autorise", label: "Post-application", icon: "mdi:water-check", domain: ["binary_sensor"] },
+  { key: "entity_signal_irrigation", label: "Signal irrigation", icon: "mdi:sprinkler", domain: ["binary_sensor"] },
   { key: "entity_tonte_autorisee", label: "Tonte autorisée", icon: "mdi:content-cut", domain: ["binary_sensor"] },
+  { key: "entity_signal_intervention", label: "Signal intervention", icon: "mdi:spray-bottle", domain: ["binary_sensor"] },
   { key: "entity_phase", label: "Phase dominante", icon: "mdi:grass", domain: ["sensor"] },
   { key: "entity_sous_phase", label: "Sous-phase", icon: "mdi:sprout", domain: ["sensor"] },
   { key: "entity_niveau", label: "Niveau d'action", icon: "mdi:signal", domain: ["sensor"] },
@@ -122,6 +132,9 @@ const SECTION_FIELDS = {
     "entity_action",
     "entity_avoid",
     "entity_hauteur",
+    "entity_niveau_pertinence",
+    "entity_prochaine_fenetre_optimale",
+    "entity_prochain_blocage_attendu",
     "entity_arrosage_recommande",
     "entity_arrosage_apres_application_autorise",
     "entity_tonte_autorisee",
@@ -139,6 +152,7 @@ const SECTION_FIELDS = {
     "entity_objectif_arrosage",
     "entity_type_arrosage",
     "entity_arrosage_apres_application_autorise",
+    "entity_signal_irrigation",
   ],
   mowing: [
     "entity_tonte",
@@ -165,6 +179,9 @@ const LEGACY_ENTITY_KEYS = [
 
 const OVERVIEW_ENTITY_KEYS = new Set([
   ...LEGACY_ENTITY_KEYS,
+  "entity_niveau_pertinence",
+  "entity_prochaine_fenetre_optimale",
+  "entity_prochain_blocage_attendu",
   "entity_arrosage_recommande",
   "entity_arrosage_apres_application_autorise",
   "entity_tonte_autorisee",
@@ -180,6 +197,9 @@ const OVERVIEW_ENTITY_KEYS = new Set([
 
 const RENDER_SIGNATURE_ATTRS = {
   entity_fenetre_optimale: ["status", "summary", "next_action", "auto_irrigation_enabled"],
+  entity_niveau_pertinence: ["score", "score_level", "summary", "tone", "source_entity"],
+  entity_prochaine_fenetre_optimale: ["source_entity", "source_state", "block_reason", "confidence_score", "phase", "month", "temperature", "summary"],
+  entity_prochain_blocage_attendu: ["source_entity", "source_status", "block_reason", "block_label", "confidence_score", "phase", "month", "temperature", "summary"],
   entity_plan_arrosage: ["summary", "duration_human", "zone_count", "objective_mm", "plan_type", "passages", "fractionation", "total_duration_min"],
   entity_arrosage_en_cours: ["active", "started_at_utc", "last_activity_at_utc", "active_zone_count", "zone_count", "progress_percent"],
   entity_dernier_arrosage: ["source", "date_action", "detected_at", "zone_count"],
@@ -197,6 +217,8 @@ const RENDER_SIGNATURE_ATTRS = {
     "summary",
     "products_count",
   ],
+  entity_signal_intervention: ["source_entity", "source_status", "recommended_action", "product_id", "product_name", "ready_to_declare", "selected_product_ready", "trigger_kind", "summary"],
+  entity_signal_irrigation: ["source_entities", "source_status", "application_post_watering_status", "type_arrosage", "trigger_kind", "summary"],
   entity_objectif_arrosage: ["temperature", "etp", "phase_active"],
   entity_arrosage_recommande: ["objectif_mm", "type_arrosage"],
   entity_arrosage_apres_application_autorise: ["application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm", "application_post_watering_status"],
@@ -914,12 +936,17 @@ class GazonIntelligentCard extends HTMLElement {
       entity_conseil: DEFAULT_CONFIG.entity_conseil,
       entity_action: DEFAULT_CONFIG.entity_action,
       entity_avoid: DEFAULT_CONFIG.entity_avoid,
+      entity_niveau_pertinence: DEFAULT_CONFIG.entity_niveau_pertinence,
+      entity_prochaine_fenetre_optimale: DEFAULT_CONFIG.entity_prochaine_fenetre_optimale,
+      entity_prochain_blocage_attendu: DEFAULT_CONFIG.entity_prochain_blocage_attendu,
       entity_mode: DEFAULT_CONFIG.entity_mode,
       entity_switch_arrosage_automatique: DEFAULT_CONFIG.entity_switch_arrosage_automatique,
       entity_arrosage_recommande: DEFAULT_CONFIG.entity_arrosage_recommande,
       entity_arrosage_apres_application_autorise: DEFAULT_CONFIG.entity_arrosage_apres_application_autorise,
       entity_debug_intervention: DEFAULT_CONFIG.entity_debug_intervention,
+      entity_signal_irrigation: DEFAULT_CONFIG.entity_signal_irrigation,
       entity_tonte_autorisee: DEFAULT_CONFIG.entity_tonte_autorisee,
+      entity_signal_intervention: DEFAULT_CONFIG.entity_signal_intervention,
       entity_objectif_arrosage: DEFAULT_CONFIG.entity_objectif_arrosage,
       entity_type_arrosage: DEFAULT_CONFIG.entity_type_arrosage,
       entity_tonte: DEFAULT_CONFIG.entity_tonte,
@@ -954,12 +981,17 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_conseil", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_action", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_avoid", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_niveau_pertinence", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_prochaine_fenetre_optimale", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_prochain_blocage_attendu", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_mode", selector: { entity: { domain: ["select"] } } },
         { name: "entity_switch_arrosage_automatique", selector: { entity: { domain: ["switch"] } } },
         { name: "entity_arrosage_recommande", selector: { entity: { domain: ["binary_sensor"] } } },
         { name: "entity_arrosage_apres_application_autorise", selector: { entity: { domain: ["binary_sensor"] } } },
         { name: "entity_debug_intervention", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_signal_irrigation", selector: { entity: { domain: ["binary_sensor"] } } },
         { name: "entity_tonte_autorisee", selector: { entity: { domain: ["binary_sensor"] } } },
+        { name: "entity_signal_intervention", selector: { entity: { domain: ["binary_sensor"] } } },
         { name: "entity_objectif_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_type_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_arrosage_en_cours", selector: { entity: { domain: ["sensor"] } } },
@@ -2981,7 +3013,7 @@ class GazonIntelligentCard extends HTMLElement {
     if (OVERVIEW_ENTITY_KEYS.has(fieldKey)) {
       return "overview";
     }
-    if (["entity_arrosage_recommande", "entity_objectif_arrosage", "entity_type_arrosage"].includes(fieldKey)) {
+    if (["entity_arrosage_recommande", "entity_objectif_arrosage", "entity_type_arrosage", "entity_signal_irrigation"].includes(fieldKey)) {
       return "watering";
     }
     if (["entity_tonte", "entity_hauteur"].includes(fieldKey)) {
@@ -3003,6 +3035,18 @@ class GazonIntelligentCard extends HTMLElement {
 
   _heroMetricIcon(fieldKey, value) {
     const normalized = String(value ?? "").toLowerCase();
+
+    if (fieldKey === "entity_niveau_pertinence") {
+      return "mdi:signal";
+    }
+
+    if (fieldKey === "entity_prochaine_fenetre_optimale") {
+      return "mdi:clock-outline";
+    }
+
+    if (fieldKey === "entity_prochain_blocage_attendu") {
+      return "mdi:alert-circle-outline";
+    }
 
     if (fieldKey === "entity_phase") {
       if (normalized.includes("sursem")) return "mdi:sprout";
@@ -3035,6 +3079,14 @@ class GazonIntelligentCard extends HTMLElement {
 
     if (fieldKey === "entity_arrosage_apres_application_autorise") {
       return ["on", "true", "yes", "1", "oui"].includes(normalized) ? "mdi:water-check" : "mdi:water-off";
+    }
+
+    if (fieldKey === "entity_signal_irrigation") {
+      return "mdi:sprinkler";
+    }
+
+    if (fieldKey === "entity_signal_intervention") {
+      return "mdi:spray-bottle";
     }
 
     if (fieldKey === "entity_hauteur") {
@@ -3127,6 +3179,36 @@ class GazonIntelligentCard extends HTMLElement {
     if (!entity) {
       return "neutral";
     }
+    if (field.key === "entity_niveau_pertinence") {
+      const tone = String(entity.attributes?.tone || "").trim().toLowerCase();
+      if (tone === "success" || tone === "warning" || tone === "neutral") {
+        return tone;
+      }
+      const level = String(entity.state || entity.attributes?.score_level || "").trim().toLowerCase();
+      if (level === "élevé" || level === "eleve") {
+        return "success";
+      }
+      if (level === "moyen") {
+        return "warning";
+      }
+      return "neutral";
+    }
+    if (field.key === "entity_prochaine_fenetre_optimale") {
+      const status = String(entity.state || "").trim().toLowerCase();
+      if (status === "attendre") {
+        return "warning";
+      }
+      if (["maintenant", "ce_matin"].includes(status)) {
+        return "success";
+      }
+      if (["demain_matin", "apres_pluie", "soir"].includes(status)) {
+        return "accent";
+      }
+      return "neutral";
+    }
+    if (field.key === "entity_prochain_blocage_attendu") {
+      return isEmpty(entity.state) ? "neutral" : "danger";
+    }
     if (field.key === "entity_tonte") {
       return computeTonteTone(entity.state);
     }
@@ -3145,6 +3227,23 @@ class GazonIntelligentCard extends HTMLElement {
     if (field.key === "entity_arrosage_apres_application_autorise") {
       return this._postApplicationState(entity).tone;
     }
+    if (field.key === "entity_signal_intervention") {
+      const triggerKind = String(entity.attributes?.trigger_kind || "").trim().toLowerCase();
+      if (["recommended", "ready"].includes(triggerKind)) {
+        return "success";
+      }
+      if (triggerKind === "soft") {
+        return "warning";
+      }
+      return String(entity.state).toLowerCase() === "on" ? "success" : "neutral";
+    }
+    if (field.key === "entity_signal_irrigation") {
+      const triggerKind = String(entity.attributes?.trigger_kind || "").trim().toLowerCase();
+      if (["post_application", "hydrique"].includes(triggerKind)) {
+        return "success";
+      }
+      return String(entity.state).toLowerCase() === "on" ? "success" : "neutral";
+    }
     if (field.key === "entity_phase") {
       return phaseTone(entity.state);
     }
@@ -3157,6 +3256,15 @@ class GazonIntelligentCard extends HTMLElement {
   _formatFieldValue(field, entity) {
     if (!entity) {
       return "Non disponible";
+    }
+    if (field.key === "entity_niveau_pertinence") {
+      return formatStatusLabel(entity.state);
+    }
+    if (field.key === "entity_prochaine_fenetre_optimale") {
+      return formatStatusLabel(entity.state);
+    }
+    if (field.key === "entity_prochain_blocage_attendu") {
+      return String(entity.attributes?.block_label || entity.attributes?.summary || formatStatusLabel(entity.state)).trim() || "Non disponible";
     }
     if (field.key === "entity_fenetre_optimale") {
       return formatStatusLabel(entity.state);
@@ -3184,6 +3292,9 @@ class GazonIntelligentCard extends HTMLElement {
     if (field.key === "entity_tonte") {
       return formatStatusLabel(entity.state);
     }
+    if (field.key === "entity_signal_intervention" || field.key === "entity_signal_irrigation") {
+      return String(entity.attributes?.summary || formatStatusLabel(entity.state)).trim() || "Non disponible";
+    }
     if (field.key === "entity_niveau" || field.key === "entity_phase" || field.key === "entity_sous_phase") {
       return formatStatusLabel(entity.state);
     }
@@ -3193,6 +3304,30 @@ class GazonIntelligentCard extends HTMLElement {
   _secondaryFieldText(field, entity) {
     if (!entity) {
       return "";
+    }
+    if (["entity_niveau_pertinence", "entity_prochaine_fenetre_optimale", "entity_prochain_blocage_attendu", "entity_signal_intervention", "entity_signal_irrigation"].includes(field.key)) {
+      const parts = [];
+      const summary = String(entity.attributes?.summary || "").trim();
+      const triggerKind = String(entity.attributes?.trigger_kind || "").trim();
+      const sourceStatus = String(entity.attributes?.source_status || "").trim();
+      const score = asNumber(entity.attributes?.score);
+      const scoreLevel = String(entity.attributes?.score_level || "").trim();
+      if (summary) {
+        parts.push(summary);
+      }
+      if (score !== null) {
+        parts.push(`Score: ${formatNumber(score, 0)}/100`);
+      }
+      if (scoreLevel) {
+        parts.push(`Niveau: ${formatStatusLabel(scoreLevel)}`);
+      }
+      if (triggerKind) {
+        parts.push(`Déclencheur: ${formatStatusLabel(triggerKind)}`);
+      }
+      if (sourceStatus && sourceStatus !== summary) {
+        parts.push(`Statut source: ${formatStatusLabel(sourceStatus)}`);
+      }
+      return parts.join(" · ");
     }
     if (field.key === "entity_hauteur") {
       const min = asNumber(entity.attributes?.hauteur_tonte_min_cm);

@@ -487,6 +487,112 @@ export function renderWateringProgressSection(card, progressState) {
   }
 }
 
+function formatDerivedTriggerLabel(triggerKind) {
+  const normalized = String(triggerKind ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return "Aucun";
+  }
+  if (normalized === "soft") {
+    return "Signal faible";
+  }
+  if (normalized === "recommended") {
+    return "Recommandé";
+  }
+  if (normalized === "ready") {
+    return "Prêt à déclarer";
+  }
+  if (normalized === "post_application") {
+    return "Post-application";
+  }
+  if (normalized === "hydrique") {
+    return "Hydrique";
+  }
+  return formatStatusLabel(normalized);
+}
+
+function getDerivedPertinencePresentation(entity) {
+  if (!entity) {
+    return null;
+  }
+  const score = asNumber(entity.attributes?.score);
+  const state = String(entity.state ?? "").trim();
+  const summary = String(entity.attributes?.summary || "").trim();
+  const tone = String(entity.attributes?.tone || "").trim().toLowerCase();
+  return {
+    label: "Niveau de pertinence",
+    value: formatStatusLabel(state),
+    tone: tone === "success" || tone === "warning" || tone === "neutral" ? tone : state === "élevé" ? "success" : state === "moyen" ? "warning" : "neutral",
+    icon: "mdi:signal",
+    secondary: [summary, score !== null ? `Score: ${formatNumber(score, 0)}/100` : ""].filter(Boolean).join(" · "),
+  };
+}
+
+function getDerivedWindowPresentation(entity) {
+  if (!entity) {
+    return null;
+  }
+  const state = String(entity.state ?? "").trim();
+  const summary = String(entity.attributes?.summary || "").trim();
+  const blockReason = String(entity.attributes?.block_reason || "").trim();
+  const blockLabel = String(entity.attributes?.block_label || "").trim();
+  const tone = state === "attendre" ? "warning" : ["maintenant", "ce_matin"].includes(state) ? "success" : ["demain_matin", "apres_pluie", "soir"].includes(state) ? "accent" : "neutral";
+  return {
+    label: "Prochaine fenêtre optimale",
+    value: formatStatusLabel(state),
+    tone,
+    icon: "mdi:clock-outline",
+    secondary: [summary, blockLabel || formatStatusLabel(blockReason)].filter(Boolean).join(" · "),
+  };
+}
+
+function getDerivedBlockPresentation(entity) {
+  if (!entity) {
+    return null;
+  }
+  const state = String(entity.state ?? "").trim();
+  const summary = String(entity.attributes?.summary || "").trim();
+  const blockLabel = String(entity.attributes?.block_label || "").trim();
+  const blockReason = String(entity.attributes?.block_reason || "").trim();
+  return {
+    label: "Prochain blocage attendu",
+    value: blockLabel || formatStatusLabel(state),
+    tone: state ? "danger" : "neutral",
+    icon: "mdi:alert-circle-outline",
+    secondary: [summary, blockReason && blockReason !== state ? `Cause: ${formatDerivedTriggerLabel(blockReason)}` : ""].filter(Boolean).join(" · "),
+  };
+}
+
+function getDerivedSignalPresentation(entity, label, icon = "mdi:information-outline") {
+  if (!entity) {
+    return null;
+  }
+  const summary = String(entity.attributes?.summary || "").trim();
+  const triggerKind = String(entity.attributes?.trigger_kind || "").trim().toLowerCase();
+  const sourceStatus = String(entity.attributes?.source_status || "").trim();
+  const state = String(entity.state ?? "").trim().toLowerCase();
+  const tone = triggerKind === "soft"
+    ? "warning"
+    : ["recommended", "ready", "post_application", "hydrique"].includes(triggerKind)
+      ? "success"
+      : state === "on"
+        ? "success"
+        : "neutral";
+  const secondaryParts = [];
+  if (triggerKind) {
+    secondaryParts.push(`Déclencheur: ${formatDerivedTriggerLabel(triggerKind)}`);
+  }
+  if (sourceStatus && sourceStatus !== triggerKind) {
+    secondaryParts.push(`Statut source: ${formatStatusLabel(sourceStatus)}`);
+  }
+  return {
+    label,
+    value: summary || formatStatusLabel(entity.state),
+    tone,
+    icon,
+    secondary: secondaryParts.join(" · "),
+  };
+}
+
 export function renderProductSummarySection(card) {
   const selection = card._productSelectionState();
   const catalogue = card._catalogueState();
@@ -629,6 +735,11 @@ export function renderInterventionTab(card) {
   const quickAction = card._selectedProductInterventionState();
   const lastApplication = card._lastApplicationState();
   const productOptions = card._catalogueProductOptions();
+  const signalIntervention = getDerivedSignalPresentation(
+    card._entity("entity_signal_intervention"),
+    "Signal intervention",
+    "mdi:spray-bottle",
+  );
   const ui = recommendation.ui || {};
   const selectedProductOptionLabel = quickAction.optionLabel || (productOptions.length === 1 ? productOptions[0].label : "");
   const hasProductOptions = productOptions.length > 0;
@@ -772,6 +883,29 @@ export function renderInterventionTab(card) {
           </div>
         </section>
 
+        ${
+          signalIntervention
+            ? `
+              <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--derived-signals">
+                <div class="tab-panel__section-head">
+                  <div class="tab-panel__eyebrow">Signal dérivé</div>
+                  <div class="tab-panel__section-meta">Lecture rapide</div>
+                </div>
+                <div class="tab-panel__grid">
+                  ${card._renderLinkedStatCard({
+                    label: signalIntervention.label,
+                    value: signalIntervention.value,
+                    tone: signalIntervention.tone,
+                    icon: signalIntervention.icon,
+                    secondary: signalIntervention.secondary,
+                    entityKey: "entity_signal_intervention",
+                  })}
+                </div>
+              </section>
+            `
+            : ""
+        }
+
         ${renderDebugInterventionSection(card, debug)}
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
@@ -849,6 +983,11 @@ export function renderOverviewTab(card) {
   const overviewIcon = card._config?.show_icons ? proposal.icon : null;
   const facts = card._overviewFacts();
   const wateringProgress = card._wateringProgressState();
+  const derivedFacts = [
+    { key: "entity_niveau_pertinence", fact: getDerivedPertinencePresentation(card._entity("entity_niveau_pertinence")) },
+    { key: "entity_prochaine_fenetre_optimale", fact: getDerivedWindowPresentation(card._entity("entity_prochaine_fenetre_optimale")) },
+    { key: "entity_prochain_blocage_attendu", fact: getDerivedBlockPresentation(card._entity("entity_prochain_blocage_attendu")) },
+  ].filter(({ fact }) => Boolean(fact));
 
   return `
       <section class="tab-panel gi-panel tab-panel--overview">
@@ -868,6 +1007,33 @@ export function renderOverviewTab(card) {
             .map((fact) => card._renderLinkedStatCard(fact))
             .join("")}
         </div>
+
+        ${
+          derivedFacts.length
+            ? `
+              <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--derived-insights">
+                <div class="tab-panel__section-head">
+                  <div class="tab-panel__eyebrow">Lecture dérivée</div>
+                  <div class="tab-panel__section-meta">Raccourci lisible</div>
+                </div>
+                <div class="tab-panel__grid">
+                  ${derivedFacts
+                    .map(({ key, fact }) =>
+                      card._renderLinkedStatCard({
+                        label: fact.label,
+                        value: fact.value,
+                        tone: fact.tone,
+                        icon: fact.icon,
+                        secondary: fact.secondary,
+                        entityKey: key,
+                      }),
+                    )
+                    .join("")}
+                </div>
+              </section>
+            `
+            : ""
+        }
 
         ${
           `<section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--overview-brief">
@@ -891,6 +1057,11 @@ export function renderWateringTab(card) {
   const arrosageRecommande = card._entityState("entity_arrosage_recommande", null);
   const afterApplication = card._entity("entity_arrosage_apres_application_autorise");
   const afterApplicationInfo = card._postApplicationState(afterApplication);
+  const irrigationSignal = getDerivedSignalPresentation(
+    card._entity("entity_signal_irrigation"),
+    "Signal irrigation",
+    "mdi:sprinkler",
+  );
   const tone = windowState.tone;
   const windowIcon = card._statusIcon(windowState.status);
   const windowStatusIcon = card._config?.show_icons ? windowIcon : null;
@@ -913,6 +1084,9 @@ export function renderWateringTab(card) {
   const contextPills = [
     card._renderTabPill("Irrigation", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
     card._renderTabPill("Post-application", afterApplicationInfo.label, afterApplicationInfo.tone, "mdi:water-off"),
+    irrigationSignal
+      ? card._renderTabPill(irrigationSignal.label, irrigationSignal.value, irrigationSignal.tone, irrigationSignal.icon)
+      : null,
     card._renderTabPill("Profil d'irrigation", formatStatusLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
     card._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
     card._renderTabPill("Risque gazon", context.risk, computeRisqueTone(context.risk), "mdi:shield-alert-outline"),

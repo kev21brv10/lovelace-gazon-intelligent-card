@@ -204,8 +204,12 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_fenetre_optimale", "Fenêtre optimale")}
             ${this._renderEntityInput("entity_plan_arrosage", "Plan d'irrigation")}
             ${this._renderEntityInput("entity_objectif_arrosage", "Objectif d'irrigation")}
+            ${this._renderEntityInput("entity_niveau_pertinence", "Niveau de pertinence")}
+            ${this._renderEntityInput("entity_prochaine_fenetre_optimale", "Prochaine fenêtre optimale")}
+            ${this._renderEntityInput("entity_prochain_blocage_attendu", "Prochain blocage attendu")}
             ${this._renderEntityInput("entity_arrosage_recommande", "Irrigation")}
             ${this._renderEntityInput("entity_arrosage_apres_application_autorise", "Post-application")}
+            ${this._renderEntityInput("entity_signal_irrigation", "Signal irrigation")}
             ${this._renderEntityInput("entity_dernier_arrosage", "Dernier arrosage")}
             ${this._renderEntityInput("entity_niveau", "Niveau d'action")}
           </div>
@@ -219,6 +223,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_produit_intervention", "Produit sélectionné")}
             ${this._renderEntityInput("entity_prochaine_intervention", "Prochaine intervention")}
             ${this._renderEntityInput("entity_derniere_application", "Dernière intervention")}
+            ${this._renderEntityInput("entity_signal_intervention", "Signal intervention")}
           </div>
         </section>
 

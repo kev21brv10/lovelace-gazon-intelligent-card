@@ -1,6 +1,6 @@
 export const CARD_TYPE = "gazon-intelligent-card";
 export const CARD_NAME = "Gazon Intelligent Card";
-export const CARD_VERSION = "0.1.44";
+export const CARD_VERSION = "0.1.45";
 
 export const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -25,6 +25,11 @@ export const DEFAULT_CONFIG = {
   entity_catalogue_produits: "sensor.gazon_intelligent_catalogue_produits",
   entity_produit_intervention: "select.gazon_intelligent_produit_d_intervention",
   entity_debug_intervention: "sensor.gazon_intelligent_debug_intervention",
+  entity_niveau_pertinence: "sensor.gazon_intelligent_niveau_de_pertinence",
+  entity_prochaine_fenetre_optimale: "sensor.gazon_intelligent_prochaine_fenetre_optimale",
+  entity_prochain_blocage_attendu: "sensor.gazon_intelligent_prochain_blocage_attendu",
+  entity_signal_intervention: "binary_sensor.gazon_intelligent_signal_intervention",
+  entity_signal_irrigation: "binary_sensor.gazon_intelligent_signal_irrigation",
   entity_prochaine_intervention: "sensor.gazon_intelligent_prochaine_intervention",
   entity_conseil: "sensor.gazon_intelligent_conseil_principal",
   entity_action: "sensor.gazon_intelligent_action_recommandee",
@@ -76,6 +81,9 @@ export const ENTITY_KEYS = [
   { key: "entity_catalogue_produits", label: "Référentiel produits", icon: "mdi:package-variant-closed", domain: ["sensor"] },
   { key: "entity_produit_intervention", label: "Produit sélectionné", icon: "mdi:package-variant", domain: ["select"] },
   { key: "entity_debug_intervention", label: "Debug métier", icon: "mdi:bug-outline", domain: ["sensor"] },
+  { key: "entity_niveau_pertinence", label: "Niveau de pertinence", icon: "mdi:signal", domain: ["sensor"] },
+  { key: "entity_prochaine_fenetre_optimale", label: "Prochaine fenêtre optimale", icon: "mdi:clock-outline", domain: ["sensor"] },
+  { key: "entity_prochain_blocage_attendu", label: "Prochain blocage attendu", icon: "mdi:alert-circle-outline", domain: ["sensor"] },
   { key: "entity_prochaine_intervention", label: "À préparer", icon: "mdi:spray-bottle", domain: ["sensor"] },
   { key: "entity_conseil", label: "Conseil principal", icon: "mdi:message-text-outline", domain: ["sensor"] },
   { key: "entity_action", label: "Action recommandée", icon: "mdi:check-circle-outline", domain: ["sensor"] },
@@ -83,7 +91,9 @@ export const ENTITY_KEYS = [
   { key: "entity_mode", label: "Mode du gazon", icon: "mdi:grass", domain: ["select"] },
   { key: "entity_switch_arrosage_automatique", label: "Irrigation automatique", icon: "mdi:switch", domain: ["switch"] },
   { key: "entity_arrosage_apres_application_autorise", label: "Post-application", icon: "mdi:water-check", domain: ["binary_sensor"] },
+  { key: "entity_signal_irrigation", label: "Signal irrigation", icon: "mdi:sprinkler", domain: ["binary_sensor"] },
   { key: "entity_tonte_autorisee", label: "Tonte autorisée", icon: "mdi:content-cut", domain: ["binary_sensor"] },
+  { key: "entity_signal_intervention", label: "Signal intervention", icon: "mdi:spray-bottle", domain: ["binary_sensor"] },
   { key: "entity_phase", label: "Phase dominante", icon: "mdi:grass", domain: ["sensor"] },
   { key: "entity_sous_phase", label: "Sous-phase", icon: "mdi:sprout", domain: ["sensor"] },
   { key: "entity_niveau", label: "Niveau d'action", icon: "mdi:signal", domain: ["sensor"] },
@@ -115,6 +125,9 @@ export const SECTION_FIELDS = {
     "entity_action",
     "entity_avoid",
     "entity_hauteur",
+    "entity_niveau_pertinence",
+    "entity_prochaine_fenetre_optimale",
+    "entity_prochain_blocage_attendu",
     "entity_arrosage_recommande",
     "entity_arrosage_apres_application_autorise",
     "entity_tonte_autorisee",
@@ -134,6 +147,7 @@ export const SECTION_FIELDS = {
     "entity_objectif_arrosage",
     "entity_type_arrosage",
     "entity_arrosage_apres_application_autorise",
+    "entity_signal_irrigation",
   ],
   mowing: [
     "entity_tonte",
@@ -161,6 +175,9 @@ export const LEGACY_ENTITY_KEYS = [
 
 export const OVERVIEW_ENTITY_KEYS = new Set([
   ...LEGACY_ENTITY_KEYS,
+  "entity_niveau_pertinence",
+  "entity_prochaine_fenetre_optimale",
+  "entity_prochain_blocage_attendu",
   "entity_arrosage_recommande",
   "entity_arrosage_apres_application_autorise",
   "entity_tonte_autorisee",
@@ -176,6 +193,9 @@ export const OVERVIEW_ENTITY_KEYS = new Set([
 
 export const RENDER_SIGNATURE_ATTRS = {
   entity_fenetre_optimale: ["status", "summary", "next_action", "auto_irrigation_enabled"],
+  entity_niveau_pertinence: ["score", "score_level", "summary", "tone", "source_entity"],
+  entity_prochaine_fenetre_optimale: ["source_entity", "source_state", "block_reason", "confidence_score", "phase", "month", "temperature", "summary"],
+  entity_prochain_blocage_attendu: ["source_entity", "source_status", "block_reason", "block_label", "confidence_score", "phase", "month", "temperature", "summary"],
   entity_plan_arrosage: ["summary", "duration_human", "zone_count", "objective_mm", "plan_type", "passages", "fractionation", "total_duration_min"],
   entity_arrosage_en_cours: ["active", "started_at_utc", "last_activity_at_utc", "active_zone_count", "zone_count", "progress_percent"],
   entity_dernier_arrosage: ["source", "date_action", "detected_at", "zone_count"],
@@ -183,6 +203,8 @@ export const RENDER_SIGNATURE_ATTRS = {
   entity_catalogue_produits: ["products_count", "product_ids", "product_names", "products_summary", "summary"],
   entity_produit_intervention: ["selected_product_id", "selected_product_name", "summary", "products_count"],
   entity_debug_intervention: ["score", "status", "recommended_action", "product_id", "product_name", "summary", "reason", "why_now", "reasons", "constraints", "blocking_constraints", "non_blocking_constraints", "missing_requirements", "context", "ready_to_declare", "selected_product_ready", "ui_summary", "ui_hint"],
+  entity_signal_intervention: ["source_entity", "source_status", "recommended_action", "product_id", "product_name", "ready_to_declare", "selected_product_ready", "trigger_kind", "summary"],
+  entity_signal_irrigation: ["source_entities", "source_status", "application_post_watering_status", "type_arrosage", "trigger_kind", "summary"],
   entity_prochaine_intervention: [
     "payload",
   ],

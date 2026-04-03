@@ -638,11 +638,21 @@ class GazonIntelligentCard extends HTMLElement {
     const attrs = entity?.attributes || {};
     const payload = attrs.payload && typeof attrs.payload === "object" ? attrs.payload : attrs;
     const catalogue = this._catalogueState();
+    const pertinenceEntity = this._entity("entity_niveau_pertinence");
     const product = payload.product && typeof payload.product === "object" ? payload.product : {};
     const selection = payload.selection && typeof payload.selection === "object" ? payload.selection : {};
     const context = payload.context && typeof payload.context === "object" ? payload.context : {};
     const state = String(payload.status || entity?.state || attrs.state || "").trim().toLowerCase();
     const normalizedState = state || "unavailable";
+    const score = asNumber(payload.score ?? attrs.score ?? pertinenceEntity?.attributes?.score) ?? 0;
+    const scoreLevel = String(
+      payload.score_level
+        || attrs.score_level
+        || pertinenceEntity?.attributes?.score_level
+        || pertinenceEntity?.state
+        || "",
+    ).trim().toLowerCase();
+    const hasHighScore = ["élevé", "eleve", "high", "haut"].includes(scoreLevel) || score >= 71;
     const fallbackPresentation = {
       status: normalizedState,
       title: "Intervention",
@@ -659,7 +669,23 @@ class GazonIntelligentCard extends HTMLElement {
       historySummary: "Dernière application",
       historyHint: "Historique local des applications enregistrées.",
     };
-    const presentation = typeof formatInterventionStatusPresentation === "function"
+    const lowScorePresentation = {
+      status: normalizedState,
+      title: "À surveiller",
+      badge: "Score insuffisant",
+      tone: "neutral",
+      icon: "mdi:chart-line-variant",
+      summary: "Aucune intervention proposée",
+      hint: "L’intervention n’est proposée que lorsque le score est élevé.",
+      actionLabel: "Surveiller",
+      selectionSummary: "Produit à sélectionner",
+      selectionHint: "La sélection reste possible, mais aucune intervention n’est proposée tant que le score n’est pas élevé.",
+      declarationSummary: "Pas de proposition",
+      declarationHint: "Aucune intervention n’est proposée tant que le score n’est pas élevé.",
+      historySummary: "Dernière application",
+      historyHint: "Historique local des applications enregistrées.",
+    };
+    const basePresentation = typeof formatInterventionStatusPresentation === "function"
       ? formatInterventionStatusPresentation(normalizedState)
       : (function mapFallbackInterventionStatus(status) {
           const normalized = String(status ?? "").trim().toLowerCase();
@@ -680,6 +706,9 @@ class GazonIntelligentCard extends HTMLElement {
           }
           return fallbackPresentation;
         })(normalizedState);
+    const presentation = hasHighScore || ["blocked", "unavailable", "non_disponible"].includes(normalizedState)
+      ? basePresentation
+      : lowScorePresentation;
     const reason = String(payload.reason || "").trim();
     const whyNow = String(payload.why_now || "").trim();
     const title = presentation.title;
@@ -719,7 +748,7 @@ class GazonIntelligentCard extends HTMLElement {
     const recommendedProductId = String(product.id || attrs.recommended_product_id || "").trim() || null;
     const recommendedProductName = String(product.name || attrs.recommended_product_name || "").trim() || null;
     const recommendedProductType = String(product.type || attrs.recommended_product_type || "").trim() || null;
-    const readyToDeclare = Boolean(payload.ready_to_declare);
+    const readyToDeclare = Boolean(payload.ready_to_declare) && hasHighScore;
     return {
       entity,
       payload,
@@ -727,7 +756,9 @@ class GazonIntelligentCard extends HTMLElement {
       status: normalizedState,
       recommendedAction: String(payload.recommended_action || "").trim() || null,
       priority: String(payload.priority || "").trim() || null,
-      score: asNumber(payload.score) ?? 0,
+      score,
+      scoreLevel: scoreLevel || null,
+      scoreHigh: hasHighScore,
       reason: String(payload.reason || "").trim() || "",
       whyNow: String(payload.why_now || "").trim() || "",
       reasons,

@@ -6956,7 +6956,7 @@ function renderProductsTab(card) {
     selection.maxApplicationsPerYearLabel ? `Max/an: ${selection.maxApplicationsPerYearLabel}` : "",
   ].filter(Boolean);
   const productsHint = hasProductData
-    ? `${selection.summary || "Le référentiel produit alimente la prochaine recommandation."}${productsHintParts.length ? ` · ${productsHintParts.join(" · ")}` : ""}`
+    ? productsHintParts.join(" · ") || "Le référentiel produit alimente la prochaine recommandation."
     : emptyStateMessage;
 
   return `
@@ -7000,12 +7000,12 @@ function renderInterventionTab(card) {
   const recommendationTone = ui.tone || "neutral";
   const recommendationIcon = ui.icon || "mdi:spray-bottle";
   const selectionMeta = quickAction.record
-    ? "Produit sélectionné"
+    ? "Choix actif"
     : hasProductOptions
       ? "Produit à sélectionner"
       : "Aucun produit disponible";
   const declarationMeta = ui.badge || formatStatusLabel(recommendation.status) || "Non disponible";
-  const pickerSummary = ui.selectionSummary || (quickAction.record ? "Produit sélectionné." : hasProductOptions ? "Sélectionne un produit dans la liste." : "Aucun produit disponible.");
+  const pickerSummary = ui.selectionSummary || (quickAction.record ? "Sélection en cours." : hasProductOptions ? "Sélectionne un produit dans la liste." : "Aucun produit disponible.");
   const pickerHint = ui.selectionHint || "La sélection met à jour le produit actif.";
   const actionSummary = ui.declarationSummary || "Déclaration indisponible.";
   const actionHint = ui.declarationHint || "La déclaration suit le produit sélectionné.";

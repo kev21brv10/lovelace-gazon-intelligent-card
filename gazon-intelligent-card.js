@@ -7557,6 +7557,12 @@ function renderHeader(card) {
   }
   const phase = card._entityState("entity_phase", null);
   const subPhase = card._entityState("entity_sous_phase", null);
+  const normalizedPhase = String(phase ?? "").trim().toLowerCase();
+  const normalizedSubPhase = String(subPhase ?? "").trim().toLowerCase();
+  const subtitleParts = [phase ? escapeHtml(phase) : "Phase non disponible"];
+  if (subPhase && normalizedSubPhase !== normalizedPhase) {
+    subtitleParts.push(escapeHtml(subPhase));
+  }
   const weather = card._weatherState();
   const manualActionLabel = card._manualActionLabel();
   const tone = card._cardTone();
@@ -7568,10 +7574,7 @@ function renderHeader(card) {
           </div>
           <div class="header__titles">
             <div class="header__title">${escapeHtml(card._config.title || "Gazon Intelligent")}</div>
-            <div class="header__subtitle">
-              ${phase ? escapeHtml(phase) : "Phase non disponible"}
-              ${subPhase ? ` · ${escapeHtml(subPhase)}` : ""}
-            </div>
+            <div class="header__subtitle">${subtitleParts.join(" · ")}</div>
           </div>
         </div>
         <div class="header__meta">

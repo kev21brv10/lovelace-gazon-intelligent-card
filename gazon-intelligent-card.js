@@ -3186,6 +3186,104 @@ function formatStatusLabel(status) {
   return formatStateLabel(status);
 }
 
+const INTERVENTION_STATUS_PRESENTATIONS = {
+  recommended: {
+    title: "Intervention recommandée",
+    badge: "Choisie automatiquement",
+    tone: "success",
+    icon: "mdi:spray-bottle",
+    summary: "Recommandé",
+    hint: "La prochaine intervention est recommandée.",
+    actionLabel: "Déclarer maintenant",
+    selectionSummary: "Produit recommandé",
+    selectionHint: "Le produit recommandé alimente la déclaration.",
+    declarationSummary: "Recommandé",
+    declarationHint: "La déclaration peut être lancée maintenant.",
+    historySummary: "Dernière application",
+    historyHint: "Historique local des applications enregistrées.",
+  },
+  possible: {
+    title: "Intervention à préparer",
+    badge: "À confirmer",
+    tone: "warning",
+    icon: "mdi:spray-bottle",
+    summary: "À préparer",
+    hint: "La prochaine intervention est à préparer.",
+    actionLabel: "Choisir le produit",
+    selectionSummary: "Produit à sélectionner",
+    selectionHint: "Le produit sélectionné alimente la déclaration.",
+    declarationSummary: "À préparer",
+    declarationHint: "La déclaration n’est pas encore prête.",
+    historySummary: "Dernière application",
+    historyHint: "Historique local des applications enregistrées.",
+  },
+  ready: {
+    title: "Prêt à déclarer",
+    badge: "Prêt à déclarer",
+    tone: "success",
+    icon: "mdi:spray-bottle",
+    summary: "Prêt à déclarer",
+    hint: "Le produit peut être déclaré maintenant.",
+    actionLabel: "Déclarer",
+    selectionSummary: "Produit sélectionné",
+    selectionHint: "Le produit sélectionné est prêt à être confirmé.",
+    declarationSummary: "Prêt à déclarer",
+    declarationHint: "La déclaration peut être lancée maintenant.",
+    historySummary: "Dernière application",
+    historyHint: "Historique local des applications enregistrées.",
+  },
+  blocked: {
+    title: "Bloqué",
+    badge: "Bloqué",
+    tone: "danger",
+    icon: "mdi:cancel",
+    summary: "Bloqué",
+    hint: "Une contrainte bloque la prochaine intervention.",
+    actionLabel: "Attendre",
+    selectionSummary: "Produit sélectionné",
+    selectionHint: "La sélection reste disponible, mais la déclaration est bloquée.",
+    declarationSummary: "Bloqué",
+    declarationHint: "Une contrainte bloque la déclaration.",
+    historySummary: "Dernière application",
+    historyHint: "Historique local des applications enregistrées.",
+  },
+  unavailable: {
+    title: "Non disponible",
+    badge: "Non disponible",
+    tone: "neutral",
+    icon: "mdi:package-variant-closed",
+    summary: "Non disponible",
+    hint: "Aucun statut exploitable n’est disponible.",
+    actionLabel: "Non disponible",
+    selectionSummary: "Aucun produit disponible",
+    selectionHint: "Sélectionne un produit dans la liste pour préparer la déclaration.",
+    declarationSummary: "Non disponible",
+    declarationHint: "Aucune recommandation n’est disponible pour l’instant.",
+    historySummary: "Dernière application",
+    historyHint: "Historique local des applications enregistrées.",
+  },
+};
+
+function formatInterventionStatusPresentation(status) {
+  const normalized = String(status ?? "").trim().toLowerCase();
+  if (normalized === "recommended") {
+    return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.recommended };
+  }
+  if (normalized === "possible") {
+    return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.possible };
+  }
+  if (normalized === "ready") {
+    return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.ready };
+  }
+  if (normalized === "blocked") {
+    return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.blocked };
+  }
+  if (normalized === "unavailable" || normalized === "non_disponible") {
+    return { status: normalized || "unavailable", ...INTERVENTION_STATUS_PRESENTATIONS.unavailable };
+  }
+  return { status: normalized || "unavailable", ...INTERVENTION_STATUS_PRESENTATIONS.unavailable };
+}
+
 const POST_APPLICATION_STATUS_PRESENTATIONS = {
   autorise: { label: "Autorisé", tone: "success", active: true, kind: "autorise" },
   en_attente: { label: "En attente", tone: "warning", active: false, kind: "en_attente" },
@@ -3793,7 +3891,43 @@ class GazonIntelligentCard extends HTMLElement {
     const context = payload.context && typeof payload.context === "object" ? payload.context : {};
     const state = String(payload.status || entity?.state || attrs.state || "").trim().toLowerCase();
     const normalizedState = state || "unavailable";
-    const presentation = formatInterventionStatusPresentation(normalizedState);
+    const fallbackPresentation = {
+      status: normalizedState,
+      title: "Intervention",
+      badge: "Non disponible",
+      tone: "neutral",
+      icon: "mdi:spray-bottle",
+      summary: "Non disponible",
+      hint: "Aucune recommandation exploitable n’est disponible.",
+      actionLabel: "Non disponible",
+      selectionSummary: "Aucun produit identifié",
+      selectionHint: "Aucune recommandation exploitable n’est disponible.",
+      declarationSummary: "Non disponible",
+      declarationHint: "Aucune recommandation exploitable n’est disponible.",
+      historySummary: "Dernière application",
+      historyHint: "Historique local des applications enregistrées.",
+    };
+    const presentation = typeof formatInterventionStatusPresentation === "function"
+      ? formatInterventionStatusPresentation(normalizedState)
+      : (function mapFallbackInterventionStatus(status) {
+          const normalized = String(status ?? "").trim().toLowerCase();
+          if (normalized === "recommended") {
+            return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.recommended };
+          }
+          if (normalized === "possible") {
+            return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.possible };
+          }
+          if (normalized === "ready") {
+            return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.ready };
+          }
+          if (normalized === "blocked") {
+            return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.blocked };
+          }
+          if (normalized === "unavailable" || normalized === "non_disponible") {
+            return { status: normalized || "unavailable", ...INTERVENTION_STATUS_PRESENTATIONS.unavailable };
+          }
+          return fallbackPresentation;
+        })(normalizedState);
     const reason = String(payload.reason || "").trim();
     const whyNow = String(payload.why_now || "").trim();
     const title = presentation.title;

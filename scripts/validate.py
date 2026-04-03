@@ -115,4 +115,12 @@ for marker in (
     if marker not in root_src:
         raise SystemExit(f"Missing expected helper in bundled file: {marker}")
 
+for marker in (
+    "function formatInterventionStatusPresentation",
+    "function formatPostApplicationStatusPresentation",
+    "function formatWateringBlockReason",
+):
+    if marker not in root_src:
+        raise SystemExit(f"Missing critical helper in bundled file: {marker}")
+
 print("Validation OK")

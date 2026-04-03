@@ -744,6 +744,7 @@ export function renderInterventionTab(card) {
   const selectedProductOptionLabel = quickAction.optionLabel || (productOptions.length === 1 ? productOptions[0].label : "");
   const hasProductOptions = productOptions.length > 0;
   const canDeclare = Boolean(recommendation.readyToDeclare && quickAction.record && !quickAction.disabled);
+  const hasSelection = Boolean(quickAction.record && !quickAction.disabled);
   const catalogue = card._catalogueState();
   const hasApplication = Boolean(lastApplication.hasApplication);
   const lastApplicationSummary = hasApplication ? lastApplication.summary : "Aucune application enregistrée.";

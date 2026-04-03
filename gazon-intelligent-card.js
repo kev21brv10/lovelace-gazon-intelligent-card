@@ -2453,7 +2453,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.42";
+const CARD_VERSION = "0.1.43";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -2854,6 +2854,35 @@ function formatAuthorizationState(value) {
     return "Non autorisé";
   }
   return isUnavailableState(value) ? "Non disponible" : String(value);
+}
+
+const WATERING_BLOCK_REASON_LABELS = {
+  sol_deja_humide: "Sol déjà humide",
+  cooldown_24h: "Délai de 24 h",
+  pluie_proche: "Pluie proche",
+  pluie_significative: "Pluie significative",
+  pluie: "Pluie",
+  application: "Bloc application",
+  post_application: "Bloc post-application",
+  temperature: "Température",
+  meteorologie: "Météo",
+  meteo: "Météo",
+  weather: "Météo",
+};
+
+function formatWateringBlockReason(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return "Blocage";
+  }
+  if (WATERING_BLOCK_REASON_LABELS[normalized]) {
+    return WATERING_BLOCK_REASON_LABELS[normalized];
+  }
+  const cleaned = normalized.replaceAll("_", " ").replaceAll("-", " ").replace(/\s+/g, " ").trim();
+  if (!cleaned) {
+    return "Blocage";
+  }
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
 }
 
 function formatStateLabel(value) {

@@ -36,6 +36,7 @@ import {
   formatWateringBlockReason,
   formatWeatherConditionLabel,
   formatNumber,
+  iconForField,
   humanDateTimeText,
   isEmpty,
   isUnavailableState,
@@ -2280,7 +2281,9 @@ class GazonIntelligentCard extends HTMLElement {
     const value = this._formatFieldValue(field, entity);
     const tone = this._toneForField(field, entity);
     const secondary = this._secondaryFieldText(field, entity);
-    const icon = this._config?.show_icons ? iconForField(field) : null;
+    const icon = this._config?.show_icons
+      ? (typeof iconForField === "function" ? iconForField(field) : "mdi:help-circle-outline")
+      : null;
     const accent = this._fieldAccent(field.key, tone);
 
     return renderCardCore({

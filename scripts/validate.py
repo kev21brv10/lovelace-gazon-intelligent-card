@@ -32,6 +32,7 @@ UNIQUE_HELPERS = (
     "asNumber",
     "formatNumber",
     "formatDurationHuman",
+    "iconForField",
     "renderIconBox",
     "formatInterventionStatusPresentation",
     "formatPostApplicationStatusPresentation",
@@ -181,6 +182,7 @@ for marker in (
     "function formatProductAnnualLimit",
     "function formatTemperatureRangeConstraint",
     "function formatMonthLabel",
+    "function iconForField",
 ):
     if marker not in root_src:
         raise SystemExit(f"Missing expected helper in bundled file: {marker}")

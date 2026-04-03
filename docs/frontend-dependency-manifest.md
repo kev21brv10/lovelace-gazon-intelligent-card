@@ -92,6 +92,7 @@ Exports critiques:
 - `formatPlanType`
 - `formatApplicationMode`
 - `formatStatusLabel`
+- `iconForField`
 - `formatProductUsageMode`
 - `formatProductAnnualLimit`
 - `formatMonthLabel`
@@ -221,4 +222,3 @@ Toute nouvelle fonction ou constante critique doit:
   - bloque les doublons dangereux dans le bundle final
 - `scripts/check_bundle_sync.py`
   - compare le bundle du repo et le bundle installé côté HA/HACS
-

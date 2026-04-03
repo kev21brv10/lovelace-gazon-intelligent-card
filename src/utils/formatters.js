@@ -1,4 +1,4 @@
-import { STATUS_COLORS, STATUS_LABELS, WEATHER_LABELS } from "../constants.js";
+import { ENTITY_KEYS, STATUS_COLORS, STATUS_LABELS, WEATHER_LABELS } from "../constants.js";
 
 export function isEmpty(value) {
   return value === undefined || value === null || String(value).trim() === "";
@@ -336,6 +336,26 @@ export function formatApplicationMode(value) {
 
 export function formatStatusLabel(status) {
   return formatStateLabel(status);
+}
+
+export function iconForField(field) {
+  if (!field) {
+    return "mdi:information-outline";
+  }
+  if (typeof field === "object") {
+    if (field.icon) {
+      return String(field.icon);
+    }
+    if (field.key) {
+      return iconForField(field.key);
+    }
+  }
+  const key = String(field ?? "").trim();
+  if (!key) {
+    return "mdi:information-outline";
+  }
+  const match = ENTITY_KEYS.find((entry) => entry.key === key);
+  return String(match?.icon || "mdi:information-outline");
 }
 
 const PRODUCT_USAGE_MODE_LABELS = {

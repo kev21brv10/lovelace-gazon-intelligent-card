@@ -2320,7 +2320,7 @@ const CARD_STYLES = String.raw`
           }
         }
 
-        @media (max-width: 393px) {
+        @media (max-width: 400px) {
           :host {
             --gi-header-gap: 6px;
             --gi-header-margin-bottom: 8px;

@@ -2320,4 +2320,37 @@ export const CARD_STYLES = String.raw`
             min-height: 70px;
           }
         }
+
+        @media (max-width: 393px) {
+          :host {
+            --gi-header-gap: 8px;
+            --gi-header-margin-bottom: 10px;
+          }
+
+          .header {
+            align-items: stretch;
+          }
+
+          .header__title-wrap {
+            width: 100%;
+          }
+
+          .header__meta {
+            width: 100%;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: flex-start;
+            gap: 6px;
+            margin-left: 0;
+          }
+
+          .header__weather {
+            max-width: 100%;
+          }
+
+          .header__action {
+            max-width: 100%;
+            align-self: flex-end;
+          }
+        }
 `;

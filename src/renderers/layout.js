@@ -1077,7 +1077,7 @@ export function renderOverviewTab(card) {
             <div class="tab-panel__hero-summary">Vue prioritaire</div>
             ${renderStatusPill(proposal.title, overviewTone, overviewIcon, `tab-panel__status tab-panel__status--${overviewTone}`)}
           </div>
-          <div class="tab-panel__hero-next">${escapeHtml(windowState.displaySummary || windowState.summary || planState.summary || "Vue d’ensemble de la carte.")}</div>
+          <div class="tab-panel__hero-next">${escapeHtml(proposal.hint || windowState.displaySummary || windowState.summary || planState.summary || "Vue d’ensemble de la carte.")}</div>
           <div class="tab-panel__hero-hint">${escapeHtml("Le résumé s’adapte automatiquement à la situation réelle et remonte les informations utiles en premier.")}</div>
         </div>
 

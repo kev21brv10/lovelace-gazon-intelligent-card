@@ -1889,6 +1889,7 @@ class GazonIntelligentCard extends HTMLElement {
     const arrosageApresApplication = this._entity("entity_arrosage_apres_application_autorise");
     const afterApplicationInfo = this._postApplicationState(arrosageApresApplication);
     const tonteAutorisee = this._entityState("entity_tonte_autorisee", null);
+    const interventionSignal = this._entity("entity_signal_intervention");
     const actionTone = this._actionTone();
 
     let title = "Vue d’ensemble";
@@ -1940,6 +1941,27 @@ class GazonIntelligentCard extends HTMLElement {
       hint = action || "Sursemis en cours.";
       tone = "danger";
       icon = "mdi:content-cut";
+    } else if (conseil) {
+      const normalizedAdvice = String(conseil).trim().toLowerCase();
+      const interventionTrigger = String(interventionSignal?.attributes?.trigger_kind || "").trim().toLowerCase();
+      hint = conseil;
+      if (normalizedAdvice.startsWith("tonte")) {
+        title = "Tonte possible";
+        tone = "success";
+        icon = "mdi:content-cut";
+      } else if (normalizedAdvice.startsWith("intervention")) {
+        title = interventionTrigger === "ready" ? "Intervention prête" : interventionTrigger === "recommended" ? "Intervention recommandée" : "Intervention à préparer";
+        tone = interventionTrigger === "ready" || interventionTrigger === "recommended" ? "success" : "warning";
+        icon = "mdi:spray-bottle";
+      } else if (normalizedAdvice.startsWith("traitement")) {
+        title = normalizedAdvice.includes("bloqué") || normalizedAdvice.includes("bloque") ? "Traitement bloqué" : "Traitement conseillé";
+        tone = normalizedAdvice.includes("bloqué") || normalizedAdvice.includes("bloque") ? "warning" : "success";
+        icon = "mdi:flask-outline";
+      } else if (normalizedAdvice.startsWith("pas d'arrosage") || normalizedAdvice.startsWith("n'arrose pas")) {
+        title = "Aucune irrigation requise";
+        tone = "neutral";
+        icon = "mdi:water-off";
+      }
     }
 
     return { title, hint, tone, icon };
@@ -2485,6 +2507,95 @@ class GazonIntelligentCard extends HTMLElement {
     });
   }
 
+  _renderAdvancedGroup(title, meta, keys, eyebrow = "Détail") {
+    const tiles = keys
+      .map((key) => ENTITY_KEYS.find((field) => field.key === key))
+      .filter(Boolean)
+      .map((field) => this._renderTile(field))
+      .filter(Boolean);
+    if (!tiles.length) {
+      return "";
+    }
+    return `
+      <section class="gi-info gi-info--secondary advanced-group">
+        <div class="advanced-group__head">
+          <div class="advanced-group__eyebrow">${escapeHtml(eyebrow)}</div>
+          <div class="advanced-group__title">${escapeHtml(title)}</div>
+          <div class="advanced-group__meta">${escapeHtml(meta)}</div>
+        </div>
+        <div class="advanced-group__grid">
+          ${tiles.join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  _buildAdvancedContent() {
+    const groups = [
+      {
+        title: "Pilotage global",
+        meta: "Ce qui oriente la recommandation du moment.",
+        eyebrow: "Synthèse",
+        keys: ["entity_conseil", "entity_action", "entity_avoid", "entity_niveau", "entity_risque", "entity_phase", "entity_sous_phase"],
+      },
+      {
+        title: "Irrigation",
+        meta: "Fenêtre, besoin hydrique et exécution.",
+        eyebrow: "Hydrique",
+        keys: [
+          "entity_fenetre_optimale",
+          "entity_objectif_arrosage",
+          "entity_type_arrosage",
+          "entity_plan_arrosage",
+          "entity_arrosage_en_cours",
+          "entity_dernier_arrosage",
+          "entity_arrosage_recommande",
+          "entity_arrosage_apres_application_autorise",
+          "entity_signal_irrigation",
+        ],
+      },
+      {
+        title: "Intervention",
+        meta: "Produit conseillé, statut et debug utile.",
+        eyebrow: "Intervention",
+        keys: [
+          "entity_prochaine_intervention",
+          "entity_signal_intervention",
+          "entity_produit_intervention",
+          "entity_catalogue_produits",
+          "entity_derniere_application",
+          "entity_debug_intervention",
+          "entity_niveau_pertinence",
+          "entity_prochaine_fenetre_optimale",
+          "entity_prochain_blocage_attendu",
+        ],
+      },
+      {
+        title: "Réglages",
+        meta: "Configuration active utilisée par le moteur.",
+        eyebrow: "Configuration",
+        keys: [
+          "entity_mode",
+          "entity_switch_arrosage_automatique",
+          "entity_tonte",
+          "entity_tonte_autorisee",
+          "entity_hauteur",
+          "entity_debit_zone_1",
+          "entity_debit_zone_2",
+          "entity_debit_zone_3",
+          "entity_debit_zone_4",
+          "entity_debit_zone_5",
+          "entity_hauteur_min_tondeuse",
+          "entity_hauteur_max_tondeuse",
+        ],
+      },
+    ];
+    return groups
+      .map((group) => this._renderAdvancedGroup(group.title, group.meta, group.keys, group.eyebrow))
+      .filter(Boolean)
+      .join("");
+  }
+
   _renderSectionNav() {
     return renderSectionNav(this);
   }
@@ -2740,6 +2851,9 @@ class GazonIntelligentCard extends HTMLElement {
 
   _buildContent() {
     const section = this._isMinimalMode() ? "overview" : this._activeSection;
+    if (section === "details" && this._canShowLegacyDetails()) {
+      return this._buildAdvancedContent();
+    }
     const tiles = this._visibleFields(section).map((field) => this._renderTile(field)).filter(Boolean);
     if (tiles.length === 0) {
       return "";

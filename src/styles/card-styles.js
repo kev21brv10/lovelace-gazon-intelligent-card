@@ -1394,8 +1394,51 @@ export const CARD_STYLES = String.raw`
         .decision-advanced {
           display: flex;
           flex-direction: column;
-          gap: 8px;
-          margin-top: 2px;
+          gap: 12px;
+          margin-top: 6px;
+        }
+
+        .advanced-group {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          padding: 14px;
+          border-radius: calc(var(--gazon-border-radius) - 8px);
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 16%, var(--divider-color));
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 8%, transparent), transparent 36%),
+            color-mix(in srgb, var(--card-background-color) 86%, var(--gazon-section-accent) 4%);
+        }
+
+        .advanced-group__head {
+          display: grid;
+          gap: 4px;
+        }
+
+        .advanced-group__eyebrow {
+          font-size: 0.72rem;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--secondary-text-color);
+        }
+
+        .advanced-group__title {
+          font-size: 1rem;
+          font-weight: 700;
+          color: var(--primary-text-color);
+        }
+
+        .advanced-group__meta {
+          font-size: var(--gi-font-sm);
+          line-height: 1.4;
+          color: var(--secondary-text-color);
+          max-width: 72ch;
+        }
+
+        .advanced-group__grid {
+          display: grid;
+          gap: 10px;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         }
 
         * {

@@ -6246,66 +6246,132 @@ class GazonIntelligentCard extends HTMLElement {
     `;
   }
 
-  _buildAdvancedContent() {
-    const groups = [
-      {
-        title: "Pilotage global",
-        meta: "Ce qui oriente la recommandation du moment.",
-        eyebrow: "Synthèse",
-        keys: ["entity_conseil", "entity_action", "entity_avoid", "entity_niveau", "entity_risque", "entity_phase", "entity_sous_phase"],
-      },
-      {
-        title: "Irrigation",
-        meta: "Fenêtre, besoin hydrique et exécution.",
-        eyebrow: "Hydrique",
-        keys: [
-          "entity_fenetre_optimale",
-          "entity_objectif_arrosage",
-          "entity_type_arrosage",
-          "entity_plan_arrosage",
-          "entity_arrosage_en_cours",
-          "entity_dernier_arrosage",
-          "entity_arrosage_recommande",
-          "entity_arrosage_apres_application_autorise",
-          "entity_signal_irrigation",
-        ],
-      },
-      {
-        title: "Intervention",
-        meta: "Produit conseillé, statut et debug utile.",
-        eyebrow: "Intervention",
-        keys: [
-          "entity_prochaine_intervention",
-          "entity_signal_intervention",
-          "entity_produit_intervention",
-          "entity_catalogue_produits",
-          "entity_derniere_application",
-          "entity_debug_intervention",
-          "entity_niveau_pertinence",
-          "entity_prochaine_fenetre_optimale",
-          "entity_prochain_blocage_attendu",
-        ],
-      },
-      {
-        title: "Réglages",
-        meta: "Configuration active utilisée par le moteur.",
-        eyebrow: "Configuration",
-        keys: [
-          "entity_mode",
-          "entity_switch_arrosage_automatique",
-          "entity_tonte",
-          "entity_tonte_autorisee",
-          "entity_hauteur",
-          "entity_debit_zone_1",
-          "entity_debit_zone_2",
-          "entity_debit_zone_3",
-          "entity_debit_zone_4",
-          "entity_debit_zone_5",
-          "entity_hauteur_min_tondeuse",
-          "entity_hauteur_max_tondeuse",
-        ],
-      },
-    ];
+  _buildAdvancedContent(tab = this._activeTab) {
+    const groupsByTab = {
+      overview: [
+        {
+          title: "Pilotage global",
+          meta: "Les signaux les plus utiles pour comprendre la priorité du moment.",
+          eyebrow: "Synthèse",
+          keys: ["entity_conseil", "entity_niveau", "entity_risque", "entity_phase", "entity_sous_phase"],
+        },
+        {
+          title: "Priorités dérivées",
+          meta: "Ce qui fait évoluer la recommandation globale.",
+          eyebrow: "Priorité",
+          keys: ["entity_niveau_pertinence", "entity_prochaine_fenetre_optimale", "entity_prochain_blocage_attendu", "entity_prochaine_intervention"],
+        },
+      ],
+      watering: [
+        {
+          title: "Conduite d'irrigation",
+          meta: "Besoin hydrique, fenêtre et plan à exécuter.",
+          eyebrow: "Hydrique",
+          keys: [
+            "entity_fenetre_optimale",
+            "entity_objectif_arrosage",
+            "entity_type_arrosage",
+            "entity_plan_arrosage",
+            "entity_arrosage_recommande",
+            "entity_arrosage_apres_application_autorise",
+            "entity_signal_irrigation",
+            "entity_arrosage_en_cours",
+            "entity_dernier_arrosage",
+          ],
+        },
+        {
+          title: "Réglages irrigation",
+          meta: "Paramètres qui influencent directement les cycles.",
+          eyebrow: "Configuration",
+          keys: [
+            "entity_switch_arrosage_automatique",
+            "entity_debit_zone_1",
+            "entity_debit_zone_2",
+            "entity_debit_zone_3",
+            "entity_debit_zone_4",
+            "entity_debit_zone_5",
+          ],
+        },
+      ],
+      mowing: [
+        {
+          title: "Décision tonte",
+          meta: "Statut courant, autorisation et hauteur conseillée.",
+          eyebrow: "Tonte",
+          keys: ["entity_tonte", "entity_tonte_autorisee", "entity_hauteur", "entity_phase", "entity_sous_phase", "entity_risque"],
+        },
+        {
+          title: "Réglages tonte",
+          meta: "Bornes utilisées pour la recommandation de hauteur.",
+          eyebrow: "Configuration",
+          keys: ["entity_hauteur_min_tondeuse", "entity_hauteur_max_tondeuse"],
+        },
+      ],
+      gazon: [
+        {
+          title: "État du gazon",
+          meta: "Lecture métier de la phase, du niveau d'action et du risque.",
+          eyebrow: "Gazon",
+          keys: ["entity_conseil", "entity_niveau", "entity_risque", "entity_phase", "entity_sous_phase", "entity_action", "entity_avoid"],
+        },
+        {
+          title: "Contexte hydrique",
+          meta: "Ce qui nourrit l'analyse sans surcharger le résumé principal.",
+          eyebrow: "Contexte",
+          keys: ["entity_objectif_arrosage", "entity_type_arrosage", "entity_fenetre_optimale"],
+        },
+      ],
+      products: [
+        {
+          title: "Catalogue",
+          meta: "Référentiel local disponible pour la saison.",
+          eyebrow: "Produits",
+          keys: ["entity_catalogue_produits", "entity_produit_intervention", "entity_derniere_application"],
+        },
+      ],
+      intervention: [
+        {
+          title: "Recommandation intervention",
+          meta: "Produit ciblé, statut et préparation de déclaration.",
+          eyebrow: "Intervention",
+          keys: [
+            "entity_prochaine_intervention",
+            "entity_signal_intervention",
+            "entity_produit_intervention",
+            "entity_catalogue_produits",
+            "entity_derniere_application",
+            "entity_niveau_pertinence",
+            "entity_prochaine_fenetre_optimale",
+            "entity_prochain_blocage_attendu",
+          ],
+        },
+        {
+          title: "Debug métier",
+          meta: "Lecture détaillée du moteur quand il faut investiguer.",
+          eyebrow: "Debug",
+          keys: ["entity_debug_intervention"],
+        },
+      ],
+      config: [
+        {
+          title: "Paramètres actifs",
+          meta: "Configuration effectivement utilisée par le moteur.",
+          eyebrow: "Réglages",
+          keys: [
+            "entity_mode",
+            "entity_switch_arrosage_automatique",
+            "entity_debit_zone_1",
+            "entity_debit_zone_2",
+            "entity_debit_zone_3",
+            "entity_debit_zone_4",
+            "entity_debit_zone_5",
+            "entity_hauteur_min_tondeuse",
+            "entity_hauteur_max_tondeuse",
+          ],
+        },
+      ],
+    };
+    const groups = groupsByTab[tab] || groupsByTab.overview;
     return groups
       .map((group) => this._renderAdvancedGroup(group.title, group.meta, group.keys, group.eyebrow))
       .filter(Boolean)
@@ -6534,8 +6600,11 @@ class GazonIntelligentCard extends HTMLElement {
     return renderHeader(this);
   }
 
-  _buildDecisionBlocks(section = this._activeSection) {
-    if (section !== "details" || this._isMinimalMode()) {
+  _buildDecisionBlocks() {
+    if (!this._canShowLegacyDetails() || this._isMinimalMode()) {
+      return "";
+    }
+    if (!["overview", "gazon"].includes(this._activeTab)) {
       return "";
     }
     const action = this._entityState("entity_action", null);
@@ -6567,8 +6636,8 @@ class GazonIntelligentCard extends HTMLElement {
 
   _buildContent() {
     const section = this._isMinimalMode() ? "overview" : this._activeSection;
-    if (section === "details" && this._canShowLegacyDetails()) {
-      return this._buildAdvancedContent();
+    if (this._canShowLegacyDetails()) {
+      return this._buildAdvancedContent(this._activeTab);
     }
     const tiles = this._visibleFields(section).map((field) => this._renderTile(field)).filter(Boolean);
     if (tiles.length === 0) {
@@ -6581,8 +6650,11 @@ class GazonIntelligentCard extends HTMLElement {
     `;
   }
 
-  _buildFooter(section = this._activeSection) {
-    if (section !== "details" || this._isMinimalMode()) {
+  _buildFooter() {
+    if (!this._canShowLegacyDetails() || this._isMinimalMode()) {
+      return "";
+    }
+    if (!["overview", "gazon"].includes(this._activeTab)) {
       return "";
     }
     const phaseSource = this._entity("entity_phase")?.attributes?.phase_dominante_source;
@@ -7038,7 +7110,7 @@ function renderTabNav(card) {
 }
 
 function renderSectionNav(card) {
-  if (card._isMinimalMode()) {
+  if (card._isMinimalMode() || card._canShowLegacyDetails()) {
     return "";
   }
   return `

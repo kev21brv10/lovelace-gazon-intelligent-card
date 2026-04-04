@@ -48,7 +48,7 @@ export function renderTabNav(card) {
 }
 
 export function renderSectionNav(card) {
-  if (card._isMinimalMode()) {
+  if (card._isMinimalMode() || card._canShowLegacyDetails()) {
     return "";
   }
   return `

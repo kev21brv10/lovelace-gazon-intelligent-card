@@ -381,6 +381,62 @@ class GazonIntelligentCard extends HTMLElement {
     }
   }
 
+  _tabPalette(tab = this._activeTab) {
+    const accent = this._tabAccent(tab);
+    switch (tab) {
+      case "watering":
+        return {
+          accent,
+          companion: "#88e4ff",
+          glow: "#31b8d4",
+          mist: "#58cfd6",
+        };
+      case "mowing":
+        return {
+          accent,
+          companion: "#e6cf73",
+          glow: "#a6cb58",
+          mist: "#c8d86b",
+        };
+      case "gazon":
+        return {
+          accent,
+          companion: "#9fd874",
+          glow: "#5bb56e",
+          mist: "#7ec788",
+        };
+      case "products":
+        return {
+          accent,
+          companion: "#d9bf73",
+          glow: "#57c18d",
+          mist: "#8ecf90",
+        };
+      case "intervention":
+        return {
+          accent,
+          companion: "#f1b86f",
+          glow: "#5ac7b0",
+          mist: "#93d3a4",
+        };
+      case "config":
+        return {
+          accent,
+          companion: "#8eb8d8",
+          glow: "#7b8da0",
+          mist: "#a5b3bf",
+        };
+      case "overview":
+      default:
+        return {
+          accent,
+          companion: "#7fd6b6",
+          glow: "#58c27d",
+          mist: "#75cfd2",
+        };
+    }
+  }
+
   _normalizedActionConfig(action) {
     if (typeof action === "string") {
       return { action };
@@ -1401,10 +1457,11 @@ class GazonIntelligentCard extends HTMLElement {
     return pathname.includes("/config/lovelace");
   }
 
-  _applyHostVariables({ accent, activeTone, sectionAccent, borderRadius, iconSize }) {
+  _applyHostVariables({ accent, activeTone, sectionAccent, borderRadius, iconSize, tabPalette }) {
     if (!this.style) {
       return;
     }
+    const palette = tabPalette || this._tabPalette(this._activeTab);
     const vars = {
       "--gazon-accent-color": accent,
       "--gazon-card-accent": accent,
@@ -1415,6 +1472,11 @@ class GazonIntelligentCard extends HTMLElement {
       "--gazon-water-color": `color-mix(in srgb, ${accent} 42%, #44c8ea)`,
       "--gazon-moss-color": `color-mix(in srgb, ${sectionAccent} 74%, #4d9f58)`,
       "--gi-soil-color": `color-mix(in srgb, ${accent} 18%, #b8865d)`,
+      "--gi-tab-accent": palette.accent,
+      "--gi-tab-companion": palette.companion,
+      "--gi-tab-glow-color": palette.glow,
+      "--gi-tab-mist-color": palette.mist,
+      "--gi-tab-shadow": `0 18px 36px color-mix(in srgb, ${palette.glow} 16%, transparent)`,
       "--gazon-danger-color": STATUS_COLORS.danger,
       "--gazon-warning-color": STATUS_COLORS.warning,
       "--gazon-success-color": STATUS_COLORS.success,
@@ -2979,6 +3041,7 @@ class GazonIntelligentCard extends HTMLElement {
       const activeTone = this._cardTone();
       const accent = this._config.accent_color || this._accentColorFromTone(activeTone);
       const sectionAccent = this._tabAccent(this._activeTab);
+      const tabPalette = this._tabPalette(this._activeTab);
       const background = this._config.show_background ? "true" : "false";
       const backgroundStyle = this._config.background_style || "solid";
       const themeMode = this._config.theme_mode || "auto";
@@ -2995,6 +3058,7 @@ class GazonIntelligentCard extends HTMLElement {
         sectionAccent,
         borderRadius,
         iconSize,
+        tabPalette,
       });
 
       const rootClass = [
@@ -3019,6 +3083,7 @@ ${CARD_STYLES}
             aria-label="${escapeHtml(this._config.title || DEFAULT_CONFIG.title)}"
             data-background="${background}"
             data-tone="${activeTone}"
+            data-active-tab="${escapeHtml(this._activeTab)}"
             ${hasCardAction ? 'role="button" tabindex="0"' : ""}
           >
           ${this._buildHeader()}

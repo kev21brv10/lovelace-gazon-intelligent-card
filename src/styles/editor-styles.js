@@ -40,6 +40,13 @@ export const EDITOR_STYLES = String.raw`
             background-color 160ms ease;
         }
 
+        .section--sub {
+          padding: 12px;
+          border-radius: 14px;
+          background: color-mix(in srgb, var(--secondary-background-color) 96%, transparent);
+          box-shadow: none;
+        }
+
         @media (hover: hover) and (pointer: fine) {
           .section:hover {
             border-color: color-mix(in srgb, var(--primary-color) 14%, var(--editor-border));

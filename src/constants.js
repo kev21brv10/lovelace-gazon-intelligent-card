@@ -62,6 +62,13 @@ export const DEFAULT_CONFIG = {
   double_tap_action: { action: "none" },
 };
 
+export function createStubConfig() {
+  return {
+    type: `custom:${CARD_TYPE}`,
+    ...DEFAULT_CONFIG,
+  };
+}
+
 export const TAB_DEFS = [
   { key: "overview", label: "Synthèse", icon: "mdi:view-dashboard" },
   { key: "watering", label: "Irrigation", icon: "mdi:water" },

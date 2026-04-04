@@ -27,7 +27,7 @@ Gazon Intelligent Card affiche dans Home Assistant les décisions métier les pl
 
 ## 📸 Aperçu
 
-> Ajoute ici une capture Lovelace de la carte finalisée.
+Capture Lovelace à documenter dans une prochaine révision du README.
 
 ---
 

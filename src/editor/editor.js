@@ -1,4 +1,4 @@
-import { CARD_TYPE, DEFAULT_CONFIG } from "../constants.js";
+import { CARD_TYPE, DEFAULT_CONFIG, ENTITY_KEYS, createStubConfig } from "../constants.js";
 import {
   domainMatches,
   escapeHtml,
@@ -6,6 +6,23 @@ import {
   normalizeConfig,
 } from "../utils/formatters.js";
 import { EDITOR_STYLES } from "../styles/editor-styles.js";
+
+const ENTITY_FIELD_DOMAINS = {
+  entity_weather: ["weather"],
+  ...Object.fromEntries(
+    ENTITY_KEYS.map((field) => [field.key, field.domain || null]),
+  ),
+};
+
+const ACTION_OPTIONS = [
+  { value: "none", label: "Aucune action" },
+  { value: "more-info", label: "More-info" },
+  { value: "toggle", label: "Basculer" },
+  { value: "perform-action", label: "Exécuter une action" },
+  { value: "navigate", label: "Naviguer" },
+  { value: "url", label: "Ouvrir une URL" },
+  { value: "assist", label: "Assist" },
+];
 
 export class GazonIntelligentCardEditor extends HTMLElement {
   constructor() {
@@ -31,11 +48,11 @@ export class GazonIntelligentCardEditor extends HTMLElement {
   }
 
   getStubConfig() {
-    return GazonIntelligentCard.getStubConfig();
+    return createStubConfig();
   }
 
   _entityOptions(domainFilter = null) {
-    const entities = Object.entries(this._hass?.states || {})
+    return Object.entries(this._hass?.states || {})
       .map(([entityId, stateObj]) => ({ entity_id: entityId, stateObj }))
       .filter(({ stateObj }) => {
         if (!domainFilter) {
@@ -44,7 +61,64 @@ export class GazonIntelligentCardEditor extends HTMLElement {
         return domainMatches(stateObj, domainFilter);
       })
       .sort((a, b) => a.entity_id.localeCompare(b.entity_id));
-    return entities;
+  }
+
+  _getConfigValue(key) {
+    return String(key || "")
+      .split(".")
+      .filter(Boolean)
+      .reduce((value, segment) => value?.[segment], this._config);
+  }
+
+  _cloneBranch(value) {
+    if (Array.isArray(value)) {
+      return [...value];
+    }
+    if (value && typeof value === "object") {
+      return { ...value };
+    }
+    return {};
+  }
+
+  _pruneEmptyObjects(value) {
+    if (Array.isArray(value)) {
+      return value;
+    }
+    if (value && typeof value === "object") {
+      const next = {};
+      Object.entries(value).forEach(([key, child]) => {
+        const prunedChild = this._pruneEmptyObjects(child);
+        if (prunedChild !== undefined) {
+          next[key] = prunedChild;
+        }
+      });
+      return Object.keys(next).length ? next : undefined;
+    }
+    return value === undefined ? undefined : value;
+  }
+
+  _setConfigValue(config, key, value) {
+    const path = String(key || "").split(".").filter(Boolean);
+    if (!path.length) {
+      return config;
+    }
+    const next = { ...config };
+    let cursor = next;
+    let sourceCursor = config;
+    for (let index = 0; index < path.length - 1; index += 1) {
+      const segment = path[index];
+      const sourceValue = sourceCursor?.[segment];
+      cursor[segment] = this._cloneBranch(sourceValue);
+      cursor = cursor[segment];
+      sourceCursor = sourceValue;
+    }
+    const leaf = path[path.length - 1];
+    if (value === undefined) {
+      delete cursor[leaf];
+    } else {
+      cursor[leaf] = value;
+    }
+    return this._pruneEmptyObjects(next) || {};
   }
 
   _handleInput(event) {
@@ -57,9 +131,7 @@ export class GazonIntelligentCardEditor extends HTMLElement {
       return;
     }
 
-    const next = { ...this._config };
     let value;
-
     if (target instanceof HTMLInputElement && target.type === "checkbox") {
       value = target.checked;
     } else if (target instanceof HTMLInputElement && target.type === "number") {
@@ -68,13 +140,9 @@ export class GazonIntelligentCardEditor extends HTMLElement {
       value = target.value;
     }
 
-    if (value === "" && !["title"].includes(key)) {
-      delete next[key];
-    } else {
-      next[key] = value;
-    }
-
-    this._config = normalizeConfig(next);
+    const shouldDelete = value === "" && !["title"].includes(key);
+    const next = this._setConfigValue(this._config, key, shouldDelete ? undefined : value);
+    this._config = normalizeConfig(mergeConfig(DEFAULT_CONFIG, next));
     this.dispatchEvent(
       new CustomEvent("config-changed", {
         detail: { config: this._config },
@@ -84,8 +152,17 @@ export class GazonIntelligentCardEditor extends HTMLElement {
     );
   }
 
+  _bindInputs() {
+    this.shadowRoot.querySelectorAll("[data-config-key]").forEach((element) => {
+      element.removeEventListener("input", this._handleInput);
+      element.removeEventListener("change", this._handleInput);
+      element.addEventListener("input", this._handleInput);
+      element.addEventListener("change", this._handleInput);
+    });
+  }
+
   _renderCheckbox(field, label) {
-    const checked = Boolean(this._config?.[field]);
+    const checked = Boolean(this._getConfigValue(field));
     return `
       <label class="field field--checkbox">
         <input data-config-key="${escapeHtml(field)}" type="checkbox" ${checked ? "checked" : ""} />
@@ -94,20 +171,107 @@ export class GazonIntelligentCardEditor extends HTMLElement {
     `;
   }
 
-  _renderEntityInput(field, label) {
-    const value = this._config?.[field] ?? "";
-    const listId = "gazon-intelligent-card-entities";
+  _renderTextInput(field, label, placeholder = "") {
+    const value = this._getConfigValue(field) ?? "";
     return `
       <label class="field">
         <span>${escapeHtml(label)}</span>
         <input
           data-config-key="${escapeHtml(field)}"
-          list="${listId}"
           type="text"
           value="${escapeHtml(value)}"
-          placeholder="sensor.gazon_intelligent_..."
+          placeholder="${escapeHtml(placeholder)}"
         />
       </label>
+    `;
+  }
+
+  _renderNumberInput(field, label, min = 0) {
+    const value = this._getConfigValue(field);
+    return `
+      <label class="field">
+        <span>${escapeHtml(label)}</span>
+        <input
+          data-config-key="${escapeHtml(field)}"
+          type="number"
+          min="${escapeHtml(String(min))}"
+          step="1"
+          value="${escapeHtml(value ?? "")}"
+        />
+      </label>
+    `;
+  }
+
+  _renderSelect(field, label, options) {
+    const value = String(this._getConfigValue(field) ?? "");
+    return `
+      <label class="field">
+        <span>${escapeHtml(label)}</span>
+        <select data-config-key="${escapeHtml(field)}">
+          ${options
+            .map(
+              (option) => `
+                <option value="${escapeHtml(option.value)}" ${option.value === value ? "selected" : ""}>
+                  ${escapeHtml(option.label)}
+                </option>
+              `,
+            )
+            .join("")}
+        </select>
+      </label>
+    `;
+  }
+
+  _renderEntityInput(field, label, placeholder = "sensor.gazon_intelligent_...", domainFilter = undefined) {
+    const value = this._getConfigValue(field) ?? "";
+    const domains = domainFilter === undefined ? ENTITY_FIELD_DOMAINS[field] || null : domainFilter;
+    const listId = `gazon-intelligent-card-entities-${field.replaceAll(".", "-")}`;
+    const options = this._entityOptions(domains)
+      .map(({ entity_id }) => `<option value="${escapeHtml(entity_id)}"></option>`)
+      .join("");
+    return `
+      <label class="field">
+        <span>${escapeHtml(label)}</span>
+        <input
+          data-config-key="${escapeHtml(field)}"
+          list="${escapeHtml(listId)}"
+          type="text"
+          value="${escapeHtml(value)}"
+          placeholder="${escapeHtml(placeholder)}"
+        />
+        <datalist id="${escapeHtml(listId)}">${options}</datalist>
+      </label>
+    `;
+  }
+
+  _renderActionEditor(actionKey, title) {
+    const actionType = String(this._getConfigValue(`${actionKey}.action`) || DEFAULT_CONFIG[actionKey]?.action || "none");
+    const rows = [
+      this._renderSelect(`${actionKey}.action`, title, ACTION_OPTIONS),
+      this._renderEntityInput(`${actionKey}.entity`, "Entité", "sensor.exemple", null),
+    ];
+
+    if (actionType === "perform-action") {
+      rows.push(this._renderTextInput(`${actionKey}.perform_action`, "Action Home Assistant", "light.turn_on"));
+    }
+    if (actionType === "navigate") {
+      rows.push(this._renderTextInput(`${actionKey}.navigation_path`, "Chemin de navigation", "/lovelace/gazon"));
+    }
+    if (actionType === "url") {
+      rows.push(this._renderTextInput(`${actionKey}.url_path`, "URL", "https://www.home-assistant.io"));
+    }
+    if (actionType === "assist") {
+      rows.push(this._renderTextInput(`${actionKey}.pipeline_id`, "Pipeline Assist", "preferred"));
+      rows.push(this._renderCheckbox(`${actionKey}.start_listening`, "Démarrer l'écoute"));
+    }
+
+    return `
+      <div class="section section--sub">
+        <h3>${escapeHtml(title)}</h3>
+        <div class="grid">
+          ${rows.join("")}
+        </div>
+      </div>
     `;
   }
 
@@ -120,11 +284,6 @@ export class GazonIntelligentCardEditor extends HTMLElement {
       return;
     }
 
-    const entityOptions = this._entityOptions();
-    const idList = entityOptions
-      .map(({ entity_id }) => `<option value="${escapeHtml(entity_id)}"></option>`)
-      .join("");
-
     this.shadowRoot.innerHTML = `
       <style>
 ${EDITOR_STYLES}
@@ -134,36 +293,18 @@ ${EDITOR_STYLES}
         <section class="section">
           <h3>Carte</h3>
           <div class="grid">
-            <label class="field">
-              <span>Titre</span>
-              <input data-config-key="title" type="text" value="${escapeHtml(this._config.title || "")}" placeholder="Gazon Intelligent" />
-            </label>
-            <label class="field">
-              <span>Mode de fond</span>
-              <select data-config-key="background_style">
-                ${["solid", "glass", "minimal"]
-                  .map(
-                    (option) =>
-                      `<option value="${option}" ${this._config.background_style === option ? "selected" : ""}>${option}</option>`,
-                  )
-                  .join("")}
-              </select>
-            </label>
-            <label class="field">
-              <span>Couleur d'accent</span>
-              <input data-config-key="accent_color" type="text" value="${escapeHtml(this._config.accent_color || "")}" placeholder="var(--primary-color)" />
-            </label>
-            <label class="field">
-              <span>Mode thème</span>
-              <select data-config-key="theme_mode">
-                ${["auto", "light", "dark"]
-                  .map(
-                    (option) =>
-                      `<option value="${option}" ${this._config.theme_mode === option ? "selected" : ""}>${option}</option>`,
-                  )
-                  .join("")}
-              </select>
-            </label>
+            ${this._renderTextInput("title", "Titre", "Gazon Intelligent")}
+            ${this._renderSelect("background_style", "Mode de fond", [
+              { value: "solid", label: "solid" },
+              { value: "glass", label: "glass" },
+              { value: "minimal", label: "minimal" },
+            ])}
+            ${this._renderTextInput("accent_color", "Couleur d'accent", "var(--primary-color)")}
+            ${this._renderSelect("theme_mode", "Mode thème", [
+              { value: "auto", label: "auto" },
+              { value: "light", label: "light" },
+              { value: "dark", label: "dark" },
+            ])}
           </div>
           <div class="grid">
             ${this._renderCheckbox("show_header", "Afficher l'en-tête")}
@@ -173,35 +314,33 @@ ${EDITOR_STYLES}
             ${this._renderCheckbox("minimal_mode", "Mode minimal")}
             ${this._renderCheckbox("show_secondary_info", "Afficher les infos secondaires")}
             ${this._renderCheckbox("use_gradient", "Utiliser un dégradé")}
-          </div>
-          <div class="row">
-            <label class="field">
-              <span>Taille des icônes (px)</span>
-              <input data-config-key="icon_size" type="number" min="16" step="1" value="${escapeHtml(this._config.icon_size ?? 24)}" />
-            </label>
-          </div>
-          <div class="row">
-            <label class="field">
-              <span>Rayon des bords (px)</span>
-              <input data-config-key="border_radius" type="number" min="0" step="1" value="${escapeHtml(this._config.border_radius ?? 24)}" />
-            </label>
-            <div class="hint">La carte reste compatible avec le thème clair / sombre de Home Assistant.</div>
-          </div>
-          <div class="grid">
             ${this._renderCheckbox("show_advanced_details", "Afficher les détails avancés")}
           </div>
           <div class="row">
-            ${this._renderEntityInput("manual_action_service", "Service du bouton manuel")}
-            ${this._renderEntityInput("manual_action_label", "Libellé du bouton manuel")}
+            ${this._renderNumberInput("icon_size", "Taille des icônes (px)", 16)}
+            ${this._renderNumberInput("border_radius", "Rayon des bords (px)", 0)}
           </div>
+          <div class="row">
+            ${this._renderTextInput("manual_action_service", "Service du bouton manuel", "gazon_intelligent.start_manual_irrigation")}
+            ${this._renderTextInput("manual_action_label", "Libellé du bouton manuel", "Irrigation manuelle")}
+          </div>
+          <div class="hint">L’éditeur filtre les entités par domaine quand la carte connaît le type attendu.</div>
+        </section>
+
+        <section class="section">
+          <h3>Actions de la carte</h3>
+          <p>Ces actions s’appliquent au fond de la carte, hors boutons internes et sélecteurs dédiés.</p>
+          ${this._renderActionEditor("tap_action", "Tap")}
+          ${this._renderActionEditor("hold_action", "Hold")}
+          ${this._renderActionEditor("double_tap_action", "Double tap")}
         </section>
 
         <section class="section">
           <h3>Synthèse et irrigation</h3>
-          <p>Ces entités alimentent la synthèse principale et l'onglet Irrigation. Renseigne seulement les blocs que tu veux afficher.</p>
-          <datalist id="gazon-intelligent-card-entities">${idList}</datalist>
+          <p>Ces entités alimentent la synthèse principale et l'onglet Irrigation.</p>
           <div class="grid">
             ${this._renderEntityInput("entity_fenetre_optimale", "Fenêtre optimale")}
+            ${this._renderEntityInput("entity_weather", "Météo")}
             ${this._renderEntityInput("entity_plan_arrosage", "Plan d'irrigation")}
             ${this._renderEntityInput("entity_objectif_arrosage", "Objectif d'irrigation")}
             ${this._renderEntityInput("entity_niveau_pertinence", "Niveau de pertinence")}
@@ -217,7 +356,7 @@ ${EDITOR_STYLES}
 
         <section class="section">
           <h3>Référentiel produit</h3>
-          <p>Ces entités donnent à la carte le produit sélectionné, le catalogue local et la dernière intervention pour séparer clairement les interventions.</p>
+          <p>Ces entités séparent la recommandation, le catalogue et l’historique local.</p>
           <div class="grid">
             ${this._renderEntityInput("entity_catalogue_produits", "Référentiel produits")}
             ${this._renderEntityInput("entity_produit_intervention", "Produit sélectionné")}
@@ -229,7 +368,7 @@ ${EDITOR_STYLES}
 
         <section class="section">
           <h3>Gazon et tonte</h3>
-          <p>Ces entités alimentent les onglets Gazon et Tonte pour garder une lecture cohérente de la phase, du risque et de la hauteur.</p>
+          <p>Ces entités alimentent les onglets Gazon et Tonte.</p>
           <div class="grid">
             ${this._renderEntityInput("entity_mode", "Mode du gazon")}
             ${this._renderEntityInput("entity_type_arrosage", "Profil d'irrigation")}
@@ -244,7 +383,7 @@ ${EDITOR_STYLES}
 
         <section class="section">
           <h3>Réglages</h3>
-          <p>Ces entités alimentent l'onglet Réglages pour garder une vue rapide sur l'autorisation, les débits et les hauteurs de tonte.</p>
+          <p>Ces entités alimentent l'onglet Réglages pour l'autorisation, les débits et les hauteurs.</p>
           <div class="grid">
             ${this._renderEntityInput("entity_switch_arrosage_automatique", "Irrigation automatique")}
             ${this._renderEntityInput("entity_debit_zone_1", "Débit zone 1")}
@@ -259,23 +398,19 @@ ${EDITOR_STYLES}
 
         <section class="section">
           <h3>Détails avancés</h3>
-          <p>Ces champs alimentent les vues détaillées et les écrans de diagnostic si tu actives l'option correspondante.</p>
+          <p>Ces champs alimentent les vues détaillées et les écrans de diagnostic.</p>
           <div class="grid">
             ${this._renderEntityInput("entity_conseil", "Conseil principal")}
             ${this._renderEntityInput("entity_action", "Action recommandée")}
             ${this._renderEntityInput("entity_avoid", "Action à éviter")}
             ${this._renderEntityInput("entity_debug_intervention", "Debug métier")}
+            ${this._renderEntityInput("entity_arrosage_en_cours", "Irrigation en cours")}
           </div>
         </section>
       </div>
     `;
 
-    this.shadowRoot.querySelectorAll("[data-config-key]").forEach((element) => {
-      element.removeEventListener("input", this._handleInput);
-      element.removeEventListener("change", this._handleInput);
-      element.addEventListener("input", this._handleInput);
-      element.addEventListener("change", this._handleInput);
-    });
+    this._bindInputs();
   }
 }
 

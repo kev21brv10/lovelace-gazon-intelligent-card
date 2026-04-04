@@ -154,13 +154,16 @@ if 'from "./renderers/layout.js";' not in main_src:
 
 editor_src = src_files["src/editor/editor.js"]
 for marker in (
-    'import { CARD_TYPE, DEFAULT_CONFIG } from "../constants.js";',
+    'import { CARD_TYPE, DEFAULT_CONFIG, ENTITY_KEYS, createStubConfig } from "../constants.js";',
     'import { EDITOR_STYLES } from "../styles/editor-styles.js";',
     "GazonIntelligentCardEditor",
     'customElements.define(`${CARD_TYPE}-editor`',
 ):
     if marker not in editor_src:
         raise SystemExit(f"Missing expected marker in src/editor/editor.js: {marker}")
+
+if "GazonIntelligentCard.getStubConfig()" in editor_src:
+    raise SystemExit("src/editor/editor.js must not depend on GazonIntelligentCard global scope")
 
 layout_src = src_files["src/renderers/layout.js"]
 for marker in ("renderHeader", "renderDecisionLayout", "renderWateringProgressSection"):
@@ -185,6 +188,19 @@ for marker in constants_markers:
 for marker in ("customElements.define", "getConfigForm", "window.customCards"):
     if marker not in main_src:
         raise SystemExit(f"Missing expected marker: {marker}")
+
+for marker in ("SECTION_ACCENTS", "createStubConfig"):
+    if marker not in main_src:
+        raise SystemExit(f"src/gazon-intelligent-card.js must reference {marker}")
+
+if 'import { renderPill } from "./renderers/primitives.js";' not in main_src:
+    raise SystemExit("src/gazon-intelligent-card.js must import renderPill from primitives")
+
+if 'new Event("hass-action"' not in main_src:
+    raise SystemExit('src/gazon-intelligent-card.js must dispatch "hass-action" for card actions')
+
+if 'import { CARD_TYPE, DEFAULT_CONFIG, ENTITY_KEYS, createStubConfig } from "../constants.js";' not in editor_src:
+    raise SystemExit("src/editor/editor.js must import ENTITY_KEYS for editor domain filtering")
 
 required_safe_imports = {
     "src/gazon-intelligent-card.js": (

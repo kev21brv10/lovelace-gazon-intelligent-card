@@ -2,6 +2,7 @@ import {
   CARD_NAME,
   CARD_TYPE,
   CARD_VERSION,
+  SECTION_ACCENTS,
   DEFAULT_CONFIG,
   ENTITY_KEYS,
   RENDER_SIGNATURE_ATTRS,
@@ -9,6 +10,7 @@ import {
   STATUS_COLORS,
   STATUS_LABELS,
   TAB_DEFS,
+  createStubConfig,
 } from "./constants.js";
 import { CARD_STYLES } from "./styles/card-styles.js";
 import {
@@ -53,6 +55,7 @@ import {
   safeRenderIconBox as renderIconBox,
   safeRenderStatusPill as renderStatusPill,
 } from "./utils/formatters.js";
+import { renderPill } from "./renderers/primitives.js";
 import {
   renderActiveTab,
   renderDecisionLayout,
@@ -76,52 +79,20 @@ class GazonIntelligentCard extends HTMLElement {
     this._activeSection = "overview";
     this._wateringProgressTimer = null;
     this._wateringProgressTick = 0;
+    this._cardActionTimer = null;
+    this._holdActionTimer = null;
+    this._holdActionTriggered = false;
     this._onClick = this._onClick.bind(this);
+    this._onPointerDown = this._onPointerDown.bind(this);
+    this._onPointerUp = this._onPointerUp.bind(this);
+    this._onPointerCancel = this._onPointerCancel.bind(this);
     this._onContextMenu = this._onContextMenu.bind(this);
     this._onDoubleClick = this._onDoubleClick.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
   }
 
   static getStubConfig() {
-    return {
-      type: `custom:${CARD_TYPE}`,
-      title: DEFAULT_CONFIG.title,
-      show_icons: DEFAULT_CONFIG.show_icons,
-      show_header: DEFAULT_CONFIG.show_header,
-      show_background: DEFAULT_CONFIG.show_background,
-      compact: DEFAULT_CONFIG.compact,
-      entity_fenetre_optimale: DEFAULT_CONFIG.entity_fenetre_optimale,
-      entity_weather: DEFAULT_CONFIG.entity_weather,
-      entity_plan_arrosage: DEFAULT_CONFIG.entity_plan_arrosage,
-      entity_dernier_arrosage: DEFAULT_CONFIG.entity_dernier_arrosage,
-      entity_derniere_application: DEFAULT_CONFIG.entity_derniere_application,
-      entity_conseil: DEFAULT_CONFIG.entity_conseil,
-      entity_action: DEFAULT_CONFIG.entity_action,
-      entity_avoid: DEFAULT_CONFIG.entity_avoid,
-      entity_niveau_pertinence: DEFAULT_CONFIG.entity_niveau_pertinence,
-      entity_prochaine_fenetre_optimale: DEFAULT_CONFIG.entity_prochaine_fenetre_optimale,
-      entity_prochain_blocage_attendu: DEFAULT_CONFIG.entity_prochain_blocage_attendu,
-      entity_mode: DEFAULT_CONFIG.entity_mode,
-      entity_switch_arrosage_automatique: DEFAULT_CONFIG.entity_switch_arrosage_automatique,
-      entity_arrosage_recommande: DEFAULT_CONFIG.entity_arrosage_recommande,
-      entity_arrosage_apres_application_autorise: DEFAULT_CONFIG.entity_arrosage_apres_application_autorise,
-      entity_debug_intervention: DEFAULT_CONFIG.entity_debug_intervention,
-      entity_signal_irrigation: DEFAULT_CONFIG.entity_signal_irrigation,
-      entity_tonte_autorisee: DEFAULT_CONFIG.entity_tonte_autorisee,
-      entity_signal_intervention: DEFAULT_CONFIG.entity_signal_intervention,
-      entity_objectif_arrosage: DEFAULT_CONFIG.entity_objectif_arrosage,
-      entity_type_arrosage: DEFAULT_CONFIG.entity_type_arrosage,
-      entity_tonte: DEFAULT_CONFIG.entity_tonte,
-      entity_hauteur: DEFAULT_CONFIG.entity_hauteur,
-      entity_arrosage_en_cours: DEFAULT_CONFIG.entity_arrosage_en_cours,
-      entity_debit_zone_1: DEFAULT_CONFIG.entity_debit_zone_1,
-      entity_debit_zone_2: DEFAULT_CONFIG.entity_debit_zone_2,
-      entity_debit_zone_3: DEFAULT_CONFIG.entity_debit_zone_3,
-      entity_debit_zone_4: DEFAULT_CONFIG.entity_debit_zone_4,
-      entity_debit_zone_5: DEFAULT_CONFIG.entity_debit_zone_5,
-      entity_hauteur_min_tondeuse: DEFAULT_CONFIG.entity_hauteur_min_tondeuse,
-      entity_hauteur_max_tondeuse: DEFAULT_CONFIG.entity_hauteur_max_tondeuse,
-    };
+    return createStubConfig();
   }
 
   static getConfigForm() {
@@ -135,11 +106,23 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "minimal_mode", selector: { boolean: {} } },
         { name: "show_secondary_info", selector: { boolean: {} } },
         { name: "show_advanced_details", selector: { boolean: {} } },
+        { name: "tap_action", selector: { action: {} } },
+        { name: "hold_action", selector: { action: {} } },
+        { name: "double_tap_action", selector: { action: {} } },
+        { name: "theme_mode", selector: { select: { options: ["auto", "light", "dark"] } } },
+        { name: "accent_color", selector: { text: {} } },
+        { name: "icon_size", selector: { number: { min: 16, mode: "box", step: 1 } } },
+        { name: "border_radius", selector: { number: { min: 0, mode: "box", step: 1 } } },
+        { name: "background_style", selector: { select: { options: ["solid", "glass", "minimal"] } } },
+        { name: "use_gradient", selector: { boolean: {} } },
         { name: "entity_fenetre_optimale", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_weather", selector: { entity: { domain: ["weather"] } } },
         { name: "entity_plan_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_dernier_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_derniere_application", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_catalogue_produits", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_produit_intervention", selector: { entity: { domain: ["select"] } } },
+        { name: "entity_prochaine_intervention", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_conseil", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_action", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_avoid", selector: { entity: { domain: ["sensor"] } } },
@@ -156,6 +139,10 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_signal_intervention", selector: { entity: { domain: ["binary_sensor"] } } },
         { name: "entity_objectif_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_type_arrosage", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_phase", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_sous_phase", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_risque", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_niveau", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_arrosage_en_cours", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_debit_zone_1", selector: { entity: { domain: ["number"] } } },
         { name: "entity_debit_zone_2", selector: { entity: { domain: ["number"] } } },
@@ -228,7 +215,13 @@ class GazonIntelligentCard extends HTMLElement {
 
   disconnectedCallback() {
     this._clearWateringProgressTimer();
+    this._clearCardActionTimer();
+    this._clearHoldActionTimer();
     this.shadowRoot?.removeEventListener("click", this._onClick);
+    this.shadowRoot?.removeEventListener("pointerdown", this._onPointerDown);
+    this.shadowRoot?.removeEventListener("pointerup", this._onPointerUp);
+    this.shadowRoot?.removeEventListener("pointercancel", this._onPointerCancel);
+    this.shadowRoot?.removeEventListener("pointerleave", this._onPointerCancel);
     this.shadowRoot?.removeEventListener("change", this._onChange);
     this.shadowRoot?.removeEventListener("contextmenu", this._onContextMenu);
     this.shadowRoot?.removeEventListener("dblclick", this._onDoubleClick);
@@ -257,6 +250,16 @@ class GazonIntelligentCard extends HTMLElement {
       this._entityId("entity_catalogue_produits") ||
       null
     );
+  }
+
+  _defaultActionEntityId() {
+    for (const key of ["entity_weather", ...ENTITY_KEYS.map((entry) => entry.key)]) {
+      const entityId = this._entityId(key);
+      if (entityId) {
+        return entityId;
+      }
+    }
+    return null;
   }
 
   _entityState(entityKey, fallback = "Non disponible") {
@@ -376,6 +379,158 @@ class GazonIntelligentCard extends HTMLElement {
       default:
         return SECTION_ACCENTS.overview;
     }
+  }
+
+  _normalizedActionConfig(action) {
+    if (typeof action === "string") {
+      return { action };
+    }
+    if (action && typeof action === "object") {
+      return action;
+    }
+    return { action: "none" };
+  }
+
+  _configuredAction(actionKey) {
+    return this._normalizedActionConfig(this._config?.[actionKey] ?? DEFAULT_CONFIG[actionKey]);
+  }
+
+  _hasConfiguredAction(actionKey) {
+    const action = this._configuredAction(actionKey);
+    return String(action.action || "none").trim().toLowerCase() !== "none";
+  }
+
+  _hasCardAction() {
+    return this._hasConfiguredAction("tap_action")
+      || this._hasConfiguredAction("hold_action")
+      || this._hasConfiguredAction("double_tap_action");
+  }
+
+  _isActionEventCandidateTarget(target) {
+    if (!(target instanceof Element)) {
+      return false;
+    }
+    if (!target.closest("ha-card")) {
+      return false;
+    }
+    return !target.closest(
+      "[data-gazon-action], [data-more-info-entity], [data-tab], [data-section], button, select, input, textarea, a, summary",
+    );
+  }
+
+  _clearCardActionTimer() {
+    if (this._cardActionTimer !== null && typeof window !== "undefined") {
+      window.clearTimeout(this._cardActionTimer);
+    }
+    this._cardActionTimer = null;
+  }
+
+  _clearHoldActionTimer() {
+    if (this._holdActionTimer !== null && typeof window !== "undefined") {
+      window.clearTimeout(this._holdActionTimer);
+    }
+    this._holdActionTimer = null;
+  }
+
+  _actionEventName(actionKey) {
+    return String(actionKey || "").replace(/_action$/, "");
+  }
+
+  _actionConfigForEvent(actionKey, action, fallbackEntityId) {
+    const normalized = { ...this._normalizedActionConfig(action) };
+    let actionName = String(normalized.action || "none").trim().toLowerCase();
+    if (actionName === "more_info") {
+      actionName = "more-info";
+    }
+    if (actionName === "perform_action" || actionName === "call-service") {
+      actionName = "perform-action";
+    }
+    if (actionName === "none") {
+      return null;
+    }
+
+    const eventConfig = {
+      [actionKey]: {
+        ...normalized,
+        action: actionName,
+      },
+    };
+    const actionConfig = eventConfig[actionKey];
+    const targetEntityId = actionConfig.entity || actionConfig.entity_id || fallbackEntityId || null;
+
+    if (actionConfig.service && !actionConfig.perform_action) {
+      actionConfig.perform_action = actionConfig.service;
+    }
+    if (actionConfig.service_name && !actionConfig.perform_action) {
+      actionConfig.perform_action = actionConfig.service_name;
+    }
+    if (actionConfig.service_data !== undefined && actionConfig.data === undefined) {
+      actionConfig.data = actionConfig.service_data;
+    }
+    if (actionConfig.path && actionConfig.navigation_path === undefined) {
+      actionConfig.navigation_path = actionConfig.path;
+    }
+    if (actionConfig.url && actionName === "navigate" && actionConfig.navigation_path === undefined) {
+      actionConfig.navigation_path = actionConfig.url;
+    }
+    if (actionConfig.url && actionName === "url" && actionConfig.url_path === undefined) {
+      actionConfig.url_path = actionConfig.url;
+    }
+
+    delete actionConfig.service;
+    delete actionConfig.service_name;
+    delete actionConfig.service_data;
+    delete actionConfig.path;
+    delete actionConfig.url;
+    delete actionConfig.entity_id;
+
+    if (actionName === "perform-action" && targetEntityId && actionConfig.target === undefined) {
+      actionConfig.target = { entity_id: targetEntityId };
+    }
+    if (actionName !== "perform-action" && targetEntityId && eventConfig.entity === undefined) {
+      eventConfig.entity = targetEntityId;
+    }
+
+    return eventConfig;
+  }
+
+  _performConfiguredAction(actionKey, fallbackEntityId = this._defaultActionEntityId()) {
+    const config = this._actionConfigForEvent(actionKey, this._configuredAction(actionKey), fallbackEntityId);
+    if (!config) {
+      return;
+    }
+    const event = new Event("hass-action", {
+      bubbles: true,
+      composed: true,
+    });
+    event.detail = {
+      config,
+      action: this._actionEventName(actionKey),
+    };
+    this.dispatchEvent(event);
+  }
+
+  _handleCardTapAction(fallbackEntityId) {
+    const hasTapAction = this._hasConfiguredAction("tap_action");
+    const hasDoubleTapAction = this._hasConfiguredAction("double_tap_action");
+    if (!hasTapAction && !hasDoubleTapAction) {
+      return;
+    }
+    if (!hasDoubleTapAction) {
+      this._performConfiguredAction("tap_action", fallbackEntityId);
+      return;
+    }
+    if (this._cardActionTimer !== null) {
+      this._clearCardActionTimer();
+      this._performConfiguredAction("double_tap_action", fallbackEntityId);
+      return;
+    }
+    this._cardActionTimer = window.setTimeout(() => {
+      this._cardActionTimer = null;
+      if (hasTapAction) {
+        this._performConfiguredAction("tap_action", fallbackEntityId);
+      }
+    }, 250);
   }
 
   _primaryTone() {
@@ -2646,6 +2801,7 @@ class GazonIntelligentCard extends HTMLElement {
       const iconSize = `${this._config.icon_size ?? 24}px`;
       const actionCritical = this._actionTone() === "critical";
       const isPreview = this._isPreviewMode();
+      const hasCardAction = this._hasCardAction();
 
       this._applyHostVariables({
         accent,
@@ -2677,6 +2833,7 @@ ${CARD_STYLES}
             aria-label="${escapeHtml(this._config.title || DEFAULT_CONFIG.title)}"
             data-background="${background}"
             data-tone="${activeTone}"
+            ${hasCardAction ? 'role="button" tabindex="0"' : ""}
           >
           ${this._buildHeader()}
           ${this._renderDecisionLayout()}
@@ -2694,11 +2851,19 @@ ${CARD_STYLES}
       }
 
       this.shadowRoot.removeEventListener("click", this._onClick);
+      this.shadowRoot.removeEventListener("pointerdown", this._onPointerDown);
+      this.shadowRoot.removeEventListener("pointerup", this._onPointerUp);
+      this.shadowRoot.removeEventListener("pointercancel", this._onPointerCancel);
+      this.shadowRoot.removeEventListener("pointerleave", this._onPointerCancel);
       this.shadowRoot.removeEventListener("change", this._onChange);
       this.shadowRoot.removeEventListener("contextmenu", this._onContextMenu);
       this.shadowRoot.removeEventListener("dblclick", this._onDoubleClick);
       this.shadowRoot.removeEventListener("keydown", this._onKeyDown);
       this.shadowRoot.addEventListener("click", this._onClick);
+      this.shadowRoot.addEventListener("pointerdown", this._onPointerDown);
+      this.shadowRoot.addEventListener("pointerup", this._onPointerUp);
+      this.shadowRoot.addEventListener("pointercancel", this._onPointerCancel);
+      this.shadowRoot.addEventListener("pointerleave", this._onPointerCancel);
       this.shadowRoot.addEventListener("change", this._onChange);
       this.shadowRoot.addEventListener("contextmenu", this._onContextMenu);
       this.shadowRoot.addEventListener("dblclick", this._onDoubleClick);
@@ -2722,6 +2887,7 @@ ${CARD_STYLES}
     const buttons = this.shadowRoot.querySelectorAll("[data-more-info-entity]");
     buttons.forEach((button) => {
       button.addEventListener("click", (event) => {
+        this._clearCardActionTimer();
         event.preventDefault();
         event.stopPropagation();
         this._openEntityMoreInfo(button.dataset.moreInfoEntity);
@@ -2747,6 +2913,7 @@ ${CARD_STYLES}
   _onClick(event) {
     const manualTarget = event.target.closest("[data-gazon-action='manual-irrigation']");
     if (manualTarget) {
+      this._clearCardActionTimer();
       event.preventDefault();
       event.stopPropagation();
       this._triggerManualIrrigation();
@@ -2754,6 +2921,7 @@ ${CARD_STYLES}
     }
     const declareTarget = event.target.closest("[data-gazon-action='declare-product-intervention']");
     if (declareTarget) {
+      this._clearCardActionTimer();
       event.preventDefault();
       event.stopPropagation();
       this._triggerSelectedProductIntervention();
@@ -2761,6 +2929,7 @@ ${CARD_STYLES}
     }
     const removeLastApplicationTarget = event.target.closest("[data-gazon-action='remove-last-application']");
     if (removeLastApplicationTarget) {
+      this._clearCardActionTimer();
       event.preventDefault();
       event.stopPropagation();
       this._triggerRemoveLastApplication();
@@ -2768,6 +2937,7 @@ ${CARD_STYLES}
     }
     const tabTarget = event.target.closest("[data-tab]");
     if (tabTarget) {
+      this._clearCardActionTimer();
       event.preventDefault();
       event.stopPropagation();
       this._setActiveTab(tabTarget.dataset.tab);
@@ -2775,28 +2945,79 @@ ${CARD_STYLES}
     }
     const sectionTarget = event.target.closest("[data-section]");
     if (sectionTarget) {
+      this._clearCardActionTimer();
       event.preventDefault();
       event.stopPropagation();
       this._setActiveSection(sectionTarget.dataset.section);
       return;
     }
+    if (!this._isActionEventCandidateTarget(event.target)) {
+      this._clearCardActionTimer();
+      return;
+    }
+    if (this._holdActionTriggered) {
+      this._holdActionTriggered = false;
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    this._handleCardTapAction(this._defaultActionEntityId());
   }
 
   _onChange(event) {
     const selectTarget = event.target?.closest?.("[data-gazon-action='select-intervention-product']");
     if (selectTarget) {
+      this._clearCardActionTimer();
       event.preventDefault();
       event.stopPropagation();
       this._triggerInterventionProductSelection(selectTarget.value);
     }
   }
 
+  _onPointerDown(event) {
+    if (!this._hasConfiguredAction("hold_action")) {
+      return;
+    }
+    if (event.button !== 0 || !this._isActionEventCandidateTarget(event.target)) {
+      return;
+    }
+    this._clearHoldActionTimer();
+    this._holdActionTriggered = false;
+    this._holdActionTimer = window.setTimeout(() => {
+      this._holdActionTimer = null;
+      this._holdActionTriggered = true;
+      this._clearCardActionTimer();
+      this._performConfiguredAction("hold_action", this._defaultActionEntityId());
+    }, 500);
+  }
+
+  _onPointerUp() {
+    this._clearHoldActionTimer();
+  }
+
+  _onPointerCancel() {
+    this._clearHoldActionTimer();
+  }
+
   _onContextMenu(event) {
+    this._clearHoldActionTimer();
+    if (!this._hasConfiguredAction("hold_action") || !this._isActionEventCandidateTarget(event.target)) {
+      return;
+    }
+    this._clearCardActionTimer();
     event.preventDefault();
+    event.stopPropagation();
+    this._performConfiguredAction("hold_action", this._defaultActionEntityId());
   }
 
   _onDoubleClick(event) {
+    if (!this._hasConfiguredAction("double_tap_action") || !this._isActionEventCandidateTarget(event.target)) {
+      return;
+    }
     event.preventDefault();
+    event.stopPropagation();
   }
 
   _onKeyDown(event) {
@@ -2805,6 +3026,13 @@ ${CARD_STYLES}
       return;
     }
     if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+    if (target instanceof Element && target.tagName === "HA-CARD" && this._hasConfiguredAction("tap_action")) {
+      event.preventDefault();
+      event.stopPropagation();
+      this._clearCardActionTimer();
+      this._performConfiguredAction("tap_action", this._defaultActionEntityId());
       return;
     }
     event.preventDefault();
@@ -2938,71 +3166,6 @@ ${CARD_STYLES}
     this._hass.callService(service.domain, service.service, payload);
   }
 
-  _performAction(action, fallbackEntityId) {
-    const normalized = typeof action === "string" ? { action } : action || { action: "none" };
-    const actionName = String(normalized.action || "none").toLowerCase();
-    const entityId = normalized.entity_id || fallbackEntityId;
-
-    switch (actionName) {
-      case "none":
-        return;
-      case "more-info":
-        if (entityId) {
-          this.dispatchEvent(
-            new CustomEvent("hass-more-info", {
-              detail: { entityId },
-              bubbles: true,
-              composed: true,
-            }),
-          );
-        }
-        return;
-      case "call-service": {
-        const service = splitServiceName(normalized.service || normalized.service_name);
-        if (!service || !this._hass) {
-          return;
-        }
-        this._hass.callService(service.domain, service.service, normalized.service_data || normalized.data || {});
-        return;
-      }
-      case "toggle":
-        if (entityId) {
-          this.dispatchEvent(
-            new CustomEvent("hass-toggle", {
-              detail: { entityId },
-              bubbles: true,
-              composed: true,
-            }),
-          );
-        }
-        return;
-      case "navigate": {
-        const path = normalized.navigation_path || normalized.path || normalized.url;
-        if (!path) {
-          return;
-        }
-        if (path.startsWith("http://") || path.startsWith("https://")) {
-          window.open(path, "_blank", "noopener");
-          return;
-        }
-        this.dispatchEvent(
-          new CustomEvent("hass-navigate", {
-            detail: { path },
-            bubbles: true,
-            composed: true,
-          }),
-        );
-        return;
-      }
-      case "url":
-        if (normalized.url) {
-          window.open(normalized.url, "_blank", "noopener");
-        }
-        return;
-      default:
-        return;
-    }
-  }
 }
 
 if (!customElements.get(CARD_TYPE)) {

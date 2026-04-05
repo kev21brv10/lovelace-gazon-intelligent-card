@@ -144,53 +144,34 @@ show_advanced_details: false
 
 ### Dépendances entités
 
-- **Obligatoire**
-  - `type: custom:gazon-intelligent-card`
-- **Essentielles pour une carte utile**
-  - `entity_fenetre_optimale`
-  - `entity_plan_arrosage`
-  - `entity_prochaine_intervention`
-  - `entity_produit_intervention`
-  - `entity_objectif_arrosage`
-  - `entity_tonte`
-  - `entity_hauteur`
-- **Optionnelles pour le rendu**
-  - toutes les entités `sensor.*`, `binary_sensor.*`, `select.*`, `switch.*` et `number.*` déclarées par la carte
-- **Entités complémentaires prises en charge**
-  - `entity_fenetre_optimale`
-  - `entity_weather`
-  - `entity_plan_arrosage`
-  - `entity_arrosage_en_cours`
-  - `entity_dernier_arrosage`
-  - `entity_derniere_application`
-  - `entity_catalogue_produits`
-  - `entity_prochaine_intervention`
-  - `entity_produit_intervention`
-  - `entity_conseil`
-  - `entity_action`
-  - `entity_avoid`
-  - `entity_debug_intervention`
-  - `entity_niveau_pertinence`
-  - `entity_prochaine_fenetre_optimale`
-  - `entity_prochain_blocage_attendu`
-  - `entity_mode`
-  - `entity_switch_arrosage_automatique`
-  - `entity_arrosage_recommande`
-  - `entity_arrosage_apres_application_autorise`
-  - `entity_signal_irrigation`
-  - `entity_signal_intervention`
-  - `entity_objectif_arrosage`
-  - `entity_type_arrosage`
-  - `entity_phase`
-  - `entity_sous_phase`
-  - `entity_risque`
-  - `entity_niveau`
-  - `entity_tonte_autorisee`
-  - `entity_tonte`
-  - `entity_hauteur`
-  - `entity_debit_zone_1` à `entity_debit_zone_5`
-  - `entity_hauteur_min_tondeuse`
-  - `entity_hauteur_max_tondeuse`
+Dans ce README, les noms comme `entity_produit_intervention` ou `entity_conseil` sont des **clés de configuration de la card**, pas des entités Home Assistant.
+
+Exemple:
+
+- `entity_produit_intervention` = champ YAML de la carte
+- `select.gazon_intelligent_produit_d_intervention` = vraie entité Home Assistant à sélectionner
+- dans l’interface Home Assistant, cette entité apparaît généralement comme **Produit sélectionné**
+
+En pratique, la card est déjà **préremplie automatiquement** avec les entités publiques standard de l’intégration. Si ton backend Gazon Intelligent expose bien les IDs publics par défaut, tu peux souvent partir du YAML minimal.
+
+| Clé de config | Entité réelle par défaut | Usage |
+|---|---|---|
+| `entity_fenetre_optimale` | `sensor.gazon_intelligent_fenetre_optimale` | synthèse, irrigation |
+| `entity_plan_arrosage` | `sensor.gazon_intelligent_plan_d_arrosage` | synthèse, irrigation |
+| `entity_prochaine_intervention` | `sensor.gazon_intelligent_prochaine_intervention` | synthèse, intervention |
+| `entity_produit_intervention` | `select.gazon_intelligent_produit_d_intervention` | produits, intervention |
+| `entity_objectif_arrosage` | `sensor.gazon_intelligent_objectif_d_arrosage` | synthèse, irrigation |
+| `entity_tonte` | `sensor.gazon_intelligent_etat_de_tonte` | tonte |
+| `entity_hauteur` | `sensor.gazon_intelligent_hauteur_de_tonte_conseillee` | tonte |
+
+Tu ajustes le YAML seulement si:
+
+- ton instance utilise un autre `entity_id`
+- tu veux brancher une météo différente via `entity_weather`
+- tu veux enrichir la carte avec les entités avancées comme `entity_debug_intervention`, `entity_signal_irrigation` ou `entity_arrosage_en_cours`
+- tu veux personnaliser le bouton manuel ou les actions de carte
+
+La liste complète des clés supportées reste plus bas dans `Options principales`.
 
 Même si une entité est absente ou renvoie `unknown` / `unavailable`, la carte garde sa structure et affiche un fallback propre.
 
@@ -348,6 +329,8 @@ La carte expose un éditeur visuel natif dans Home Assistant pour :
 - l’affichage optionnel des détails avancés et des écrans de diagnostic
 
 Dans la carte elle-même, l’onglet **Réglages** propose aussi des tuiles cliquables qui ouvrent directement le contrôle Home Assistant des entités associées. C’est le chemin le plus simple pour ajuster un switch, un sélecteur ou un nombre sans quitter la vue.
+
+Même logique pour l’éditeur: il affiche les **clés de config** de la carte, mais tu dois y brancher les **vraies entités Home Assistant**. Par exemple, `entity_produit_intervention` doit pointer vers l’entité visible **Produit sélectionné** (`select.gazon_intelligent_produit_d_intervention`).
 
 Quand `show_advanced_details` est activé, la vue avancée suit l’onglet actif au lieu d’afficher un bloc partagé unique.
 

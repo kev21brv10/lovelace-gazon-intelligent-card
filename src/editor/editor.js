@@ -222,7 +222,7 @@ export class GazonIntelligentCardEditor extends HTMLElement {
     `;
   }
 
-  _renderEntityInput(field, label, placeholder = "sensor.gazon_intelligent_...", domainFilter = undefined) {
+  _renderEntityInput(field, label, placeholder = "sensor.gazon_intelligent_...", domainFilter = undefined, hint = "") {
     const value = this._getConfigValue(field) ?? "";
     const domains = domainFilter === undefined ? ENTITY_FIELD_DOMAINS[field] || null : domainFilter;
     const listId = `gazon-intelligent-card-entities-${field.replaceAll(".", "-")}`;
@@ -240,6 +240,7 @@ export class GazonIntelligentCardEditor extends HTMLElement {
           placeholder="${escapeHtml(placeholder)}"
         />
         <datalist id="${escapeHtml(listId)}">${options}</datalist>
+        ${hint ? `<small class="hint">${escapeHtml(hint)}</small>` : ""}
       </label>
     `;
   }
@@ -356,10 +357,16 @@ ${EDITOR_STYLES}
 
         <section class="section">
           <h3>Référentiel produit</h3>
-          <p>Ces entités séparent la recommandation, le catalogue et l’historique local.</p>
+          <p>Ces entités séparent la recommandation, le catalogue et l’historique local. Pour le produit courant, branche l’entité Home Assistant visible comme “Produit sélectionné”.</p>
           <div class="grid">
             ${this._renderEntityInput("entity_catalogue_produits", "Référentiel produits")}
-            ${this._renderEntityInput("entity_produit_intervention", "Produit sélectionné")}
+            ${this._renderEntityInput(
+              "entity_produit_intervention",
+              "Produit sélectionné",
+              "select.gazon_intelligent_produit_d_intervention",
+              undefined,
+              "Entité attendue dans Home Assistant: Produit sélectionné (select.gazon_intelligent_produit_d_intervention).",
+            )}
             ${this._renderEntityInput("entity_prochaine_intervention", "Prochaine intervention")}
             ${this._renderEntityInput("entity_derniere_application", "Dernière intervention")}
             ${this._renderEntityInput("entity_signal_intervention", "Signal intervention")}

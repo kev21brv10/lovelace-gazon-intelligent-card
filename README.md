@@ -8,9 +8,9 @@
 > Une carte Lovelace claire et premium pour lire les décisions de **Gazon Intelligent** en un coup d'œil.
 
 Gazon Intelligent Card affiche dans Home Assistant les décisions métier les plus utiles de ton intégration Gazon Intelligent :
-- navigation par onglets pour séparer clairement irrigation, tonte, gazon, produits et réglages
+- navigation par onglets pour séparer clairement synthèse, irrigation, tonte, gazon, produits, intervention et réglages
 - barre d’onglets horizontale qui se recentre automatiquement quand elle déborde
-- résumé adaptatif qui met en avant les vraies informations utiles selon la situation
+- résumé adaptatif qui met en avant l’information vraiment utile selon la situation
 - tuiles de la synthèse, de la tonte, du gazon, des produits et des réglages cliquables pour ouvrir le bon `more-info`
 - zone produit dédiée pour le catalogue local, le produit d’intervention et la dernière application
 - bloc `Intervention` orienté décision avec recommandation automatique, guidage produit et déclaration rapide
@@ -40,11 +40,11 @@ Capture Lovelace à documenter dans une prochaine révision du README.
 - lit un contrat stable où les champs racine restent présents, avec `null`, `[]` ou `{}` quand l’information manque
 - sépare la zone produit du reste du résumé pour éviter les doublons visuels
 - affiche la progression d'irrigation en cours dès qu'une session est active
-- sépare les usages par onglets: irrigation, tonte, gazon, produits, réglages et contexte avancé
+- sépare les usages par onglets: synthèse, irrigation, tonte, gazon, produits, intervention et réglages
 - reste lisible même si certaines entités sont absentes
 - s’adapte au thème clair ou sombre de Home Assistant
-- propose un éditeur visuel simple pour la configuration de base
-- garde un mode avancé optionnel pour retrouver les détails bruts si besoin
+- propose un éditeur visuel simple pour la configuration courante
+- garde un mode avancé optionnel dont le contenu suit l’onglet actif
 
 ---
 
@@ -146,28 +146,53 @@ show_advanced_details: false
 
 - **Obligatoire**
   - `type: custom:gazon-intelligent-card`
-- **Optionnelles pour le rendu**
-  - toutes les entités `sensor.*`, `binary_sensor.*`, `select.*`, `switch.*` et `number.*` déclarées par la carte
-- **Recommandées pour une carte utile**
+- **Essentielles pour une carte utile**
   - `entity_fenetre_optimale`
   - `entity_plan_arrosage`
+  - `entity_prochaine_intervention`
+  - `entity_produit_intervention`
+  - `entity_objectif_arrosage`
+  - `entity_tonte`
+  - `entity_hauteur`
+- **Optionnelles pour le rendu**
+  - toutes les entités `sensor.*`, `binary_sensor.*`, `select.*`, `switch.*` et `number.*` déclarées par la carte
+- **Entités complémentaires prises en charge**
+  - `entity_fenetre_optimale`
+  - `entity_weather`
+  - `entity_plan_arrosage`
+  - `entity_arrosage_en_cours`
   - `entity_dernier_arrosage`
   - `entity_derniere_application`
   - `entity_catalogue_produits`
   - `entity_prochaine_intervention`
   - `entity_produit_intervention`
+  - `entity_conseil`
+  - `entity_action`
+  - `entity_avoid`
+  - `entity_debug_intervention`
+  - `entity_niveau_pertinence`
+  - `entity_prochaine_fenetre_optimale`
+  - `entity_prochain_blocage_attendu`
   - `entity_mode`
   - `entity_switch_arrosage_automatique`
   - `entity_arrosage_recommande`
+  - `entity_arrosage_apres_application_autorise`
+  - `entity_signal_irrigation`
+  - `entity_signal_intervention`
   - `entity_objectif_arrosage`
   - `entity_type_arrosage`
+  - `entity_phase`
+  - `entity_sous_phase`
+  - `entity_risque`
+  - `entity_niveau`
+  - `entity_tonte_autorisee`
   - `entity_tonte`
   - `entity_hauteur`
   - `entity_debit_zone_1` à `entity_debit_zone_5`
   - `entity_hauteur_min_tondeuse`
   - `entity_hauteur_max_tondeuse`
 
-Même si une entité est absente ou renvoie `unknown` / `unavailable`, la carte garde la structure des onglets et affiche un fallback propre.
+Même si une entité est absente ou renvoie `unknown` / `unavailable`, la carte garde sa structure et affiche un fallback propre.
 
 ### Exemple minimal
 
@@ -198,6 +223,8 @@ border_radius: 24
 background_style: solid
 use_gradient: true
 show_secondary_info: true
+manual_action_service: gazon_intelligent.start_manual_irrigation
+manual_action_label: Irrigation manuelle
 tap_action:
   action: more-info
 hold_action:
@@ -205,17 +232,34 @@ hold_action:
 double_tap_action:
   action: none
 entity_fenetre_optimale: sensor.gazon_intelligent_fenetre_optimale
+entity_weather: weather.forecast_home
 entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
+entity_arrosage_en_cours: sensor.gazon_intelligent_arrosage_en_cours
 entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
 entity_derniere_application: sensor.gazon_intelligent_derniere_application
 entity_catalogue_produits: sensor.gazon_intelligent_catalogue_produits
 entity_prochaine_intervention: sensor.gazon_intelligent_prochaine_intervention
 entity_produit_intervention: select.gazon_intelligent_produit_d_intervention
+entity_conseil: sensor.gazon_intelligent_conseil_principal
+entity_action: sensor.gazon_intelligent_action_recommandee
+entity_avoid: sensor.gazon_intelligent_action_a_eviter
+entity_debug_intervention: sensor.gazon_intelligent_debug_intervention
+entity_niveau_pertinence: sensor.gazon_intelligent_niveau_de_pertinence
+entity_prochaine_fenetre_optimale: sensor.gazon_intelligent_prochaine_fenetre_optimale
+entity_prochain_blocage_attendu: sensor.gazon_intelligent_prochain_blocage_attendu
 entity_mode: select.gazon_intelligent_mode_du_gazon
 entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique_autorise
 entity_arrosage_recommande: binary_sensor.gazon_intelligent_arrosage_recommande
+entity_arrosage_apres_application_autorise: binary_sensor.gazon_intelligent_arrosage_apres_application_autorise
+entity_signal_irrigation: binary_sensor.gazon_intelligent_signal_irrigation
+entity_signal_intervention: binary_sensor.gazon_intelligent_signal_intervention
 entity_objectif_arrosage: sensor.gazon_intelligent_objectif_d_arrosage
 entity_type_arrosage: sensor.gazon_intelligent_type_d_arrosage
+entity_phase: sensor.gazon_intelligent_phase_dominante
+entity_sous_phase: sensor.gazon_intelligent_sous_phase
+entity_risque: sensor.gazon_intelligent_risque_gazon
+entity_niveau: sensor.gazon_intelligent_niveau_d_action
+entity_tonte_autorisee: binary_sensor.gazon_intelligent_tonte_autorisee
 entity_tonte: sensor.gazon_intelligent_etat_de_tonte
 entity_hauteur: sensor.gazon_intelligent_hauteur_de_tonte_conseillee
 entity_debit_zone_1: number.gazon_intelligent_debit_zone_1
@@ -233,6 +277,7 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 
 - `title`
 - `entity_fenetre_optimale`
+- `entity_weather`
 - `entity_plan_arrosage`
 - `entity_arrosage_en_cours`
 - `entity_dernier_arrosage`
@@ -240,12 +285,25 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 - `entity_catalogue_produits`
 - `entity_prochaine_intervention`
 - `entity_produit_intervention`
+- `entity_conseil`
+- `entity_action`
+- `entity_avoid`
+- `entity_debug_intervention`
+- `entity_niveau_pertinence`
+- `entity_prochaine_fenetre_optimale`
+- `entity_prochain_blocage_attendu`
 - `entity_mode`
 - `entity_switch_arrosage_automatique`
 - `entity_arrosage_recommande`
 - `entity_arrosage_apres_application_autorise`
+- `entity_signal_irrigation`
+- `entity_signal_intervention`
 - `entity_objectif_arrosage`
 - `entity_type_arrosage`
+- `entity_phase`
+- `entity_sous_phase`
+- `entity_risque`
+- `entity_niveau`
 - `entity_tonte_autorisee`
 - `entity_tonte`
 - `entity_hauteur`
@@ -265,6 +323,7 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 - `theme_mode`
 - `accent_color`
 - `manual_action_service`
+- `manual_action_label`
 - `tap_action`
 - `hold_action`
 - `double_tap_action`
@@ -280,14 +339,17 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 
 La carte expose un éditeur visuel natif dans Home Assistant pour :
 - la carte elle-même: titre, style, fond, icônes et bouton manuel
-- la synthèse et l’irrigation: fenêtre, plan, objectif et dernières actions
+- la synthèse et l’irrigation: fenêtre, plan, objectif, signaux et dernières actions
 - la zone produit: catalogue local, produit d’intervention et dernière application
-- le gazon et la tonte: mode, profil d’irrigation, phase, risque et hauteur
+- l’intervention: recommandation, signal métier et debug
+- le gazon et la tonte: mode, profil d’irrigation, phase, risque, tonte autorisée et hauteur
 - l'onglet Réglages avec le switch auto, les débits et les hauteurs
 - les options visuelles de base
 - l’affichage optionnel des détails avancés et des écrans de diagnostic
 
 Dans la carte elle-même, l’onglet **Réglages** propose aussi des tuiles cliquables qui ouvrent directement le contrôle Home Assistant des entités associées. C’est le chemin le plus simple pour ajuster un switch, un sélecteur ou un nombre sans quitter la vue.
+
+Quand `show_advanced_details` est activé, la vue avancée suit l’onglet actif au lieu d’afficher un bloc partagé unique.
 
 Par défaut, le switch d’autorisation pointe vers `switch.gazon_intelligent_arrosage_automatique_autorise`. Si ton instance expose un identifiant différent, ajuste `entity_switch_arrosage_automatique`.
 

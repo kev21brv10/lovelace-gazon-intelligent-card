@@ -71,6 +71,87 @@ root_bundle_gz = ROOT / DIST_GZ_FILE
 root_src = root_bundle.read_text(encoding="utf-8")
 readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
+
+def extract_default_config_keys(source):
+    match = re.search(r"export const DEFAULT_CONFIG = \{(?P<body>.*?)\n\};", source, re.S)
+    if not match:
+        raise SystemExit("Could not find DEFAULT_CONFIG in src/constants.js")
+    return re.findall(r"^\s*([a-zA-Z0-9_]+):", match.group("body"), re.M)
+
+
+def extract_config_form_names(source):
+    match = re.search(
+        r"static getConfigForm\(\)\s*\{\s*return\s*\{\s*schema:\s*\[(?P<body>.*?)\]\s*,?\s*\};\s*\}",
+        source,
+        re.S,
+    )
+    if not match:
+        raise SystemExit("Could not find getConfigForm schema in src/gazon-intelligent-card.js")
+    return re.findall(r'\{\s*name:\s*"([^"]+)"', match.group("body"))
+
+
+def extract_editor_config_keys(source):
+    keys = set(
+        re.findall(
+            r'_render(?:EntityInput|TextInput|Select|Checkbox|NumberInput)\(\s*"([^"]+)"',
+            source,
+        )
+    )
+    keys.update(re.findall(r'_renderActionEditor\(\s*"([^"]+)"', source))
+    return sorted(keys)
+
+
+def extract_readme_option_keys(source):
+    match = re.search(r"## ⚙️ Options principales(?P<body>.*?)(?:\n---|\n## )", source, re.S)
+    if not match:
+        raise SystemExit("README.md must contain an 'Options principales' section")
+    return re.findall(r"- `([^`]+)`", match.group("body"))
+
+
+def extract_readme_complete_yaml_keys(source):
+    match = re.search(r"## 🧱 Exemple YAML complet\s+```yaml\n(?P<body>.*?)\n```", source, re.S)
+    if not match:
+        raise SystemExit("README.md must contain a complete YAML example block")
+    return re.findall(r"^(?!\s)([a-zA-Z0-9_]+):", match.group("body"), re.M)
+
+
+def ensure_same_keys(label, expected, actual):
+    missing = sorted(set(expected) - set(actual))
+    extra = sorted(set(actual) - set(expected))
+    if missing or extra:
+        details = []
+        if missing:
+            details.append(f"missing={missing}")
+        if extra:
+            details.append(f"extra={extra}")
+        raise SystemExit(f"{label} key mismatch: {'; '.join(details)}")
+
+
+def validate_hass_action_contract(source):
+    perform_match = re.search(
+        r'_performConfiguredAction\(.*?\)\s*\{(?P<body>.*?)\n  \}',
+        source,
+        re.S,
+    )
+    if not perform_match:
+        raise SystemExit("Could not find _performConfiguredAction in src/gazon-intelligent-card.js")
+    body = perform_match.group("body")
+    for marker in (
+        'new Event("hass-action", {',
+        "bubbles: true",
+        "composed: true",
+        "event.detail = {",
+        "config,",
+        "action: this._actionEventName(actionKey)",
+        "this.dispatchEvent(event);",
+    ):
+        if marker not in body:
+            raise SystemExit(f"_performConfiguredAction must include {marker}")
+
+    for action_key in ("tap_action", "hold_action", "double_tap_action"):
+        if f'_performConfiguredAction("{action_key}"' not in source:
+            raise SystemExit(f"src/gazon-intelligent-card.js must trigger {action_key} via _performConfiguredAction")
+
 if package.get("main") != "gazon-intelligent-card.js":
     raise SystemExit("package.json main must point to gazon-intelligent-card.js")
 
@@ -82,6 +163,23 @@ if hacs.get("content_in_root") is not True:
 
 main_src = src_files["src/gazon-intelligent-card.js"]
 constants_src = src_files["src/constants.js"]
+editor_src = src_files["src/editor/editor.js"]
+default_config_keys = extract_default_config_keys(constants_src)
+config_form_names = extract_config_form_names(main_src)
+editor_config_keys = extract_editor_config_keys(editor_src)
+readme_option_keys = extract_readme_option_keys(readme)
+readme_complete_yaml_keys = extract_readme_complete_yaml_keys(readme)
+
+ensure_same_keys("getConfigForm vs DEFAULT_CONFIG", default_config_keys, config_form_names)
+ensure_same_keys("editor vs DEFAULT_CONFIG", default_config_keys, editor_config_keys)
+ensure_same_keys("README options vs DEFAULT_CONFIG", default_config_keys, readme_option_keys)
+ensure_same_keys(
+    "README complete YAML vs DEFAULT_CONFIG",
+    ["type", *default_config_keys],
+    ["type", *[key for key in readme_complete_yaml_keys if key != "type"]],
+)
+validate_hass_action_contract(main_src)
+
 if 'from "./constants.js"' not in main_src:
     raise SystemExit('src/gazon-intelligent-card.js must import shared constants')
 
@@ -152,7 +250,6 @@ for marker in (
 if 'from "./renderers/layout.js";' not in main_src:
     raise SystemExit("src/gazon-intelligent-card.js must import the layout renderer module")
 
-editor_src = src_files["src/editor/editor.js"]
 for marker in (
     'import { CARD_TYPE, DEFAULT_CONFIG, ENTITY_KEYS, createStubConfig } from "../constants.js";',
     'import { EDITOR_STYLES } from "../styles/editor-styles.js";',

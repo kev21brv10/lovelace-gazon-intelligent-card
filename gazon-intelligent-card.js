@@ -867,6 +867,24 @@ const CARD_STYLES = String.raw`
           gap: 6px;
         }
 
+        .tab-panel__watering-zone {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          width: fit-content;
+          max-width: 100%;
+          padding: 8px 12px;
+          border-radius: 999px;
+          font-size: var(--gi-font-sm);
+          font-weight: 700;
+          line-height: 1.2;
+          color: color-mix(in srgb, var(--primary-text-color) 92%, var(--gazon-water-color, #44c8ea));
+          background: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 12%, transparent);
+          border: 1px solid color-mix(in srgb, var(--gazon-water-color, #44c8ea) 22%, transparent);
+          box-shadow: inset 0 1px 0 color-mix(in srgb, white 32%, transparent);
+          overflow-wrap: anywhere;
+        }
+
         .tab-progress__bar,
         .gi-progress {
           height: 9px;
@@ -3052,7 +3070,7 @@ const RENDER_SIGNATURE_ATTRS = {
   entity_prochaine_fenetre_optimale: ["source_entity", "source_state", "block_reason", "confidence_score", "phase", "month", "temperature", "summary"],
   entity_prochain_blocage_attendu: ["source_entity", "source_status", "block_reason", "block_label", "confidence_score", "phase", "month", "temperature", "summary"],
   entity_plan_arrosage: ["summary", "duration_human", "zone_count", "objective_mm", "plan_type", "passages", "fractionation", "total_duration_min"],
-  entity_arrosage_en_cours: ["active", "started_at_utc", "last_activity_at_utc", "active_zone_count", "zone_count", "progress_percent"],
+  entity_arrosage_en_cours: ["active", "started_at_utc", "last_activity_at_utc", "active_zone_count", "zone_count", "progress_percent", "active_zones", "active_zone_labels", "current_passage", "passage_count"],
   entity_dernier_arrosage: ["source", "date_action", "detected_at", "zone_count"],
   entity_derniere_application: ["source", "application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm", "application_post_watering_status"],
   entity_catalogue_produits: ["products_count", "product_ids", "product_names", "products_summary", "summary"],
@@ -5072,6 +5090,42 @@ class GazonIntelligentCard extends HTMLElement {
     return this._entity("entity_arrosage_en_cours");
   }
 
+  _friendlyZoneLabel(zoneId) {
+    const entityId = String(zoneId || "").trim();
+    if (!entityId) {
+      return "Zone";
+    }
+    const stateObj = this._hass?.states?.[entityId];
+    const friendlyName = String(stateObj?.attributes?.friendly_name || "").trim();
+    if (friendlyName) {
+      return friendlyName;
+    }
+    const objectId = entityId.includes(".") ? entityId.split(".").slice(1).join(".") : entityId;
+    const zoneMatch = objectId.match(/zone[_-]?(\d+)/i);
+    if (zoneMatch) {
+      return `Zone ${zoneMatch[1]}`;
+    }
+    return objectId
+      .replace(/[_-]+/g, " ")
+      .trim()
+      .replace(/\b\w/g, (letter) => letter.toUpperCase()) || entityId;
+  }
+
+  _activeZoneLabels(attrs) {
+    const labelValue = attrs.active_zone_labels;
+    if (Array.isArray(labelValue)) {
+      const labels = labelValue.map((item) => String(item || "").trim()).filter(Boolean);
+      if (labels.length) {
+        return labels;
+      }
+    }
+    const activeValue = attrs.active_zones;
+    if (Array.isArray(activeValue)) {
+      return activeValue.map((zoneId) => this._friendlyZoneLabel(zoneId)).filter(Boolean);
+    }
+    return [];
+  }
+
   _estimatedWateringTotalSeconds() {
     const entity = this._planEntity();
     const attrs = entity?.attributes || {};
@@ -5130,12 +5184,22 @@ class GazonIntelligentCard extends HTMLElement {
     const remainingSeconds = totalSeconds > 0 ? Math.max(totalSeconds - elapsedSeconds, 0) : asNumber(attrs.remaining_seconds) ?? 0;
     const activeZoneCount = asNumber(attrs.active_zone_count) ?? 0;
     const zoneCount = asNumber(attrs.zone_count) ?? activeZoneCount;
+    const activeZoneLabels = this._activeZoneLabels(attrs);
     const startedAtLabel = String(attrs.started_at || "").trim() || (startedAtRaw ? humanDateTimeText(startedAtRaw) : "");
+    const currentPassage = asNumber(attrs.current_passage);
+    const passageCount = asNumber(attrs.passage_count);
     const detailParts = [];
     if (startedAtLabel) {
       detailParts.push(`Démarré ${startedAtLabel}`);
     }
     detailParts.push(`${activeZoneCount} zone${activeZoneCount > 1 ? "s" : ""} active${activeZoneCount > 1 ? "s" : ""}`);
+    if (activeZoneLabels.length) {
+      const zonePrefix = activeZoneLabels.length > 1 ? "Zones en cours" : "Zone en cours";
+      detailParts.push(`${zonePrefix} ${activeZoneLabels.join(", ")}`);
+    }
+    if (currentPassage && passageCount && passageCount > 1) {
+      detailParts.push(`Passage ${currentPassage}/${passageCount}`);
+    }
     if (totalSeconds > 0) {
       detailParts.push(`Restant ${formatDurationHuman(remainingSeconds / 60.0)}`);
     }
@@ -5149,6 +5213,7 @@ class GazonIntelligentCard extends HTMLElement {
       detail: detailParts.join(" · "),
       startedAtLabel,
       activeZoneCount,
+      activeZoneLabels,
       zoneCount,
       critical: progressPercent >= 90,
     };
@@ -7776,6 +7841,8 @@ function renderWateringProgressSection(card, progressState) {
         : "0 min";
     const summary = String(progressState.summary || "Irrigation en cours").trim();
     const detail = String(progressState.detail || "").trim();
+    const activeZoneLabels = Array.isArray(progressState.activeZoneLabels) ? progressState.activeZoneLabels.filter(Boolean) : [];
+    const activeZoneLabel = activeZoneLabels.join(" · ");
     const metaParts = [];
     if (progressState.startedAtLabel) {
       metaParts.push(progressState.startedAtLabel);
@@ -7793,6 +7860,7 @@ function renderWateringProgressSection(card, progressState) {
             <div class="tab-panel__section-meta">${escapeHtml(`${Math.round(percent)} %`)}</div>
           </div>
           <div class="tab-panel__section-summary">${escapeHtml(summary)}</div>
+          ${activeZoneLabel ? `<div class="tab-panel__watering-zone">Zone active · ${escapeHtml(activeZoneLabel)}</div>` : ""}
           <div class="tab-progress" aria-label="${escapeHtml(summary)}">
             <div class="tab-progress__bar gi-progress">
               <span class="gi-progress__bar ${progressState.critical ? "gi-progress__bar--critical" : ""}" style="width:${escapeHtml(String(percent))}%;"></span>

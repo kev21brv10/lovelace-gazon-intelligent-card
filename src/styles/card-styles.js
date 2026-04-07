@@ -867,6 +867,24 @@ export const CARD_STYLES = String.raw`
           gap: 6px;
         }
 
+        .tab-panel__watering-zone {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          width: fit-content;
+          max-width: 100%;
+          padding: 8px 12px;
+          border-radius: 999px;
+          font-size: var(--gi-font-sm);
+          font-weight: 700;
+          line-height: 1.2;
+          color: color-mix(in srgb, var(--primary-text-color) 92%, var(--gazon-water-color, #44c8ea));
+          background: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 12%, transparent);
+          border: 1px solid color-mix(in srgb, var(--gazon-water-color, #44c8ea) 22%, transparent);
+          box-shadow: inset 0 1px 0 color-mix(in srgb, white 32%, transparent);
+          overflow-wrap: anywhere;
+        }
+
         .tab-progress__bar,
         .gi-progress {
           height: 9px;

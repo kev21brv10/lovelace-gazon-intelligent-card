@@ -550,6 +550,8 @@ export function renderWateringProgressSection(card, progressState) {
         : "0 min";
     const summary = String(progressState.summary || "Irrigation en cours").trim();
     const detail = String(progressState.detail || "").trim();
+    const activeZoneLabels = Array.isArray(progressState.activeZoneLabels) ? progressState.activeZoneLabels.filter(Boolean) : [];
+    const activeZoneLabel = activeZoneLabels.join(" · ");
     const metaParts = [];
     if (progressState.startedAtLabel) {
       metaParts.push(progressState.startedAtLabel);
@@ -567,6 +569,7 @@ export function renderWateringProgressSection(card, progressState) {
             <div class="tab-panel__section-meta">${escapeHtml(`${Math.round(percent)} %`)}</div>
           </div>
           <div class="tab-panel__section-summary">${escapeHtml(summary)}</div>
+          ${activeZoneLabel ? `<div class="tab-panel__watering-zone">Zone active · ${escapeHtml(activeZoneLabel)}</div>` : ""}
           <div class="tab-progress" aria-label="${escapeHtml(summary)}">
             <div class="tab-progress__bar gi-progress">
               <span class="gi-progress__bar ${progressState.critical ? "gi-progress__bar--critical" : ""}" style="width:${escapeHtml(String(percent))}%;"></span>

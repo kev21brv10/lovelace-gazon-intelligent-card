@@ -1257,6 +1257,42 @@ class GazonIntelligentCard extends HTMLElement {
     return this._entity("entity_arrosage_en_cours");
   }
 
+  _friendlyZoneLabel(zoneId) {
+    const entityId = String(zoneId || "").trim();
+    if (!entityId) {
+      return "Zone";
+    }
+    const stateObj = this._hass?.states?.[entityId];
+    const friendlyName = String(stateObj?.attributes?.friendly_name || "").trim();
+    if (friendlyName) {
+      return friendlyName;
+    }
+    const objectId = entityId.includes(".") ? entityId.split(".").slice(1).join(".") : entityId;
+    const zoneMatch = objectId.match(/zone[_-]?(\d+)/i);
+    if (zoneMatch) {
+      return `Zone ${zoneMatch[1]}`;
+    }
+    return objectId
+      .replace(/[_-]+/g, " ")
+      .trim()
+      .replace(/\b\w/g, (letter) => letter.toUpperCase()) || entityId;
+  }
+
+  _activeZoneLabels(attrs) {
+    const labelValue = attrs.active_zone_labels;
+    if (Array.isArray(labelValue)) {
+      const labels = labelValue.map((item) => String(item || "").trim()).filter(Boolean);
+      if (labels.length) {
+        return labels;
+      }
+    }
+    const activeValue = attrs.active_zones;
+    if (Array.isArray(activeValue)) {
+      return activeValue.map((zoneId) => this._friendlyZoneLabel(zoneId)).filter(Boolean);
+    }
+    return [];
+  }
+
   _estimatedWateringTotalSeconds() {
     const entity = this._planEntity();
     const attrs = entity?.attributes || {};
@@ -1315,12 +1351,22 @@ class GazonIntelligentCard extends HTMLElement {
     const remainingSeconds = totalSeconds > 0 ? Math.max(totalSeconds - elapsedSeconds, 0) : asNumber(attrs.remaining_seconds) ?? 0;
     const activeZoneCount = asNumber(attrs.active_zone_count) ?? 0;
     const zoneCount = asNumber(attrs.zone_count) ?? activeZoneCount;
+    const activeZoneLabels = this._activeZoneLabels(attrs);
     const startedAtLabel = String(attrs.started_at || "").trim() || (startedAtRaw ? humanDateTimeText(startedAtRaw) : "");
+    const currentPassage = asNumber(attrs.current_passage);
+    const passageCount = asNumber(attrs.passage_count);
     const detailParts = [];
     if (startedAtLabel) {
       detailParts.push(`Démarré ${startedAtLabel}`);
     }
     detailParts.push(`${activeZoneCount} zone${activeZoneCount > 1 ? "s" : ""} active${activeZoneCount > 1 ? "s" : ""}`);
+    if (activeZoneLabels.length) {
+      const zonePrefix = activeZoneLabels.length > 1 ? "Zones en cours" : "Zone en cours";
+      detailParts.push(`${zonePrefix} ${activeZoneLabels.join(", ")}`);
+    }
+    if (currentPassage && passageCount && passageCount > 1) {
+      detailParts.push(`Passage ${currentPassage}/${passageCount}`);
+    }
     if (totalSeconds > 0) {
       detailParts.push(`Restant ${formatDurationHuman(remainingSeconds / 60.0)}`);
     }
@@ -1334,6 +1380,7 @@ class GazonIntelligentCard extends HTMLElement {
       detail: detailParts.join(" · "),
       startedAtLabel,
       activeZoneCount,
+      activeZoneLabels,
       zoneCount,
       critical: progressPercent >= 90,
     };

@@ -8850,6 +8850,14 @@ function renderWateringTab(card) {
           windowState.optimalWindowDisplay ? `Optimal: ${windowState.optimalWindowDisplay}` : "",
           windowState.wateringWindowDisplay ? `Créneau: ${windowState.wateringWindowDisplay}` : "",
         ].filter(Boolean).join(" · ");
+  const heroNextText = String(windowState.reasonSummary || nextActionText || "").trim();
+  const heroHintText = String(blockHint || "").trim();
+  const normalizedHeroNext = heroNextText.toLowerCase();
+  const normalizedHeroHint = heroHintText.toLowerCase();
+  const shouldShowHeroHint = Boolean(heroHintText)
+    && normalizedHeroHint !== normalizedHeroNext
+    && !normalizedHeroHint.startsWith(`${normalizedHeroNext} ·`)
+    && !normalizedHeroNext.startsWith(`${normalizedHeroHint} ·`);
   const planTypeLabel = formatPlanType(planState.planType);
 
   const planChips = [
@@ -8877,13 +8885,13 @@ function renderWateringTab(card) {
             ${renderStatusPill(irrigationSignal.actionLabel || windowState.statusLabel, tone, windowStatusIcon, `tab-panel__hero-status tab-panel__hero-status--${tone}`)}
           </div>
           ${
-            (windowState.reasonSummary || nextActionText)
-              ? `<div class="tab-panel__hero-next">${escapeHtml(windowState.reasonSummary || nextActionText)}</div>`
+            heroNextText
+              ? `<div class="tab-panel__hero-next">${escapeHtml(heroNextText)}</div>`
               : ""
           }
           ${
-            (isBlocked && blockHint) || windowState.optimalWindowDisplay || windowState.wateringWindowDisplay
-              ? `<div class="tab-panel__hero-hint">${escapeHtml(blockHint)}</div>`
+            shouldShowHeroHint
+              ? `<div class="tab-panel__hero-hint">${escapeHtml(heroHintText)}</div>`
               : ""
           }
         </div>

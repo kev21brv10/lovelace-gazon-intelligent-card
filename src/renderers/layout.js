@@ -1163,6 +1163,7 @@ export function renderWateringTab(card) {
   const normalizedHeroNext = heroNextText.toLowerCase();
   const normalizedHeroHint = heroHintText.toLowerCase();
   const shouldShowHeroHint = Boolean(heroHintText)
+    && (isBlocked || isAwaiting)
     && normalizedHeroHint !== normalizedHeroNext
     && !normalizedHeroHint.startsWith(`${normalizedHeroNext} ·`)
     && !normalizedHeroNext.startsWith(`${normalizedHeroHint} ·`);

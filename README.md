@@ -118,6 +118,7 @@ resources:
 ```yaml
 type: custom:gazon-intelligent-card
 title: Gazon du jardin
+entity_assistant: sensor.gazon_intelligent_assistant
 entity_fenetre_optimale: sensor.gazon_intelligent_fenetre_optimale
 entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
 entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
@@ -125,6 +126,9 @@ entity_derniere_application: sensor.gazon_intelligent_derniere_application
 entity_catalogue_produits: sensor.gazon_intelligent_catalogue_produits
 entity_prochaine_intervention: sensor.gazon_intelligent_prochaine_intervention
 entity_produit_intervention: select.gazon_intelligent_produit_d_intervention
+entity_conseil: sensor.gazon_intelligent_conseil_principal
+entity_signal_irrigation: binary_sensor.gazon_intelligent_signal_irrigation
+entity_niveau: sensor.gazon_intelligent_niveau_d_action
 entity_mode: select.gazon_intelligent_mode_du_gazon
 entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique_autorise
 entity_arrosage_recommande: binary_sensor.gazon_intelligent_arrosage_recommande
@@ -212,6 +216,7 @@ hold_action:
   action: none
 double_tap_action:
   action: none
+entity_assistant: sensor.gazon_intelligent_assistant
 entity_fenetre_optimale: sensor.gazon_intelligent_fenetre_optimale
 entity_weather: weather.forecast_home
 entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
@@ -235,6 +240,13 @@ entity_arrosage_apres_application_autorise: binary_sensor.gazon_intelligent_arro
 entity_signal_irrigation: binary_sensor.gazon_intelligent_signal_irrigation
 entity_signal_intervention: binary_sensor.gazon_intelligent_signal_intervention
 entity_objectif_arrosage: sensor.gazon_intelligent_objectif_d_arrosage
+entity_objectif_legacy: sensor.gazon_intelligent_objectif_legacy
+entity_objectif_depletion: sensor.gazon_intelligent_objectif_depletion
+entity_reserve_actuelle: sensor.gazon_intelligent_reserve_actuelle
+entity_depletion_ratio: sensor.gazon_intelligent_depletion_ratio
+entity_etat_hydrique: sensor.gazon_intelligent_etat_hydrique
+entity_et0: sensor.gazon_intelligent_et0
+entity_etc: sensor.gazon_intelligent_etc
 entity_type_arrosage: sensor.gazon_intelligent_type_d_arrosage
 entity_phase: sensor.gazon_intelligent_phase_dominante
 entity_sous_phase: sensor.gazon_intelligent_sous_phase
@@ -257,6 +269,7 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 ## ⚙️ Options principales
 
 - `title`
+- `entity_assistant`
 - `entity_fenetre_optimale`
 - `entity_weather`
 - `entity_plan_arrosage`
@@ -280,6 +293,13 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 - `entity_signal_irrigation`
 - `entity_signal_intervention`
 - `entity_objectif_arrosage`
+- `entity_objectif_legacy`
+- `entity_objectif_depletion`
+- `entity_reserve_actuelle`
+- `entity_depletion_ratio`
+- `entity_etat_hydrique`
+- `entity_et0`
+- `entity_etc`
 - `entity_type_arrosage`
 - `entity_phase`
 - `entity_sous_phase`
@@ -320,10 +340,11 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 
 La carte expose un éditeur visuel natif dans Home Assistant pour :
 - la carte elle-même: titre, style, fond, icônes et bouton manuel
-- la synthèse et l’irrigation: fenêtre, plan, objectif, signaux et dernières actions
+- la synthèse et l’irrigation: assistant, fenêtre, plan, objectif, signaux et dernières actions
 - la zone produit: catalogue local, produit d’intervention et dernière application
 - l’intervention: recommandation, signal métier et debug
 - le gazon et la tonte: mode, profil d’irrigation, phase, risque, tonte autorisée et hauteur
+- le suivi hydrique avancé: état hydrique, réserve, déplétion, ET0, ETc et comparaison legacy/déplétion
 - l'onglet Réglages avec le switch auto, les débits et les hauteurs
 - les options visuelles de base
 - l’affichage optionnel des détails avancés et des écrans de diagnostic

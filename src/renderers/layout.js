@@ -678,17 +678,27 @@ function getDerivedSignalPresentation(entity, label, icon = "mdi:information-out
     return null;
   }
   const summary = String(entity.attributes?.summary || "").trim();
+  const actionLabel = String(entity.attributes?.action_label || "").trim();
+  const reasonKind = String(entity.attributes?.reason_kind || "").trim().toLowerCase();
   const triggerKind = String(entity.attributes?.trigger_kind || "").trim().toLowerCase();
   const sourceStatus = String(entity.attributes?.source_status || "").trim();
   const state = String(entity.state ?? "").trim().toLowerCase();
-  const tone = triggerKind === "soft"
-    ? "warning"
-    : ["recommended", "ready", "post_application", "hydrique"].includes(triggerKind)
+  const tone = reasonKind === "blocked"
+    ? "danger"
+    : triggerKind === "soft"
+      ? "warning"
+    : ["recommended", "ready", "post_application", "hydrique"].includes(triggerKind) || ["post_application", "hydric_need"].includes(reasonKind)
       ? "success"
       : state === "on"
         ? "success"
         : "neutral";
   const secondaryParts = [];
+  if (actionLabel && actionLabel !== summary) {
+    secondaryParts.push(actionLabel);
+  }
+  if (reasonKind) {
+    secondaryParts.push(`Raison: ${formatStatusLabel(reasonKind)}`);
+  }
   if (triggerKind) {
     secondaryParts.push(`Déclencheur: ${formatDerivedTriggerLabel(triggerKind)}`);
   }
@@ -697,7 +707,7 @@ function getDerivedSignalPresentation(entity, label, icon = "mdi:information-out
   }
   return {
     label,
-    value: summary || formatStatusLabel(entity.state),
+    value: actionLabel || summary || formatStatusLabel(entity.state),
     tone,
     icon,
     secondary: secondaryParts.join(" · "),
@@ -1071,6 +1081,7 @@ export function renderOverviewTab(card) {
     { key: "entity_niveau_pertinence", fact: getDerivedPertinencePresentation(card._entity("entity_niveau_pertinence")) },
     { key: "entity_prochaine_fenetre_optimale", fact: getDerivedWindowPresentation(card._entity("entity_prochaine_fenetre_optimale")) },
     { key: "entity_prochain_blocage_attendu", fact: getDerivedBlockPresentation(card._entity("entity_prochain_blocage_attendu")) },
+    { key: "entity_signal_irrigation", fact: getDerivedSignalPresentation(card._entity("entity_signal_irrigation"), "Signal irrigation", "mdi:sprinkler") },
   ].filter(({ fact }) => Boolean(fact));
 
   return `
@@ -1125,11 +1136,13 @@ export function renderOverviewTab(card) {
 
 export function renderWateringTab(card) {
   const windowState = card._windowState();
+  const irrigationSignal = card._irrigationSignalState();
+  const context = card._objectiveContext();
   const nextActionText = windowState.displayNextAction || windowState.nextActionDisplay || windowState.nextAction;
   const planState = card._planState();
   const objective = windowState.objective;
   const objectiveLabel = formatMm(objective);
-  const tone = windowState.tone;
+  const tone = irrigationSignal.tone || windowState.tone;
   const windowIcon = card._statusIcon(windowState.status);
   const windowStatusIcon = card._config?.show_icons ? windowIcon : null;
   const isBlocked = windowState.isBlocked;
@@ -1140,7 +1153,11 @@ export function renderWateringTab(card) {
     ? windowState.blockReasonLabel || windowState.displayNextAction || windowState.nextAction || ""
     : isAwaiting
       ? windowState.nextAction || "Attendre le créneau prévu"
-      : noActionHint;
+      : [
+          noActionHint,
+          windowState.optimalWindowDisplay ? `Optimal: ${windowState.optimalWindowDisplay}` : "",
+          windowState.wateringWindowDisplay ? `Créneau: ${windowState.wateringWindowDisplay}` : "",
+        ].filter(Boolean).join(" · ");
   const planTypeLabel = formatPlanType(planState.planType);
 
   const planChips = [
@@ -1149,6 +1166,14 @@ export function renderWateringTab(card) {
     card._renderTabPill("Fractionnement", planState.fractionation ? "Oui" : "Non", planState.fractionation ? "warning" : "neutral", "mdi:call-split"),
     card._renderTabPill("Type de plan", planTypeLabel, card._planTypeTone(planState.planType), "mdi:shape"),
     card._renderTabPill("Objectif", objectiveLabel, objective > 0 ? "success" : "neutral", "mdi:water"),
+    card._renderTabPill("Signal", irrigationSignal.actionLabel || "Non disponible", tone, "mdi:sprinkler"),
+    card._renderTabPill("Raison", formatStatusLabel(irrigationSignal.reasonKind), tone, "mdi:information-outline"),
+    card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
+    windowState.optimalWindowDisplay ? card._renderTabPill("Optimal", windowState.optimalWindowDisplay, "neutral", "mdi:clock-time-eight-outline") : "",
+    windowState.wateringWindowDisplay ? card._renderTabPill("Créneau", windowState.wateringWindowDisplay, "neutral", "mdi:timeline-clock-outline") : "",
+    context.hydricState ? card._renderTabPill("État hydrique", formatStatusLabel(context.hydricState), context.hydricState === "plein" ? "success" : "warning", "mdi:water-percent-alert") : "",
+    context.reserveActuelle !== null ? card._renderTabPill("Réserve", `${formatNumber(context.reserveActuelle, 1)} mm`, "neutral", "mdi:cup-water") : "",
+    context.depletionRatio !== null ? card._renderTabPill("Déplétion", formatNumber(context.depletionRatio, 3), "neutral", "mdi:gauge") : "",
   ];
   const wateringProgress = card._wateringProgressState();
 
@@ -1156,16 +1181,16 @@ export function renderWateringTab(card) {
       <section class="tab-panel gi-panel tab-panel--watering">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${tone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">${escapeHtml(windowState.displaySummary || windowState.summary || "Irrigation")}</div>
-            ${renderStatusPill(windowState.statusLabel, tone, windowStatusIcon, `tab-panel__hero-status tab-panel__hero-status--${tone}`)}
+            <div class="tab-panel__hero-summary">${escapeHtml(irrigationSignal.summary || windowState.displaySummary || windowState.summary || "Irrigation")}</div>
+            ${renderStatusPill(irrigationSignal.actionLabel || windowState.statusLabel, tone, windowStatusIcon, `tab-panel__hero-status tab-panel__hero-status--${tone}`)}
           </div>
           ${
-            nextActionText
-              ? `<div class="tab-panel__hero-next">${escapeHtml(nextActionText)}</div>`
+            (windowState.reasonSummary || nextActionText)
+              ? `<div class="tab-panel__hero-next">${escapeHtml(windowState.reasonSummary || nextActionText)}</div>`
               : ""
           }
           ${
-            isBlocked && blockHint
+            (isBlocked && blockHint) || windowState.optimalWindowDisplay || windowState.wateringWindowDisplay
               ? `<div class="tab-panel__hero-hint">${escapeHtml(blockHint)}</div>`
               : ""
           }
@@ -1190,10 +1215,12 @@ export function renderWateringTab(card) {
 }
 
 export function renderGazonTab(card) {
+  const assistant = card._assistantState();
   const phase = card._entityState("entity_phase", null);
   const subPhase = card._entityState("entity_sous_phase", null);
   const risk = card._entityState("entity_risque", null);
   const action = card._entityState("entity_niveau", null);
+  const hydricLevel = String(card._entityAttribute("entity_niveau", "niveau_action_hydrique", "") || "").trim();
   const progress = asNumber(card._entity("entity_sous_phase")?.attributes?.sous_phase_progression);
   const progressDetail = card._entity("entity_sous_phase")?.attributes?.sous_phase_detail || "";
   const progressLabel = progress === null ? "Progression non disponible" : `${formatNumber(progress, 0)} %`;
@@ -1208,6 +1235,14 @@ export function renderGazonTab(card) {
     action ? `Action ${formatStatusLabel(action)}` : "",
   ].filter(Boolean).join(" · ") || "Les détails avancés suivent l’onglet actif.";
   const gazonFacts = [
+    {
+      label: "Assistant",
+      value: assistant.summary || "Non disponible",
+      tone: assistant.tone || computeActionTone(action),
+      icon: "mdi:account-tie-hat-outline",
+      secondary: assistant.reason || "",
+      entityKey: "entity_assistant",
+    },
     {
       label: "Phase dominante",
       value: formatStatusLabel(phase),
@@ -1237,7 +1272,7 @@ export function renderGazonTab(card) {
       value: formatStatusLabel(action),
       tone: computeActionTone(action),
       icon: "mdi:signal",
-      secondary: "",
+      secondary: hydricLevel ? `Hydrique: ${formatStatusLabel(hydricLevel)}` : "",
       entityKey: "entity_niveau",
     },
   ];

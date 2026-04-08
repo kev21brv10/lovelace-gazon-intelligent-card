@@ -340,6 +340,7 @@ ${EDITOR_STYLES}
           <h3>Synthèse et irrigation</h3>
           <p>Ces entités alimentent la synthèse principale et l'onglet Irrigation.</p>
           <div class="grid">
+            ${this._renderEntityInput("entity_assistant", "Assistant")}
             ${this._renderEntityInput("entity_fenetre_optimale", "Fenêtre optimale")}
             ${this._renderEntityInput("entity_weather", "Météo")}
             ${this._renderEntityInput("entity_plan_arrosage", "Plan d'irrigation")}
@@ -412,6 +413,13 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_avoid", "Action à éviter")}
             ${this._renderEntityInput("entity_debug_intervention", "Debug métier")}
             ${this._renderEntityInput("entity_arrosage_en_cours", "Irrigation en cours")}
+            ${this._renderEntityInput("entity_etat_hydrique", "État hydrique")}
+            ${this._renderEntityInput("entity_reserve_actuelle", "Réserve actuelle")}
+            ${this._renderEntityInput("entity_depletion_ratio", "Déplétion")}
+            ${this._renderEntityInput("entity_et0", "ET0")}
+            ${this._renderEntityInput("entity_etc", "ETc")}
+            ${this._renderEntityInput("entity_objectif_legacy", "Objectif legacy")}
+            ${this._renderEntityInput("entity_objectif_depletion", "Objectif déplétion")}
           </div>
         </section>
       </div>

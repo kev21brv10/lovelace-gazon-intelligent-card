@@ -2883,6 +2883,7 @@ const DEFAULT_CONFIG = {
   background_style: "solid",
   use_gradient: true,
   show_secondary_info: true,
+  entity_assistant: "sensor.gazon_intelligent_assistant",
   entity_fenetre_optimale: "sensor.gazon_intelligent_fenetre_optimale",
   entity_weather: "weather.forecast_home",
   entity_plan_arrosage: "sensor.gazon_intelligent_plan_d_arrosage",
@@ -2906,6 +2907,13 @@ const DEFAULT_CONFIG = {
   entity_arrosage_apres_application_autorise: "binary_sensor.gazon_intelligent_arrosage_apres_application_autorise",
   entity_tonte_autorisee: "binary_sensor.gazon_intelligent_tonte_autorisee",
   entity_objectif_arrosage: "sensor.gazon_intelligent_objectif_d_arrosage",
+  entity_objectif_legacy: "sensor.gazon_intelligent_objectif_legacy",
+  entity_objectif_depletion: "sensor.gazon_intelligent_objectif_depletion",
+  entity_reserve_actuelle: "sensor.gazon_intelligent_reserve_actuelle",
+  entity_depletion_ratio: "sensor.gazon_intelligent_depletion_ratio",
+  entity_etat_hydrique: "sensor.gazon_intelligent_etat_hydrique",
+  entity_et0: "sensor.gazon_intelligent_et0",
+  entity_etc: "sensor.gazon_intelligent_etc",
   entity_type_arrosage: "sensor.gazon_intelligent_type_d_arrosage",
   entity_risque: "sensor.gazon_intelligent_risque_gazon",
   entity_phase: "sensor.gazon_intelligent_phase_dominante",
@@ -2946,6 +2954,7 @@ const TAB_DEFS = [
 ];
 
 const ENTITY_KEYS = [
+  { key: "entity_assistant", label: "Assistant", icon: "mdi:account-tie-hat-outline", domain: ["sensor"] },
   { key: "entity_fenetre_optimale", label: "Fenêtre d'action", icon: "mdi:clock-outline", domain: ["sensor"] },
   { key: "entity_plan_arrosage", label: "Plan d'irrigation", icon: "mdi:timer-outline", domain: ["sensor"] },
   { key: "entity_arrosage_en_cours", label: "Irrigation en cours", icon: "mdi:progress-clock", domain: ["sensor"] },
@@ -2974,6 +2983,13 @@ const ENTITY_KEYS = [
   { key: "entity_hauteur", label: "Hauteur de tonte conseillée", icon: "mdi:ruler-square", domain: ["sensor"] },
   { key: "entity_arrosage_recommande", label: "Irrigation", icon: "mdi:water-check", domain: ["binary_sensor"] },
   { key: "entity_objectif_arrosage", label: "Objectif d'irrigation", icon: "mdi:water-percent", domain: ["sensor"] },
+  { key: "entity_objectif_legacy", label: "Objectif legacy", icon: "mdi:water-minus", domain: ["sensor"] },
+  { key: "entity_objectif_depletion", label: "Objectif déplétion", icon: "mdi:water-sync", domain: ["sensor"] },
+  { key: "entity_reserve_actuelle", label: "Réserve actuelle", icon: "mdi:cup-water", domain: ["sensor"] },
+  { key: "entity_depletion_ratio", label: "Déplétion", icon: "mdi:gauge", domain: ["sensor"] },
+  { key: "entity_etat_hydrique", label: "État hydrique", icon: "mdi:water-percent-alert", domain: ["sensor"] },
+  { key: "entity_et0", label: "ET0", icon: "mdi:weather-sunny", domain: ["sensor"] },
+  { key: "entity_etc", label: "ETc", icon: "mdi:grass", domain: ["sensor"] },
   { key: "entity_type_arrosage", label: "Profil d'irrigation", icon: "mdi:sprinkler", domain: ["sensor"] },
   { key: "entity_risque", label: "Risque gazon", icon: "mdi:shield-alert-outline", domain: ["sensor"] },
   { key: "entity_debit_zone_1", label: "Débit zone 1", icon: "mdi:sprinkler", domain: ["number"] },
@@ -2994,6 +3010,7 @@ const SECTION_DEFS = [
 
 const SECTION_FIELDS = {
   overview: [
+    "entity_assistant",
     "entity_conseil",
     "entity_action",
     "entity_avoid",
@@ -3016,6 +3033,7 @@ const SECTION_FIELDS = {
   "entity_switch_arrosage_automatique",
   ],
   watering: [
+    "entity_fenetre_optimale",
     "entity_arrosage_recommande",
     "entity_objectif_arrosage",
     "entity_type_arrosage",
@@ -3039,6 +3057,7 @@ const SECTION_ACCENTS = {
 };
 
 const LEGACY_ENTITY_KEYS = [
+  "entity_assistant",
   "entity_conseil",
   "entity_action",
   "entity_avoid",
@@ -3065,7 +3084,22 @@ const OVERVIEW_ENTITY_KEYS = new Set([
 ]);
 
 const RENDER_SIGNATURE_ATTRS = {
-  entity_fenetre_optimale: ["status", "summary", "next_action", "auto_irrigation_enabled"],
+  entity_assistant: ["action", "moment", "quantity_mm", "status", "reason"],
+  entity_fenetre_optimale: [
+    "status",
+    "summary",
+    "next_action",
+    "auto_irrigation_enabled",
+    "window_reason_summary",
+    "watering_window_display",
+    "optimal_window_display",
+    "evening_window_display",
+    "watering_evening_allowed",
+    "confidence_score",
+    "application_post_watering_status",
+    "watering_window_profile",
+    "heat_stress_level",
+  ],
   entity_niveau_pertinence: ["score", "score_level", "summary", "tone", "source_entity"],
   entity_prochaine_fenetre_optimale: ["source_entity", "source_state", "block_reason", "confidence_score", "phase", "month", "temperature", "summary"],
   entity_prochain_blocage_attendu: ["source_entity", "source_status", "block_reason", "block_label", "confidence_score", "phase", "month", "temperature", "summary"],
@@ -3077,16 +3111,64 @@ const RENDER_SIGNATURE_ATTRS = {
   entity_produit_intervention: ["selected_product_id", "selected_product_name", "summary", "products_count"],
   entity_debug_intervention: ["score", "status", "recommended_action", "product_id", "product_name", "summary", "reason", "why_now", "reasons", "constraints", "blocking_constraints", "non_blocking_constraints", "missing_requirements", "context", "ready_to_declare", "selected_product_ready", "ui_summary", "ui_hint"],
   entity_signal_intervention: ["source_entity", "source_status", "recommended_action", "product_id", "product_name", "ready_to_declare", "selected_product_ready", "trigger_kind", "summary"],
-  entity_signal_irrigation: ["source_entities", "source_status", "application_post_watering_status", "type_arrosage", "trigger_kind", "summary"],
+  entity_signal_irrigation: ["source_entities", "source_status", "application_post_watering_status", "type_arrosage", "trigger_kind", "reason_kind", "action_label", "summary"],
   entity_prochaine_intervention: [
-    "payload",
+    "recommended_action",
+    "priority",
+    "score",
+    "reason",
+    "why_now",
+    "product_id",
+    "product_name",
+    "ready_to_declare",
+    "selected_product_ready",
+    "month_match",
+    "current_phase",
+    "current_month",
+    "opportunity_level",
+    "summary",
+    "hint",
+    "action_label",
   ],
-  entity_objectif_arrosage: ["temperature", "etp", "phase_active"],
+  entity_conseil: ["action_recommandee", "action_a_eviter", "niveau_action", "niveau_action_hydrique", "fenetre_optimale", "risque_gazon", "objectif_mm", "type_arrosage", "summary"],
+  entity_objectif_arrosage: [
+    "temperature",
+    "etp",
+    "phase_active",
+    "phase_dominante",
+    "sous_phase",
+    "hydric_balance_level",
+    "hydric_strategy",
+    "hydric_state",
+    "reserve_actuelle_mm",
+    "reserve_stock_mm",
+    "reserve_stock_max_mm",
+    "reserve_surplus_mm",
+    "reserve_fill_ratio",
+    "reserve_available_ratio",
+    "reserve_minimale_mm",
+    "depletion_mm",
+    "depletion_ratio",
+    "depletion_allowed_mm",
+    "mad_ratio",
+    "et0_mm",
+    "et0_source",
+    "kc_gazon",
+    "etc_mm",
+  ],
   entity_arrosage_recommande: ["objectif_mm", "type_arrosage"],
   entity_arrosage_apres_application_autorise: ["application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm", "application_post_watering_status"],
   entity_tonte_autorisee: ["phase_active", "tonte_statut", "niveau_action", "fenetre_optimale", "risque_gazon", "hauteur_tonte_recommandee_cm", "hauteur_tonte_min_cm", "hauteur_tonte_max_cm"],
+  entity_niveau: ["niveau_action_hydrique"],
   entity_sous_phase: ["sous_phase_progression", "sous_phase_detail"],
   entity_phase: ["phase_dominante_source", "pluie_demain_source"],
+  entity_et0: ["et0_source", "temperature", "forecast_temperature_today", "temperature_reference_hydrique"],
+  entity_etc: ["et0_mm", "kc_gazon", "phase_dominante", "sous_phase"],
+  entity_reserve_actuelle: ["reserve_utile_mm", "reserve_stock_mm", "reserve_stock_max_mm", "reserve_surplus_mm", "reserve_fill_ratio", "reserve_available_ratio", "reserve_minimale_mm", "depletion_mm", "depletion_ratio", "hydric_state"],
+  entity_depletion_ratio: ["depletion_ratio_raw", "hydric_state"],
+  entity_etat_hydrique: ["reserve_actuelle_mm", "reserve_stock_mm", "reserve_stock_max_mm", "reserve_surplus_mm", "reserve_fill_ratio", "reserve_available_ratio", "reserve_minimale_mm", "depletion_mm", "depletion_ratio", "hydric_state"],
+  entity_objectif_legacy: ["objectif_mm", "mm_final_recommande", "use_depletion_logic", "type_arrosage", "comparison_mode"],
+  entity_objectif_depletion: ["reserve_actuelle_mm", "reserve_stock_mm", "reserve_stock_max_mm", "reserve_surplus_mm", "reserve_fill_ratio", "reserve_available_ratio", "reserve_minimale_mm", "depletion_mm", "depletion_ratio", "use_depletion_logic", "comparison_mode"],
   entity_weather: ["temperature", "dew_point", "humidity", "uv_index", "pressure", "wind_speed", "wind_bearing", "precipitation"],
   entity_hauteur: ["hauteur_tonte_min_cm", "hauteur_tonte_max_cm"],
 };
@@ -3108,7 +3190,20 @@ const STATUS_LABELS = {
   blocked: "Bloqué",
   unavailable: "Non disponible",
   en_attente: "En attente",
+  action_required: "Action requise",
   bloque: "Bloqué",
+  attendre: "Attendre",
+  maintenant: "Maintenant",
+  ce_matin: "Ce matin",
+  demain_matin: "Demain matin",
+  apres_pluie: "Après la pluie",
+  no_need: "Aucun besoin",
+  waiting: "Attendre",
+  blocked: "Bloqué",
+  post_application: "Post-application",
+  hydric_need: "Besoin hydrique",
+  plein: "Plein",
+  excédentaire: "Excédentaire",
   a_faire: "À faire",
   a_surveiller: "À surveiller",
   autorisee: "Autorisée",
@@ -3948,6 +4043,7 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "border_radius", selector: { number: { min: 0, mode: "box", step: 1 } } },
         { name: "background_style", selector: { select: { options: ["solid", "glass", "minimal"] } } },
         { name: "use_gradient", selector: { boolean: {} } },
+        { name: "entity_assistant", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_fenetre_optimale", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_weather", selector: { entity: { domain: ["weather"] } } },
         { name: "entity_plan_arrosage", selector: { entity: { domain: ["sensor"] } } },
@@ -3971,6 +4067,13 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_tonte_autorisee", selector: { entity: { domain: ["binary_sensor"] } } },
         { name: "entity_signal_intervention", selector: { entity: { domain: ["binary_sensor"] } } },
         { name: "entity_objectif_arrosage", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_objectif_legacy", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_objectif_depletion", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_reserve_actuelle", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_depletion_ratio", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_etat_hydrique", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_et0", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_etc", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_type_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_phase", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_sous_phase", selector: { entity: { domain: ["sensor"] } } },
@@ -4529,6 +4632,10 @@ class GazonIntelligentCard extends HTMLElement {
     return this._entity("entity_fenetre_optimale");
   }
 
+  _assistantEntity() {
+    return this._entity("entity_assistant");
+  }
+
   _planEntity() {
     return this._entity("entity_plan_arrosage");
   }
@@ -4998,29 +5105,83 @@ class GazonIntelligentCard extends HTMLElement {
     return this._entityNumber("entity_objectif_arrosage");
   }
 
+  _assistantState() {
+    const entity = this._assistantEntity();
+    const attrs = entity?.attributes || {};
+    const action = String(attrs.action || entity?.state || "").trim().toLowerCase();
+    const actionLabel = formatStatusLabel(action || entity?.state || "non disponible");
+    const moment = String(attrs.moment || "").trim().toLowerCase();
+    const momentLabel = moment ? formatStatusLabel(moment) : "";
+    const status = String(attrs.status || "").trim().toLowerCase();
+    const reason = String(attrs.reason || "").trim();
+    const quantityMm = asNumber(attrs.quantity_mm);
+    let tone = "neutral";
+    if (status === "action_required") {
+      tone = action.includes("arros") ? "accent" : "success";
+    } else if (status.includes("block") || reason.toLowerCase().includes("bloqu")) {
+      tone = "danger";
+    } else if (action.includes("surveil")) {
+      tone = "warning";
+    }
+    const summary = [
+      actionLabel,
+      momentLabel && moment !== "maintenant" ? momentLabel.toLowerCase() : moment === "maintenant" ? "maintenant" : "",
+    ].filter(Boolean).join(" ");
+    return {
+      entity,
+      action,
+      actionLabel,
+      moment,
+      momentLabel,
+      status,
+      reason,
+      quantityMm,
+      tone,
+      summary: summary || actionLabel,
+      detail: reason || (quantityMm !== null && quantityMm > 0 ? `${formatMm(quantityMm)} demandés` : ""),
+    };
+  }
+
   _windowState() {
     const entity = this._windowEntity();
     const attrs = entity?.attributes || {};
-    const status = String(attrs.status || "").trim().toLowerCase();
+    const publicState = String(entity?.state || "").trim().toLowerCase();
+    const status = String(attrs.status || publicState).trim().toLowerCase();
     const summary = String(attrs.summary || entity?.state || "Irrigation prévue").trim();
+    const reasonSummary = String(attrs.window_reason_summary || "").trim();
     const nextAction = String(attrs.next_action || "").trim();
     const nextActionDisplay = String(attrs.next_action_display || "").trim();
     const nextActionDate = String(attrs.next_action_date || "").trim();
     const blockReason = String(attrs.block_reason || "").trim();
     const blockReasonLabel = formatWateringBlockReason(blockReason);
     const objective = this._objectiveMm() ?? 0;
-    const isAwaiting = status === "en_attente";
+    const wateringWindowDisplay = String(attrs.watering_window_display || "").trim();
+    const optimalWindowDisplay = String(attrs.optimal_window_display || "").trim();
+    const eveningWindowDisplay = String(attrs.evening_window_display || "").trim();
+    const isAwaiting = status === "en_attente" || publicState === "attendre";
     const showManualAction = objective > 0 && status === "auto";
     const isBlocked = status === "bloque";
     const isNoActionRequired = !isBlocked && objective <= 0;
-    const displaySummary = isBlocked ? "Irrigation bloquée" : summary;
+    const displaySummary = isBlocked ? "Irrigation bloquée" : (reasonSummary || summary);
     const displayNextAction = isBlocked
       ? blockReasonLabel || nextActionDisplay || nextAction || "Attendre la fin du bloc"
       : nextActionDisplay || nextAction || "";
+    let tone = statusTone(status);
+    if (isNoActionRequired) {
+      tone = "neutral";
+    } else if (["maintenant", "ce_matin"].includes(publicState)) {
+      tone = "success";
+    } else if (["demain_matin", "apres_pluie", "soir"].includes(publicState)) {
+      tone = "accent";
+    } else if (publicState === "attendre") {
+      tone = objective > 0 ? "warning" : "neutral";
+    }
     return {
       entity,
       status,
+      publicState,
       summary,
+      reasonSummary,
       displaySummary,
       nextAction,
       nextActionDisplay,
@@ -5029,12 +5190,16 @@ class GazonIntelligentCard extends HTMLElement {
       blockReason,
       blockReasonLabel,
       objective,
+      wateringWindowDisplay,
+      optimalWindowDisplay,
+      eveningWindowDisplay,
+      wateringEveningAllowed: Boolean(attrs.watering_evening_allowed),
       showManualAction,
       isAwaiting,
       isBlocked,
       isNoActionRequired,
-      tone: statusTone(status),
-      statusLabel: formatStatusLabel(status),
+      tone,
+      statusLabel: formatStatusLabel(publicState || status),
       rawStatus: attrs.status,
       autoIrrigationEnabled: attrs.auto_irrigation_enabled,
     };
@@ -5290,6 +5455,15 @@ class GazonIntelligentCard extends HTMLElement {
     const risk = this._entityState("entity_risque", null);
     const mode = this._entityState("entity_mode", null);
     const typeArrosage = this._entityState("entity_type_arrosage", null);
+    const hydricState = String(entity?.attributes?.hydric_state || "").trim();
+    const hydricStrategy = String(entity?.attributes?.hydric_strategy || "").trim();
+    const hydricBalanceLevel = String(entity?.attributes?.hydric_balance_level || "").trim();
+    const reserveActuelle = asNumber(entity?.attributes?.reserve_actuelle_mm);
+    const reserveStock = asNumber(entity?.attributes?.reserve_stock_mm);
+    const depletionRatio = asNumber(entity?.attributes?.depletion_ratio);
+    const et0 = asNumber(entity?.attributes?.et0_mm);
+    const etc = asNumber(entity?.attributes?.etc_mm);
+    const kc = asNumber(entity?.attributes?.kc_gazon);
     return {
       entity,
       temperature,
@@ -5297,6 +5471,46 @@ class GazonIntelligentCard extends HTMLElement {
       risk,
       mode,
       typeArrosage,
+      hydricState,
+      hydricStrategy,
+      hydricBalanceLevel,
+      reserveActuelle,
+      reserveStock,
+      depletionRatio,
+      et0,
+      etc,
+      kc,
+    };
+  }
+
+  _irrigationSignalState() {
+    const entity = this._entity("entity_signal_irrigation");
+    const attrs = entity?.attributes || {};
+    const reasonKind = String(attrs.reason_kind || "").trim().toLowerCase();
+    const actionLabel = String(attrs.action_label || "").trim() || formatStatusLabel(entity?.state);
+    const summary = String(attrs.summary || "").trim() || actionLabel || "Non disponible";
+    const sourceStatus = String(attrs.source_status || "").trim();
+    const triggerKind = String(attrs.trigger_kind || "").trim();
+    const typeArrosage = String(attrs.type_arrosage || "").trim();
+    const applicationStatus = String(attrs.application_post_watering_status || "").trim();
+    let tone = "neutral";
+    if (reasonKind === "blocked") {
+      tone = "danger";
+    } else if (reasonKind === "waiting") {
+      tone = "warning";
+    } else if (["post_application", "hydric_need"].includes(reasonKind)) {
+      tone = "success";
+    }
+    return {
+      entity,
+      reasonKind,
+      actionLabel,
+      summary,
+      sourceStatus,
+      triggerKind,
+      typeArrosage,
+      applicationStatus,
+      tone,
     };
   }
 
@@ -5384,6 +5598,7 @@ class GazonIntelligentCard extends HTMLElement {
     }
 
     const keys = new Set([
+      "entity_assistant",
       "entity_phase",
       "entity_sous_phase",
       "entity_tonte",
@@ -5404,6 +5619,13 @@ class GazonIntelligentCard extends HTMLElement {
       "entity_action",
       "entity_avoid",
       "entity_objectif_arrosage",
+      "entity_objectif_legacy",
+      "entity_objectif_depletion",
+      "entity_reserve_actuelle",
+      "entity_depletion_ratio",
+      "entity_etat_hydrique",
+      "entity_et0",
+      "entity_etc",
       "entity_type_arrosage",
       "entity_mode",
       "entity_switch_arrosage_automatique",
@@ -5426,7 +5648,7 @@ class GazonIntelligentCard extends HTMLElement {
       if (this._activeTab === "mowing") {
         ["entity_tonte", "entity_hauteur", "entity_tonte_autorisee", "entity_fenetre_optimale"].forEach((key) => keys.add(key));
       } else if (this._activeTab === "gazon") {
-        ["entity_phase", "entity_sous_phase", "entity_niveau", "entity_risque", "entity_conseil", "entity_action", "entity_avoid"].forEach((key) => keys.add(key));
+        ["entity_assistant", "entity_phase", "entity_sous_phase", "entity_niveau", "entity_risque", "entity_conseil", "entity_action", "entity_avoid"].forEach((key) => keys.add(key));
       } else if (this._activeTab === "products") {
         ["entity_catalogue_produits", "entity_produit_intervention", "entity_derniere_application"].forEach((key) => keys.add(key));
       } else if (this._activeTab === "config") {
@@ -5450,10 +5672,18 @@ class GazonIntelligentCard extends HTMLElement {
           "entity_dernier_arrosage",
           "entity_derniere_application",
           "entity_debug_intervention",
+          "entity_assistant",
           "entity_conseil",
           "entity_action",
           "entity_avoid",
           "entity_objectif_arrosage",
+          "entity_objectif_legacy",
+          "entity_objectif_depletion",
+          "entity_reserve_actuelle",
+          "entity_depletion_ratio",
+          "entity_etat_hydrique",
+          "entity_et0",
+          "entity_etc",
           "entity_type_arrosage",
           "entity_arrosage_en_cours",
           "entity_arrosage_recommande",
@@ -5567,6 +5797,9 @@ class GazonIntelligentCard extends HTMLElement {
   _overviewFacts() {
     const windowState = this._windowState();
     const planState = this._planState();
+    const assistant = this._assistantState();
+    const irrigationSignal = this._irrigationSignalState();
+    const intervention = this._interventionRecommendationState();
     const objective = windowState.objective;
     const objectiveLabel = formatMm(objective);
     const switchState = this._configSwitchState();
@@ -5578,6 +5811,7 @@ class GazonIntelligentCard extends HTMLElement {
     const arrosageRecommande = this._entityState("entity_arrosage_recommande", null);
     const mode = this._entityState("entity_mode", null);
     const typeArrosage = this._entityState("entity_type_arrosage", null);
+    const niveauHydrique = String(this._entityAttribute("entity_niveau", "niveau_action_hydrique", "") || "").trim();
     const lastWatering = this._lastWateringState();
     const height = this._entity("entity_hauteur");
     const heightValue = height ? formatCm(height.state) : "Non disponible";
@@ -5609,21 +5843,44 @@ class GazonIntelligentCard extends HTMLElement {
       !isEmpty(mode);
     const stableState = !wateringFocus && !mowingFocus && !configFocus;
 
+    const priorityGroup = [
+      {
+        label: "Assistant",
+        value: assistant.summary || conseil || "Non disponible",
+        tone: assistant.tone || computeActionTone(this._entityState("entity_niveau", null)),
+        icon: "mdi:account-tie-hat-outline",
+        secondary: assistant.detail || conseil || "",
+        entityKey: "entity_assistant",
+      },
+      {
+        label: "Niveau global",
+        value: formatStatusLabel(this._entityState("entity_niveau", null)),
+        tone: computeActionTone(this._entityState("entity_niveau", null)),
+        icon: "mdi:signal",
+        secondary: niveauHydrique ? `Hydrique: ${formatStatusLabel(niveauHydrique)}` : "",
+        entityKey: "entity_niveau",
+      },
+    ];
+
     const waterGroup = [
       {
         label: "Irrigation",
-        value: formatRecommendationState(arrosageRecommande),
-        tone: arrosageRecommande === "on" ? "success" : windowState.tone,
-        icon: "mdi:water-check",
-        secondary: windowState.summary || planState.summary || objectiveLabel,
-        entityKey: "entity_arrosage_recommande",
+        value: irrigationSignal.actionLabel || formatRecommendationState(arrosageRecommande),
+        tone: irrigationSignal.tone || (arrosageRecommande === "on" ? "success" : windowState.tone),
+        icon: "mdi:sprinkler",
+        secondary: irrigationSignal.summary || windowState.displaySummary || planState.summary || objectiveLabel,
+        entityKey: "entity_signal_irrigation",
       },
       {
-        label: "Fenêtre d'irrigation",
+        label: "Fenêtre optimale",
         value: windowState.statusLabel,
         tone: windowState.tone,
         icon: "mdi:clock-outline",
-        secondary: windowState.summary || windowState.nextAction || planState.summary,
+        secondary: [
+          windowState.reasonSummary || windowState.summary,
+          windowState.optimalWindowDisplay ? `Optimal: ${windowState.optimalWindowDisplay}` : "",
+          windowState.wateringWindowDisplay ? `Créneau: ${windowState.wateringWindowDisplay}` : "",
+        ].filter(Boolean).join(" · "),
         entityKey: "entity_fenetre_optimale",
       },
       {
@@ -5631,7 +5888,10 @@ class GazonIntelligentCard extends HTMLElement {
         value: objectiveLabel,
         tone: objective > 0 ? "success" : "neutral",
         icon: "mdi:water-percent",
-        secondary: typeArrosage ? `Type: ${formatApplicationMode(typeArrosage)}` : "",
+        secondary: [
+          typeArrosage ? `Type: ${formatApplicationMode(typeArrosage)}` : "",
+          niveauHydrique ? `Hydrique: ${formatStatusLabel(niveauHydrique)}` : "",
+        ].filter(Boolean).join(" · "),
         entityKey: "entity_objectif_arrosage",
       },
       {
@@ -5711,6 +5971,8 @@ class GazonIntelligentCard extends HTMLElement {
       }
     };
 
+    pushGroup(priorityGroup);
+
     if (wateringFocus) {
       pushGroup(waterGroup);
       if (facts.length < 4) {
@@ -5743,6 +6005,19 @@ class GazonIntelligentCard extends HTMLElement {
       if (facts.length < 4) {
         pushGroup(configGroup);
       }
+    }
+
+    if (facts.length < 4) {
+      pushGroup([
+        {
+          label: "Intervention",
+          value: intervention.entity ? (intervention.ui?.summary || "Intervention") : "Aucune intervention",
+          tone: intervention.entity ? (intervention.ui?.tone || "neutral") : "neutral",
+          icon: intervention.entity ? (intervention.ui?.icon || "mdi:spray-bottle") : "mdi:spray-bottle",
+          secondary: intervention.entity ? (intervention.ui?.hint || intervention.reason || "") : "",
+          entityKey: "entity_prochaine_intervention",
+        },
+      ]);
     }
 
     if (facts.length < 4) {
@@ -5819,6 +6094,9 @@ class GazonIntelligentCard extends HTMLElement {
   _overviewProposal() {
     const windowState = this._windowState();
     const planState = this._planState();
+    const assistant = this._assistantState();
+    const irrigationSignal = this._irrigationSignalState();
+    const intervention = this._interventionRecommendationState();
     const objective = windowState.objective;
     const objectiveLabel = formatMm(objective);
     const switchState = this._configSwitchState();
@@ -5839,7 +6117,22 @@ class GazonIntelligentCard extends HTMLElement {
     let tone = "neutral";
     let icon = "mdi:check-circle-outline";
 
-    if (windowState.isAwaiting && objective > 0) {
+    if (assistant.entity && assistant.status === "action_required") {
+      title = assistant.summary || assistant.actionLabel;
+      hint = conseil || assistant.reason || irrigationSignal.summary || planState.summary || windowState.displaySummary;
+      tone = assistant.tone || "success";
+      icon = assistant.action.includes("arros") ? "mdi:sprinkler" : assistant.action.includes("tonte") ? "mdi:content-cut" : "mdi:account-tie-hat-outline";
+    } else if (irrigationSignal.reasonKind === "blocked") {
+      title = irrigationSignal.actionLabel || "Irrigation bloquée";
+      hint = irrigationSignal.summary || windowState.displaySummary || "Un blocage empêche l’arrosage.";
+      tone = "danger";
+      icon = "mdi:cancel";
+    } else if (irrigationSignal.reasonKind === "waiting" && objective > 0) {
+      title = irrigationSignal.actionLabel || "Attendre";
+      hint = irrigationSignal.summary || windowState.displaySummary || "Le prochain créneau n’est pas encore ouvert.";
+      tone = "warning";
+      icon = "mdi:clock-outline";
+    } else if (windowState.isAwaiting && objective > 0) {
       title = "Irrigation prévue demain matin";
       hint = `${windowState.nextAction || "Attendre le créneau prévu."}${planState.summary ? ` · ${planState.summary}` : ""}`;
       tone = "warning";
@@ -5904,6 +6197,11 @@ class GazonIntelligentCard extends HTMLElement {
         tone = "neutral";
         icon = "mdi:water-off";
       }
+    } else if (intervention.entity) {
+      title = intervention.ui?.summary || intervention.ui?.title || "Intervention";
+      hint = intervention.ui?.hint || intervention.reason || intervention.whyNow || "Intervention disponible";
+      tone = intervention.ui?.tone || "neutral";
+      icon = intervention.ui?.icon || "mdi:spray-bottle";
     }
 
     return { title, hint, tone, icon };
@@ -6326,7 +6624,19 @@ class GazonIntelligentCard extends HTMLElement {
     if (OVERVIEW_ENTITY_KEYS.has(fieldKey)) {
       return "overview";
     }
-    if (["entity_arrosage_recommande", "entity_objectif_arrosage", "entity_type_arrosage", "entity_signal_irrigation"].includes(fieldKey)) {
+    if ([
+      "entity_arrosage_recommande",
+      "entity_objectif_arrosage",
+      "entity_objectif_legacy",
+      "entity_objectif_depletion",
+      "entity_type_arrosage",
+      "entity_signal_irrigation",
+      "entity_reserve_actuelle",
+      "entity_depletion_ratio",
+      "entity_etat_hydrique",
+      "entity_et0",
+      "entity_etc",
+    ].includes(fieldKey)) {
       return "watering";
     }
     if (["entity_tonte", "entity_hauteur"].includes(fieldKey)) {
@@ -6479,7 +6789,7 @@ class GazonIntelligentCard extends HTMLElement {
           title: "Pilotage global",
           meta: "Les signaux les plus utiles pour comprendre la priorité du moment.",
           eyebrow: "Synthèse",
-          keys: ["entity_conseil", "entity_niveau", "entity_risque", "entity_phase", "entity_sous_phase"],
+          keys: ["entity_assistant", "entity_conseil", "entity_niveau", "entity_risque", "entity_phase", "entity_sous_phase"],
         },
         {
           title: "Priorités dérivées",
@@ -6503,6 +6813,20 @@ class GazonIntelligentCard extends HTMLElement {
             "entity_signal_irrigation",
             "entity_arrosage_en_cours",
             "entity_dernier_arrosage",
+          ],
+        },
+        {
+          title: "Observabilité hydrique",
+          meta: "Suivi avancé du contexte hydrique sans alourdir la façade publique.",
+          eyebrow: "Diagnostic",
+          keys: [
+            "entity_etat_hydrique",
+            "entity_reserve_actuelle",
+            "entity_depletion_ratio",
+            "entity_et0",
+            "entity_etc",
+            "entity_objectif_legacy",
+            "entity_objectif_depletion",
           ],
         },
         {
@@ -6538,13 +6862,13 @@ class GazonIntelligentCard extends HTMLElement {
           title: "État du gazon",
           meta: "Lecture métier de la phase, du niveau d'action et du risque.",
           eyebrow: "Gazon",
-          keys: ["entity_conseil", "entity_niveau", "entity_risque", "entity_phase", "entity_sous_phase", "entity_action", "entity_avoid"],
+          keys: ["entity_assistant", "entity_conseil", "entity_niveau", "entity_risque", "entity_phase", "entity_sous_phase", "entity_action", "entity_avoid"],
         },
         {
           title: "Contexte hydrique",
           meta: "Ce qui nourrit l'analyse sans surcharger le résumé principal.",
           eyebrow: "Contexte",
-          keys: ["entity_objectif_arrosage", "entity_type_arrosage", "entity_fenetre_optimale"],
+          keys: ["entity_objectif_arrosage", "entity_type_arrosage", "entity_fenetre_optimale", "entity_etat_hydrique", "entity_reserve_actuelle"],
         },
       ],
       products: [
@@ -6649,6 +6973,9 @@ class GazonIntelligentCard extends HTMLElement {
     if (!entity) {
       return "neutral";
     }
+    if (field.key === "entity_assistant") {
+      return this._assistantState().tone || "neutral";
+    }
     if (field.key === "entity_niveau_pertinence") {
       const tone = String(entity.attributes?.tone || "").trim().toLowerCase();
       if (tone === "success" || tone === "warning" || tone === "neutral") {
@@ -6679,6 +7006,9 @@ class GazonIntelligentCard extends HTMLElement {
     if (field.key === "entity_prochain_blocage_attendu") {
       return isEmpty(entity.state) ? "neutral" : "danger";
     }
+    if (field.key === "entity_fenetre_optimale") {
+      return this._windowState().tone;
+    }
     if (field.key === "entity_tonte") {
       return computeTonteTone(entity.state);
     }
@@ -6708,11 +7038,7 @@ class GazonIntelligentCard extends HTMLElement {
       return String(entity.state).toLowerCase() === "on" ? "success" : "neutral";
     }
     if (field.key === "entity_signal_irrigation") {
-      const triggerKind = String(entity.attributes?.trigger_kind || "").trim().toLowerCase();
-      if (["post_application", "hydrique"].includes(triggerKind)) {
-        return "success";
-      }
-      return String(entity.state).toLowerCase() === "on" ? "success" : "neutral";
+      return this._irrigationSignalState().tone;
     }
     if (field.key === "entity_phase") {
       return phaseTone(entity.state);
@@ -6720,12 +7046,25 @@ class GazonIntelligentCard extends HTMLElement {
     if (field.key === "entity_hauteur") {
       return this._phaseTone();
     }
+    if (field.key === "entity_objectif_arrosage") {
+      const hydricState = String(entity.attributes?.hydric_state || "").trim().toLowerCase();
+      if (hydricState === "plein") {
+        return "success";
+      }
+      if (hydricState.includes("surveil")) {
+        return "warning";
+      }
+      return asNumber(entity.state) > 0 ? "accent" : "neutral";
+    }
     return "neutral";
   }
 
   _formatFieldValue(field, entity) {
     if (!entity) {
       return "Non disponible";
+    }
+    if (field.key === "entity_assistant") {
+      return this._assistantState().summary || "Non disponible";
     }
     if (field.key === "entity_niveau_pertinence") {
       return formatStatusLabel(entity.state);
@@ -6737,7 +7076,7 @@ class GazonIntelligentCard extends HTMLElement {
       return String(entity.attributes?.block_label || entity.attributes?.summary || formatStatusLabel(entity.state)).trim() || "Non disponible";
     }
     if (field.key === "entity_fenetre_optimale") {
-      return formatStatusLabel(entity.state);
+      return this._windowState().statusLabel;
     }
     if (field.key === "entity_arrosage_recommande") {
       return formatRecommendationState(entity.state);
@@ -6762,8 +7101,14 @@ class GazonIntelligentCard extends HTMLElement {
     if (field.key === "entity_tonte") {
       return formatStatusLabel(entity.state);
     }
-    if (field.key === "entity_signal_intervention" || field.key === "entity_signal_irrigation") {
+    if (field.key === "entity_signal_irrigation") {
+      return this._irrigationSignalState().actionLabel || "Non disponible";
+    }
+    if (field.key === "entity_signal_intervention") {
       return String(entity.attributes?.summary || formatStatusLabel(entity.state)).trim() || "Non disponible";
+    }
+    if (field.key === "entity_prochaine_intervention") {
+      return String(entity.attributes?.summary || entity.state || "").trim() || "Non disponible";
     }
     if (field.key === "entity_niveau" || field.key === "entity_phase" || field.key === "entity_sous_phase") {
       return formatStatusLabel(entity.state);
@@ -6774,6 +7119,14 @@ class GazonIntelligentCard extends HTMLElement {
   _secondaryFieldText(field, entity) {
     if (!entity) {
       return "";
+    }
+    if (field.key === "entity_assistant") {
+      const assistant = this._assistantState();
+      return [
+        assistant.reason,
+        assistant.momentLabel ? `Moment: ${assistant.momentLabel}` : "",
+        assistant.status ? `Statut: ${formatStatusLabel(assistant.status)}` : "",
+      ].filter(Boolean).join(" · ");
     }
     if (["entity_niveau_pertinence", "entity_prochaine_fenetre_optimale", "entity_prochain_blocage_attendu", "entity_signal_intervention", "entity_signal_irrigation"].includes(field.key)) {
       const parts = [];
@@ -6797,7 +7150,30 @@ class GazonIntelligentCard extends HTMLElement {
       if (sourceStatus && sourceStatus !== summary) {
         parts.push(`Statut source: ${formatStatusLabel(sourceStatus)}`);
       }
+      if (field.key === "entity_signal_irrigation") {
+        const reasonKind = String(entity.attributes?.reason_kind || "").trim();
+        const actionLabel = String(entity.attributes?.action_label || "").trim();
+        const typeArrosage = String(entity.attributes?.type_arrosage || "").trim();
+        if (actionLabel && actionLabel !== summary) {
+          parts.unshift(actionLabel);
+        }
+        if (reasonKind) {
+          parts.push(`Raison: ${formatStatusLabel(reasonKind)}`);
+        }
+        if (typeArrosage) {
+          parts.push(`Profil: ${formatStatusLabel(typeArrosage)}`);
+        }
+      }
       return parts.join(" · ");
+    }
+    if (field.key === "entity_fenetre_optimale") {
+      const windowState = this._windowState();
+      return [
+        windowState.reasonSummary || windowState.summary,
+        windowState.optimalWindowDisplay ? `Optimal: ${windowState.optimalWindowDisplay}` : "",
+        windowState.wateringWindowDisplay ? `Créneau: ${windowState.wateringWindowDisplay}` : "",
+        windowState.eveningWindowDisplay ? `Soir: ${windowState.eveningWindowDisplay}` : "",
+      ].filter(Boolean).join(" · ");
     }
     if (field.key === "entity_hauteur") {
       const min = asNumber(entity.attributes?.hauteur_tonte_min_cm);
@@ -6808,8 +7184,33 @@ class GazonIntelligentCard extends HTMLElement {
       return `${formatCm(min)} → ${formatCm(max)}`;
     }
     if (field.key === "entity_objectif_arrosage") {
-      const phase = entity.attributes?.phase_active;
-      return isEmpty(phase) ? "" : `Phase: ${phase}`;
+      return [
+        entity.attributes?.hydric_state ? `État: ${formatStatusLabel(entity.attributes.hydric_state)}` : "",
+        entity.attributes?.hydric_strategy ? `Stratégie: ${formatStatusLabel(entity.attributes.hydric_strategy)}` : "",
+        asNumber(entity.attributes?.reserve_actuelle_mm) !== null ? `Réserve: ${formatNumber(entity.attributes.reserve_actuelle_mm, 1)} mm` : "",
+        asNumber(entity.attributes?.depletion_ratio) !== null ? `Déplétion: ${formatNumber(entity.attributes.depletion_ratio, 3)}` : "",
+      ].filter(Boolean).join(" · ");
+    }
+    if (field.key === "entity_niveau") {
+      const hydric = String(entity.attributes?.niveau_action_hydrique || "").trim();
+      return hydric ? `Hydrique: ${formatStatusLabel(hydric)}` : "";
+    }
+    if (field.key === "entity_conseil") {
+      const hydric = String(entity.attributes?.niveau_action_hydrique || "").trim();
+      return hydric ? `Hydrique: ${formatStatusLabel(hydric)}` : "";
+    }
+    if (field.key === "entity_prochaine_intervention") {
+      return [
+        String(entity.attributes?.hint || "").trim(),
+        String(entity.attributes?.action_label || "").trim(),
+        String(entity.attributes?.opportunity_level || "").trim() ? `Opportunité: ${formatStatusLabel(entity.attributes.opportunity_level)}` : "",
+      ].filter(Boolean).join(" · ");
+    }
+    if (["entity_etat_hydrique", "entity_reserve_actuelle", "entity_depletion_ratio", "entity_et0", "entity_etc", "entity_objectif_legacy", "entity_objectif_depletion"].includes(field.key)) {
+      return Object.entries(entity.attributes || {})
+        .slice(0, 4)
+        .map(([key, value]) => `${formatStatusLabel(key)}: ${normalizeDisplayValue(value)}`)
+        .join(" · ");
     }
     return "";
   }
@@ -7969,17 +8370,27 @@ function getDerivedSignalPresentation(entity, label, icon = "mdi:information-out
     return null;
   }
   const summary = String(entity.attributes?.summary || "").trim();
+  const actionLabel = String(entity.attributes?.action_label || "").trim();
+  const reasonKind = String(entity.attributes?.reason_kind || "").trim().toLowerCase();
   const triggerKind = String(entity.attributes?.trigger_kind || "").trim().toLowerCase();
   const sourceStatus = String(entity.attributes?.source_status || "").trim();
   const state = String(entity.state ?? "").trim().toLowerCase();
-  const tone = triggerKind === "soft"
-    ? "warning"
-    : ["recommended", "ready", "post_application", "hydrique"].includes(triggerKind)
+  const tone = reasonKind === "blocked"
+    ? "danger"
+    : triggerKind === "soft"
+      ? "warning"
+    : ["recommended", "ready", "post_application", "hydrique"].includes(triggerKind) || ["post_application", "hydric_need"].includes(reasonKind)
       ? "success"
       : state === "on"
         ? "success"
         : "neutral";
   const secondaryParts = [];
+  if (actionLabel && actionLabel !== summary) {
+    secondaryParts.push(actionLabel);
+  }
+  if (reasonKind) {
+    secondaryParts.push(`Raison: ${formatStatusLabel(reasonKind)}`);
+  }
   if (triggerKind) {
     secondaryParts.push(`Déclencheur: ${formatDerivedTriggerLabel(triggerKind)}`);
   }
@@ -7988,7 +8399,7 @@ function getDerivedSignalPresentation(entity, label, icon = "mdi:information-out
   }
   return {
     label,
-    value: summary || formatStatusLabel(entity.state),
+    value: actionLabel || summary || formatStatusLabel(entity.state),
     tone,
     icon,
     secondary: secondaryParts.join(" · "),
@@ -8362,6 +8773,7 @@ function renderOverviewTab(card) {
     { key: "entity_niveau_pertinence", fact: getDerivedPertinencePresentation(card._entity("entity_niveau_pertinence")) },
     { key: "entity_prochaine_fenetre_optimale", fact: getDerivedWindowPresentation(card._entity("entity_prochaine_fenetre_optimale")) },
     { key: "entity_prochain_blocage_attendu", fact: getDerivedBlockPresentation(card._entity("entity_prochain_blocage_attendu")) },
+    { key: "entity_signal_irrigation", fact: getDerivedSignalPresentation(card._entity("entity_signal_irrigation"), "Signal irrigation", "mdi:sprinkler") },
   ].filter(({ fact }) => Boolean(fact));
 
   return `
@@ -8416,11 +8828,13 @@ function renderOverviewTab(card) {
 
 function renderWateringTab(card) {
   const windowState = card._windowState();
+  const irrigationSignal = card._irrigationSignalState();
+  const context = card._objectiveContext();
   const nextActionText = windowState.displayNextAction || windowState.nextActionDisplay || windowState.nextAction;
   const planState = card._planState();
   const objective = windowState.objective;
   const objectiveLabel = formatMm(objective);
-  const tone = windowState.tone;
+  const tone = irrigationSignal.tone || windowState.tone;
   const windowIcon = card._statusIcon(windowState.status);
   const windowStatusIcon = card._config?.show_icons ? windowIcon : null;
   const isBlocked = windowState.isBlocked;
@@ -8431,7 +8845,11 @@ function renderWateringTab(card) {
     ? windowState.blockReasonLabel || windowState.displayNextAction || windowState.nextAction || ""
     : isAwaiting
       ? windowState.nextAction || "Attendre le créneau prévu"
-      : noActionHint;
+      : [
+          noActionHint,
+          windowState.optimalWindowDisplay ? `Optimal: ${windowState.optimalWindowDisplay}` : "",
+          windowState.wateringWindowDisplay ? `Créneau: ${windowState.wateringWindowDisplay}` : "",
+        ].filter(Boolean).join(" · ");
   const planTypeLabel = formatPlanType(planState.planType);
 
   const planChips = [
@@ -8440,6 +8858,14 @@ function renderWateringTab(card) {
     card._renderTabPill("Fractionnement", planState.fractionation ? "Oui" : "Non", planState.fractionation ? "warning" : "neutral", "mdi:call-split"),
     card._renderTabPill("Type de plan", planTypeLabel, card._planTypeTone(planState.planType), "mdi:shape"),
     card._renderTabPill("Objectif", objectiveLabel, objective > 0 ? "success" : "neutral", "mdi:water"),
+    card._renderTabPill("Signal", irrigationSignal.actionLabel || "Non disponible", tone, "mdi:sprinkler"),
+    card._renderTabPill("Raison", formatStatusLabel(irrigationSignal.reasonKind), tone, "mdi:information-outline"),
+    card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
+    windowState.optimalWindowDisplay ? card._renderTabPill("Optimal", windowState.optimalWindowDisplay, "neutral", "mdi:clock-time-eight-outline") : "",
+    windowState.wateringWindowDisplay ? card._renderTabPill("Créneau", windowState.wateringWindowDisplay, "neutral", "mdi:timeline-clock-outline") : "",
+    context.hydricState ? card._renderTabPill("État hydrique", formatStatusLabel(context.hydricState), context.hydricState === "plein" ? "success" : "warning", "mdi:water-percent-alert") : "",
+    context.reserveActuelle !== null ? card._renderTabPill("Réserve", `${formatNumber(context.reserveActuelle, 1)} mm`, "neutral", "mdi:cup-water") : "",
+    context.depletionRatio !== null ? card._renderTabPill("Déplétion", formatNumber(context.depletionRatio, 3), "neutral", "mdi:gauge") : "",
   ];
   const wateringProgress = card._wateringProgressState();
 
@@ -8447,16 +8873,16 @@ function renderWateringTab(card) {
       <section class="tab-panel gi-panel tab-panel--watering">
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${tone}">
           <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">${escapeHtml(windowState.displaySummary || windowState.summary || "Irrigation")}</div>
-            ${renderStatusPill(windowState.statusLabel, tone, windowStatusIcon, `tab-panel__hero-status tab-panel__hero-status--${tone}`)}
+            <div class="tab-panel__hero-summary">${escapeHtml(irrigationSignal.summary || windowState.displaySummary || windowState.summary || "Irrigation")}</div>
+            ${renderStatusPill(irrigationSignal.actionLabel || windowState.statusLabel, tone, windowStatusIcon, `tab-panel__hero-status tab-panel__hero-status--${tone}`)}
           </div>
           ${
-            nextActionText
-              ? `<div class="tab-panel__hero-next">${escapeHtml(nextActionText)}</div>`
+            (windowState.reasonSummary || nextActionText)
+              ? `<div class="tab-panel__hero-next">${escapeHtml(windowState.reasonSummary || nextActionText)}</div>`
               : ""
           }
           ${
-            isBlocked && blockHint
+            (isBlocked && blockHint) || windowState.optimalWindowDisplay || windowState.wateringWindowDisplay
               ? `<div class="tab-panel__hero-hint">${escapeHtml(blockHint)}</div>`
               : ""
           }
@@ -8481,10 +8907,12 @@ function renderWateringTab(card) {
 }
 
 function renderGazonTab(card) {
+  const assistant = card._assistantState();
   const phase = card._entityState("entity_phase", null);
   const subPhase = card._entityState("entity_sous_phase", null);
   const risk = card._entityState("entity_risque", null);
   const action = card._entityState("entity_niveau", null);
+  const hydricLevel = String(card._entityAttribute("entity_niveau", "niveau_action_hydrique", "") || "").trim();
   const progress = asNumber(card._entity("entity_sous_phase")?.attributes?.sous_phase_progression);
   const progressDetail = card._entity("entity_sous_phase")?.attributes?.sous_phase_detail || "";
   const progressLabel = progress === null ? "Progression non disponible" : `${formatNumber(progress, 0)} %`;
@@ -8499,6 +8927,14 @@ function renderGazonTab(card) {
     action ? `Action ${formatStatusLabel(action)}` : "",
   ].filter(Boolean).join(" · ") || "Les détails avancés suivent l’onglet actif.";
   const gazonFacts = [
+    {
+      label: "Assistant",
+      value: assistant.summary || "Non disponible",
+      tone: assistant.tone || computeActionTone(action),
+      icon: "mdi:account-tie-hat-outline",
+      secondary: assistant.reason || "",
+      entityKey: "entity_assistant",
+    },
     {
       label: "Phase dominante",
       value: formatStatusLabel(phase),
@@ -8528,7 +8964,7 @@ function renderGazonTab(card) {
       value: formatStatusLabel(action),
       tone: computeActionTone(action),
       icon: "mdi:signal",
-      secondary: "",
+      secondary: hydricLevel ? `Hydrique: ${formatStatusLabel(hydricLevel)}` : "",
       entityKey: "entity_niveau",
     },
   ];
@@ -9048,6 +9484,7 @@ ${EDITOR_STYLES}
           <h3>Synthèse et irrigation</h3>
           <p>Ces entités alimentent la synthèse principale et l'onglet Irrigation.</p>
           <div class="grid">
+            ${this._renderEntityInput("entity_assistant", "Assistant")}
             ${this._renderEntityInput("entity_fenetre_optimale", "Fenêtre optimale")}
             ${this._renderEntityInput("entity_weather", "Météo")}
             ${this._renderEntityInput("entity_plan_arrosage", "Plan d'irrigation")}
@@ -9120,6 +9557,13 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_avoid", "Action à éviter")}
             ${this._renderEntityInput("entity_debug_intervention", "Debug métier")}
             ${this._renderEntityInput("entity_arrosage_en_cours", "Irrigation en cours")}
+            ${this._renderEntityInput("entity_etat_hydrique", "État hydrique")}
+            ${this._renderEntityInput("entity_reserve_actuelle", "Réserve actuelle")}
+            ${this._renderEntityInput("entity_depletion_ratio", "Déplétion")}
+            ${this._renderEntityInput("entity_et0", "ET0")}
+            ${this._renderEntityInput("entity_etc", "ETc")}
+            ${this._renderEntityInput("entity_objectif_legacy", "Objectif legacy")}
+            ${this._renderEntityInput("entity_objectif_depletion", "Objectif déplétion")}
           </div>
         </section>
       </div>

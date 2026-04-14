@@ -1195,10 +1195,13 @@ class GazonIntelligentCard extends HTMLElement {
     } else if (action.includes("surveil")) {
       tone = "warning";
     }
-    const summary = [
-      actionLabel,
-      momentLabel && moment !== "maintenant" ? momentLabel.toLowerCase() : moment === "maintenant" ? "maintenant" : "",
-    ].filter(Boolean).join(" ");
+    const isPassiveState = action === "aucune_action" && moment === "attendre";
+    const summary = isPassiveState
+      ? "Aucune action immédiate"
+      : [
+          actionLabel,
+          momentLabel && moment !== "maintenant" ? momentLabel.toLowerCase() : moment === "maintenant" ? "maintenant" : "",
+        ].filter(Boolean).join(" ");
     return {
       entity,
       action,
@@ -2181,6 +2184,19 @@ class GazonIntelligentCard extends HTMLElement {
     const arrosageApresApplication = this._entity("entity_arrosage_apres_application_autorise");
     const afterApplicationInfo = this._postApplicationState(arrosageApresApplication);
     const tonteAutorisee = this._entityState("entity_tonte_autorisee", null);
+    const tonteEntity = this._entity("entity_tonte");
+    const tonteReason = String(
+      tonteEntity?.attributes?.raison_blocage_tonte
+      || tonteEntity?.attributes?.summary
+      || "",
+    ).trim();
+    const tonteNextMowing = String(
+      tonteEntity?.attributes?.next_mowing_display
+      || this._entity("entity_tonte_autorisee")?.attributes?.next_mowing_display
+      || "",
+    ).trim();
+    const tonteStatusLabel = formatStatusLabel(tonte);
+    const tonteTone = computeTonteTone(tonte);
     const interventionSignal = this._entity("entity_signal_intervention");
     const actionTone = this._actionTone();
 
@@ -2219,10 +2235,18 @@ class GazonIntelligentCard extends HTMLElement {
       hint = windowState.nextAction || windowState.summary || "Le créneau prévu n’est pas encore ouvert.";
       tone = "danger";
       icon = "mdi:cancel";
-    } else if (computeTonteTone(tonte) === "danger") {
-      title = "Tonte interdite";
-      hint = avoid || "Tondre avant levée complète.";
-      tone = "danger";
+    } else if (tonteTone === "danger" || tonteTone === "critical") {
+      title = tonteStatusLabel || "Tonte interdite";
+      hint = tonteReason || avoid || "Tonte déconseillée dans les conditions actuelles.";
+      tone = tonteTone === "critical" ? "critical" : "danger";
+      icon = "mdi:content-cut";
+    } else if (tonteTone === "warning") {
+      title = tonteStatusLabel || "Tonte à surveiller";
+      hint = [
+        tonteReason,
+        tonteNextMowing ? `Prochaine tonte estimée le ${tonteNextMowing}.` : "",
+      ].filter(Boolean).join(" ") || conseil || "Attendre une meilleure fenêtre de tonte.";
+      tone = "warning";
       icon = "mdi:content-cut";
     } else if (computeRisqueTone(risk) === "danger" || computeRisqueTone(risk) === "critical") {
       title = "Risque gazon élevé";
@@ -2243,11 +2267,6 @@ class GazonIntelligentCard extends HTMLElement {
       hint = "L’onglet Réglages permet de vérifier l’autorisation et les débits.";
       tone = "danger";
       icon = "mdi:switch-off";
-    } else if (tonteAutorisee === "off") {
-      title = "Tonte interdite";
-      hint = action || "Sursemis en cours.";
-      tone = "danger";
-      icon = "mdi:content-cut";
     } else if (conseil) {
       const normalizedAdvice = String(conseil).trim().toLowerCase();
       const interventionTrigger = String(interventionSignal?.attributes?.trigger_kind || "").trim().toLowerCase();

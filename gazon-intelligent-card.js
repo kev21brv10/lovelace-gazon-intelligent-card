@@ -966,6 +966,26 @@ const CARD_STYLES = String.raw`
           height: var(--gi-action-icon-glyph-size);
         }
 
+        .gi-action--primary:disabled {
+          cursor: not-allowed;
+          color: var(--secondary-text-color);
+          text-shadow: none;
+          background:
+            linear-gradient(
+              135deg,
+              color-mix(in srgb, var(--card-background-color, #ffffff) 96%, var(--gazon-card-accent) 4%) 0%,
+              color-mix(in srgb, var(--card-background-color, #ffffff) 88%, var(--divider-color, #d8dde3) 12%) 100%
+            );
+          border-color: color-mix(in srgb, var(--divider-color, #d8dde3) 78%, transparent);
+          box-shadow: none;
+          filter: grayscale(0.15);
+          opacity: 0.84;
+        }
+
+        .gi-action--primary:disabled .gi-icon {
+          background: color-mix(in srgb, var(--divider-color, #d8dde3) 48%, transparent);
+        }
+
         .gi-action--danger {
           display: flex;
           flex-direction: row;
@@ -4854,6 +4874,22 @@ class GazonIntelligentCard extends HTMLElement {
       historySummary: "Dernière application",
       historyHint: "Historique local des applications enregistrées.",
     };
+    const lowScoreCandidatePresentation = {
+      status: normalizedState,
+      title: "À envisager",
+      badge: "Pertinence faible",
+      tone: "warning",
+      icon: "mdi:spray-bottle",
+      summary: "Intervention non prioritaire",
+      hint: "Un candidat existe, mais le contexte actuel limite sa pertinence.",
+      actionLabel: "Choisir le produit",
+      selectionSummary: "Produit à sélectionner",
+      selectionHint: "La sélection reste possible pour préparer la déclaration.",
+      declarationSummary: "À envisager",
+      declarationHint: "La déclaration reste possible, mais elle n’est pas prioritaire tant que la pertinence est faible.",
+      historySummary: "Dernière application",
+      historyHint: "Historique local des applications enregistrées.",
+    };
     const basePresentation = typeof formatInterventionStatusPresentation === "function"
       ? formatInterventionStatusPresentation(normalizedState)
       : (function mapFallbackInterventionStatus(status) {
@@ -4880,7 +4916,9 @@ class GazonIntelligentCard extends HTMLElement {
         })(normalizedState);
     const presentation = hasHighScore || ["blocked", "unavailable", "non_disponible"].includes(normalizedState)
       ? basePresentation
-      : lowScorePresentation;
+      : ["preparation", "possible"].includes(normalizedState)
+        ? lowScoreCandidatePresentation
+        : lowScorePresentation;
     const reason = String(payload.reason || "").trim();
     const whyNow = String(payload.why_now || "").trim();
     const title = presentation.title;
@@ -4917,9 +4955,9 @@ class GazonIntelligentCard extends HTMLElement {
     ).trim() || null;
     const recommendedProductMonths = Array.isArray(product.months) ? product.months : [];
     const recommendedProductMonthsLabel = String(product.months_label || attrs.recommended_product_months_label || "").trim() || null;
-    const recommendedProductId = String(product.id || attrs.recommended_product_id || "").trim() || null;
-    const recommendedProductName = String(product.name || attrs.recommended_product_name || "").trim() || null;
-    const recommendedProductType = String(product.type || attrs.recommended_product_type || "").trim() || null;
+    const recommendedProductId = String(product.id || payload.product_id || attrs.product_id || attrs.recommended_product_id || "").trim() || null;
+    const recommendedProductName = String(product.name || payload.product_name || attrs.product_name || attrs.recommended_product_name || "").trim() || null;
+    const recommendedProductType = String(product.type || payload.product_type || attrs.product_type || attrs.recommended_product_type || "").trim() || null;
     const readyToDeclare = Boolean(payload.ready_to_declare) && hasHighScore;
     return {
       entity,

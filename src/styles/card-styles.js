@@ -966,6 +966,26 @@ export const CARD_STYLES = String.raw`
           height: var(--gi-action-icon-glyph-size);
         }
 
+        .gi-action--primary:disabled {
+          cursor: not-allowed;
+          color: var(--secondary-text-color);
+          text-shadow: none;
+          background:
+            linear-gradient(
+              135deg,
+              color-mix(in srgb, var(--card-background-color, #ffffff) 96%, var(--gazon-card-accent) 4%) 0%,
+              color-mix(in srgb, var(--card-background-color, #ffffff) 88%, var(--divider-color, #d8dde3) 12%) 100%
+            );
+          border-color: color-mix(in srgb, var(--divider-color, #d8dde3) 78%, transparent);
+          box-shadow: none;
+          filter: grayscale(0.15);
+          opacity: 0.84;
+        }
+
+        .gi-action--primary:disabled .gi-icon {
+          background: color-mix(in srgb, var(--divider-color, #d8dde3) 48%, transparent);
+        }
+
         .gi-action--danger {
           display: flex;
           flex-direction: row;

@@ -84,6 +84,7 @@ class GazonIntelligentCard extends HTMLElement {
     this._holdActionTriggered = false;
     this._pendingInterventionSelection = null;
     this._onClick = this._onClick.bind(this);
+    this._onChange = this._onChange.bind(this);
     this._onPointerDown = this._onPointerDown.bind(this);
     this._onPointerUp = this._onPointerUp.bind(this);
     this._onPointerCancel = this._onPointerCancel.bind(this);
@@ -1920,6 +1921,7 @@ class GazonIntelligentCard extends HTMLElement {
     const windowState = this._windowState();
     const planState = this._planState();
     const assistant = this._assistantState();
+    const conseil = this._entityState("entity_conseil", null);
     const irrigationSignal = this._irrigationSignalState();
     const intervention = this._interventionRecommendationState();
     const objective = windowState.objective;

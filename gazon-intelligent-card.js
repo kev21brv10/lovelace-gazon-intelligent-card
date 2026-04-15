@@ -3763,6 +3763,21 @@ const INTERVENTION_STATUS_PRESENTATIONS = {
     historySummary: "Dernière application",
     historyHint: "Historique local des applications enregistrées.",
   },
+  preparation: {
+    title: "À envisager",
+    badge: "À envisager",
+    tone: "warning",
+    icon: "mdi:spray-bottle",
+    summary: "À envisager",
+    hint: "La prochaine intervention reste possible, mais le contexte actuel limite sa pertinence.",
+    actionLabel: "Choisir le produit",
+    selectionSummary: "Produit à sélectionner",
+    selectionHint: "Le produit peut être préparé, mais la recommandation reste prudente.",
+    declarationSummary: "À envisager",
+    declarationHint: "La déclaration n’est pas encore prioritaire dans le contexte actuel.",
+    historySummary: "Dernière application",
+    historyHint: "Historique local des applications enregistrées.",
+  },
   ready: {
     title: "Prêt à déclarer",
     badge: "Prêt à déclarer",
@@ -3817,6 +3832,9 @@ function formatInterventionStatusPresentation(status) {
   }
   if (normalized === "possible") {
     return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.possible };
+  }
+  if (normalized === "preparation") {
+    return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.preparation };
   }
   if (normalized === "ready") {
     return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.ready };
@@ -4845,6 +4863,9 @@ class GazonIntelligentCard extends HTMLElement {
           }
           if (normalized === "possible") {
             return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.possible };
+          }
+          if (normalized === "preparation") {
+            return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.preparation };
           }
           if (normalized === "ready") {
             return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.ready };
@@ -7915,6 +7936,21 @@ function resolveInterventionStatusPresentation(status) {
       selectionHint: "Le produit sélectionné alimente la déclaration.",
       declarationSummary: "À préparer",
       declarationHint: "La déclaration n’est pas encore prête.",
+      historySummary: "Dernière application",
+      historyHint: "Historique local des applications enregistrées.",
+    },
+    preparation: {
+      title: "À envisager",
+      badge: "À envisager",
+      tone: "warning",
+      icon: "mdi:spray-bottle",
+      summary: "À envisager",
+      hint: "La prochaine intervention reste possible, mais le contexte actuel limite sa pertinence.",
+      actionLabel: "Choisir le produit",
+      selectionSummary: "Produit à sélectionner",
+      selectionHint: "Le produit peut être préparé, mais la recommandation reste prudente.",
+      declarationSummary: "À envisager",
+      declarationHint: "La déclaration n’est pas encore prioritaire dans le contexte actuel.",
       historySummary: "Dernière application",
       historyHint: "Historique local des applications enregistrées.",
     },

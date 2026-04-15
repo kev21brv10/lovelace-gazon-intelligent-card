@@ -918,6 +918,9 @@ class GazonIntelligentCard extends HTMLElement {
           if (normalized === "possible") {
             return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.possible };
           }
+          if (normalized === "preparation") {
+            return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.preparation };
+          }
           if (normalized === "ready") {
             return { status: normalized, ...INTERVENTION_STATUS_PRESENTATIONS.ready };
           }

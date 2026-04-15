@@ -131,6 +131,7 @@ entity_signal_irrigation: binary_sensor.gazon_intelligent_signal_irrigation
 entity_niveau: sensor.gazon_intelligent_niveau_d_action
 entity_mode: select.gazon_intelligent_mode_du_gazon
 entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique_autorise
+entity_switch_coordination_tondeuse: switch.gazon_intelligent_coordination_tondeuse
 entity_arrosage_recommande: binary_sensor.gazon_intelligent_arrosage_recommande
 entity_objectif_arrosage: sensor.gazon_intelligent_objectif_d_arrosage
 entity_type_arrosage: sensor.gazon_intelligent_type_d_arrosage
@@ -143,6 +144,7 @@ entity_debit_zone_4: number.gazon_intelligent_debit_zone_4
 entity_debit_zone_5: number.gazon_intelligent_debit_zone_5
 entity_hauteur_min_tondeuse: number.gazon_intelligent_hauteur_min_tondeuse
 entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
+entity_delai_reprise_tonte_apres_arrosage: number.gazon_intelligent_delai_reprise_tonte_apres_arrosage
 show_advanced_details: false
 ```
 
@@ -235,6 +237,7 @@ entity_prochaine_fenetre_optimale: sensor.gazon_intelligent_prochaine_fenetre_op
 entity_prochain_blocage_attendu: sensor.gazon_intelligent_prochain_blocage_attendu
 entity_mode: select.gazon_intelligent_mode_du_gazon
 entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique_autorise
+entity_switch_coordination_tondeuse: switch.gazon_intelligent_coordination_tondeuse
 entity_arrosage_recommande: binary_sensor.gazon_intelligent_arrosage_recommande
 entity_arrosage_apres_application_autorise: binary_sensor.gazon_intelligent_arrosage_apres_application_autorise
 entity_signal_irrigation: binary_sensor.gazon_intelligent_signal_irrigation
@@ -262,6 +265,7 @@ entity_debit_zone_4: number.gazon_intelligent_debit_zone_4
 entity_debit_zone_5: number.gazon_intelligent_debit_zone_5
 entity_hauteur_min_tondeuse: number.gazon_intelligent_hauteur_min_tondeuse
 entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
+entity_delai_reprise_tonte_apres_arrosage: number.gazon_intelligent_delai_reprise_tonte_apres_arrosage
 ```
 
 ---
@@ -288,6 +292,7 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 - `entity_prochain_blocage_attendu`
 - `entity_mode`
 - `entity_switch_arrosage_automatique`
+- `entity_switch_coordination_tondeuse`
 - `entity_arrosage_recommande`
 - `entity_arrosage_apres_application_autorise`
 - `entity_signal_irrigation`
@@ -315,6 +320,7 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 - `entity_debit_zone_5`
 - `entity_hauteur_min_tondeuse`
 - `entity_hauteur_max_tondeuse`
+- `entity_delai_reprise_tonte_apres_arrosage`
 - `show_icons`
 - `show_header`
 - `show_background`

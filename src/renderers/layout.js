@@ -1364,6 +1364,8 @@ export function renderOverviewTab(card) {
 export function renderWateringTab(card) {
   const windowState = card._windowState();
   const irrigationSignal = card._irrigationSignalState();
+  const mowerState = card._mowerState();
+  const mowerCoordinationState = card._mowerCoordinationSwitchState();
   const context = card._objectiveContext();
   const nextActionText = windowState.displayNextAction || windowState.nextActionDisplay || windowState.nextAction;
   const planState = card._planState();
@@ -1408,6 +1410,13 @@ export function renderWateringTab(card) {
     card._renderTabPill("Type", wateringTypeLabel, isEmpty(irrigationSignal.typeArrosage || context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
     card._renderTabPill("Signal", irrigationSignal.actionLabel || "Non disponible", tone, "mdi:sprinkler"),
     card._renderTabPill("Raison", formatStatusLabel(irrigationSignal.reasonKind), tone, "mdi:information-outline"),
+    card._renderTabPill("Coordination tondeuse", mowerCoordinationState.label, mowerCoordinationState.tone, "mdi:robot-mower"),
+    irrigationSignal.wateringBlockedByMower
+      ? card._renderTabPill("Blocage tondeuse", irrigationSignal.wateringBlockReasonLabel, "danger", "mdi:robot-mower-alert")
+      : "",
+    mowerState.present && mowerState.safeForWatering !== undefined
+      ? card._renderTabPill("Robot rangé", mowerState.safeForWatering ? "Oui" : "Non", mowerState.safeForWatering ? "success" : "warning", "mdi:garage")
+      : "",
     card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
     windowState.optimalWindowDisplay ? card._renderTabPill("Optimal", windowState.optimalWindowDisplay, "neutral", "mdi:clock-time-eight-outline") : "",
     windowState.wateringWindowDisplay ? card._renderTabPill("Créneau", windowState.wateringWindowDisplay, "neutral", "mdi:timeline-clock-outline") : "",
@@ -1551,6 +1560,7 @@ export function renderMowingTab(card) {
   const height = card._entity("entity_hauteur");
   const windowState = card._windowState();
   const mowerState = card._mowerState();
+  const mowingBlock = card._mowingBlockState();
   const tonteValue = tonte ? formatStatusLabel(tonte.state) : "Non disponible";
   const heightValue = height ? formatCm(height.state) : "Non disponible";
   const heightMin = asNumber(height?.attributes?.hauteur_tonte_min_cm);
@@ -1572,7 +1582,7 @@ export function renderMowingTab(card) {
       value: formatAuthorizationState(tonteAutorisee),
       tone: tonteAutorisee === "on" ? "success" : "danger",
       icon: "mdi:content-cut",
-      secondary: "",
+      secondary: mowingBlock.blocked ? mowingBlock.detail || mowingBlock.reasonLabel : "",
       entityKey: "entity_tonte_autorisee",
     },
     {
@@ -1589,12 +1599,26 @@ export function renderMowingTab(card) {
         tone: windowState.tone,
         icon: "mdi:clock-outline",
         secondary: windowState.nextActionDisplay || windowState.nextAction || "",
-        entityKey: "entity_fenetre_optimale",
+      entityKey: "entity_fenetre_optimale",
       },
     ];
-  if (mowerState.present) {
+  if (mowingBlock.blocked || mowingBlock.postApplicationActive) {
     mowingFacts.splice(
       1,
+      0,
+      {
+        label: "Blocage tonte",
+        value: mowingBlock.reasonLabel || "Blocage actif",
+        tone: mowingBlock.tone || "danger",
+        icon: "mdi:cancel",
+        secondary: mowingBlock.detail || "",
+        entityKey: "entity_tonte_autorisee",
+      },
+    );
+  }
+  if (mowerState.present) {
+    mowingFacts.splice(
+      mowingBlock.blocked || mowingBlock.postApplicationActive ? 2 : 1,
       0,
       {
         label: mowerState.name ? `Robot · ${mowerState.name}` : "Robot tondeuse",
@@ -1642,6 +1666,7 @@ export function renderMowingTab(card) {
 
 export function renderConfigTab(card) {
   const switchState = card._configSwitchState();
+  const mowerCoordinationState = card._mowerCoordinationSwitchState();
   const afterApplication = card._entity("entity_arrosage_apres_application_autorise");
   const afterApplicationInfo = card._postApplicationState(afterApplication);
   const tonteAutorisee = card._entityState("entity_tonte_autorisee", null);
@@ -1656,13 +1681,14 @@ export function renderConfigTab(card) {
     .join("");
   const heightMin = card._renderConfigValue("entity_hauteur_min_tondeuse", "cm");
   const heightMax = card._renderConfigValue("entity_hauteur_max_tondeuse", "cm");
+  const mowingCooldown = card._renderConfigValue("entity_delai_reprise_tonte_apres_arrosage", "min");
 
   return `
       <section class="tab-panel gi-panel tab-panel--config">
         <div class="tab-panel__header">
           <div>
             <div class="tab-panel__eyebrow">Réglages</div>
-            <div class="tab-panel__title">Autorisations, débits et hauteurs</div>
+            <div class="tab-panel__title">Autorisations, coordination, débits et hauteurs</div>
             <div class="tab-panel__header-hint">Touchez une tuile pour ouvrir le contrôle Home Assistant correspondant.</div>
           </div>
           ${renderStatusPill(switchState.label, switchState.tone, switchIcon, "tab-panel__status")}
@@ -1670,9 +1696,11 @@ export function renderConfigTab(card) {
 
         <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-top">
           ${card._renderConfigActionCard("Irrigation automatique", "entity_switch_arrosage_automatique", switchState.label, switchState.tone, "mdi:switch")}
+          ${card._renderConfigActionCard("Coordination tondeuse", "entity_switch_coordination_tondeuse", mowerCoordinationState.label, mowerCoordinationState.tone, "mdi:robot-mower")}
           ${card._renderConfigActionCard("Post-application", "entity_arrosage_apres_application_autorise", afterApplicationInfo.label, afterApplicationInfo.tone, "mdi:water-off")}
           ${card._renderConfigActionCard("Tonte autorisée", "entity_tonte_autorisee", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", "mdi:content-cut")}
           ${card._renderConfigActionCard("Mode du gazon", "entity_mode", formatApplicationMode(mode), modeTone, "mdi:grass")}
+          ${card._renderConfigActionCard("Cooldown tonte après arrosage", "entity_delai_reprise_tonte_apres_arrosage", mowingCooldown.value, mowingCooldown.tone, "mdi:timer-cog-outline")}
         </div>
 
         <div class="tab-panel__section tab-panel__section--config-debits">

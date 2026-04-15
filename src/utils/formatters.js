@@ -365,6 +365,47 @@ export function formatWateringTypeLabel(value) {
   return formatStateLabel(value);
 }
 
+const MOWER_REASON_LABELS = {
+  mower_mowing: "Tondeuse en cours de tonte",
+  mowing: "Tondeuse en cours de tonte",
+  mower_returning: "Tondeuse en retour station",
+  returning: "Tondeuse en retour station",
+  mower_not_stowed: "Tondeuse non rangée",
+  not_stowed: "Tondeuse non rangée",
+  mower_unreliable: "Coordination tondeuse indisponible",
+  unreliable: "Coordination tondeuse indisponible",
+  error: "Tondeuse en erreur",
+  disconnected: "Tondeuse indisponible",
+};
+
+export function formatMowerReasonLabel(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return "Aucune contrainte tondeuse";
+  }
+  if (MOWER_REASON_LABELS[normalized]) {
+    return MOWER_REASON_LABELS[normalized];
+  }
+  return formatStateLabel(value);
+}
+
+const MOWING_BLOCK_REASON_LABELS = {
+  post_application_active: "Post-produit actif",
+  watering_in_progress: "Arrosage en cours",
+  watering_cooldown: "Cooldown tonte après arrosage",
+};
+
+export function formatMowingBlockReason(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return "Aucun blocage";
+  }
+  if (MOWING_BLOCK_REASON_LABELS[normalized]) {
+    return MOWING_BLOCK_REASON_LABELS[normalized];
+  }
+  return formatStateLabel(value);
+}
+
 export function formatStatusLabel(status) {
   return formatStateLabel(status);
 }
@@ -659,6 +700,10 @@ const WATERING_BLOCK_REASON_LABELS = {
   meteorologie: "Météo",
   meteo: "Météo",
   weather: "Météo",
+  mower_mowing: "Tondeuse en cours de tonte",
+  mower_returning: "Tondeuse en retour station",
+  mower_not_stowed: "Tondeuse non rangée",
+  mower_unreliable: "Coordination tondeuse indisponible",
 };
 
 export function formatWateringBlockReason(value) {

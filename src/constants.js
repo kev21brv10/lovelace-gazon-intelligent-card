@@ -37,6 +37,7 @@ export const DEFAULT_CONFIG = {
   entity_avoid: "sensor.gazon_intelligent_action_a_eviter",
   entity_mode: "select.gazon_intelligent_mode_du_gazon",
   entity_switch_arrosage_automatique: "switch.gazon_intelligent_arrosage_automatique_autorise",
+  entity_switch_coordination_tondeuse: "switch.gazon_intelligent_coordination_tondeuse",
   entity_arrosage_recommande: "binary_sensor.gazon_intelligent_arrosage_recommande",
   entity_arrosage_apres_application_autorise: "binary_sensor.gazon_intelligent_arrosage_apres_application_autorise",
   entity_tonte_autorisee: "binary_sensor.gazon_intelligent_tonte_autorisee",
@@ -63,6 +64,7 @@ export const DEFAULT_CONFIG = {
   entity_debit_zone_5: "number.gazon_intelligent_debit_zone_5",
   entity_hauteur_min_tondeuse: "number.gazon_intelligent_hauteur_min_tondeuse",
   entity_hauteur_max_tondeuse: "number.gazon_intelligent_hauteur_max_tondeuse",
+  entity_delai_reprise_tonte_apres_arrosage: "number.gazon_intelligent_delai_reprise_tonte_apres_arrosage",
   manual_action_service: "gazon_intelligent.start_manual_irrigation",
   manual_action_label: "Irrigation manuelle",
   tap_action: { action: "more-info" },
@@ -106,6 +108,7 @@ export const ENTITY_KEYS = [
   { key: "entity_avoid", label: "Action à éviter", icon: "mdi:alert-circle-outline", domain: ["sensor"] },
   { key: "entity_mode", label: "Mode du gazon", icon: "mdi:grass", domain: ["select"] },
   { key: "entity_switch_arrosage_automatique", label: "Irrigation automatique", icon: "mdi:switch", domain: ["switch"] },
+  { key: "entity_switch_coordination_tondeuse", label: "Coordination tondeuse", icon: "mdi:robot-mower", domain: ["switch"] },
   { key: "entity_arrosage_apres_application_autorise", label: "Post-application", icon: "mdi:water-check", domain: ["binary_sensor"] },
   { key: "entity_signal_irrigation", label: "Signal irrigation", icon: "mdi:sprinkler", domain: ["binary_sensor"] },
   { key: "entity_tonte_autorisee", label: "Tonte autorisée", icon: "mdi:content-cut", domain: ["binary_sensor"] },
@@ -133,6 +136,7 @@ export const ENTITY_KEYS = [
   { key: "entity_debit_zone_5", label: "Débit zone 5", icon: "mdi:sprinkler", domain: ["number"] },
   { key: "entity_hauteur_min_tondeuse", label: "Hauteur min tondeuse", icon: "mdi:ruler-square", domain: ["number"] },
   { key: "entity_hauteur_max_tondeuse", label: "Hauteur max tondeuse", icon: "mdi:ruler-square", domain: ["number"] },
+  { key: "entity_delai_reprise_tonte_apres_arrosage", label: "Cooldown tonte après arrosage", icon: "mdi:timer-cog-outline", domain: ["number"] },
 ];
 
 export const SECTION_DEFS = [
@@ -165,6 +169,7 @@ export const SECTION_FIELDS = {
   "entity_debug_intervention",
   "entity_prochaine_intervention",
   "entity_switch_arrosage_automatique",
+  "entity_switch_coordination_tondeuse",
   ],
   watering: [
     "entity_fenetre_optimale",
@@ -215,6 +220,7 @@ export const OVERVIEW_ENTITY_KEYS = new Set([
   "entity_dernier_arrosage",
   "entity_derniere_application",
   "entity_switch_arrosage_automatique",
+  "entity_switch_coordination_tondeuse",
 ]);
 
 export const RENDER_SIGNATURE_ATTRS = {
@@ -246,7 +252,7 @@ export const RENDER_SIGNATURE_ATTRS = {
   entity_produit_intervention: ["selected_product_id", "selected_product_name", "summary", "products_count"],
   entity_debug_intervention: ["score", "status", "recommended_action", "product_id", "product_name", "summary", "reason", "why_now", "reasons", "constraints", "blocking_constraints", "non_blocking_constraints", "missing_requirements", "context", "ready_to_declare", "selected_product_ready", "ui_summary", "ui_hint"],
   entity_signal_intervention: ["source_entity", "source_status", "recommended_action", "product_id", "product_name", "ready_to_declare", "selected_product_ready", "trigger_kind", "summary"],
-  entity_signal_irrigation: ["source_entities", "source_status", "application_post_watering_status", "watering_cause", "type_arrosage", "trigger_kind", "reason_kind", "action_label", "summary"],
+  entity_signal_irrigation: ["source_entities", "source_status", "application_post_watering_status", "watering_cause", "type_arrosage", "trigger_kind", "reason_kind", "action_label", "summary", "watering_blocked_by_mower", "watering_block_reason_code", "watering_block_reason_label"],
   entity_prochaine_intervention: [
     "recommended_action",
     "priority",
@@ -291,10 +297,10 @@ export const RENDER_SIGNATURE_ATTRS = {
     "kc_gazon",
     "etc_mm",
   ],
-  entity_arrosage_recommande: ["objectif_mm", "type_arrosage", "watering_cause"],
+  entity_arrosage_recommande: ["objectif_mm", "type_arrosage", "watering_cause", "watering_blocked_by_mower", "watering_block_reason_code", "watering_block_reason_label"],
   entity_arrosage_apres_application_autorise: ["application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm", "application_post_watering_status"],
-  entity_tonte: ["tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_prete", "tondeuse_batterie", "tondeuse_prochain_depart_display", "tondeuse_hauteur_coupe_mm"],
-  entity_tonte_autorisee: ["phase_active", "tonte_statut", "niveau_action", "fenetre_optimale", "risque_gazon", "hauteur_tonte_recommandee_cm", "hauteur_tonte_min_cm", "hauteur_tonte_max_cm", "tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_prete", "tondeuse_batterie", "tondeuse_prochain_depart_display", "tondeuse_hauteur_coupe_mm"],
+  entity_tonte: ["tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_prete", "tondeuse_batterie", "tondeuse_prochain_depart_display", "tondeuse_hauteur_coupe_mm", "mower_coordination_enabled", "mower_coordination_ready", "mower_presence_state", "mower_presence_label", "mower_operation_state", "mower_operation_label", "mower_is_docked", "mower_is_outside", "mower_is_safe_for_watering", "mower_reason_code", "mower_reason_label", "mowing_blocked_by_watering", "mowing_block_reason_code", "mowing_block_reason_label", "mowing_cooldown_remaining_minutes", "mowing_post_application_active"],
+  entity_tonte_autorisee: ["phase_active", "tonte_statut", "niveau_action", "fenetre_optimale", "risque_gazon", "hauteur_tonte_recommandee_cm", "hauteur_tonte_min_cm", "hauteur_tonte_max_cm", "tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_prete", "tondeuse_batterie", "tondeuse_prochain_depart_display", "tondeuse_hauteur_coupe_mm", "mower_coordination_enabled", "mower_coordination_ready", "mower_presence_state", "mower_presence_label", "mower_operation_state", "mower_operation_label", "mower_is_docked", "mower_is_outside", "mower_is_safe_for_watering", "mower_reason_code", "mower_reason_label", "mowing_blocked_by_watering", "mowing_block_reason_code", "mowing_block_reason_label", "mowing_cooldown_remaining_minutes", "mowing_post_application_active"],
   entity_niveau: ["niveau_action_hydrique"],
   entity_sous_phase: ["sous_phase_progression", "sous_phase_detail"],
   entity_phase: ["phase_dominante_source", "pluie_demain_source"],
@@ -307,6 +313,8 @@ export const RENDER_SIGNATURE_ATTRS = {
   entity_objectif_depletion: ["reserve_actuelle_mm", "reserve_stock_mm", "reserve_stock_max_mm", "reserve_surplus_mm", "reserve_fill_ratio", "reserve_available_ratio", "reserve_minimale_mm", "depletion_mm", "depletion_ratio", "use_depletion_logic", "comparison_mode"],
   entity_weather: ["temperature", "dew_point", "humidity", "uv_index", "pressure", "wind_speed", "wind_bearing", "precipitation"],
   entity_hauteur: ["hauteur_tonte_min_cm", "hauteur_tonte_max_cm", "tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_hauteur_coupe_mm"],
+  entity_switch_coordination_tondeuse: [],
+  entity_delai_reprise_tonte_apres_arrosage: [],
 };
 
 export const STATUS_COLORS = {

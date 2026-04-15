@@ -391,9 +391,11 @@ ${EDITOR_STYLES}
 
         <section class="section">
           <h3>Réglages</h3>
-          <p>Ces entités alimentent l'onglet Réglages pour l'autorisation, les débits et les hauteurs.</p>
+          <p>Ces entités alimentent l'onglet Réglages pour l'autorisation, la coordination tondeuse, les débits et les hauteurs.</p>
           <div class="grid">
             ${this._renderEntityInput("entity_switch_arrosage_automatique", "Irrigation automatique")}
+            ${this._renderEntityInput("entity_switch_coordination_tondeuse", "Coordination tondeuse")}
+            ${this._renderEntityInput("entity_delai_reprise_tonte_apres_arrosage", "Cooldown tonte après arrosage")}
             ${this._renderEntityInput("entity_debit_zone_1", "Débit zone 1")}
             ${this._renderEntityInput("entity_debit_zone_2", "Débit zone 2")}
             ${this._renderEntityInput("entity_debit_zone_3", "Débit zone 3")}

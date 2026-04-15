@@ -1317,6 +1317,63 @@ class GazonIntelligentCard extends HTMLElement {
     };
   }
 
+  _mowerState() {
+    const tonteEntity = this._entity("entity_tonte");
+    const tonteAutoriseeEntity = this._entity("entity_tonte_autorisee");
+    const tonteAttrs = tonteEntity?.attributes || {};
+    const fallbackAttrs = tonteAutoriseeEntity?.attributes || {};
+    const attrs = tonteAttrs.tondeuse_statut || tonteAttrs.tondeuse_statut_libelle ? tonteAttrs : fallbackAttrs;
+    const status = String(attrs.tondeuse_statut || "").trim().toLowerCase();
+    const label = String(attrs.tondeuse_statut_libelle || formatStatusLabel(status || "non disponible")).trim();
+    const battery = asNumber(attrs.tondeuse_batterie);
+    const nextDeparture = String(
+      attrs.tondeuse_prochain_depart_display
+      || humanDateTimeText(attrs.tondeuse_prochain_depart)
+      || "",
+    ).trim();
+    const cuttingHeightMm = asNumber(attrs.tondeuse_hauteur_coupe_mm);
+    const reason = String(
+      attrs.tondeuse_raison
+      || attrs.tondeuse_erreur_libelle
+      || "",
+    ).trim();
+    const name = String(attrs.tondeuse_nom || "").trim();
+    const ready = attrs.tondeuse_prete;
+    const connected = attrs.tondeuse_connectee;
+
+    if (!status && !label && battery === null && !nextDeparture && cuttingHeightMm === null && !reason) {
+      return {
+        present: false,
+      };
+    }
+
+    let tone = "neutral";
+    if (["erreur", "indisponible", "pluie"].includes(status)) {
+      tone = "danger";
+    } else if (["en_charge", "retour_station", "pause"].includes(status)) {
+      tone = "warning";
+    } else if (status === "tonte_en_cours") {
+      tone = "accent";
+    } else if (status === "au_repos" && ready !== false) {
+      tone = "success";
+    }
+
+    return {
+      present: true,
+      name,
+      status,
+      label: label || "Non disponible",
+      tone,
+      battery,
+      nextDeparture,
+      cuttingHeightMm,
+      reason,
+      ready,
+      connected,
+      sourceEntity: String(attrs.tondeuse_source_entity || "").trim(),
+    };
+  }
+
   _windowState() {
     const entity = this._windowEntity();
     const attrs = entity?.attributes || {};
@@ -2602,6 +2659,7 @@ class GazonIntelligentCard extends HTMLElement {
     const tonteAutorisee = this._entityState("entity_tonte_autorisee", null);
     const height = this._entity("entity_hauteur");
     const windowState = this._windowState();
+    const mowerState = this._mowerState();
     const tonteValue = tonte ? formatStatusLabel(tonte.state) : "Non disponible";
     const heightValue = height ? formatCm(height.state) : "Non disponible";
     const heightMin = asNumber(height?.attributes?.hauteur_tonte_min_cm);
@@ -2643,6 +2701,36 @@ class GazonIntelligentCard extends HTMLElement {
         entityKey: "entity_fenetre_optimale",
       },
     ];
+    if (mowerState.present) {
+      mowingFacts.splice(
+        1,
+        0,
+        {
+          label: mowerState.name ? `Robot · ${mowerState.name}` : "Robot tondeuse",
+          value: mowerState.label,
+          tone: mowerState.tone,
+          icon: "mdi:robot-mower",
+          secondary: mowerState.reason || "",
+          entityKey: "entity_tonte",
+        },
+        {
+          label: "Batterie tondeuse",
+          value: mowerState.battery === null ? "Non disponible" : `${mowerState.battery} %`,
+          tone: mowerState.battery !== null && mowerState.battery <= 20 ? "warning" : "neutral",
+          icon: "mdi:battery",
+          secondary: mowerState.nextDeparture || "",
+        },
+      );
+      if (mowerState.cuttingHeightMm !== null) {
+        mowingFacts.push({
+          label: "Hauteur de coupe",
+          value: `${mowerState.cuttingHeightMm} mm`,
+          tone: "neutral",
+          icon: "mdi:grass",
+          secondary: "",
+        });
+      }
+    }
 
     return `
       <section class="tab-panel gi-panel tab-panel--mowing">
@@ -3196,6 +3284,7 @@ class GazonIntelligentCard extends HTMLElement {
     const objective = this._objectiveMm();
     const objectiveLabel = objective === null ? "Non disponible" : formatMm(objective);
     const windowState = this._windowState();
+    const mowerState = this._mowerState();
     const conseil = this._entityState("entity_conseil", null);
     const sectionAccent = this._sectionAccent("overview");
 
@@ -3213,6 +3302,7 @@ class GazonIntelligentCard extends HTMLElement {
           ${this._renderMetric("Objectif", objectiveLabel, objective !== null && objective > 0 ? "success" : "neutral", "mdi:water-percent")}
           ${this._renderMetric("Profil d'irrigation", formatWateringTypeLabel(typeArrosage), isEmpty(typeArrosage) ? "neutral" : "accent", "mdi:sprinkler")}
           ${this._renderMetric("Tonte", tonte, computeTonteTone(tonte), this._heroMetricIcon("entity_tonte", tonte))}
+          ${mowerState.present ? this._renderMetric("Robot", mowerState.label, mowerState.tone, "mdi:robot-mower") : ""}
           ${this._renderMetric("Irrigation", formatRecommendationState(arrosage), arrosage === "on" ? "success" : "neutral", this._heroMetricIcon("entity_arrosage_recommande", arrosage))}
           ${this._renderMetric("Tonte autorisée", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", this._heroMetricIcon("entity_tonte_autorisee", tonteAutorisee))}
           ${this._renderMetric("Post-application", afterApplicationInfo.label, afterApplicationInfo.tone, this._heroMetricIcon("entity_arrosage_apres_application_autorise", afterApplication?.state ?? ""))}

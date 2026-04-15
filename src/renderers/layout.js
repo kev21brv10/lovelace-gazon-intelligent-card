@@ -1550,6 +1550,7 @@ export function renderMowingTab(card) {
   const tonteAutorisee = card._entityState("entity_tonte_autorisee", null);
   const height = card._entity("entity_hauteur");
   const windowState = card._windowState();
+  const mowerState = card._mowerState();
   const tonteValue = tonte ? formatStatusLabel(tonte.state) : "Non disponible";
   const heightValue = height ? formatCm(height.state) : "Non disponible";
   const heightMin = asNumber(height?.attributes?.hauteur_tonte_min_cm);
@@ -1591,6 +1592,36 @@ export function renderMowingTab(card) {
         entityKey: "entity_fenetre_optimale",
       },
     ];
+  if (mowerState.present) {
+    mowingFacts.splice(
+      1,
+      0,
+      {
+        label: mowerState.name ? `Robot · ${mowerState.name}` : "Robot tondeuse",
+        value: mowerState.label,
+        tone: mowerState.tone,
+        icon: "mdi:robot-mower",
+        secondary: mowerState.reason || "",
+        entityKey: "entity_tonte",
+      },
+      {
+        label: "Batterie tondeuse",
+        value: mowerState.battery === null ? "Non disponible" : `${mowerState.battery} %`,
+        tone: mowerState.battery !== null && mowerState.battery <= 20 ? "warning" : "neutral",
+        icon: "mdi:battery",
+        secondary: mowerState.nextDeparture || "",
+      },
+    );
+    if (mowerState.cuttingHeightMm !== null) {
+      mowingFacts.push({
+        label: "Hauteur de coupe",
+        value: `${mowerState.cuttingHeightMm} mm`,
+        tone: "neutral",
+        icon: "mdi:grass",
+        secondary: "",
+      });
+    }
+  }
 
   return `
       <section class="tab-panel gi-panel tab-panel--mowing">

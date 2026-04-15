@@ -293,7 +293,8 @@ export const RENDER_SIGNATURE_ATTRS = {
   ],
   entity_arrosage_recommande: ["objectif_mm", "type_arrosage", "watering_cause"],
   entity_arrosage_apres_application_autorise: ["application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm", "application_post_watering_status"],
-  entity_tonte_autorisee: ["phase_active", "tonte_statut", "niveau_action", "fenetre_optimale", "risque_gazon", "hauteur_tonte_recommandee_cm", "hauteur_tonte_min_cm", "hauteur_tonte_max_cm"],
+  entity_tonte: ["tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_prete", "tondeuse_batterie", "tondeuse_prochain_depart_display", "tondeuse_hauteur_coupe_mm"],
+  entity_tonte_autorisee: ["phase_active", "tonte_statut", "niveau_action", "fenetre_optimale", "risque_gazon", "hauteur_tonte_recommandee_cm", "hauteur_tonte_min_cm", "hauteur_tonte_max_cm", "tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_prete", "tondeuse_batterie", "tondeuse_prochain_depart_display", "tondeuse_hauteur_coupe_mm"],
   entity_niveau: ["niveau_action_hydrique"],
   entity_sous_phase: ["sous_phase_progression", "sous_phase_detail"],
   entity_phase: ["phase_dominante_source", "pluie_demain_source"],
@@ -305,7 +306,7 @@ export const RENDER_SIGNATURE_ATTRS = {
   entity_objectif_legacy: ["objectif_mm", "mm_final_recommande", "use_depletion_logic", "type_arrosage", "comparison_mode"],
   entity_objectif_depletion: ["reserve_actuelle_mm", "reserve_stock_mm", "reserve_stock_max_mm", "reserve_surplus_mm", "reserve_fill_ratio", "reserve_available_ratio", "reserve_minimale_mm", "depletion_mm", "depletion_ratio", "use_depletion_logic", "comparison_mode"],
   entity_weather: ["temperature", "dew_point", "humidity", "uv_index", "pressure", "wind_speed", "wind_bearing", "precipitation"],
-  entity_hauteur: ["hauteur_tonte_min_cm", "hauteur_tonte_max_cm"],
+  entity_hauteur: ["hauteur_tonte_min_cm", "hauteur_tonte_max_cm", "tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_hauteur_coupe_mm"],
 };
 
 export const STATUS_COLORS = {

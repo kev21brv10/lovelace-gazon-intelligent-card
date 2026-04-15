@@ -337,6 +337,34 @@ export function formatApplicationMode(value) {
   return formatStateLabel(value);
 }
 
+export function formatWateringCauseLabel(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return "Cause non disponible";
+  }
+  if (normalized === "post_application") {
+    return "Post-produit";
+  }
+  if (normalized === "hydrique") {
+    return "Hydrique";
+  }
+  return formatStateLabel(value);
+}
+
+export function formatWateringTypeLabel(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return "Non disponible";
+  }
+  if (normalized === "application_technique_auto") {
+    return "Arrosage post-produit auto";
+  }
+  if (normalized === "application_technique") {
+    return "Arrosage post-produit";
+  }
+  return formatStateLabel(value);
+}
+
 export function formatStatusLabel(status) {
   return formatStateLabel(status);
 }

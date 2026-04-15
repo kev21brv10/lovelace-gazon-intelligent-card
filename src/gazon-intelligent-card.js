@@ -35,7 +35,9 @@ import {
   formatStateLabel,
   formatStatusLabel,
   formatSwitchState,
+  formatWateringCauseLabel,
   formatWateringBlockReason,
+  formatWateringTypeLabel,
   safeFormatWeatherConditionLabel as formatWeatherConditionLabel,
   formatNumber,
   iconForField,
@@ -301,6 +303,56 @@ class GazonIntelligentCard extends HTMLElement {
     }
     const value = entity.attributes?.[attr];
     return value === undefined ? fallback : value;
+  }
+
+  _normalizeWateringCause(value, fallback = null) {
+    const normalized = String(value ?? "").trim().toLowerCase();
+    if (["hydrique", "post_application"].includes(normalized)) {
+      return normalized;
+    }
+    return fallback;
+  }
+
+  _inferWateringCause({ entity = null, attrs = null, typeArrosage = "", source = "" } = {}) {
+    const resolvedEntity = entity && typeof entity === "object" ? entity : null;
+    const resolvedAttrs = attrs && typeof attrs === "object" ? attrs : resolvedEntity?.attributes || {};
+    const explicitCause = this._normalizeWateringCause(resolvedAttrs.watering_cause);
+    if (explicitCause) {
+      return explicitCause;
+    }
+    const postStatus = String(resolvedAttrs.application_post_watering_status || "").trim().toLowerCase();
+    if (["bloque", "en_attente", "autorise"].includes(postStatus)) {
+      return "post_application";
+    }
+    const normalizedType = String(typeArrosage || resolvedAttrs.type_arrosage || "").trim().toLowerCase();
+    if (["application_technique", "application_technique_auto"].includes(normalizedType)) {
+      return "post_application";
+    }
+    const normalizedSource = String(source || resolvedAttrs.source || "").trim().toLowerCase();
+    if (["application_technique", "application_technique_auto", "manual_application"].includes(normalizedSource)) {
+      return "post_application";
+    }
+    return "hydrique";
+  }
+
+  _wateringSourceLabel(source, fallbackCause = "hydrique") {
+    const normalized = String(source ?? "").trim().toLowerCase();
+    if (normalized === "application_technique_auto") {
+      return "Post-produit auto";
+    }
+    if (normalized === "manual_application") {
+      return "Post-produit manuel";
+    }
+    if (normalized === "application_technique") {
+      return "Post-produit";
+    }
+    if (normalized === "zone_session") {
+      return fallbackCause === "post_application" ? "Post-produit" : "Hydrique";
+    }
+    if (!normalized) {
+      return formatWateringCauseLabel(fallbackCause);
+    }
+    return formatStateLabel(source);
   }
 
   _postApplicationState(entity = null) {
@@ -1278,19 +1330,34 @@ class GazonIntelligentCard extends HTMLElement {
     const blockReason = String(attrs.block_reason || "").trim();
     const blockReasonLabel = formatWateringBlockReason(blockReason);
     const objective = this._objectiveMm() ?? 0;
+    const typeArrosage = String(this._entityState("entity_type_arrosage", "") || "").trim();
+    const wateringCause = this._inferWateringCause({ entity, attrs, typeArrosage });
+    const isPostApplication = wateringCause === "post_application";
     const wateringWindowDisplay = String(attrs.watering_window_display || "").trim();
     const optimalWindowDisplay = String(attrs.optimal_window_display || "").trim();
     const eveningWindowDisplay = String(attrs.evening_window_display || "").trim();
-    const isAwaiting = status === "en_attente" || publicState === "attendre";
-    const showManualAction = objective > 0 && status === "auto";
+    const isAwaiting = status === "en_attente" || (!isPostApplication && publicState === "attendre");
+    const showManualAction = isPostApplication ? status === "autorise" : objective > 0 && status === "auto";
     const isBlocked = status === "bloque";
-    const isNoActionRequired = !isBlocked && objective <= 0;
-    const displaySummary = isBlocked ? "Irrigation bloquée" : (reasonSummary || summary);
+    const isNoActionRequired = !isPostApplication && !isBlocked && !isAwaiting && !showManualAction && objective <= 0;
+    const displaySummary = isBlocked
+      ? (isPostApplication ? "Arrosage post-produit bloqué" : "Irrigation bloquée")
+      : (reasonSummary || summary);
     const displayNextAction = isBlocked
       ? blockReasonLabel || nextActionDisplay || nextAction || "Attendre la fin du bloc"
       : nextActionDisplay || nextAction || "";
     let tone = statusTone(status);
-    if (isNoActionRequired) {
+    if (isPostApplication) {
+      if (status === "auto" || status === "autorise") {
+        tone = "success";
+      } else if (isAwaiting) {
+        tone = "warning";
+      } else if (isBlocked) {
+        tone = "danger";
+      } else {
+        tone = "neutral";
+      }
+    } else if (isNoActionRequired) {
       tone = "neutral";
     } else if (["maintenant", "ce_matin"].includes(publicState)) {
       tone = "success";
@@ -1299,10 +1366,26 @@ class GazonIntelligentCard extends HTMLElement {
     } else if (publicState === "attendre") {
       tone = objective > 0 ? "warning" : "neutral";
     }
+    let statusLabel = formatStatusLabel(publicState || status);
+    if (isPostApplication) {
+      if (status === "auto") {
+        statusLabel = "Post-produit auto";
+      } else if (status === "autorise") {
+        statusLabel = "Post-produit autorisé";
+      } else if (status === "en_attente") {
+        statusLabel = "Post-produit en attente";
+      } else if (status === "bloque") {
+        statusLabel = "Post-produit bloqué";
+      } else {
+        statusLabel = formatWateringCauseLabel(wateringCause);
+      }
+    }
     return {
       entity,
       status,
       publicState,
+      wateringCause,
+      isPostApplication,
       summary,
       reasonSummary,
       displaySummary,
@@ -1322,7 +1405,7 @@ class GazonIntelligentCard extends HTMLElement {
       isBlocked,
       isNoActionRequired,
       tone,
-      statusLabel: formatStatusLabel(publicState || status),
+      statusLabel,
       rawStatus: attrs.status,
       autoIrrigationEnabled: attrs.auto_irrigation_enabled,
     };
@@ -1548,6 +1631,7 @@ class GazonIntelligentCard extends HTMLElement {
     }
     const rawValue = asNumber(entity.state);
     const source = String(entity.attributes?.source || "").trim();
+    const wateringCause = this._inferWateringCause({ entity, source });
     const dateAction = String(entity.attributes?.date_action || entity.attributes?.detected_at || "").trim();
     const zoneCount = asNumber(entity.attributes?.zone_count);
     if (source === "none" || rawValue === null || rawValue <= 0) {
@@ -1558,6 +1642,10 @@ class GazonIntelligentCard extends HTMLElement {
       };
     }
     const fragments = [];
+    const sourceLabel = this._wateringSourceLabel(source, wateringCause);
+    if (sourceLabel) {
+      fragments.push(sourceLabel);
+    }
     if (dateAction) {
       fragments.push(dateAction);
     }
@@ -1568,6 +1656,8 @@ class GazonIntelligentCard extends HTMLElement {
       label: formatMm(rawValue),
       detail: fragments.join(" · "),
       value: rawValue,
+      source,
+      wateringCause,
     };
   }
 
@@ -1616,6 +1706,7 @@ class GazonIntelligentCard extends HTMLElement {
     const triggerKind = String(attrs.trigger_kind || "").trim();
     const typeArrosage = String(attrs.type_arrosage || "").trim();
     const applicationStatus = String(attrs.application_post_watering_status || "").trim();
+    const wateringCause = this._inferWateringCause({ entity, attrs, typeArrosage });
     let tone = "neutral";
     if (reasonKind === "blocked") {
       tone = "danger";
@@ -1631,6 +1722,7 @@ class GazonIntelligentCard extends HTMLElement {
       summary,
       sourceStatus,
       triggerKind,
+      wateringCause,
       typeArrosage,
       applicationStatus,
       tone,
@@ -1935,6 +2027,7 @@ class GazonIntelligentCard extends HTMLElement {
     const arrosageRecommande = this._entityState("entity_arrosage_recommande", null);
     const mode = this._entityState("entity_mode", null);
     const typeArrosage = this._entityState("entity_type_arrosage", null);
+    const wateringCause = irrigationSignal.wateringCause || windowState.wateringCause || this._inferWateringCause({ typeArrosage });
     const niveauHydrique = String(this._entityAttribute("entity_niveau", "niveau_action_hydrique", "") || "").trim();
     const lastWatering = this._lastWateringState();
     const height = this._entity("entity_hauteur");
@@ -1954,7 +2047,7 @@ class GazonIntelligentCard extends HTMLElement {
       facts.push({ label, value, tone, icon, secondary, entityKey });
     };
 
-    const wateringFocus = objective > 0 || arrosageRecommande === "on" || windowState.isAwaiting || windowState.showManualAction;
+    const wateringFocus = objective > 0 || arrosageRecommande === "on" || windowState.isAwaiting || windowState.showManualAction || wateringCause === "post_application";
     const mowingFocus =
       computeTonteTone(tonte) !== "neutral" ||
       computeRisqueTone(risk) !== "neutral" ||
@@ -1992,7 +2085,10 @@ class GazonIntelligentCard extends HTMLElement {
         value: irrigationSignal.actionLabel || formatRecommendationState(arrosageRecommande),
         tone: irrigationSignal.tone || (arrosageRecommande === "on" ? "success" : windowState.tone),
         icon: "mdi:sprinkler",
-        secondary: irrigationSignal.summary || windowState.displaySummary || planState.summary || objectiveLabel,
+        secondary: [
+          irrigationSignal.summary || windowState.displaySummary || planState.summary || objectiveLabel,
+          wateringCause ? `Cause: ${formatWateringCauseLabel(wateringCause)}` : "",
+        ].filter(Boolean).join(" · "),
         entityKey: "entity_signal_irrigation",
       },
       {
@@ -2013,7 +2109,8 @@ class GazonIntelligentCard extends HTMLElement {
         tone: objective > 0 ? "success" : "neutral",
         icon: "mdi:water-percent",
         secondary: [
-          typeArrosage ? `Type: ${formatApplicationMode(typeArrosage)}` : "",
+          typeArrosage ? `Type: ${formatWateringTypeLabel(typeArrosage)}` : "",
+          wateringCause ? `Cause: ${formatWateringCauseLabel(wateringCause)}` : "",
           niveauHydrique ? `Hydrique: ${formatStatusLabel(niveauHydrique)}` : "",
         ].filter(Boolean).join(" · "),
         entityKey: "entity_objectif_arrosage",
@@ -2232,6 +2329,7 @@ class GazonIntelligentCard extends HTMLElement {
     const arrosageRecommande = this._entityState("entity_arrosage_recommande", null);
     const arrosageApresApplication = this._entity("entity_arrosage_apres_application_autorise");
     const afterApplicationInfo = this._postApplicationState(arrosageApresApplication);
+    const wateringCause = irrigationSignal.wateringCause || windowState.wateringCause || this._inferWateringCause({ typeArrosage: this._entityState("entity_type_arrosage", null) });
     const tonteAutorisee = this._entityState("entity_tonte_autorisee", null);
     const tonteEntity = this._entity("entity_tonte");
     const tonteReason = String(
@@ -2254,7 +2352,22 @@ class GazonIntelligentCard extends HTMLElement {
     let tone = "neutral";
     let icon = "mdi:check-circle-outline";
 
-    if (assistant.entity && assistant.status === "action_required") {
+    if (wateringCause === "post_application" && irrigationSignal.reasonKind === "blocked") {
+      title = "Post-produit bloqué";
+      hint = irrigationSignal.summary || windowState.displaySummary || "Un blocage empêche l’arrosage post-produit.";
+      tone = "danger";
+      icon = "mdi:cancel";
+    } else if (wateringCause === "post_application" && irrigationSignal.reasonKind === "waiting") {
+      title = "Post-produit en attente";
+      hint = irrigationSignal.summary || windowState.displaySummary || "Le post-arrosage reste en attente.";
+      tone = "warning";
+      icon = "mdi:clock-outline";
+    } else if (wateringCause === "post_application" && ["post_application", "hydric_need"].includes(irrigationSignal.reasonKind)) {
+      title = irrigationSignal.actionLabel || "Post-produit prêt";
+      hint = irrigationSignal.summary || windowState.displaySummary || "Le post-arrosage est prêt.";
+      tone = "success";
+      icon = "mdi:sprinkler";
+    } else if (assistant.entity && assistant.status === "action_required") {
       title = assistant.summary || assistant.actionLabel;
       hint = conseil || assistant.reason || irrigationSignal.summary || planState.summary || windowState.displaySummary;
       tone = assistant.tone || "success";
@@ -2621,7 +2734,7 @@ class GazonIntelligentCard extends HTMLElement {
     const contextPills = [
       this._renderTabPill("Irrigation", formatRecommendationState(arrosageRecommande), arrosageRecommande === "on" ? "success" : "neutral", "mdi:water-check"),
       this._renderTabPill("Post-application", afterApplicationInfo.label, afterApplicationInfo.tone, "mdi:water-off"),
-      this._renderTabPill("Profil d'irrigation", formatStateLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
+      this._renderTabPill("Profil d'irrigation", formatWateringTypeLabel(context.typeArrosage), isEmpty(context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
       this._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
       this._renderTabPill("Risque gazon", context.risk, computeRisqueTone(context.risk), "mdi:shield-alert-outline"),
       this._renderTabPill(
@@ -3098,7 +3211,7 @@ class GazonIntelligentCard extends HTMLElement {
         <div class="hero__metrics">
           ${this._renderMetric("Fenêtre", windowState.summary || windowState.statusLabel, windowState.tone, this._heroMetricIcon("entity_fenetre_optimale", windowState.summary || windowState.statusLabel))}
           ${this._renderMetric("Objectif", objectiveLabel, objective !== null && objective > 0 ? "success" : "neutral", "mdi:water-percent")}
-          ${this._renderMetric("Profil d'irrigation", formatApplicationMode(typeArrosage), isEmpty(typeArrosage) ? "neutral" : "accent", "mdi:sprinkler")}
+          ${this._renderMetric("Profil d'irrigation", formatWateringTypeLabel(typeArrosage), isEmpty(typeArrosage) ? "neutral" : "accent", "mdi:sprinkler")}
           ${this._renderMetric("Tonte", tonte, computeTonteTone(tonte), this._heroMetricIcon("entity_tonte", tonte))}
           ${this._renderMetric("Irrigation", formatRecommendationState(arrosage), arrosage === "on" ? "success" : "neutral", this._heroMetricIcon("entity_arrosage_recommande", arrosage))}
           ${this._renderMetric("Tonte autorisée", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", this._heroMetricIcon("entity_tonte_autorisee", tonteAutorisee))}
@@ -3301,7 +3414,7 @@ class GazonIntelligentCard extends HTMLElement {
           parts.push(`Raison: ${formatStatusLabel(reasonKind)}`);
         }
         if (typeArrosage) {
-          parts.push(`Profil: ${formatStatusLabel(typeArrosage)}`);
+          parts.push(`Profil: ${formatWateringTypeLabel(typeArrosage)}`);
         }
       }
       return parts.join(" · ");

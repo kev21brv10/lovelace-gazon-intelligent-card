@@ -16,7 +16,9 @@ import {
   formatNumber,
   formatDurationHuman,
   formatInterventionStatusPresentation,
+  formatWateringCauseLabel,
   formatWateringBlockReason,
+  formatWateringTypeLabel,
   safeFormatMonthLabel as formatMonthLabel,
   safeRenderIconBox as renderIconBox,
   safeRenderStatusPill as renderStatusPill,
@@ -783,16 +785,37 @@ function getDerivedWindowPresentation(entity) {
     return null;
   }
   const state = String(entity.state ?? "").trim();
+  const status = String(entity.attributes?.status || state).trim().toLowerCase();
   const summary = String(entity.attributes?.summary || "").trim();
   const blockReason = String(entity.attributes?.block_reason || "").trim();
   const blockLabel = String(entity.attributes?.block_label || "").trim();
-  const tone = state === "attendre" ? "warning" : ["maintenant", "ce_matin"].includes(state) ? "success" : ["demain_matin", "apres_pluie", "soir"].includes(state) ? "accent" : "neutral";
+  const wateringCause = String(entity.attributes?.watering_cause || "").trim().toLowerCase();
+  const isPostApplication = wateringCause === "post_application";
+  let tone = state === "attendre" ? "warning" : ["maintenant", "ce_matin"].includes(state) ? "success" : ["demain_matin", "apres_pluie", "soir"].includes(state) ? "accent" : "neutral";
+  let value = formatStatusLabel(state);
+  if (isPostApplication) {
+    if (status === "auto") {
+      value = "Post-produit auto";
+      tone = "success";
+    } else if (status === "autorise") {
+      value = "Post-produit autorisé";
+      tone = "success";
+    } else if (status === "en_attente") {
+      value = "Post-produit en attente";
+      tone = "warning";
+    } else if (status === "bloque") {
+      value = "Post-produit bloqué";
+      tone = "danger";
+    } else {
+      value = formatWateringCauseLabel(wateringCause);
+    }
+  }
   return {
     label: "Prochaine fenêtre optimale",
-    value: formatStatusLabel(state),
+    value,
     tone,
     icon: "mdi:clock-outline",
-    secondary: [summary, blockLabel || formatStatusLabel(blockReason)].filter(Boolean).join(" · "),
+    secondary: [summary, isPostApplication ? `Cause: ${formatWateringCauseLabel(wateringCause)}` : "", blockLabel || formatStatusLabel(blockReason)].filter(Boolean).join(" · "),
   };
 }
 
@@ -822,6 +845,7 @@ function getDerivedSignalPresentation(entity, label, icon = "mdi:information-out
   const reasonKind = String(entity.attributes?.reason_kind || "").trim().toLowerCase();
   const triggerKind = String(entity.attributes?.trigger_kind || "").trim().toLowerCase();
   const sourceStatus = String(entity.attributes?.source_status || "").trim();
+  const wateringCause = String(entity.attributes?.watering_cause || "").trim().toLowerCase();
   const state = String(entity.state ?? "").trim().toLowerCase();
   const tone = reasonKind === "blocked"
     ? "danger"
@@ -835,6 +859,9 @@ function getDerivedSignalPresentation(entity, label, icon = "mdi:information-out
   const secondaryParts = [];
   if (actionLabel && actionLabel !== summary) {
     secondaryParts.push(actionLabel);
+  }
+  if (wateringCause) {
+    secondaryParts.push(`Cause: ${formatWateringCauseLabel(wateringCause)}`);
   }
   if (reasonKind) {
     secondaryParts.push(`Raison: ${formatStatusLabel(reasonKind)}`);
@@ -1368,6 +1395,8 @@ export function renderWateringTab(card) {
     && !normalizedHeroHint.startsWith(`${normalizedHeroNext} ·`)
     && !normalizedHeroNext.startsWith(`${normalizedHeroHint} ·`);
   const planTypeLabel = formatPlanType(planState.planType);
+  const wateringCauseLabel = formatWateringCauseLabel(windowState.wateringCause || irrigationSignal.wateringCause || "hydrique");
+  const wateringTypeLabel = formatWateringTypeLabel(irrigationSignal.typeArrosage || context.typeArrosage);
 
   const planChips = [
     card._renderTabPill("Zones", planState.zoneCount ? `${planState.zoneCount}` : "0", planState.zoneCount > 1 ? "accent" : "neutral", "mdi:pipe"),
@@ -1375,6 +1404,8 @@ export function renderWateringTab(card) {
     card._renderTabPill("Fractionnement", planState.fractionation ? "Oui" : "Non", planState.fractionation ? "warning" : "neutral", "mdi:call-split"),
     card._renderTabPill("Type de plan", planTypeLabel, card._planTypeTone(planState.planType), "mdi:shape"),
     card._renderTabPill("Objectif", objectiveLabel, objective > 0 ? "success" : "neutral", "mdi:water"),
+    card._renderTabPill("Cause", wateringCauseLabel, windowState.isPostApplication ? "accent" : "neutral", "mdi:source-branch"),
+    card._renderTabPill("Type", wateringTypeLabel, isEmpty(irrigationSignal.typeArrosage || context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
     card._renderTabPill("Signal", irrigationSignal.actionLabel || "Non disponible", tone, "mdi:sprinkler"),
     card._renderTabPill("Raison", formatStatusLabel(irrigationSignal.reasonKind), tone, "mdi:information-outline"),
     card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),

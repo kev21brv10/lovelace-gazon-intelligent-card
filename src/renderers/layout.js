@@ -705,18 +705,18 @@ export function renderWateringProgressSection(card, progressState) {
       metaParts.push(`${remainingLabel} restants`);
     }
     return `
-        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--watering-progress">
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--watering-progress" data-watering-progress="section">
           <div class="tab-panel__section-head">
             <div class="tab-panel__eyebrow">Irrigation en cours</div>
-            <div class="tab-panel__section-meta">${escapeHtml(`${Math.round(percent)} %`)}</div>
+            <div class="tab-panel__section-meta" data-watering-progress="percent">${escapeHtml(`${Math.round(percent)} %`)}</div>
           </div>
-          <div class="tab-panel__section-summary">${escapeHtml(summary)}</div>
-          ${activeZoneLabel ? `<div class="tab-panel__watering-zone">Zone active · ${escapeHtml(activeZoneLabel)}</div>` : ""}
-          <div class="tab-progress" aria-label="${escapeHtml(summary)}">
+          <div class="tab-panel__section-summary" data-watering-progress="summary">${escapeHtml(summary)}</div>
+          ${activeZoneLabel ? `<div class="tab-panel__watering-zone" data-watering-progress="zone">Zone active · ${escapeHtml(activeZoneLabel)}</div>` : `<div class="tab-panel__watering-zone" data-watering-progress="zone" hidden></div>`}
+          <div class="tab-progress" data-watering-progress="progress" aria-label="${escapeHtml(summary)}">
             <div class="tab-progress__bar gi-progress">
-              <span class="gi-progress__bar ${progressState.critical ? "gi-progress__bar--critical" : ""}" style="width:${escapeHtml(String(percent))}%;"></span>
+              <span class="gi-progress__bar ${progressState.critical ? "gi-progress__bar--critical" : ""}" data-watering-progress="bar" style="width:${escapeHtml(String(percent))}%;"></span>
             </div>
-            <div class="tab-progress__meta">${escapeHtml(metaParts.join(" · ") || "Session active")}</div>
+            <div class="tab-progress__meta" data-watering-progress="meta">${escapeHtml(metaParts.join(" · ") || "Session active")}</div>
           </div>
         </section>
       `;

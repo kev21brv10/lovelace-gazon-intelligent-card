@@ -1787,7 +1787,7 @@ class GazonIntelligentCard extends HTMLElement {
       return;
     }
     const progressState = this._wateringProgressState();
-    const sections = Array.from(this.shadowRoot.querySelectorAll(".tab-panel__section--watering-progress"));
+    const sections = Array.from(this.shadowRoot.querySelectorAll('[data-watering-progress="section"]'));
     if (!sections.length) {
       return;
     }
@@ -1795,12 +1795,59 @@ class GazonIntelligentCard extends HTMLElement {
       this._render();
       return;
     }
-    const markup = renderWateringProgressSection(this, progressState).trim();
-    if (!markup) {
-      return;
+    const percent = Math.max(0, Math.min(100, asNumber(progressState.progressPercent) ?? 0));
+    const remainingSeconds = Math.max(0, asNumber(progressState.remainingSeconds) ?? 0);
+    const remainingLabel =
+      progressState.remainingSeconds !== undefined && progressState.remainingSeconds !== null
+        ? formatDurationHuman(remainingSeconds / 60.0)
+        : "0 min";
+    const summary = String(progressState.summary || "Irrigation en cours").trim();
+    const detail = String(progressState.detail || "").trim();
+    const activeZoneLabels = Array.isArray(progressState.activeZoneLabels) ? progressState.activeZoneLabels.filter(Boolean) : [];
+    const activeZoneLabel = activeZoneLabels.join(" · ");
+    const metaParts = [];
+    if (progressState.startedAtLabel) {
+      metaParts.push(progressState.startedAtLabel);
     }
+    if (detail) {
+      metaParts.push(detail);
+    }
+    if (remainingSeconds > 0) {
+      metaParts.push(`${remainingLabel} restants`);
+    }
+    const metaText = metaParts.join(" · ") || "Session active";
     sections.forEach((section) => {
-      section.outerHTML = markup;
+      const percentNode = section.querySelector('[data-watering-progress="percent"]');
+      if (percentNode) {
+        percentNode.textContent = `${Math.round(percent)} %`;
+      }
+      const summaryNode = section.querySelector('[data-watering-progress="summary"]');
+      if (summaryNode) {
+        summaryNode.textContent = summary;
+      }
+      const zoneNode = section.querySelector('[data-watering-progress="zone"]');
+      if (zoneNode) {
+        if (activeZoneLabel) {
+          zoneNode.hidden = false;
+          zoneNode.textContent = `Zone active · ${activeZoneLabel}`;
+        } else {
+          zoneNode.hidden = true;
+          zoneNode.textContent = "";
+        }
+      }
+      const progressNode = section.querySelector('[data-watering-progress="progress"]');
+      if (progressNode) {
+        progressNode.setAttribute("aria-label", summary);
+      }
+      const barNode = section.querySelector('[data-watering-progress="bar"]');
+      if (barNode) {
+        barNode.style.width = `${percent}%`;
+        barNode.classList.toggle("gi-progress__bar--critical", Boolean(progressState.critical));
+      }
+      const metaNode = section.querySelector('[data-watering-progress="meta"]');
+      if (metaNode) {
+        metaNode.textContent = metaText;
+      }
     });
   }
 

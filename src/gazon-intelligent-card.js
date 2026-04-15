@@ -82,6 +82,7 @@ class GazonIntelligentCard extends HTMLElement {
     this._cardActionTimer = null;
     this._holdActionTimer = null;
     this._holdActionTriggered = false;
+    this._pendingInterventionSelection = null;
     this._onClick = this._onClick.bind(this);
     this._onPointerDown = this._onPointerDown.bind(this);
     this._onPointerUp = this._onPointerUp.bind(this);
@@ -181,6 +182,7 @@ class GazonIntelligentCard extends HTMLElement {
 
   set hass(hass) {
     this._hass = hass;
+    this._syncPendingInterventionSelection();
     this._render();
   }
 
@@ -756,17 +758,22 @@ class GazonIntelligentCard extends HTMLElement {
   _productSelectionState() {
     const entity = this._productSelectionEntity();
     const attrs = entity?.attributes || {};
-    const selectedProductId = String(attrs.selected_product_id || "").trim();
+    const pendingSelection = this._pendingInterventionSelection;
+    const selectedProductId = String(attrs.selected_product_id || pendingSelection?.id || "").trim();
     const entityState = String(entity?.state || "").trim();
     const selectedProductName = String(
-      attrs.selected_product_name || (isUnavailableState(entityState) ? "" : entityState) || "",
+      attrs.selected_product_name || pendingSelection?.name || (isUnavailableState(entityState) ? "" : entityState) || "",
     ).trim();
-    const selectedProductMonths = attrs.selected_product_months;
-    const selectedProductMonthsLabel = String(attrs.selected_product_months_label || "").trim();
-    const selectedProductUsageMode = String(attrs.selected_product_usage_mode || "").trim();
-    const selectedProductUsageModeLabel = String(attrs.selected_product_usage_mode_label || "").trim();
-    const selectedProductMaxApplicationsPerYear = asNumber(attrs.selected_product_max_applications_per_year);
-    const selectedProductMaxApplicationsPerYearLabel = String(attrs.selected_product_max_applications_per_year_label || "").trim();
+    const selectedProductMonths = attrs.selected_product_months ?? pendingSelection?.months ?? [];
+    const selectedProductMonthsLabel = String(attrs.selected_product_months_label || pendingSelection?.monthsLabel || "").trim();
+    const selectedProductUsageMode = String(attrs.selected_product_usage_mode || pendingSelection?.usageMode || "").trim();
+    const selectedProductUsageModeLabel = String(attrs.selected_product_usage_mode_label || pendingSelection?.usageModeLabel || "").trim();
+    const selectedProductMaxApplicationsPerYear = asNumber(
+      attrs.selected_product_max_applications_per_year ?? pendingSelection?.maxApplicationsPerYear,
+    );
+    const selectedProductMaxApplicationsPerYearLabel = String(
+      attrs.selected_product_max_applications_per_year_label || pendingSelection?.maxApplicationsPerYearLabel || "",
+    ).trim();
     const summary = String(attrs.summary || "").trim();
     const productsCount = asNumber(attrs.products_count ?? this._catalogueState().count) ?? 0;
     return {
@@ -793,6 +800,25 @@ class GazonIntelligentCard extends HTMLElement {
       productsCount,
       label: selectedProductName || "Aucun produit sélectionné",
     };
+  }
+
+  _syncPendingInterventionSelection() {
+    if (!this._pendingInterventionSelection) {
+      return;
+    }
+    const entity = this._productSelectionEntity();
+    const attrs = entity?.attributes || {};
+    const selectedProductId = String(attrs.selected_product_id || "").trim();
+    const selectedProductName = String(attrs.selected_product_name || "").trim();
+    const entityState = String(entity?.state || "").trim();
+    const pending = this._pendingInterventionSelection;
+    const hasConfirmedSelection =
+      (selectedProductId && pending.id && selectedProductId === pending.id)
+      || (selectedProductName && pending.name && selectedProductName === pending.name)
+      || (entityState && pending.optionLabel && entityState === pending.optionLabel);
+    if (hasConfirmedSelection) {
+      this._pendingInterventionSelection = null;
+    }
   }
 
   _catalogueProducts() {
@@ -3760,6 +3786,22 @@ ${CARD_STYLES}
     if (!targetEntityId) {
       return;
     }
+    const selectedOption = this._catalogueProductOptions().find((option) => option.label === value) || null;
+    this._pendingInterventionSelection = selectedOption
+      ? {
+          optionLabel: value,
+          id: selectedOption.id || null,
+          name: selectedOption.name || null,
+          months: [],
+          monthsLabel: selectedOption.monthsLabel || null,
+          usageMode: selectedOption.usageMode || null,
+          usageModeLabel: selectedOption.usageModeLabel || null,
+          maxApplicationsPerYear: selectedOption.maxApplicationsPerYear ?? null,
+          maxApplicationsPerYearLabel: selectedOption.maxApplicationsPerYearLabel || null,
+        }
+      : null;
+    this._lastRenderSignature = null;
+    this._render();
     this._hass.callService(service.domain, service.service, {
       entity_id: targetEntityId,
       option: value,

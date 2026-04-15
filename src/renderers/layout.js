@@ -579,7 +579,7 @@ function renderInterventionOverviewSection(
     quickAction.summary || "",
     hasProductOptions && !quickAction.record ? "Sélection nécessaire avant déclaration." : "",
   ].filter(Boolean).join(" · ");
-  const declarationValue = canDeclare ? "Prête" : ui.actionLabel || "Déclaration indisponible";
+  const declarationValue = canDeclare ? "Déclaration possible" : `Action : ${ui.actionLabel || "Choisir le produit"}`;
   const declarationSecondary = [
     ui.declarationSummary || "",
     ui.declarationHint || "",
@@ -1037,7 +1037,7 @@ export function renderInterventionTab(card) {
   const ui = recommendation.ui || {};
   const selectedProductOptionLabel = quickAction.optionLabel || (productOptions.length === 1 ? productOptions[0].label : "");
   const hasProductOptions = productOptions.length > 0;
-  const canDeclare = Boolean(recommendation.readyToDeclare && quickAction.record && !quickAction.disabled);
+  const canDeclare = Boolean(quickAction.record && !quickAction.disabled);
   const hasSelection = Boolean(quickAction.record && !quickAction.disabled);
   const hasApplication = Boolean(lastApplication.hasApplication);
   const lastApplicationSummary = hasApplication ? lastApplication.summary : "Aucune application enregistrée.";
@@ -1052,10 +1052,17 @@ export function renderInterventionTab(card) {
       ? "Produit à sélectionner"
       : "Aucun produit disponible";
   const declarationMeta = ui.badge || formatStatusLabel(recommendation.status) || "Non disponible";
+  const declarationActionLabel = canDeclare
+    ? quickAction.actionLabel || "Déclarer le produit"
+    : `Action : ${ui.actionLabel || "Choisir le produit"}`;
   const pickerSummary = ui.selectionSummary || (quickAction.record ? "Sélection active." : hasProductOptions ? "Sélectionne un produit dans la liste." : "Aucun produit disponible.");
   const pickerHint = ui.selectionHint || "La sélection met à jour le produit actif.";
-  const actionSummary = ui.declarationSummary || "Déclaration indisponible.";
-  const actionHint = ui.declarationHint || "La déclaration suit le produit sélectionné.";
+  const actionSummary = canDeclare
+    ? "Déclaration manuelle disponible."
+    : ui.declarationSummary || "Déclaration indisponible.";
+  const actionHint = canDeclare
+    ? "Le produit sélectionné peut maintenant être déclaré depuis la carte."
+    : ui.declarationHint || "La déclaration suit le produit sélectionné.";
   const temperatureConstraint = (Array.isArray(recommendation.constraints)
     ? recommendation.constraints.find((constraint) => constraint?.code === "temperature_range")
     : null);
@@ -1163,10 +1170,10 @@ export function renderInterventionTab(card) {
                 class="gi-action gi-action--primary tab-panel__cta"
                 data-gazon-action="declare-product-intervention"
                 ${canDeclare ? "" : "disabled"}
-                aria-label="${escapeHtml(ui.actionLabel || "Déclarer l'intervention")}"
+                aria-label="${escapeHtml(canDeclare ? (quickAction.actionLabel || "Déclarer le produit") : (ui.actionLabel || "Choisir le produit"))}"
               >
                 ${renderIconBox("mdi:spray-bottle", "sm")}
-                <span>${escapeHtml(ui.actionLabel || "Déclarer")}</span>
+                <span>${escapeHtml(declarationActionLabel)}</span>
               </button>
               <div class="tab-panel__section-summary">
                 ${escapeHtml(actionSummary)}

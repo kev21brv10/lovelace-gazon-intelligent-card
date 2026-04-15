@@ -4127,10 +4127,6 @@ ${CARD_STYLES}
       produit: productName,
       note: "Déclaration rapide depuis la carte",
     };
-    const targetEntityId = this._serviceTargetEntityId();
-    if (targetEntityId) {
-      payload.entity_id = targetEntityId;
-    }
     this._hass.callService(service.domain, service.service, payload);
   }
 
@@ -4208,12 +4204,7 @@ ${CARD_STYLES}
     if (!service) {
       return;
     }
-    const payload = {};
-    const targetEntityId = this._serviceTargetEntityId();
-    if (targetEntityId) {
-      payload.entity_id = targetEntityId;
-    }
-    this._hass.callService(service.domain, service.service, payload);
+    this._hass.callService(service.domain, service.service, {});
   }
 
 }

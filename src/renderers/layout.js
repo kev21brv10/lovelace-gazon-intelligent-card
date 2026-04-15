@@ -10,6 +10,7 @@ import {
   formatCm,
   formatMm,
   formatPlanType,
+  formatProductUsageMode,
   formatRecommendationState,
   formatStatusLabel,
   formatNumber,
@@ -433,9 +434,9 @@ function renderDebugInterventionSection(card, debug, wrapped = true) {
   const productHeadingLabel =
     debug.status === "recommended" || debug.status === "ready"
       ? "Produit retenu"
-      : debug.status === "possible"
+      : debug.status === "possible" || debug.status === "preparation"
         ? "Produit candidat"
-        : "Produit proposé";
+        : "Produit évalué";
   const productType = debug.productType ? formatStatusLabel(debug.productType) : null;
   const productId = debug.productId ? `ID: ${debug.productId}` : "";
   const actionLabel = debug.recommendedActionLabel || formatDebugRecommendedAction(debug.recommendedAction);
@@ -465,8 +466,8 @@ function renderDebugInterventionSection(card, debug, wrapped = true) {
 
   const inner = `
         <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Debug métier</div>
-          <div class="tab-panel__section-meta">${escapeHtml(summary)}</div>
+          <div class="tab-panel__eyebrow">Analyse moteur</div>
+          <div class="tab-panel__section-meta">${escapeHtml(statusLabel)}</div>
         </div>
 
         <div class="decision-hero">
@@ -515,7 +516,7 @@ function renderDebugInterventionSection(card, debug, wrapped = true) {
 
         <div class="decision-plan">
           <div class="decision-plan__header">
-            <div class="decision-plan__label">Raisons</div>
+            <div class="decision-plan__label">Signaux retenus</div>
             <div class="decision-plan__meta">${escapeHtml(String(reasons.length))}</div>
           </div>
           <div class="decision-plan__chips">
@@ -526,7 +527,7 @@ function renderDebugInterventionSection(card, debug, wrapped = true) {
             }
           </div>
           <div class="decision-plan__header" style="margin-top: 10px;">
-            <div class="decision-plan__label">Manquants</div>
+            <div class="decision-plan__label">Pré-requis manquants</div>
             <div class="decision-plan__meta">${escapeHtml(String(missingRequirements.length))}</div>
           </div>
           <div class="decision-plan__chips">
@@ -548,6 +549,130 @@ function renderDebugInterventionSection(card, debug, wrapped = true) {
   return `
       <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--debug-intervention">
         ${inner}
+      </section>
+    `;
+}
+
+function renderInterventionOverviewSection(
+  card,
+  recommendation,
+  {
+    quickAction,
+    hasProductOptions,
+    canDeclare,
+    ui,
+    recommendationTone,
+    recommendationIcon,
+  },
+) {
+  const proposedProductValue = recommendation.product.name || ui.summary || "Aucun produit retenu";
+  const proposedProductDetails = [
+    ui.badge || "",
+    recommendation.product.type ? formatStatusLabel(recommendation.product.type) : "",
+    recommendation.product.monthsLabel ? `Période: ${recommendation.product.monthsLabel}` : "",
+    recommendation.score !== null && recommendation.score !== undefined
+      ? `Score: ${formatNumber(recommendation.score, 0)}/100`
+      : "",
+  ].filter(Boolean);
+  const selectionValue = quickAction.record ? quickAction.label : "Aucun produit sélectionné";
+  const selectionSecondary = [
+    quickAction.summary || "",
+    hasProductOptions && !quickAction.record ? "Sélection nécessaire avant déclaration." : "",
+  ].filter(Boolean).join(" · ");
+  const declarationValue = canDeclare ? "Prête" : ui.actionLabel || "Déclaration indisponible";
+  const declarationSecondary = [
+    ui.declarationSummary || "",
+    ui.declarationHint || "",
+  ].filter(Boolean).join(" · ");
+  return `
+      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-overview">
+        <div class="tab-panel__section-head">
+          <div class="tab-panel__eyebrow">Pilotage intervention</div>
+          <div class="tab-panel__section-meta">${escapeHtml(ui.badge || "Analyse active")}</div>
+        </div>
+        <div class="tab-panel__grid tab-panel__grid--products">
+          ${card._renderStatCard(
+            "Produit proposé",
+            proposedProductValue,
+            recommendationTone,
+            recommendationIcon,
+            proposedProductDetails.join(" · "),
+          )}
+          ${card._renderStatCard(
+            "Produit sélectionné",
+            selectionValue,
+            quickAction.record ? "accent" : hasProductOptions ? "warning" : "neutral",
+            quickAction.record ? "mdi:package-variant" : "mdi:package-variant-closed",
+            selectionSecondary,
+          )}
+          ${card._renderStatCard(
+            "Déclaration",
+            declarationValue,
+            canDeclare ? "success" : recommendationTone,
+            canDeclare ? "mdi:check-circle-outline" : "mdi:spray-bottle",
+            declarationSecondary,
+          )}
+        </div>
+      </section>
+    `;
+}
+
+function renderInterventionTechnicalSummary(card, recommendation, debug) {
+  const scoreValue = recommendation.score !== null && recommendation.score !== undefined
+    ? `${formatNumber(recommendation.score, 0)}/100`
+    : "—";
+  const blockingConstraints = Array.isArray(debug?.blockingConstraints)
+    ? debug.blockingConstraints.length
+    : Array.isArray(recommendation.constraints)
+      ? recommendation.constraints.filter((constraint) => constraint?.blocking).length
+      : 0;
+  const nonBlockingConstraints = Array.isArray(debug?.nonBlockingConstraints)
+    ? debug.nonBlockingConstraints.length
+    : Array.isArray(recommendation.constraints)
+      ? recommendation.constraints.filter((constraint) => !constraint?.blocking).length
+      : 0;
+  const missingRequirements = Array.isArray(debug?.missingRequirements)
+    ? debug.missingRequirements.length
+    : Array.isArray(recommendation.missingRequirements)
+      ? recommendation.missingRequirements.length
+      : 0;
+  const scoreTone = recommendation.scoreHigh ? "success" : recommendation.status === "blocked" ? "danger" : "warning";
+  return `
+      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-technical">
+        <div class="tab-panel__section-head">
+          <div class="tab-panel__eyebrow">Repères techniques</div>
+          <div class="tab-panel__section-meta">${escapeHtml(debug?.statusLabel || "Analyse moteur")}</div>
+        </div>
+        <div class="tab-panel__grid tab-panel__grid--products">
+          ${card._renderStatCard(
+            "Score",
+            scoreValue,
+            scoreTone,
+            "mdi:signal",
+            recommendation.scoreLevel ? `Niveau: ${formatStatusLabel(recommendation.scoreLevel)}` : "",
+          )}
+          ${card._renderStatCard(
+            "Bloquantes",
+            String(blockingConstraints),
+            blockingConstraints > 0 ? "danger" : "success",
+            blockingConstraints > 0 ? "mdi:alert-circle-outline" : "mdi:check-circle-outline",
+            blockingConstraints > 0 ? "Une ou plusieurs contraintes bloquent la déclaration." : "Aucune contrainte bloquante.",
+          )}
+          ${card._renderStatCard(
+            "Non bloquantes",
+            String(nonBlockingConstraints),
+            nonBlockingConstraints > 0 ? "warning" : "neutral",
+            "mdi:shield-alert-outline",
+            nonBlockingConstraints > 0 ? "Signaux dégradants ou neutres pris en compte." : "Aucun signal secondaire détaillé.",
+          )}
+          ${card._renderStatCard(
+            "Manquants",
+            String(missingRequirements),
+            missingRequirements > 0 ? "warning" : "success",
+            missingRequirements > 0 ? "mdi:clipboard-alert-outline" : "mdi:check-circle-outline",
+            missingRequirements > 0 ? "Des étapes restent à compléter avant déclaration." : "Aucun pré-requis manquant.",
+          )}
+        </div>
       </section>
     `;
 }
@@ -729,12 +854,53 @@ function getDerivedSignalPresentation(entity, label, icon = "mdi:information-out
   };
 }
 
+function renderCatalogueProductCards(card) {
+  const products = card._catalogueProducts();
+  const selection = card._productSelectionState();
+  const selectedProductId = String(selection.selectedProductId || "").trim().toLowerCase();
+  if (!products.length) {
+    return `<div class="tab-panel__empty">Aucun produit enregistré.</div>`;
+  }
+  return products.map((product) => {
+    const productId = String(product.id || "").trim();
+    const productName = String(product.nom || productId || "").trim() || "Produit";
+    const productType = String(product.type || "").trim();
+    const usageMode = String(product.usage_mode || "").trim();
+    const monthsLabel = String(product.application_months_label || "").trim();
+    const requiresWateringAfter = Boolean(product.application_requires_watering_after);
+    const isSelected = selectedProductId && productId.toLowerCase() === selectedProductId;
+    const secondaryParts = [
+      usageMode ? `Mode ${formatProductUsageMode(usageMode)}` : "",
+      monthsLabel,
+      requiresWateringAfter ? "Arrosage après application" : "",
+    ].filter(Boolean);
+    return card._renderStatCard(
+      productType ? formatStatusLabel(productType) : "Produit",
+      productName,
+      isSelected ? "accent" : "neutral",
+      isSelected ? "mdi:package-variant" : "mdi:package-variant-closed",
+      secondaryParts.join(" · "),
+    );
+  }).join("");
+}
+
+function renderProductsScopeSection() {
+  return `
+      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-scope">
+        <div class="tab-panel__section-head">
+          <div class="tab-panel__eyebrow">Repère</div>
+        </div>
+        <div class="tab-panel__section-summary">Catalogue, sélection active et dernière application</div>
+        <div class="tab-panel__section-hint">L’analyse de pertinence détaillée reste dans l’onglet Intervention.</div>
+      </section>
+    `;
+}
+
 export function renderProductSummarySection(card) {
   const selection = card._productSelectionState();
   const catalogue = card._catalogueState();
-  const application = card._applicationEntity();
   const hasProductData = Boolean(
-    selection.selectedProductId || selection.selectedProductName || catalogue.hasProducts || application,
+    selection.selectedProductId || selection.selectedProductName || catalogue.hasProducts,
   );
   const emptyStateMessage = "Aucune donnée produit disponible";
   const catalogueLabel = catalogue.count === 1 ? "1 produit" : `${catalogue.count || 0} produits`;
@@ -753,26 +919,6 @@ export function renderProductSummarySection(card) {
   }
   const selectionDetails = selectionDetailsParts.join(" · ") || selection.summary || "Sélection active";
   const selectionValue = selection.selectedProductName || (catalogue.hasProducts ? "Sélection à faire" : "Aucun produit");
-  const catalogueDetails =
-    catalogue.count > 0
-      ? catalogue.productNames || catalogue.productIds || "Catalogue local"
-      : "Aucun produit enregistré";
-  const applicationState = application && !isUnavailableState(application.state) ? formatStatusLabel(application.state) : "Aucune application";
-  const applicationWhen = String(application?.attributes?.last_application_when || "").trim()
-    || (application?.attributes?.date_action ? humanDateTimeText(application.attributes.date_action) : "")
-    || (application?.attributes?.declared_at ? humanDateTimeText(application.attributes.declared_at) : "");
-  const applicationSecondaryParts = [];
-  if (applicationWhen) {
-    applicationSecondaryParts.push(applicationWhen);
-  }
-  if (application?.attributes?.application_type) {
-    applicationSecondaryParts.push(`Type: ${formatStatusLabel(application.attributes.application_type)}`);
-  }
-  if (application?.attributes?.application_irrigation_mode) {
-    applicationSecondaryParts.push(`Mode: ${formatStatusLabel(application.attributes.application_irrigation_mode)}`);
-  }
-  const applicationSecondary =
-    applicationSecondaryParts.join(" · ") || "Dernière application enregistrée";
 
   if (!hasProductData) {
     return `
@@ -790,29 +936,21 @@ export function renderProductSummarySection(card) {
       <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
         <div class="tab-panel__section-head">
           <div class="tab-panel__eyebrow">Vue produit</div>
-          ${renderStatusPill(catalogue.summary, catalogue.hasProducts ? "success" : "neutral", "mdi:package-variant-closed", "tab-panel__status")}
         </div>
         <div class="tab-panel__grid tab-panel__grid--products">
           ${card._renderStatCard(
-            "Produit actif",
+            "Produit sélectionné",
             selectionValue,
-            selection.selectedProductName ? "accent" : catalogue.hasProducts ? "neutral" : "neutral",
+            selection.selectedProductName ? "accent" : "neutral",
             "mdi:package-variant",
             selectionDetails,
           )}
           ${card._renderStatCard(
-            "Catalogue",
+            "Catalogue local",
             catalogueLabel,
             catalogue.hasProducts ? "success" : "neutral",
             "mdi:package-variant-closed",
-            catalogueDetails,
-          )}
-          ${card._renderStatCard(
-            "Dernière intervention",
-            applicationState,
-            application && !["unknown", "unavailable", "none", "aucune application"].includes(String(application.state || "").trim().toLowerCase()) ? "success" : "neutral",
-            "mdi:spray-bottle",
-            applicationSecondary,
+            catalogue.hasProducts ? "Le référentiel local alimente le choix du produit et l’historique." : "Aucun produit enregistré",
           )}
         </div>
       </section>
@@ -823,6 +961,8 @@ export function renderProductsTab(card) {
   const selection = card._productSelectionState();
   const catalogue = card._catalogueState();
   const application = card._applicationEntity();
+  const lastApplication = card._lastApplicationState();
+  const hasApplication = Boolean(lastApplication.hasApplication);
   const hasProductData = Boolean(
     selection.selectedProductId || selection.selectedProductName || catalogue.hasProducts || application,
   );
@@ -847,6 +987,10 @@ export function renderProductsTab(card) {
   const productsHint = hasProductData
     ? productsHintParts.join(" · ") || "Le référentiel produit alimente la prochaine recommandation."
     : emptyStateMessage;
+  const lastApplicationSummary = hasApplication ? lastApplication.summary : "Aucune application enregistrée.";
+  const lastApplicationHint = hasApplication
+    ? lastApplication.detail || "Dernière application détectée."
+    : "Aucune application enregistrée dans l’historique local.";
 
   return `
       <section class="tab-panel gi-panel tab-panel--products">
@@ -856,10 +1000,30 @@ export function renderProductsTab(card) {
             ${renderStatusPill(hasProductData ? catalogue.summary : emptyStateMessage, productsTone, "mdi:package-variant-closed", `tab-panel__status tab-panel__status--${productsTone}`)}
           </div>
           <div class="tab-panel__hero-next">${escapeHtml(productsSummary)}</div>
-          <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Le référentiel produit sert de base à la recommandation et à la déclaration.")}</div>
+          <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Le référentiel produit sert de base à la recommandation et à la déclaration.")} · ${escapeHtml("L’analyse détaillée reste dans Intervention.")}</div>
         </div>
 
         ${renderProductSummarySection(card)}
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--catalogue-reference">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Catalogue</div>
+            <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
+          </div>
+          <div class="tab-panel__section-summary">Produits disponibles dans le référentiel local</div>
+          <div class="tab-panel__section-hint">Le catalogue sert au choix du produit et à l’historique, sans reprendre l’analyse métier détaillée.</div>
+          <div class="tab-panel__grid tab-panel__grid--products">
+            ${renderCatalogueProductCards(card)}
+          </div>
+        </section>
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Dernière application</div>
+            <div class="tab-panel__section-meta">${escapeHtml(hasApplication ? "Historique local" : "Aucune application")}</div>
+          </div>
+          <div class="tab-panel__section-summary">${escapeHtml(lastApplicationSummary)}</div>
+          <div class="tab-panel__section-hint">${escapeHtml(lastApplicationHint)}</div>
+        </section>
+        ${renderProductsScopeSection()}
       </section>
     `;
 }
@@ -875,7 +1039,6 @@ export function renderInterventionTab(card) {
   const hasProductOptions = productOptions.length > 0;
   const canDeclare = Boolean(recommendation.readyToDeclare && quickAction.record && !quickAction.disabled);
   const hasSelection = Boolean(quickAction.record && !quickAction.disabled);
-  const catalogue = card._catalogueState();
   const hasApplication = Boolean(lastApplication.hasApplication);
   const lastApplicationSummary = hasApplication ? lastApplication.summary : "Aucune application enregistrée.";
   const lastApplicationHint = hasApplication
@@ -889,7 +1052,6 @@ export function renderInterventionTab(card) {
       ? "Produit à sélectionner"
       : "Aucun produit disponible";
   const declarationMeta = ui.badge || formatStatusLabel(recommendation.status) || "Non disponible";
-  const decisionSummary = [selectionMeta, declarationMeta].filter(Boolean).join(" · ");
   const pickerSummary = ui.selectionSummary || (quickAction.record ? "Sélection active." : hasProductOptions ? "Sélectionne un produit dans la liste." : "Aucun produit disponible.");
   const pickerHint = ui.selectionHint || "La sélection met à jour le produit actif.";
   const actionSummary = ui.declarationSummary || "Déclaration indisponible.";
@@ -932,12 +1094,22 @@ export function renderInterventionTab(card) {
           }
         </div>
 
+        ${renderInterventionOverviewSection(card, recommendation, {
+          quickAction,
+          hasProductOptions,
+          canDeclare,
+          ui,
+          recommendationTone,
+          recommendationIcon,
+        })}
+
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-decision">
           <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Assistant de décision</div>
-            <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
+            <div class="tab-panel__eyebrow">Actions</div>
+            <div class="tab-panel__section-meta">${escapeHtml(declarationMeta)}</div>
           </div>
           <div class="tab-panel__decision-strip" aria-hidden="true">
+            ${card._renderTabPill("Recommandation", ui.badge || "Non disponible", recommendationTone, recommendationIcon)}
             ${card._renderTabPill("Sélection", selectionMeta, quickAction.record ? "success" : hasProductOptions ? "warning" : "neutral", "mdi:package-variant")}
             ${card._renderTabPill("Déclaration", declarationMeta, canDeclare ? "success" : recommendationTone, recommendationIcon)}
           </div>
@@ -1006,10 +1178,16 @@ export function renderInterventionTab(card) {
           </div>
         </section>
 
+        ${renderInterventionTechnicalSummary(card, recommendation, debug)}
+
         <details class="tab-panel__debug-foldout">
           <summary class="tab-panel__debug-foldout-summary">
-            <span class="tab-panel__eyebrow">Debug métier</span>
-            <span class="tab-panel__debug-foldout-meta">${escapeHtml(debug ? `Score ${formatNumber(debug.score ?? 0, 0)} · ${debug.statusLabel || debug.summary || "Analyse moteur"}` : decisionSummary || "Analyse moteur")}</span>
+            <span class="tab-panel__eyebrow">Analyse moteur</span>
+            <span class="tab-panel__debug-foldout-meta">${escapeHtml(
+              debug
+                ? `Score ${formatNumber(debug.score ?? 0, 0)} · ${debug.blockingConstraints?.length ?? 0} bloquante(s) · ${debug.nonBlockingConstraints?.length ?? 0} signal(s) · ${debug.missingRequirements?.length ?? 0} manquant(s)`
+                : `${declarationMeta} · Analyse moteur`,
+            )}</span>
           </summary>
           ${renderDebugInterventionSection(card, debug, false)}
         </details>

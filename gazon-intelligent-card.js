@@ -2886,7 +2886,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.56";
+const CARD_VERSION = "0.1.57";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -4131,7 +4131,6 @@ class GazonIntelligentCard extends HTMLElement {
     this._activeTab = "overview";
     this._activeSection = "overview";
     this._wateringProgressTimer = null;
-    this._wateringProgressTick = 0;
     this._cardActionTimer = null;
     this._holdActionTimer = null;
     this._holdActionTriggered = false;
@@ -5602,7 +5601,7 @@ class GazonIntelligentCard extends HTMLElement {
     const objectiveMm = asNumber(attrs.objective_mm);
     const planType = String(attrs.plan_type || "").trim();
     const passages = asNumber(attrs.passages);
-    return {
+    const planState = {
       entity,
       summary: summary || "Aucun plan d'arrosage",
       durationHuman: durationHuman || formatDurationHuman(attrs.total_duration_min ?? entity?.state),
@@ -5611,6 +5610,33 @@ class GazonIntelligentCard extends HTMLElement {
       planType: planType || "no_plan",
       passages: passages ?? 1,
       fractionation: Boolean(attrs.fractionation),
+      isRuntimeFallback: false,
+    };
+    const wateringProgress = this._wateringProgressState();
+    if (!wateringProgress.active || planState.planType !== "no_plan") {
+      return planState;
+    }
+    const progressEntity = this._wateringProgressEntity();
+    const progressAttrs = progressEntity?.attributes || {};
+    const runtimeZoneCount = asNumber(progressAttrs.zone_count) ?? wateringProgress.zoneCount ?? 0;
+    const runtimePassages = asNumber(progressAttrs.passage_count) ?? 1;
+    const currentPassage = asNumber(progressAttrs.current_passage);
+    const plannedTotalSeconds = asNumber(progressAttrs.planned_total_seconds) ?? 0;
+    const targetMm = asNumber(progressAttrs.target_mm);
+    const summaryParts = [
+      runtimeZoneCount > 0 ? `${runtimeZoneCount} zone${runtimeZoneCount > 1 ? "s" : ""}` : "",
+      runtimePassages > 1 && currentPassage ? `Passage ${currentPassage}/${runtimePassages}` : "Cycle en cours",
+    ].filter(Boolean);
+    return {
+      ...planState,
+      summary: summaryParts.join(" · ") || "Cycle en cours",
+      durationHuman: plannedTotalSeconds > 0 ? formatDurationHuman(plannedTotalSeconds / 60.0) : planState.durationHuman,
+      zoneCount: runtimeZoneCount,
+      objectiveMm: targetMm ?? planState.objectiveMm,
+      planType: runtimeZoneCount > 1 ? "multi_zone" : runtimeZoneCount === 1 ? "single_zone" : planState.planType,
+      passages: runtimePassages,
+      fractionation: runtimePassages > 1,
+      isRuntimeFallback: true,
     };
   }
 
@@ -5741,6 +5767,7 @@ class GazonIntelligentCard extends HTMLElement {
     const startedAtLabel = String(attrs.started_at || "").trim() || (startedAtRaw ? humanDateTimeText(startedAtRaw) : "");
     const currentPassage = asNumber(attrs.current_passage);
     const passageCount = asNumber(attrs.passage_count);
+    const plannedTotalSeconds = asNumber(attrs.planned_total_seconds) ?? 0;
     const detailParts = [];
     if (startedAtLabel) {
       detailParts.push(`Démarré ${startedAtLabel}`);
@@ -5768,6 +5795,9 @@ class GazonIntelligentCard extends HTMLElement {
       activeZoneCount,
       activeZoneLabels,
       zoneCount,
+      currentPassage,
+      passageCount: passageCount ?? 1,
+      plannedTotalSeconds,
       critical: progressPercent >= 90,
     };
   }
@@ -5793,13 +5823,34 @@ class GazonIntelligentCard extends HTMLElement {
           if (!this.isConnected) {
             return;
           }
-          this._wateringProgressTick = Date.now();
-          this._render();
+          this._refreshWateringProgressSection();
         }, 5000);
       }
       return;
     }
     this._clearWateringProgressTimer();
+  }
+
+  _refreshWateringProgressSection() {
+    if (!this.shadowRoot) {
+      return;
+    }
+    const progressState = this._wateringProgressState();
+    const sections = Array.from(this.shadowRoot.querySelectorAll(".tab-panel__section--watering-progress"));
+    if (!sections.length) {
+      return;
+    }
+    if (!progressState.active) {
+      this._render();
+      return;
+    }
+    const markup = renderWateringProgressSection(this, progressState).trim();
+    if (!markup) {
+      return;
+    }
+    sections.forEach((section) => {
+      section.outerHTML = markup;
+    });
   }
 
   _lastWateringState() {
@@ -6106,10 +6157,6 @@ class GazonIntelligentCard extends HTMLElement {
           "entity_hauteur",
         ].forEach((key) => keys.add(key));
       }
-    }
-
-    if (this._hasActiveWateringProgress()) {
-      keys.add(`watering_progress_${this._wateringProgressTick || 0}`);
     }
 
     const snapshot = {

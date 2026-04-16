@@ -2727,7 +2727,26 @@ class GazonIntelligentCard extends HTMLElement {
 
   _mowerCoordinationSwitchState() {
     const state = String(this._entityState("entity_switch_coordination_tondeuse", "")).trim().toLowerCase();
+    const tonteEntity = this._entity("entity_tonte");
+    const tonteAutoriseeEntity = this._entity("entity_tonte_autorisee");
+    const tonteAttrs = tonteEntity?.attributes || {};
+    const fallbackAttrs = tonteAutoriseeEntity?.attributes || {};
+    const attrs = tonteAttrs.mower_coordination_ready !== undefined
+      || tonteAttrs.mower_reason_label
+      || tonteAttrs.mower_reason_code
+      ? tonteAttrs
+      : fallbackAttrs;
+    const coordinationReady = attrs.mower_coordination_ready;
+    const reasonCode = String(attrs.mower_reason_code || "").trim().toLowerCase();
+    const reasonLabel = String(
+      attrs.mower_reason_label
+      || formatMowerReasonLabel(reasonCode),
+    ).trim();
     if (["on", "true", "yes", "1", "oui"].includes(state)) {
+      if (coordinationReady === false) {
+        const tone = reasonCode === "error" ? "danger" : "warning";
+        return { label: reasonLabel || "À surveiller", tone };
+      }
       return { label: "Active", tone: "success" };
     }
     if (["off", "false", "no", "0", "non"].includes(state)) {

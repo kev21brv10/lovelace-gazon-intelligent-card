@@ -5,7 +5,10 @@
 ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.3.2+-blue)
 ![License](https://img.shields.io/github/license/kev21brv10/lovelace-gazon-intelligent-card?style=flat-square)
 
-> Une carte Lovelace claire et premium pour lire les décisions de **Gazon Intelligent** en un coup d'œil.
+> Une carte Lovelace claire et premium conçue comme frontend dédié de l’intégration Home Assistant **Gazon Intelligent**.
+
+Cette card n’est pas une carte d’irrigation générique.
+Elle est pensée pour lire et présenter les entités, attributs et contrats publics exposés par **ton intégration Home Assistant Gazon Intelligent**.
 
 Gazon Intelligent Card affiche dans Home Assistant les décisions métier les plus utiles de ton intégration Gazon Intelligent :
 - navigation par onglets pour séparer clairement synthèse, irrigation, tonte, gazon, produits, intervention et réglages
@@ -33,6 +36,7 @@ Capture Lovelace à documenter dans une prochaine révision du README.
 
 ## ✨ Ce que fait la carte
 
+- agit comme compagnon frontend dédié de l’intégration **Gazon Intelligent**
 - affiche une lecture claire et hiérarchisée du moteur Gazon Intelligent
 - met en avant la fenêtre optimale, l'objectif d'irrigation et l'action manuelle unique
 - expose le produit d’intervention sélectionné et le catalogue produit du moteur
@@ -49,6 +53,10 @@ Capture Lovelace à documenter dans une prochaine révision du README.
 ---
 
 ## 🧩 Installation via HACS
+
+Prérequis :
+
+- l’intégration Home Assistant **Gazon Intelligent** doit déjà être installée et fonctionnelle
 
 1. Ajoute ce dépôt dans HACS comme **Frontend / Dashboard card**
 2. Installe **Gazon Intelligent Card**
@@ -90,6 +98,7 @@ resources:
 
 ## 🧠 Compatibilité
 
+- intégration Home Assistant **Gazon Intelligent** requise
 - Home Assistant `2026.3.2` ou plus récent
 - thème clair / sombre
 - dashboard classique et sections
@@ -149,6 +158,9 @@ show_advanced_details: false
 ```
 
 ### Dépendances entités
+
+Cette card est couplée au modèle d’entités public de l’intégration **Gazon Intelligent**.
+Elle attend en priorité les entités et attributs standard exposés par cette intégration, et non un schéma arbitraire d’autres cartes ou backends d’arrosage.
 
 Dans ce README, les noms comme `entity_produit_intervention` ou `entity_conseil` sont des **clés de configuration de la card**, pas des entités Home Assistant.
 

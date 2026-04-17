@@ -2886,7 +2886,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.61";
+const CARD_VERSION = "0.1.62";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -5410,7 +5410,10 @@ class GazonIntelligentCard extends HTMLElement {
     const coordinationEnabled = attrs.mower_coordination_enabled;
     const coordinationReady = attrs.mower_coordination_ready;
     const presenceState = String(attrs.mower_presence_state || "").trim().toLowerCase();
-    const presenceLabel = String(attrs.mower_presence_label || formatStatusLabel(presenceState || "non disponible")).trim();
+    let presenceLabel = String(attrs.mower_presence_label || formatStatusLabel(presenceState || "non disponible")).trim();
+    if (presenceState === "dockee") {
+      presenceLabel = "À la station";
+    }
     const safeForWatering = attrs.mower_is_safe_for_watering;
     let label = operationLabel || "Non disponible";
     if (presenceState === "dockee" && presenceLabel) {

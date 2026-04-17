@@ -2886,7 +2886,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.64";
+const CARD_VERSION = "0.1.65";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -6620,6 +6620,7 @@ class GazonIntelligentCard extends HTMLElement {
     const objective = windowState.objective;
     const objectiveLabel = formatMm(objective);
     const switchState = this._configSwitchState();
+    const mowerState = this._mowerState();
     const tonte = this._entityState("entity_tonte", null);
     const risk = this._entityState("entity_risque", null);
     const conseil = this._entityState("entity_conseil", null);
@@ -6637,7 +6638,8 @@ class GazonIntelligentCard extends HTMLElement {
       || "",
     ).trim();
     const tonteNextMowing = String(
-      tonteEntity?.attributes?.next_mowing_display
+      mowerState.nextDeparture
+      || tonteEntity?.attributes?.next_mowing_display
       || this._entity("entity_tonte_autorisee")?.attributes?.next_mowing_display
       || "",
     ).trim();
@@ -6703,9 +6705,12 @@ class GazonIntelligentCard extends HTMLElement {
       icon = "mdi:content-cut";
     } else if (tonteTone === "warning") {
       title = tonteStatusLabel || "Tonte à surveiller";
+      const mowerHint = mowerState.present && mowerState.nextDeparture
+        ? `Prochain départ programmé le ${mowerState.nextDeparture}.`
+        : "";
       hint = [
         tonteReason,
-        tonteNextMowing ? `Prochaine tonte estimée le ${tonteNextMowing}.` : "",
+        mowerHint || (tonteNextMowing ? `Prochaine tonte estimée le ${tonteNextMowing}.` : ""),
       ].filter(Boolean).join(" ") || conseil || "Attendre une meilleure fenêtre de tonte.";
       tone = "warning";
       icon = "mdi:content-cut";

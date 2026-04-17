@@ -1414,9 +1414,6 @@ export function renderWateringTab(card) {
     irrigationSignal.wateringBlockedByMower
       ? card._renderTabPill("Blocage tondeuse", irrigationSignal.wateringBlockReasonLabel, "danger", "mdi:robot-mower-alert")
       : "",
-    mowerState.present && mowerState.safeForWatering !== undefined
-      ? card._renderTabPill("Robot rangé", mowerState.safeForWatering ? "Oui" : "Non", mowerState.safeForWatering ? "success" : "warning", "mdi:garage")
-      : "",
     card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
     windowState.optimalWindowDisplay ? card._renderTabPill("Optimal", windowState.optimalWindowDisplay, "neutral", "mdi:clock-time-eight-outline") : "",
     windowState.wateringWindowDisplay ? card._renderTabPill("Créneau", windowState.wateringWindowDisplay, "neutral", "mdi:timeline-clock-outline") : "",

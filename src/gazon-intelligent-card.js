@@ -3119,9 +3119,6 @@ class GazonIntelligentCard extends HTMLElement {
       irrigationSignal.wateringBlockedByMower
         ? this._renderTabPill("Blocage tondeuse", irrigationSignal.wateringBlockReasonLabel, "danger", "mdi:robot-mower-alert")
         : "",
-      mowerState.present && mowerState.safeForWatering !== undefined
-        ? this._renderTabPill("Robot rangé", mowerState.safeForWatering ? "Oui" : "Non", mowerState.safeForWatering ? "success" : "warning", "mdi:garage")
-        : "",
     ];
 
     const planChips = [
@@ -3472,7 +3469,7 @@ class GazonIntelligentCard extends HTMLElement {
       mowing: [
         {
           title: "Décision tonte",
-          meta: "Statut courant, autorisation, coordination tondeuse et hauteur conseillée.",
+          meta: "Statut courant, autorisation et hauteur conseillée.",
           eyebrow: "Tonte",
           keys: ["entity_tonte", "entity_tonte_autorisee", "entity_hauteur", "entity_phase", "entity_sous_phase", "entity_risque"],
         },

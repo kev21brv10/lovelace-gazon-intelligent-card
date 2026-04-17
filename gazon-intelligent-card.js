@@ -2886,7 +2886,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.63";
+const CARD_VERSION = "0.1.64";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -7168,9 +7168,6 @@ class GazonIntelligentCard extends HTMLElement {
       irrigationSignal.wateringBlockedByMower
         ? this._renderTabPill("Blocage tondeuse", irrigationSignal.wateringBlockReasonLabel, "danger", "mdi:robot-mower-alert")
         : "",
-      mowerState.present && mowerState.safeForWatering !== undefined
-        ? this._renderTabPill("Robot rangé", mowerState.safeForWatering ? "Oui" : "Non", mowerState.safeForWatering ? "success" : "warning", "mdi:garage")
-        : "",
     ];
 
     const planChips = [
@@ -7521,7 +7518,7 @@ class GazonIntelligentCard extends HTMLElement {
       mowing: [
         {
           title: "Décision tonte",
-          meta: "Statut courant, autorisation, coordination tondeuse et hauteur conseillée.",
+          meta: "Statut courant, autorisation et hauteur conseillée.",
           eyebrow: "Tonte",
           keys: ["entity_tonte", "entity_tonte_autorisee", "entity_hauteur", "entity_phase", "entity_sous_phase", "entity_risque"],
         },
@@ -9819,9 +9816,6 @@ function renderWateringTab(card) {
     card._renderTabPill("Coordination tondeuse", mowerCoordinationState.label, mowerCoordinationState.tone, "mdi:robot-mower"),
     irrigationSignal.wateringBlockedByMower
       ? card._renderTabPill("Blocage tondeuse", irrigationSignal.wateringBlockReasonLabel, "danger", "mdi:robot-mower-alert")
-      : "",
-    mowerState.present && mowerState.safeForWatering !== undefined
-      ? card._renderTabPill("Robot rangé", mowerState.safeForWatering ? "Oui" : "Non", mowerState.safeForWatering ? "success" : "warning", "mdi:garage")
       : "",
     card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
     windowState.optimalWindowDisplay ? card._renderTabPill("Optimal", windowState.optimalWindowDisplay, "neutral", "mdi:clock-time-eight-outline") : "",

@@ -1336,7 +1336,7 @@ class GazonIntelligentCard extends HTMLElement {
       || attrs.tondeuse_statut
       || "",
     ).trim().toLowerCase();
-    const label = String(
+    const operationLabel = String(
       attrs.mower_operation_label
       || attrs.tondeuse_statut_libelle
       || formatStatusLabel(status || "non disponible"),
@@ -1363,10 +1363,16 @@ class GazonIntelligentCard extends HTMLElement {
     const presenceState = String(attrs.mower_presence_state || "").trim().toLowerCase();
     const presenceLabel = String(attrs.mower_presence_label || formatStatusLabel(presenceState || "non disponible")).trim();
     const safeForWatering = attrs.mower_is_safe_for_watering;
+    let label = operationLabel || "Non disponible";
+    if (presenceState === "dockee" && presenceLabel) {
+      label = presenceLabel;
+    } else if (!operationLabel && presenceLabel) {
+      label = presenceLabel;
+    }
 
     if (
       !status
-      && !label
+      && !operationLabel
       && battery === null
       && !nextDeparture
       && cuttingHeightMm === null
@@ -1394,6 +1400,7 @@ class GazonIntelligentCard extends HTMLElement {
       name,
       status,
       label: label || "Non disponible",
+      operationLabel: operationLabel || "Non disponible",
       tone,
       battery,
       nextDeparture,
@@ -1404,7 +1411,7 @@ class GazonIntelligentCard extends HTMLElement {
       coordinationEnabled,
       coordinationReady,
       presenceState,
-      presenceLabel,
+      presenceLabel: presenceLabel || "Non disponible",
       safeForWatering,
       sourceEntity: String(attrs.tondeuse_source_entity || "").trim(),
     };
@@ -2931,6 +2938,15 @@ class GazonIntelligentCard extends HTMLElement {
       );
     }
     if (mowerState.present) {
+      const mowerCoordinationState = this._mowerCoordinationSwitchState();
+      const mowerSecondary = [
+        mowerState.label !== mowerState.operationLabel ? `État: ${mowerState.operationLabel}` : "",
+        mowerState.reason || "",
+      ].filter(Boolean).join(" · ");
+      const coordinationSecondary = [
+        mowerState.safeForWatering === undefined ? "" : `Arrosage sûr: ${mowerState.safeForWatering ? "Oui" : "Non"}`,
+        mowerState.sourceEntity || "",
+      ].filter(Boolean).join(" · ");
       mowingFacts.splice(
         mowingBlock.blocked || mowingBlock.postApplicationActive ? 2 : 1,
         0,
@@ -2939,7 +2955,15 @@ class GazonIntelligentCard extends HTMLElement {
           value: mowerState.label,
           tone: mowerState.tone,
           icon: "mdi:robot-mower",
-          secondary: mowerState.reason || "",
+          secondary: mowerSecondary,
+          entityKey: "entity_tonte",
+        },
+        {
+          label: "Coordination tondeuse",
+          value: mowerCoordinationState.label,
+          tone: mowerCoordinationState.tone,
+          icon: "mdi:robot-mower",
+          secondary: coordinationSecondary,
           entityKey: "entity_tonte",
         },
         {
@@ -2948,8 +2972,27 @@ class GazonIntelligentCard extends HTMLElement {
           tone: mowerState.battery !== null && mowerState.battery <= 20 ? "warning" : "neutral",
           icon: "mdi:battery",
           secondary: mowerState.nextDeparture || "",
+          entityKey: "entity_tonte",
+        },
+        {
+          label: "Présence robot",
+          value: mowerState.presenceLabel,
+          tone: mowerState.presenceState === "dockee" ? "success" : mowerState.presenceState === "inconnue" ? "warning" : mowerState.tone,
+          icon: "mdi:garage",
+          secondary: mowerState.operationLabel,
+          entityKey: "entity_tonte",
         },
       );
+      if (mowerState.nextDeparture) {
+        mowingFacts.push({
+          label: "Prochain départ",
+          value: mowerState.nextDeparture,
+          tone: "neutral",
+          icon: "mdi:calendar-clock",
+          secondary: "",
+          entityKey: "entity_tonte",
+        });
+      }
       if (mowerState.cuttingHeightMm !== null) {
         mowingFacts.push({
           label: "Hauteur de coupe",

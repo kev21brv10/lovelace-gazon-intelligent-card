@@ -12,6 +12,8 @@ import {
   formatPlanType,
   formatProductUsageMode,
   formatRecommendationState,
+  formatIrrigationSignalLabel,
+  formatIrrigationSignalTone,
   formatStatusLabel,
   formatNumber,
   formatDurationHuman,
@@ -846,16 +848,7 @@ function getDerivedSignalPresentation(entity, label, icon = "mdi:information-out
   const triggerKind = String(entity.attributes?.trigger_kind || "").trim().toLowerCase();
   const sourceStatus = String(entity.attributes?.source_status || "").trim();
   const wateringCause = String(entity.attributes?.watering_cause || "").trim().toLowerCase();
-  const state = String(entity.state ?? "").trim().toLowerCase();
-  const tone = reasonKind === "blocked"
-    ? "danger"
-    : triggerKind === "soft"
-      ? "warning"
-    : ["recommended", "ready", "post_application", "hydrique"].includes(triggerKind) || ["post_application", "hydric_need"].includes(reasonKind)
-      ? "success"
-      : state === "on"
-        ? "success"
-        : "neutral";
+  const tone = formatIrrigationSignalTone({ reasonKind, triggerKind });
   const secondaryParts = [];
   if (actionLabel && actionLabel !== summary) {
     secondaryParts.push(actionLabel);
@@ -874,7 +867,7 @@ function getDerivedSignalPresentation(entity, label, icon = "mdi:information-out
   }
   return {
     label,
-    value: actionLabel || summary || formatStatusLabel(entity.state),
+    value: formatIrrigationSignalLabel({ actionLabel, summary, reasonKind }),
     tone,
     icon,
     secondary: secondaryParts.join(" · "),
@@ -1411,8 +1404,8 @@ export function renderWateringTab(card) {
     card._renderTabPill("Signal", irrigationSignal.actionLabel || "Non disponible", tone, "mdi:sprinkler"),
     card._renderTabPill("Raison", formatStatusLabel(irrigationSignal.reasonKind), tone, "mdi:information-outline"),
     card._renderTabPill("Coordination tondeuse", mowerCoordinationState.label, mowerCoordinationState.tone, "mdi:robot-mower"),
-    irrigationSignal.wateringBlockedByMower
-      ? card._renderTabPill("Blocage tondeuse", irrigationSignal.wateringBlockReasonLabel, "danger", "mdi:robot-mower-alert")
+    (irrigationSignal.wateringBlockedByMower || ["ambiguous", "mower_ambiguous", "missing", "mower_missing", "configured_missing", "mower_configured_missing"].includes(mowerState.reasonCode))
+      ? card._renderTabPill("Blocage tondeuse", irrigationSignal.wateringBlockReasonLabel || mowerState.reason || "Tondeuse à vérifier", "danger", "mdi:robot-mower-alert")
       : "",
     card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
     windowState.optimalWindowDisplay ? card._renderTabPill("Optimal", windowState.optimalWindowDisplay, "neutral", "mdi:clock-time-eight-outline") : "",

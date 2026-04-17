@@ -1,0 +1,50 @@
+from __future__ import annotations
+
+from pathlib import Path
+import re
+import unittest
+
+
+ROOT = Path(__file__).resolve().parents[1]
+MAIN_SRC = (ROOT / "src/gazon-intelligent-card.js").read_text(encoding="utf-8")
+LAYOUT_SRC = (ROOT / "src/renderers/layout.js").read_text(encoding="utf-8")
+FORMATTERS_SRC = (ROOT / "src/utils/formatters.js").read_text(encoding="utf-8")
+
+
+def extract_function_body(source: str, function_name: str) -> str:
+    match = re.search(rf"function\s+{re.escape(function_name)}\([^)]*\)\s*\{{(?P<body>.*?)\n\}}", source, re.S)
+    if not match:
+        match = re.search(rf"{re.escape(function_name)}\(\)\s*\{{(?P<body>.*?)\n  \}}", source, re.S)
+    if not match:
+        raise AssertionError(f"Could not find {function_name} in source")
+    return match.group("body")
+
+
+class CardContractTests(unittest.TestCase):
+    def test_irrigation_signal_never_uses_binary_sensor_state_as_action_label(self):
+        body = extract_function_body(MAIN_SRC, "_irrigationSignalState")
+        self.assertIn("formatIrrigationSignalLabel", body)
+        self.assertIn("formatIrrigationSignalTone", body)
+        self.assertNotIn("formatStatusLabel(entity?.state)", body)
+
+    def test_layout_signal_presentation_does_not_promote_raw_on_state(self):
+        body = extract_function_body(LAYOUT_SRC, "getDerivedSignalPresentation")
+        self.assertIn("formatIrrigationSignalLabel", body)
+        self.assertIn("formatIrrigationSignalTone", body)
+        self.assertNotIn('state === "on"', body)
+
+    def test_mower_ambiguity_label_is_explicit(self):
+        self.assertIn(
+            'ambiguous: "Tondeuse ambiguë: plusieurs robots détectés, configuration requise"',
+            FORMATTERS_SRC,
+        )
+        self.assertIn('configured_missing: "Tondeuse configurée introuvable"', FORMATTERS_SRC)
+        self.assertIn('missing: "Tondeuse manquante"', FORMATTERS_SRC)
+
+    def test_recommendation_state_is_non_actionable(self):
+        self.assertIn('return "Recommandée"', FORMATTERS_SRC)
+        self.assertIn('return "Non requise"', FORMATTERS_SRC)
+
+
+if __name__ == "__main__":
+    unittest.main()

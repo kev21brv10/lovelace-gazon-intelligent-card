@@ -3337,10 +3337,10 @@ function formatMm(value) {
 function formatRecommendationState(value) {
   const normalized = String(value ?? "").trim().toLowerCase();
   if (["on", "true", "yes", "1", "oui"].includes(normalized)) {
-    return "Autorisé";
+    return "Recommandée";
   }
   if (["off", "false", "no", "0", "non"].includes(normalized)) {
-    return "Non requis";
+    return "Non requise";
   }
   return isUnavailableState(value) ? "Non disponible" : String(value);
 }
@@ -3643,6 +3643,49 @@ function formatWateringTypeLabel(value) {
   return formatStateLabel(value);
 }
 
+function formatIrrigationSignalLabel({ actionLabel, summary, reasonKind } = {}) {
+  const normalizedAction = String(actionLabel ?? "").trim();
+  if (normalizedAction) {
+    return normalizedAction;
+  }
+  const normalizedSummary = String(summary ?? "").trim();
+  if (normalizedSummary) {
+    return normalizedSummary;
+  }
+  const normalizedReason = String(reasonKind ?? "").trim().toLowerCase();
+  if (normalizedReason === "blocked") {
+    return "Irrigation bloquée";
+  }
+  if (normalizedReason === "waiting") {
+    return "Attendre";
+  }
+  if (["post_application", "hydric_need"].includes(normalizedReason)) {
+    return "Irrigation prête";
+  }
+  return "Signal irrigation";
+}
+
+function formatIrrigationSignalTone({ reasonKind, triggerKind } = {}) {
+  const normalizedReason = String(reasonKind ?? "").trim().toLowerCase();
+  const normalizedTrigger = String(triggerKind ?? "").trim().toLowerCase();
+  if (normalizedReason === "blocked") {
+    return "danger";
+  }
+  if (normalizedReason === "waiting") {
+    return "warning";
+  }
+  if (["post_application", "hydric_need"].includes(normalizedReason)) {
+    return "success";
+  }
+  if (["recommended", "ready", "post_application", "hydrique"].includes(normalizedTrigger)) {
+    return "success";
+  }
+  if (normalizedTrigger === "soft") {
+    return "warning";
+  }
+  return "neutral";
+}
+
 const MOWER_REASON_LABELS = {
   mower_mowing: "Tondeuse en cours de tonte",
   mowing: "Tondeuse en cours de tonte",
@@ -3652,6 +3695,12 @@ const MOWER_REASON_LABELS = {
   not_stowed: "Tondeuse non rangée",
   mower_unreliable: "Coordination tondeuse indisponible",
   unreliable: "Coordination tondeuse indisponible",
+  ambiguous: "Tondeuse ambiguë: plusieurs robots détectés, configuration requise",
+  mower_ambiguous: "Tondeuse ambiguë: plusieurs robots détectés, configuration requise",
+  missing: "Tondeuse manquante",
+  mower_missing: "Tondeuse manquante",
+  configured_missing: "Tondeuse configurée introuvable",
+  mower_configured_missing: "Tondeuse configurée introuvable",
   error: "Tondeuse en erreur",
   disconnected: "Tondeuse indisponible",
 };
@@ -5404,6 +5453,8 @@ class GazonIntelligentCard extends HTMLElement {
       || attrs.tondeuse_erreur_libelle
       || "",
     ).trim();
+    const reasonCode = String(attrs.mower_reason_code || "").trim().toLowerCase();
+    const hardBlockReason = ["ambiguous", "mower_ambiguous", "missing", "mower_missing", "configured_missing", "mower_configured_missing"].includes(reasonCode);
     const name = String(attrs.tondeuse_nom || "").trim();
     const ready = attrs.tondeuse_prete;
     const connected = attrs.tondeuse_connectee;
@@ -5437,7 +5488,7 @@ class GazonIntelligentCard extends HTMLElement {
     }
 
     let tone = "neutral";
-    if (["error", "erreur", "indisponible", "pluie", "unknown"].includes(status) || coordinationReady === false) {
+    if (hardBlockReason || ["error", "erreur", "indisponible", "pluie", "unknown"].includes(status) || coordinationReady === false) {
       tone = "danger";
     } else if (["charging", "en_charge", "retour_station", "retour", "transit", "paused", "pause"].includes(status) || presenceState === "retour") {
       tone = "warning";
@@ -5451,20 +5502,21 @@ class GazonIntelligentCard extends HTMLElement {
       present: true,
       name,
       status,
-      label: label || "Non disponible",
+      label: hardBlockReason ? (reason || label || "Non disponible") : (label || "Non disponible"),
       operationLabel: operationLabel || "Non disponible",
       tone,
       battery,
       nextDeparture,
       cuttingHeightMm,
       reason,
+      reasonCode,
       ready,
       connected,
       coordinationEnabled,
       coordinationReady,
       presenceState,
       presenceLabel: presenceLabel || "Non disponible",
-      safeForWatering,
+      safeForWatering: hardBlockReason && safeForWatering === undefined ? false : safeForWatering,
       sourceEntity: String(attrs.tondeuse_source_entity || "").trim(),
     };
   }
@@ -5990,7 +6042,11 @@ class GazonIntelligentCard extends HTMLElement {
     const entity = this._entity("entity_signal_irrigation");
     const attrs = entity?.attributes || {};
     const reasonKind = String(attrs.reason_kind || "").trim().toLowerCase();
-    const actionLabel = String(attrs.action_label || "").trim() || formatStatusLabel(entity?.state);
+    const actionLabel = formatIrrigationSignalLabel({
+      actionLabel: attrs.action_label,
+      summary: attrs.summary,
+      reasonKind,
+    });
     const summary = String(attrs.summary || "").trim() || actionLabel || "Non disponible";
     const sourceStatus = String(attrs.source_status || "").trim();
     const triggerKind = String(attrs.trigger_kind || "").trim();
@@ -6003,14 +6059,6 @@ class GazonIntelligentCard extends HTMLElement {
       || formatWateringBlockReason(wateringBlockReasonCode),
     ).trim();
     const wateringCause = this._inferWateringCause({ entity, attrs, typeArrosage });
-    let tone = "neutral";
-    if (reasonKind === "blocked") {
-      tone = "danger";
-    } else if (reasonKind === "waiting") {
-      tone = "warning";
-    } else if (["post_application", "hydric_need"].includes(reasonKind)) {
-      tone = "success";
-    }
     return {
       entity,
       reasonKind,
@@ -6024,7 +6072,7 @@ class GazonIntelligentCard extends HTMLElement {
       wateringBlockedByMower,
       wateringBlockReasonCode,
       wateringBlockReasonLabel,
-      tone,
+      tone: formatIrrigationSignalTone({ reasonKind, triggerKind }),
     };
   }
 
@@ -6381,7 +6429,7 @@ class GazonIntelligentCard extends HTMLElement {
     const waterGroup = [
       {
         label: "Irrigation",
-        value: irrigationSignal.actionLabel || formatRecommendationState(arrosageRecommande),
+        value: irrigationSignal.actionLabel || irrigationSignal.summary || formatRecommendationState(arrosageRecommande),
         tone: irrigationSignal.tone || (arrosageRecommande === "on" ? "success" : windowState.tone),
         icon: "mdi:sprinkler",
         secondary: [
@@ -6720,7 +6768,7 @@ class GazonIntelligentCard extends HTMLElement {
       tone = computeRisqueTone(risk);
       icon = "mdi:shield-alert-outline";
     } else if (arrosageRecommande === "on") {
-      title = "Autorisé";
+      title = "Irrigation recommandée";
       hint = `${conseil || planState.summary || objectiveLabel}${
         ["bloque", "en_attente", "non_autorise"].includes(afterApplicationInfo.kind)
           ? ` · Post-application ${afterApplicationInfo.label.toLowerCase()}`
@@ -6806,6 +6854,10 @@ class GazonIntelligentCard extends HTMLElement {
       attrs.mower_reason_label
       || formatMowerReasonLabel(reasonCode),
     ).trim();
+    const hardBlockReason = ["ambiguous", "mower_ambiguous", "missing", "mower_missing", "configured_missing", "mower_configured_missing"].includes(reasonCode);
+    if (hardBlockReason) {
+      return { label: reasonLabel || "Tondeuse à vérifier", tone: "danger" };
+    }
     if (["on", "true", "yes", "1", "oui"].includes(state)) {
       if (coordinationReady === false) {
         const tone = reasonCode === "error" ? "danger" : "warning";
@@ -7170,8 +7222,8 @@ class GazonIntelligentCard extends HTMLElement {
         "mdi:weather-sunny",
       ),
       this._renderTabPill("Coordination tondeuse", mowerCoordinationState.label, mowerCoordinationState.tone, "mdi:robot-mower"),
-      irrigationSignal.wateringBlockedByMower
-        ? this._renderTabPill("Blocage tondeuse", irrigationSignal.wateringBlockReasonLabel, "danger", "mdi:robot-mower-alert")
+      (irrigationSignal.wateringBlockedByMower || ["ambiguous", "mower_ambiguous", "missing", "mower_missing", "configured_missing", "mower_configured_missing"].includes(mowerState.reasonCode))
+        ? this._renderTabPill("Blocage tondeuse", irrigationSignal.wateringBlockReasonLabel || mowerState.reason || "Tondeuse à vérifier", "danger", "mdi:robot-mower-alert")
         : "",
     ];
 
@@ -9254,16 +9306,7 @@ function getDerivedSignalPresentation(entity, label, icon = "mdi:information-out
   const triggerKind = String(entity.attributes?.trigger_kind || "").trim().toLowerCase();
   const sourceStatus = String(entity.attributes?.source_status || "").trim();
   const wateringCause = String(entity.attributes?.watering_cause || "").trim().toLowerCase();
-  const state = String(entity.state ?? "").trim().toLowerCase();
-  const tone = reasonKind === "blocked"
-    ? "danger"
-    : triggerKind === "soft"
-      ? "warning"
-    : ["recommended", "ready", "post_application", "hydrique"].includes(triggerKind) || ["post_application", "hydric_need"].includes(reasonKind)
-      ? "success"
-      : state === "on"
-        ? "success"
-        : "neutral";
+  const tone = formatIrrigationSignalTone({ reasonKind, triggerKind });
   const secondaryParts = [];
   if (actionLabel && actionLabel !== summary) {
     secondaryParts.push(actionLabel);
@@ -9282,7 +9325,7 @@ function getDerivedSignalPresentation(entity, label, icon = "mdi:information-out
   }
   return {
     label,
-    value: actionLabel || summary || formatStatusLabel(entity.state),
+    value: formatIrrigationSignalLabel({ actionLabel, summary, reasonKind }),
     tone,
     icon,
     secondary: secondaryParts.join(" · "),
@@ -9819,8 +9862,8 @@ function renderWateringTab(card) {
     card._renderTabPill("Signal", irrigationSignal.actionLabel || "Non disponible", tone, "mdi:sprinkler"),
     card._renderTabPill("Raison", formatStatusLabel(irrigationSignal.reasonKind), tone, "mdi:information-outline"),
     card._renderTabPill("Coordination tondeuse", mowerCoordinationState.label, mowerCoordinationState.tone, "mdi:robot-mower"),
-    irrigationSignal.wateringBlockedByMower
-      ? card._renderTabPill("Blocage tondeuse", irrigationSignal.wateringBlockReasonLabel, "danger", "mdi:robot-mower-alert")
+    (irrigationSignal.wateringBlockedByMower || ["ambiguous", "mower_ambiguous", "missing", "mower_missing", "configured_missing", "mower_configured_missing"].includes(mowerState.reasonCode))
+      ? card._renderTabPill("Blocage tondeuse", irrigationSignal.wateringBlockReasonLabel || mowerState.reason || "Tondeuse à vérifier", "danger", "mdi:robot-mower-alert")
       : "",
     card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
     windowState.optimalWindowDisplay ? card._renderTabPill("Optimal", windowState.optimalWindowDisplay, "neutral", "mdi:clock-time-eight-outline") : "",

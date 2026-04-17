@@ -152,6 +152,39 @@ def validate_hass_action_contract(source):
         if f'_performConfiguredAction("{action_key}"' not in source:
             raise SystemExit(f"src/gazon-intelligent-card.js must trigger {action_key} via _performConfiguredAction")
 
+
+def validate_irrigation_signal_contract(main_source, layout_source):
+    for marker in (
+        "formatIrrigationSignalLabel",
+        "formatIrrigationSignalTone",
+    ):
+        if marker not in main_source:
+            raise SystemExit(f"src/gazon-intelligent-card.js must use {marker}")
+        if marker not in layout_source:
+            raise SystemExit(f"src/renderers/layout.js must use {marker}")
+    signal_match = re.search(
+        r"_irrigationSignalState\(\)\s*\{(?P<body>.*?)\n  \}",
+        main_source,
+        re.S,
+    )
+    if not signal_match:
+        raise SystemExit("Could not find _irrigationSignalState in src/gazon-intelligent-card.js")
+    signal_body = signal_match.group("body")
+    if "formatStatusLabel(entity?.state)" in signal_body:
+        raise SystemExit("_irrigationSignalState must not infer a label from the binary_sensor state")
+    if "state === \"on\"" in layout_source:
+        raise SystemExit("getDerivedSignalPresentation must not promote binary_sensor on state to success")
+
+
+def validate_mower_reason_labels(source):
+    for marker in (
+        'ambiguous: "Tondeuse ambiguë: plusieurs robots détectés, configuration requise"',
+        'configured_missing: "Tondeuse configurée introuvable"',
+        'missing: "Tondeuse manquante"',
+    ):
+        if marker not in source:
+            raise SystemExit(f"formatMowerReasonLabel must include {marker}")
+
 if package.get("main") != "gazon-intelligent-card.js":
     raise SystemExit("package.json main must point to gazon-intelligent-card.js")
 
@@ -179,6 +212,8 @@ ensure_same_keys(
     ["type", *[key for key in readme_complete_yaml_keys if key != "type"]],
 )
 validate_hass_action_contract(main_src)
+validate_irrigation_signal_contract(main_src, (ROOT / "src/renderers/layout.js").read_text(encoding="utf-8"))
+validate_mower_reason_labels((ROOT / "src/utils/formatters.js").read_text(encoding="utf-8"))
 
 if 'from "./constants.js"' not in main_src:
     raise SystemExit('src/gazon-intelligent-card.js must import shared constants')

@@ -59,10 +59,10 @@ export function formatMm(value) {
 export function formatRecommendationState(value) {
   const normalized = String(value ?? "").trim().toLowerCase();
   if (["on", "true", "yes", "1", "oui"].includes(normalized)) {
-    return "Autorisé";
+    return "Recommandée";
   }
   if (["off", "false", "no", "0", "non"].includes(normalized)) {
-    return "Non requis";
+    return "Non requise";
   }
   return isUnavailableState(value) ? "Non disponible" : String(value);
 }
@@ -365,6 +365,49 @@ export function formatWateringTypeLabel(value) {
   return formatStateLabel(value);
 }
 
+export function formatIrrigationSignalLabel({ actionLabel, summary, reasonKind } = {}) {
+  const normalizedAction = String(actionLabel ?? "").trim();
+  if (normalizedAction) {
+    return normalizedAction;
+  }
+  const normalizedSummary = String(summary ?? "").trim();
+  if (normalizedSummary) {
+    return normalizedSummary;
+  }
+  const normalizedReason = String(reasonKind ?? "").trim().toLowerCase();
+  if (normalizedReason === "blocked") {
+    return "Irrigation bloquée";
+  }
+  if (normalizedReason === "waiting") {
+    return "Attendre";
+  }
+  if (["post_application", "hydric_need"].includes(normalizedReason)) {
+    return "Irrigation prête";
+  }
+  return "Signal irrigation";
+}
+
+export function formatIrrigationSignalTone({ reasonKind, triggerKind } = {}) {
+  const normalizedReason = String(reasonKind ?? "").trim().toLowerCase();
+  const normalizedTrigger = String(triggerKind ?? "").trim().toLowerCase();
+  if (normalizedReason === "blocked") {
+    return "danger";
+  }
+  if (normalizedReason === "waiting") {
+    return "warning";
+  }
+  if (["post_application", "hydric_need"].includes(normalizedReason)) {
+    return "success";
+  }
+  if (["recommended", "ready", "post_application", "hydrique"].includes(normalizedTrigger)) {
+    return "success";
+  }
+  if (normalizedTrigger === "soft") {
+    return "warning";
+  }
+  return "neutral";
+}
+
 const MOWER_REASON_LABELS = {
   mower_mowing: "Tondeuse en cours de tonte",
   mowing: "Tondeuse en cours de tonte",
@@ -374,6 +417,12 @@ const MOWER_REASON_LABELS = {
   not_stowed: "Tondeuse non rangée",
   mower_unreliable: "Coordination tondeuse indisponible",
   unreliable: "Coordination tondeuse indisponible",
+  ambiguous: "Tondeuse ambiguë: plusieurs robots détectés, configuration requise",
+  mower_ambiguous: "Tondeuse ambiguë: plusieurs robots détectés, configuration requise",
+  missing: "Tondeuse manquante",
+  mower_missing: "Tondeuse manquante",
+  configured_missing: "Tondeuse configurée introuvable",
+  mower_configured_missing: "Tondeuse configurée introuvable",
   error: "Tondeuse en erreur",
   disconnected: "Tondeuse indisponible",
 };

@@ -21,10 +21,10 @@ export const CARD_STYLES = String.raw`
           --gi-header-gap: 10px;
           --gi-header-margin-bottom: 8px;
           --gi-hero-margin: 2px 0 6px;
-          --gi-hero-gap: 8px;
-          --gi-hero-lead-padding: 11px 12px;
-          --gi-hero-lead-gap: 8px;
-          --gi-hero-metrics-gap: 6px;
+          --gi-hero-gap: 10px;
+          --gi-hero-lead-padding: 12px 14px;
+          --gi-hero-lead-gap: 10px;
+          --gi-hero-metrics-gap: 8px;
           --gi-inline-direction: row;
           --gi-inline-align: center;
           --gi-inline-justify: space-between;
@@ -50,20 +50,20 @@ export const CARD_STYLES = String.raw`
           --gi-decision-grid-gap: 8px;
           --gi-tiles-gap: 6px;
           --gi-card-core-gap: 10px;
-          --gi-card-core-padding: 12px 14px;
-          --gi-card-core-min-height: 78px;
-          --gi-card-core-radius: 18px;
+          --gi-card-core-padding: 13px 14px;
+          --gi-card-core-min-height: 82px;
+          --gi-card-core-radius: 20px;
           --gi-card-core-icon-size: 20px;
           --gi-card-core-icon-glyph-size: 12px;
           --gi-card-core-secondary-size: 0.72rem;
-          --gi-surface-border: color-mix(in srgb, var(--gazon-section-accent) 18%, var(--divider-color));
-          --gi-surface-border-strong: color-mix(in srgb, var(--gazon-section-accent) 28%, var(--divider-color));
+          --gi-surface-border: color-mix(in srgb, var(--gazon-section-accent) 16%, rgba(255, 255, 255, 0.08));
+          --gi-surface-border-strong: color-mix(in srgb, var(--gazon-section-accent) 30%, rgba(255, 255, 255, 0.16));
           --gi-surface-fill:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 88%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, black) 100%);
+            linear-gradient(180deg, color-mix(in srgb, #1a2028 96%, var(--gazon-section-accent) 4%) 0%, color-mix(in srgb, #0f1217 98%, black) 100%);
           --gi-surface-fill-accent:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
-          --gi-surface-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
-          --gi-surface-shadow-strong: 0 14px 28px rgba(0, 0, 0, 0.12);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 18%, #1a2028) 0%, color-mix(in srgb, #0f1217 98%, black) 100%);
+          --gi-surface-shadow: 0 12px 28px rgba(0, 0, 0, 0.30);
+          --gi-surface-shadow-strong: 0 18px 40px rgba(0, 0, 0, 0.42);
           --gi-tab-accent: var(--gazon-section-accent);
           --gi-tab-companion: var(--gazon-water-color, #44c8ea);
           --gi-tab-glow-color: var(--gazon-section-accent);
@@ -1903,8 +1903,8 @@ export const CARD_STYLES = String.raw`
         }
 
         .hero {
-          display: flex;
-          flex-wrap: wrap;
+          display: grid;
+          grid-template-columns: minmax(280px, 1.05fr) minmax(0, 1.5fr);
           min-width: 0;
           gap: var(--gi-hero-gap);
           align-items: stretch;
@@ -1914,15 +1914,15 @@ export const CARD_STYLES = String.raw`
         .hero__lead {
           min-width: 0;
           border-radius: 20px;
-          padding: 13px 14px;
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 32%, var(--divider-color));
+          padding: 14px 16px;
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 26%, var(--divider-color));
           background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gi-tab-companion) 14%, transparent) 0%, transparent 34%),
-            radial-gradient(circle at bottom left, color-mix(in srgb, var(--gi-tab-mist-color) 18%, transparent) 0%, transparent 34%),
-            linear-gradient(135deg, color-mix(in srgb, var(--gi-tab-accent) 20%, transparent) 0%, color-mix(in srgb, var(--gi-tab-companion) 10%, transparent) 100%),
-            color-mix(in srgb, var(--secondary-background-color) 84%, transparent);
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gi-tab-companion) 16%, transparent) 0%, transparent 36%),
+            radial-gradient(circle at bottom left, color-mix(in srgb, var(--gi-tab-mist-color) 22%, transparent) 0%, transparent 36%),
+            linear-gradient(135deg, color-mix(in srgb, var(--gi-tab-accent) 18%, transparent) 0%, color-mix(in srgb, var(--gi-tab-companion) 12%, transparent) 100%),
+            color-mix(in srgb, var(--secondary-background-color) 76%, transparent);
           box-shadow:
-            0 8px 22px rgba(0, 0, 0, 0.10),
+            0 12px 28px rgba(0, 0, 0, 0.16),
             0 0 0 1px color-mix(in srgb, var(--gi-tab-accent) 12%, transparent);
           cursor: pointer;
           display: flex;
@@ -1932,15 +1932,15 @@ export const CARD_STYLES = String.raw`
         }
 
         .hero__metrics {
-          display: flex;
-          flex-wrap: wrap;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
           min-width: 0;
           gap: var(--gi-hero-metrics-gap);
           align-content: start;
         }
 
         .hero__metrics .gi-card-core {
-          flex: 1 1 110px;
+          min-height: 86px;
         }
 
         .hero__lead-icon {
@@ -2052,20 +2052,20 @@ export const CARD_STYLES = String.raw`
           width: 100%;
           min-width: 0;
           box-sizing: border-box;
-          border-radius: 18px;
+          border-radius: var(--gi-card-core-radius);
           min-height: var(--gi-card-core-min-height);
           height: 100%;
           padding: var(--gi-card-core-padding);
           position: relative;
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 14%, var(--divider-color));
           background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 0%, transparent 28%),
-            radial-gradient(circle at bottom left, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 12%, transparent) 0%, transparent 32%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 6%, transparent) 0%, transparent 100%),
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 14%, transparent) 0%, transparent 28%),
+            radial-gradient(circle at bottom left, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 16%, transparent) 0%, transparent 34%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 9%, transparent) 0%, transparent 100%),
             var(--gi-surface-fill);
           box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.04),
-            0 8px 18px rgba(0, 0, 0, 0.06);
+            0 10px 20px rgba(0, 0, 0, 0.14);
           transition:
             transform var(--gi-motion-fast) var(--gi-ease-standard),
             border-color var(--gi-motion-fast) var(--gi-ease-standard),
@@ -2080,7 +2080,7 @@ export const CARD_STYLES = String.raw`
         }
 
         .gi-card-core--metric {
-          min-height: 74px;
+          min-height: 78px;
           padding: 12px 13px;
         }
 
@@ -2092,8 +2092,8 @@ export const CARD_STYLES = String.raw`
           border: 1px solid color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 26%, transparent);
           background:
             radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 8%, transparent) 0%, transparent 26%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 16%, transparent) 0%, transparent 100%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 14%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 18%, transparent) 0%, transparent 100%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 14%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, white) 100%);
         }
 
         .gi-card-core__icon {
@@ -2190,8 +2190,8 @@ export const CARD_STYLES = String.raw`
           min-width: 0;
           overflow-wrap: break-word;
           word-break: normal;
-          font-size: var(--gi-font-sm);
-          line-height: 1.24;
+          font-size: var(--gi-font-md);
+          line-height: 1.18;
           display: -webkit-box;
           -webkit-box-orient: vertical;
           -webkit-line-clamp: 2;
@@ -2199,8 +2199,47 @@ export const CARD_STYLES = String.raw`
         }
 
         .gi-card-core--metric .gi-card-core__value {
-          font-size: var(--gi-font-sm);
-          line-height: 1.24;
+          order: 1;
+          font-size: var(--gi-font-xl);
+          line-height: 1.05;
+          font-weight: 900;
+        }
+
+        .gi-card-core--metric .gi-card-core__label {
+          order: 2;
+          margin-top: 2px;
+        }
+
+        .gi-card-core--metric .gi-card-core__secondary {
+          order: 3;
+        }
+
+        .gi-card-core--metric .gi-card-core__content {
+          gap: 1px;
+        }
+
+        .gi-card-core--success .gi-card-core__value {
+          color: var(--gazon-success-color, #4fc38c);
+        }
+
+        .gi-card-core--warning .gi-card-core__value {
+          color: var(--gazon-warning-color, #d6a34f);
+        }
+
+        .gi-card-core--danger .gi-card-core__value {
+          color: var(--gazon-danger-color, #f15f69);
+        }
+
+        .gi-card-core--accent .gi-card-core__value {
+          color: var(--gazon-accent-tone-color, #31b8d4);
+        }
+
+        .gi-card-core--critical .gi-card-core__value {
+          color: var(--gazon-critical-color, #ff5a5f);
+        }
+
+        .gi-card-core--neutral .gi-card-core__value {
+          color: var(--primary-text-color);
         }
 
         .gi-card-core__secondary {
@@ -2327,9 +2366,11 @@ export const CARD_STYLES = String.raw`
 
         .card--theme-dark :is(.tab-panel__hero, .tab-panel__section, .tab-panel__block, .gi-info, .gi-info--main, .gi-info--secondary, .decision-hero, .decision-plan, .decision-context, .decision-block, .decision-footer, .gi-card-core, .gi-tab, .tab-nav__item, .hero__lead, .decision) {
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 7%, #000000) 0%, #000000 100%);
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 16%, rgba(255, 255, 255, 0.08));
-          box-shadow: var(--gi-theme-shadow-override);
+            radial-gradient(circle at 84% 0%, color-mix(in srgb, var(--gi-tab-companion) 12%, transparent) 0%, transparent 28%),
+            radial-gradient(circle at 10% 94%, color-mix(in srgb, var(--gi-tab-mist-color) 10%, transparent) 0%, transparent 34%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 8%, #13171d) 0%, #0a0d11 100%);
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 18%, rgba(255, 255, 255, 0.10));
+          box-shadow: 0 18px 34px rgba(0, 0, 0, 0.34);
         }
 
         .card--theme-light :is(.gi-card-core--tile, .gi-card-core--metric, .gi-card-core--stat) {
@@ -2337,7 +2378,9 @@ export const CARD_STYLES = String.raw`
         }
 
         .card--theme-dark :is(.gi-card-core--tile, .gi-card-core--metric, .gi-card-core--stat) {
-          background: #000000;
+          background:
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 0%, transparent 28%),
+            linear-gradient(180deg, #151a21 0%, #0a0d11 100%);
         }
 
         .card--theme-light .gi-card-core__secondary,
@@ -2463,6 +2506,10 @@ export const CARD_STYLES = String.raw`
             --gi-tiles-gap: 6px;
             --gi-surface-shadow: 0 8px 18px rgba(0, 0, 0, 0.07);
             --gi-surface-shadow-strong: 0 12px 24px rgba(0, 0, 0, 0.12);
+          }
+
+          .hero {
+            grid-template-columns: 1fr;
           }
 
           .tab-panel__section--products {
@@ -2595,6 +2642,10 @@ export const CARD_STYLES = String.raw`
 
           .hero__metrics {
             gap: 4px;
+          }
+
+          .hero__metrics {
+            grid-template-columns: repeat(auto-fit, minmax(122px, 1fr));
           }
 
           .hero__metrics .gi-card-core {

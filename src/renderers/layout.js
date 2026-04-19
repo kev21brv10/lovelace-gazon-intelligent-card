@@ -594,7 +594,7 @@ function renderInterventionOverviewSection(
           <div class="tab-panel__eyebrow">Pilotage intervention</div>
           <div class="tab-panel__section-meta">${escapeHtml(ui.badge || "Analyse active")}</div>
         </div>
-        <div class="tab-panel__grid tab-panel__grid--products">
+        <div class="tab-panel__grid tab-panel__grid--products tab-panel__grid--featured">
           ${card._renderStatCard(
             "Produit proposé",
             proposedProductValue,
@@ -647,7 +647,7 @@ function renderInterventionTechnicalSummary(card, recommendation, debug) {
           <div class="tab-panel__eyebrow">Repères techniques</div>
           <div class="tab-panel__section-meta">${escapeHtml(debug?.statusLabel || "Analyse moteur")}</div>
         </div>
-        <div class="tab-panel__grid tab-panel__grid--products">
+        <div class="tab-panel__grid tab-panel__grid--products tab-panel__grid--featured">
           ${card._renderStatCard(
             "Score",
             scoreValue,
@@ -1317,7 +1317,7 @@ export function renderOverviewTab(card) {
 
         ${renderWateringProgressSection(card, wateringProgress)}
 
-        <div class="tab-panel__grid tab-panel__grid--overview">
+        <div class="tab-panel__grid tab-panel__grid--overview tab-panel__grid--priority">
           ${facts
             .map((fact) => card._renderLinkedStatCard(fact))
             .join("")}
@@ -1569,35 +1569,43 @@ export function renderMowingTab(card) {
   const mowingStatusIcon = card._config?.show_icons ? "mdi:content-cut" : null;
   const mowingFacts = [
     {
+      label: "Terrain",
+      value: tonteAutorisee === "on" ? "Autorisé" : "Bloqué",
+      tone: tonteAutorisee === "on" ? "success" : "danger",
+      icon: "mdi:grass",
+      secondary: mowingBlock.blocked ? mowingBlock.detail || mowingBlock.reasonLabel : "Le gazon permet la tonte.",
+      entityKey: "entity_tonte_autorisee",
+    },
+    {
+      label: "Blocage",
+      value: mowingBlock.blocked ? mowingBlock.reasonLabel || "Blocage actif" : "Aucun",
+      tone: mowingBlock.blocked ? mowingBlock.tone || "danger" : "neutral",
+      icon: "mdi:cancel",
+      secondary: mowingBlock.blocked ? mowingBlock.detail || "" : "Aucun frein hydrique ou post-produit.",
+      entityKey: "entity_tonte_autorisee",
+    },
+    {
+      label: "Machine",
+      value: machinePermetTonte ? "Prête" : mowerState.present ? mowerState.label : "Absente",
+      tone: machinePermetTonte ? "success" : mowerState.present ? mowerState.tone : "neutral",
+      icon: "mdi:robot-mower",
+      secondary: mowerState.present ? mowerState.reason || "Tondeuse détectée" : "Tondeuse non disponible",
+      entityKey: "entity_tonte",
+    },
+    {
+      label: "Action possible",
+      value: actionPossible ? "Possible" : "Impossible",
+      tone: actionPossible ? "success" : "danger",
+      icon: "mdi:check-circle-outline",
+      secondary: actionPossible ? "Terrain et machine alignés" : "Terrain ou machine non prêt",
+      entityKey: "entity_tonte",
+    },
+    {
       label: "État de tonte",
       value: tonteValue,
       tone: computeTonteTone(tonteValue),
       icon: "mdi:content-cut",
       secondary: "",
-      entityKey: "entity_tonte",
-    },
-    {
-      label: "Gazon permet la tonte",
-      value: formatAuthorizationState(tonteAutorisee),
-      tone: tonteAutorisee === "on" ? "success" : "danger",
-      icon: "mdi:content-cut",
-      secondary: mowingBlock.blocked ? mowingBlock.detail || mowingBlock.reasonLabel : "",
-      entityKey: "entity_tonte_autorisee",
-    },
-    {
-      label: "Machine permet la tonte",
-      value: machinePermetTonte ? "Oui" : "Non",
-      tone: machinePermetTonte ? "success" : "danger",
-      icon: "mdi:robot-mower",
-      secondary: mowerState.present ? mowerState.label : "Tondeuse non disponible",
-      entityKey: "entity_tonte",
-    },
-    {
-      label: "Action possible",
-      value: actionPossible ? "Oui" : "Non",
-      tone: actionPossible ? "success" : "danger",
-      icon: "mdi:check-circle-outline",
-      secondary: actionPossible ? "Terrain et machine alignés" : "Terrain ou machine non prêt",
       entityKey: "entity_tonte",
     },
     {
@@ -1609,11 +1617,11 @@ export function renderMowingTab(card) {
       entityKey: "entity_hauteur",
     },
       {
-        label: "Fenêtre optimale",
-        value: windowSummary,
-        tone: windowState.tone,
-        icon: "mdi:clock-outline",
-        secondary: windowState.nextActionDisplay || windowState.nextAction || "",
+      label: "Fenêtre optimale",
+      value: windowSummary,
+      tone: windowState.tone,
+      icon: "mdi:clock-outline",
+      secondary: windowState.nextActionDisplay || windowState.nextAction || "",
       entityKey: "entity_fenetre_optimale",
       },
     ];
@@ -1633,7 +1641,7 @@ export function renderMowingTab(card) {
   }
   if (mowerState.present) {
     mowingFacts.splice(
-      mowingBlock.blocked || mowingBlock.postApplicationActive ? 2 : 1,
+      mowingBlock.blocked || mowingBlock.postApplicationActive ? 6 : 5,
       0,
       {
         label: mowerState.name ? `Robot · ${mowerState.name}` : "Robot tondeuse",
@@ -1667,12 +1675,12 @@ export function renderMowingTab(card) {
         <div class="tab-panel__header">
           <div>
             <div class="tab-panel__eyebrow">Tonte</div>
-            <div class="tab-panel__title">État, hauteur et créneau</div>
+            <div class="tab-panel__title">Tableau de décision, hauteur et créneau</div>
           </div>
           ${renderStatusPill(tonteValue, computeTonteTone(tonteValue), mowingStatusIcon, "tab-panel__status")}
         </div>
 
-        <div class="tab-panel__grid">
+        <div class="tab-panel__grid tab-panel__grid--mowing tab-panel__grid--decision-board">
           ${mowingFacts.map((fact) => card._renderLinkedStatCard(fact)).join("")}
         </div>
       </section>

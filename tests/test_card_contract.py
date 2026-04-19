@@ -50,7 +50,7 @@ class CardContractTests(unittest.TestCase):
         self.assertIn("machine_permet_tonte", MAIN_SRC)
         self.assertIn("action_possible", MAIN_SRC)
         self.assertIn("Gazon permet la tonte", MAIN_SRC)
-        self.assertIn("Machine permet la tonte", MAIN_SRC)
+        self.assertIn('label: "Machine"', MAIN_SRC)
         self.assertIn("Action possible", MAIN_SRC)
 
     def test_overview_proposal_keeps_blocked_mowing_as_in_progress(self):
@@ -67,6 +67,7 @@ class CardContractTests(unittest.TestCase):
         self.assertIn('const mowingHeaderValue = mowingBusy', body)
         self.assertIn('"Tonte impossible"', body)
         self.assertIn('"Tonte en cours"', body)
+        self.assertIn('const machineStateLabel = mowingBusy', body)
 
 
 if __name__ == "__main__":

@@ -7307,6 +7307,18 @@ class GazonIntelligentCard extends HTMLElement {
     const heightSecondary = heightMin !== null && heightMax !== null ? `${formatCm(heightMin)} → ${formatCm(heightMax)}` : "";
     const windowSummary = windowState.entity ? windowState.summary : "Fenêtre optimale non disponible";
     const mowingStatusIcon = this._config?.show_icons ? "mdi:content-cut" : null;
+    const machineStateLabel = mowingBusy
+      ? "Tonte en cours"
+      : mowerState.present
+        ? mowerState.ready === true
+          ? "Prête"
+          : mowerState.reason || mowerState.operationLabel || "Non prête"
+        : "Indisponible";
+    const machineStateSecondary = mowerState.present
+      ? mowingBusy
+        ? assistant.reason || mowerState.reason || mowerState.operationLabel
+        : mowerState.reason || mowerState.operationLabel || mowerState.label
+      : "Tondeuse non disponible";
     const mowingFacts = [
       {
         label: "État de tonte",
@@ -7325,11 +7337,11 @@ class GazonIntelligentCard extends HTMLElement {
         entityKey: "entity_tonte_autorisee",
       },
       {
-        label: "Machine permet la tonte",
-        value: machinePermetTonte ? "Oui" : "Non",
-        tone: machinePermetTonte ? "success" : "danger",
+        label: "Machine",
+        value: machineStateLabel,
+        tone: mowingBusy ? "warning" : machinePermetTonte ? "success" : mowerState.present ? "danger" : "neutral",
         icon: "mdi:robot-mower",
-        secondary: mowerState.present ? mowerState.label : "Tondeuse non disponible",
+        secondary: machineStateSecondary,
         entityKey: "entity_tonte",
       },
       {

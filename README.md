@@ -280,6 +280,12 @@ entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 entity_delai_reprise_tonte_apres_arrosage: number.gazon_intelligent_delai_reprise_tonte_apres_arrosage
 ```
 
+Les attributs `gazon_permet_tonte`, `machine_permet_tonte` et `action_possible` sont exposés sur les entités de tonte pour rendre la lecture explicite:
+
+- `gazon_permet_tonte` = autorisation agronomique
+- `machine_permet_tonte` = disponibilité réelle de la tondeuse
+- `action_possible` = verdict exécutable final
+
 ---
 
 ## ⚙️ Options principales

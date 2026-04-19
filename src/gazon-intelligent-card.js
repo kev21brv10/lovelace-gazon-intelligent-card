@@ -2891,10 +2891,19 @@ class GazonIntelligentCard extends HTMLElement {
   _renderMowingTab() {
     const tonte = this._entity("entity_tonte");
     const tonteAutorisee = this._entityState("entity_tonte_autorisee", null);
+    const tonteAutoriseeEntity = this._entity("entity_tonte_autorisee");
     const height = this._entity("entity_hauteur");
     const windowState = this._windowState();
     const mowerState = this._mowerState();
     const mowingBlock = this._mowingBlockState();
+    const tonteAttrs = tonte?.attributes || tonteAutoriseeEntity?.attributes || {};
+    const gazonPermetTonte = tonteAttrs.gazon_permet_tonte !== undefined ? Boolean(tonteAttrs.gazon_permet_tonte) : tonteAutorisee === "on";
+    const machinePermetTonte = tonteAttrs.machine_permet_tonte !== undefined
+      ? Boolean(tonteAttrs.machine_permet_tonte)
+      : mowerState.present ? mowerState.ready === true : false;
+    const actionPossible = tonteAttrs.action_possible !== undefined
+      ? Boolean(tonteAttrs.action_possible)
+      : gazonPermetTonte && machinePermetTonte;
     const tonteValue = tonte ? formatStatusLabel(tonte.state) : "Non disponible";
     const heightValue = height ? formatCm(height.state) : "Non disponible";
     const heightMin = asNumber(height?.attributes?.hauteur_tonte_min_cm);
@@ -2912,12 +2921,28 @@ class GazonIntelligentCard extends HTMLElement {
         entityKey: "entity_tonte",
       },
       {
-        label: "Tonte autorisée",
+        label: "Gazon permet la tonte",
         value: formatAuthorizationState(tonteAutorisee),
         tone: tonteAutorisee === "on" ? "success" : "danger",
         icon: "mdi:content-cut",
         secondary: mowingBlock.blocked ? mowingBlock.detail || mowingBlock.reasonLabel : "",
         entityKey: "entity_tonte_autorisee",
+      },
+      {
+        label: "Machine permet la tonte",
+        value: machinePermetTonte ? "Oui" : "Non",
+        tone: machinePermetTonte ? "success" : "danger",
+        icon: "mdi:robot-mower",
+        secondary: mowerState.present ? mowerState.label : "Tondeuse non disponible",
+        entityKey: "entity_tonte",
+      },
+      {
+        label: "Action possible",
+        value: actionPossible ? "Oui" : "Non",
+        tone: actionPossible ? "success" : "danger",
+        icon: "mdi:check-circle-outline",
+        secondary: actionPossible ? "Terrain et machine alignés" : "Terrain ou machine non prêt",
+        entityKey: "entity_tonte",
       },
       {
         label: "Hauteur conseillée",
@@ -3598,7 +3623,7 @@ class GazonIntelligentCard extends HTMLElement {
           ${this._renderMetric("Tonte", tonte, computeTonteTone(tonte), this._heroMetricIcon("entity_tonte", tonte))}
           ${mowerState.present ? this._renderMetric("Robot", mowerState.label, mowerState.tone, "mdi:robot-mower") : ""}
           ${this._renderMetric("Irrigation", formatRecommendationState(arrosage), arrosage === "on" ? "success" : "neutral", this._heroMetricIcon("entity_arrosage_recommande", arrosage))}
-          ${this._renderMetric("Tonte autorisée", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", this._heroMetricIcon("entity_tonte_autorisee", tonteAutorisee))}
+          ${this._renderMetric("Gazon permet la tonte", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", this._heroMetricIcon("entity_tonte_autorisee", tonteAutorisee))}
           ${this._renderMetric("Post-application", afterApplicationInfo.label, afterApplicationInfo.tone, this._heroMetricIcon("entity_arrosage_apres_application_autorise", afterApplication?.state ?? ""))}
           ${this._renderMetric("Hauteur", formatCm(hauteur), this._phaseTone(), this._heroMetricIcon("entity_hauteur", hauteur))}
         </div>

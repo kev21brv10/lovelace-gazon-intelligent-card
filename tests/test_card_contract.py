@@ -45,6 +45,14 @@ class CardContractTests(unittest.TestCase):
         self.assertIn('return "Recommandée"', FORMATTERS_SRC)
         self.assertIn('return "Non requise"', FORMATTERS_SRC)
 
+    def test_tonte_contract_exposes_explicit_clarity_flags(self):
+        self.assertIn("gazon_permet_tonte", MAIN_SRC)
+        self.assertIn("machine_permet_tonte", MAIN_SRC)
+        self.assertIn("action_possible", MAIN_SRC)
+        self.assertIn("Gazon permet la tonte", MAIN_SRC)
+        self.assertIn("Machine permet la tonte", MAIN_SRC)
+        self.assertIn("Action possible", MAIN_SRC)
+
 
 if __name__ == "__main__":
     unittest.main()

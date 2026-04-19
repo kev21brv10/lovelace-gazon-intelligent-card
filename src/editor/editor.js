@@ -384,7 +384,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_sous_phase", "Sous-phase")}
             ${this._renderEntityInput("entity_risque", "Risque gazon")}
             ${this._renderEntityInput("entity_tonte", "État de tonte")}
-            ${this._renderEntityInput("entity_tonte_autorisee", "Tonte autorisée")}
+            ${this._renderEntityInput("entity_tonte_autorisee", "Gazon permet la tonte")}
             ${this._renderEntityInput("entity_hauteur", "Hauteur de tonte conseillée")}
           </div>
         </section>

@@ -53,6 +53,12 @@ class CardContractTests(unittest.TestCase):
         self.assertIn("Machine permet la tonte", MAIN_SRC)
         self.assertIn("Action possible", MAIN_SRC)
 
+    def test_overview_proposal_keeps_blocked_mowing_as_in_progress(self):
+        body = extract_function_body(MAIN_SRC, "_overviewProposal")
+        self.assertIn('assistant.status === "blocked" && assistant.action === "tonte"', body)
+        self.assertIn('title = "Tonte en cours";', body)
+        self.assertIn('title = "Tonte possible";', body)
+
 
 if __name__ == "__main__":
     unittest.main()

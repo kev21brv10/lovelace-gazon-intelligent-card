@@ -5617,17 +5617,32 @@ class GazonIntelligentCard extends HTMLElement {
     const status = String(attrs.status || "").trim().toLowerCase();
     const reason = String(attrs.reason || "").trim();
     const quantityMm = asNumber(attrs.quantity_mm);
+    const normalizedReason = reason.toLowerCase();
+    const isMowingBusy = status === "blocked" && action === "tonte" && (
+      normalizedReason.includes("déjà en cours")
+      || normalizedReason.includes("en cours")
+      || normalizedReason.includes("mower_mowing")
+    );
     let tone = "neutral";
     if (status === "action_required") {
       tone = action.includes("arros") ? "accent" : "success";
-    } else if (status.includes("block") || reason.toLowerCase().includes("bloqu")) {
+    } else if (isMowingBusy) {
+      tone = "warning";
+    } else if (status.includes("block") || normalizedReason.includes("bloqu")) {
       tone = "danger";
     } else if (action.includes("surveil")) {
       tone = "warning";
     }
     const isPassiveState = action === "aucune_action" && moment === "attendre";
+    const isBlockedMowing = status === "blocked" && action === "tonte" && (
+      normalizedReason.includes("déjà en cours")
+      || normalizedReason.includes("en cours")
+      || normalizedReason.includes("mower_mowing")
+    );
     const summary = isPassiveState
       ? "Aucune action immédiate"
+      : isBlockedMowing
+        ? "Tonte en cours"
       : [
           actionLabel,
           momentLabel && moment !== "maintenant" ? momentLabel.toLowerCase() : moment === "maintenant" ? "maintenant" : "",
@@ -6909,11 +6924,13 @@ class GazonIntelligentCard extends HTMLElement {
     const wateringCause = irrigationSignal.wateringCause || windowState.wateringCause || this._inferWateringCause({ typeArrosage: this._entityState("entity_type_arrosage", null) });
     const tonteAutorisee = this._entityState("entity_tonte_autorisee", null);
     const tonteEntity = this._entity("entity_tonte");
+    const tonteAttrs = tonteEntity?.attributes || {};
     const tonteReason = String(
       tonteEntity?.attributes?.raison_blocage_tonte
       || tonteEntity?.attributes?.summary
       || "",
     ).trim();
+    const assistantReason = String(assistant.reason || "").trim();
     const tonteNextMowing = String(
       mowerState.nextDeparture
       || tonteEntity?.attributes?.next_mowing_display
@@ -6929,6 +6946,17 @@ class GazonIntelligentCard extends HTMLElement {
     let hint = conseil || planState.summary || windowState.summary || "Les paramètres restent cohérents.";
     let tone = "neutral";
     let icon = "mdi:check-circle-outline";
+    const mowingBusy = assistant.status === "blocked" && assistant.action === "tonte" && (
+      assistantReason.toLowerCase().includes("déjà en cours")
+      || assistantReason.toLowerCase().includes("en cours")
+      || tonteReason.toLowerCase().includes("déjà en cours")
+      || tonteReason.toLowerCase().includes("en cours")
+      || mowerState.tone === "accent"
+      || mowerState.operationLabel === "Tonte en cours"
+    );
+    const mowingActionPossible = tonteAttrs.action_possible !== undefined
+      ? Boolean(tonteAttrs.action_possible)
+      : tonteAutorisee === "on" && mowerState.ready === true;
 
     if (wateringCause === "post_application" && irrigationSignal.reasonKind === "blocked") {
       title = "Post-produit bloqué";
@@ -6975,6 +7003,21 @@ class GazonIntelligentCard extends HTMLElement {
       hint = windowState.nextAction || windowState.summary || "Le créneau prévu n’est pas encore ouvert.";
       tone = "danger";
       icon = "mdi:cancel";
+    } else if (mowingBusy) {
+      title = "Tonte en cours";
+      hint = assistant.reason || tonteReason || "La tondeuse est déjà en train de tondre.";
+      tone = "warning";
+      icon = "mdi:content-cut";
+    } else if (assistant.status === "blocked" && assistant.action === "tonte") {
+      title = assistant.reason || assistant.summary || "Tonte différée";
+      hint = assistant.reason || tonteReason || conseil || planState.summary || windowState.displaySummary;
+      tone = assistant.tone === "danger" ? "danger" : "warning";
+      icon = "mdi:content-cut";
+    } else if (mowingActionPossible) {
+      title = "Tonte possible";
+      hint = assistant.reason || tonteReason || conseil || planState.summary || windowState.displaySummary;
+      tone = "success";
+      icon = "mdi:content-cut";
     } else if (tonteTone === "danger" || tonteTone === "critical") {
       title = tonteStatusLabel || "Tonte interdite";
       hint = tonteReason || avoid || "Tonte déconseillée dans les conditions actuelles.";
@@ -7015,8 +7058,8 @@ class GazonIntelligentCard extends HTMLElement {
       const interventionTrigger = String(interventionSignal?.attributes?.trigger_kind || "").trim().toLowerCase();
       hint = conseil;
       if (normalizedAdvice.startsWith("tonte")) {
-        title = "Tonte possible";
-        tone = "success";
+        title = mowingActionPossible ? "Tonte possible" : "Tonte en cours";
+        tone = mowingActionPossible ? "success" : "warning";
         icon = "mdi:content-cut";
       } else if (normalizedAdvice.startsWith("intervention")) {
         title = interventionTrigger === "ready" ? "Intervention prête" : interventionTrigger === "recommended" ? "Intervention recommandée" : "Intervention à préparer";

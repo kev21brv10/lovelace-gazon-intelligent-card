@@ -7307,17 +7307,21 @@ class GazonIntelligentCard extends HTMLElement {
     const heightSecondary = heightMin !== null && heightMax !== null ? `${formatCm(heightMin)} → ${formatCm(heightMax)}` : "";
     const windowSummary = windowState.entity ? windowState.summary : "Fenêtre optimale non disponible";
     const mowingStatusIcon = this._config?.show_icons ? "mdi:content-cut" : null;
-    const machineStateLabel = mowingBusy
-      ? "Tonte en cours"
-      : mowerState.present
-        ? mowerState.ready === true
+    const mowerIsMowing = ["mowing", "tonte", "tonte_en_cours"].includes(String(mowerState.status || "").trim().toLowerCase())
+      || String(mowerState.operationLabel || "").toLowerCase().includes("tonte");
+    const machineStateLabel = mowerState.present
+      ? mowingBusy || mowerIsMowing
+        ? "Tonte en cours"
+        : mowerState.ready === true
           ? "Prête"
           : mowerState.reason || mowerState.operationLabel || "Non prête"
-        : "Indisponible";
+      : "Indisponible";
     const machineStateSecondary = mowerState.present
       ? mowingBusy
         ? assistant.reason || mowerState.reason || mowerState.operationLabel
-        : mowerState.reason || mowerState.operationLabel || mowerState.label
+        : mowerIsMowing
+          ? mowerState.reason || mowerState.operationLabel || mowerState.label
+          : mowerState.reason || mowerState.operationLabel || mowerState.label
       : "Tondeuse non disponible";
     const mowingFacts = [
       {
@@ -7339,7 +7343,7 @@ class GazonIntelligentCard extends HTMLElement {
       {
         label: "Machine",
         value: machineStateLabel,
-        tone: mowingBusy ? "warning" : machinePermetTonte ? "success" : mowerState.present ? "danger" : "neutral",
+        tone: mowingBusy || mowerIsMowing ? "warning" : machinePermetTonte ? "success" : mowerState.present ? "danger" : "neutral",
         icon: "mdi:robot-mower",
         secondary: machineStateSecondary,
         entityKey: "entity_tonte",

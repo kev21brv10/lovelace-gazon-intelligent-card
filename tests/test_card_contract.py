@@ -67,7 +67,8 @@ class CardContractTests(unittest.TestCase):
         self.assertIn('const mowingHeaderValue = mowingBusy', body)
         self.assertIn('"Tonte impossible"', body)
         self.assertIn('"Tonte en cours"', body)
-        self.assertIn('const machineStateLabel = mowingBusy', body)
+        self.assertIn('const mowerIsMowing = ["mowing", "tonte", "tonte_en_cours"]', body)
+        self.assertIn('mowingBusy || mowerIsMowing', body)
 
 
 if __name__ == "__main__":

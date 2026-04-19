@@ -59,6 +59,13 @@ class CardContractTests(unittest.TestCase):
         self.assertIn('title = "Tonte en cours";', body)
         self.assertIn('title = "Tonte possible";', body)
 
+    def test_mowing_tab_header_reflects_busy_mower(self):
+        body = extract_function_body(MAIN_SRC, "_renderMowingTab")
+        self.assertIn('const assistant = this._assistantState();', body)
+        self.assertIn('const mowingBusy = assistant.status === "blocked" && assistant.action === "tonte"', body)
+        self.assertIn('const mowingHeaderValue = mowingBusy', body)
+        self.assertIn('"Tonte en cours"', body)
+
 
 if __name__ == "__main__":
     unittest.main()

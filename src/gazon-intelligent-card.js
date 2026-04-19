@@ -2935,6 +2935,7 @@ class GazonIntelligentCard extends HTMLElement {
     const tonte = this._entity("entity_tonte");
     const tonteAutorisee = this._entityState("entity_tonte_autorisee", null);
     const tonteAutoriseeEntity = this._entity("entity_tonte_autorisee");
+    const assistant = this._assistantState();
     const height = this._entity("entity_hauteur");
     const windowState = this._windowState();
     const mowerState = this._mowerState();
@@ -2948,6 +2949,22 @@ class GazonIntelligentCard extends HTMLElement {
       ? Boolean(tonteAttrs.action_possible)
       : gazonPermetTonte && machinePermetTonte;
     const tonteValue = tonte ? formatStatusLabel(tonte.state) : "Non disponible";
+    const mowingBusy = assistant.status === "blocked" && assistant.action === "tonte" && (
+      String(assistant.reason || "").toLowerCase().includes("déjà en cours")
+      || String(assistant.reason || "").toLowerCase().includes("en cours")
+      || String(tonteAttrs.mower_operation_label || "").toLowerCase().includes("en cours")
+      || String(tonteAttrs.mower_reason_label || "").toLowerCase().includes("en cours")
+    );
+    const mowingHeaderValue = mowingBusy
+      ? "Tonte en cours"
+      : actionPossible
+        ? "Tonte possible"
+        : tonteValue;
+    const mowingHeaderTone = mowingBusy
+      ? "warning"
+      : actionPossible
+        ? "success"
+        : computeTonteTone(tonteValue);
     const heightValue = height ? formatCm(height.state) : "Non disponible";
     const heightMin = asNumber(height?.attributes?.hauteur_tonte_min_cm);
     const heightMax = asNumber(height?.attributes?.hauteur_tonte_max_cm);
@@ -3092,7 +3109,7 @@ class GazonIntelligentCard extends HTMLElement {
             <div class="tab-panel__eyebrow">Tonte</div>
             <div class="tab-panel__title">État, hauteur et créneau</div>
           </div>
-          ${renderStatusPill(tonteValue, computeTonteTone(tonteValue), mowingStatusIcon, "tab-panel__status")}
+          ${renderStatusPill(mowingHeaderValue, mowingHeaderTone, mowingStatusIcon, "tab-panel__status")}
         </div>
 
         <div class="tab-panel__grid">

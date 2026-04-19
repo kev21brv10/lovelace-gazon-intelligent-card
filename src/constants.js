@@ -1,6 +1,6 @@
 export const CARD_TYPE = "gazon-intelligent-card";
 export const CARD_NAME = "Gazon Intelligent Card";
-export const CARD_VERSION = "0.1.72";
+export const CARD_VERSION = "0.1.73";
 
 export const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

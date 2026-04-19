@@ -454,6 +454,13 @@ export const CARD_STYLES = String.raw`
           border-color: var(--gi-surface-border);
         }
 
+        .tab-panel__section--overview-facts,
+        .tab-panel__section--mowing-summary,
+        .tab-panel__section--intervention-overview,
+        .tab-panel__section--intervention-technical {
+          gap: 8px;
+        }
+
         .tab-panel__section-title {
           font-size: var(--gi-font-xxs);
           text-transform: uppercase;
@@ -472,6 +479,99 @@ export const CARD_STYLES = String.raw`
           font-weight: 750;
           line-height: 1.28;
           letter-spacing: -0.01em;
+        }
+
+        .tab-panel__summary-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+          min-width: 0;
+        }
+
+        .tab-panel__summary-row {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 4px;
+          width: 100%;
+          min-width: 0;
+          padding: 12px 0;
+          border: 0;
+          border-top: 1px solid color-mix(in srgb, var(--gi-surface-border) 82%, transparent);
+          background: transparent;
+          text-align: left;
+          box-sizing: border-box;
+          --tab-panel-summary-value-color: var(--primary-text-color);
+        }
+
+        .tab-panel__summary-row:first-child {
+          padding-top: 0;
+          border-top: 0;
+        }
+
+        .tab-panel__summary-row--action {
+          cursor: pointer;
+          font: inherit;
+          color: inherit;
+          appearance: none;
+          -webkit-appearance: none;
+          border-radius: 14px;
+        }
+
+        .tab-panel__summary-row--action:hover {
+          background: color-mix(in srgb, var(--gazon-card-accent) 6%, transparent);
+        }
+
+        .tab-panel__summary-row--action:focus-visible {
+          outline: none;
+          box-shadow: 0 0 0 2px color-mix(in srgb, var(--gazon-card-accent) 28%, transparent);
+          border-radius: 14px;
+        }
+
+        .tab-panel__summary-row--success {
+          --tab-panel-summary-value-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 88%, var(--primary-text-color));
+        }
+
+        .tab-panel__summary-row--warning {
+          --tab-panel-summary-value-color: color-mix(in srgb, var(--gazon-warning-color, #f2c94c) 88%, var(--primary-text-color));
+        }
+
+        .tab-panel__summary-row--danger {
+          --tab-panel-summary-value-color: color-mix(in srgb, var(--gazon-danger-color, #f15f69) 88%, var(--primary-text-color));
+        }
+
+        .tab-panel__summary-row--accent {
+          --tab-panel-summary-value-color: color-mix(in srgb, var(--gazon-accent-tone-color, #6fb3ff) 88%, var(--primary-text-color));
+        }
+
+        .tab-panel__summary-row--neutral {
+          --tab-panel-summary-value-color: var(--primary-text-color);
+        }
+
+        .tab-panel__summary-label {
+          font-size: var(--gi-font-xxs);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: var(--secondary-text-color);
+          line-height: 1.15;
+        }
+
+        .tab-panel__summary-value {
+          min-width: 0;
+          font-size: var(--gi-font-md);
+          font-weight: 800;
+          line-height: 1.2;
+          letter-spacing: -0.01em;
+          color: var(--tab-panel-summary-value-color);
+          overflow-wrap: anywhere;
+        }
+
+        .tab-panel__summary-note {
+          min-width: 0;
+          font-size: var(--gi-font-xs);
+          line-height: 1.35;
+          color: var(--secondary-text-color);
+          overflow-wrap: anywhere;
         }
 
         .tab-panel__field {

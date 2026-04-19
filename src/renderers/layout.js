@@ -314,6 +314,61 @@ function renderDebugConstraintCards(card, constraints, emptyText) {
     .join("");
 }
 
+function renderCompactSummaryList(items, emptyText = "Aucune information supplémentaire.") {
+  const rows = Array.isArray(items)
+    ? items.filter(Boolean).map((item) => {
+        if (typeof item === "string") {
+          return { label: "", value: item, note: "", tone: "neutral", entityKey: null };
+        }
+        if (!item || typeof item !== "object") {
+          return null;
+        }
+        return {
+          label: String(item.label || "").trim(),
+          value: String(item.value || "").trim(),
+          note: String(item.note || "").trim(),
+          tone: String(item.tone || "neutral").trim().toLowerCase() || "neutral",
+          entityKey: String(item.entityKey || "").trim() || null,
+        };
+      }).filter(Boolean)
+    : [];
+  if (!rows.length) {
+    return `<div class="tab-panel__empty">${escapeHtml(emptyText)}</div>`;
+  }
+  return `
+    <div class="tab-panel__summary-list">
+      ${rows
+        .map(
+          (row) => `
+            ${
+              row.entityKey
+                ? `
+                  <button
+                    type="button"
+                    class="tab-panel__summary-row tab-panel__summary-row--action tab-panel__summary-row--${escapeHtml(row.tone || "neutral")}"
+                    data-more-info-entity="${escapeHtml(row.entityKey)}"
+                    aria-label="${escapeHtml(row.label ? `Ouvrir ${row.label}` : row.value || "Ouvrir le détail")}"
+                  >
+                    ${row.label ? `<div class="tab-panel__summary-label">${escapeHtml(row.label)}</div>` : ""}
+                    <div class="tab-panel__summary-value">${escapeHtml(row.value || "Non disponible")}</div>
+                    ${row.note ? `<div class="tab-panel__summary-note">${escapeHtml(row.note)}</div>` : ""}
+                  </button>
+                `
+                : `
+                  <div class="tab-panel__summary-row tab-panel__summary-row--${escapeHtml(row.tone || "neutral")}">
+                    ${row.label ? `<div class="tab-panel__summary-label">${escapeHtml(row.label)}</div>` : ""}
+                    <div class="tab-panel__summary-value">${escapeHtml(row.value || "Non disponible")}</div>
+                    ${row.note ? `<div class="tab-panel__summary-note">${escapeHtml(row.note)}</div>` : ""}
+                  </div>
+                `
+            }
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
 function getDebugInterventionState(card) {
   const entity = card._entity("entity_debug_intervention");
   if (!entity) {
@@ -570,14 +625,6 @@ function renderInterventionOverviewSection(
   },
 ) {
   const proposedProductValue = recommendation.product.name || ui.summary || "Aucun produit retenu";
-  const proposedProductDetails = [
-    ui.badge || "",
-    recommendation.product.type ? formatStatusLabel(recommendation.product.type) : "",
-    recommendation.product.monthsLabel ? `Période: ${recommendation.product.monthsLabel}` : "",
-    recommendation.score !== null && recommendation.score !== undefined
-      ? `Score: ${formatNumber(recommendation.score, 0)}/100`
-      : "",
-  ].filter(Boolean);
   const selectionValue = quickAction.record ? quickAction.label : "Aucun produit sélectionné";
   const selectionSecondary = [
     quickAction.summary || "",
@@ -594,28 +641,44 @@ function renderInterventionOverviewSection(
           <div class="tab-panel__eyebrow">Pilotage intervention</div>
           <div class="tab-panel__section-meta">${escapeHtml(ui.badge || "Analyse active")}</div>
         </div>
-        <div class="tab-panel__grid tab-panel__grid--products tab-panel__grid--featured">
-          ${card._renderStatCard(
-            "Produit proposé",
-            proposedProductValue,
-            recommendationTone,
-            recommendationIcon,
-            proposedProductDetails.join(" · "),
-          )}
-          ${card._renderStatCard(
-            "Produit sélectionné",
-            selectionValue,
-            quickAction.record ? "accent" : hasProductOptions ? "warning" : "neutral",
-            quickAction.record ? "mdi:package-variant" : "mdi:package-variant-closed",
-            selectionSecondary,
-          )}
-          ${card._renderStatCard(
-            "Déclaration",
-            declarationValue,
-            canDeclare ? "success" : recommendationTone,
-            canDeclare ? "mdi:check-circle-outline" : "mdi:spray-bottle",
-            declarationSecondary,
-          )}
+        <div class="decision-plan tab-panel__decision-plan tab-panel__decision-plan--intervention">
+          <div class="decision-plan__header">
+            <div class="decision-plan__label">Produit proposé</div>
+            <div class="decision-plan__meta">${escapeHtml(ui.actionLabel || "Choisir le produit")}</div>
+          </div>
+          <div class="decision-plan__summary">${escapeHtml(proposedProductValue)}</div>
+          <div class="decision-plan__chips">
+            ${ui.badge ? renderStatusPill(ui.badge, recommendationTone, recommendationIcon, "debug-chip") : ""}
+            ${recommendation.product.type ? renderStatusPill(formatStatusLabel(recommendation.product.type), "neutral", "mdi:package-variant", "debug-chip") : ""}
+            ${
+              recommendation.product.monthsLabel
+                ? renderStatusPill(recommendation.product.monthsLabel, "neutral", "mdi:calendar-month", "debug-chip")
+                : ""
+            }
+            ${
+              recommendation.score !== null && recommendation.score !== undefined
+                ? renderStatusPill(`Score ${formatNumber(recommendation.score, 0)}/100`, recommendationTone, "mdi:signal", "debug-chip")
+                : ""
+            }
+          </div>
+        </div>
+        <div class="tab-panel__section-summary-list">
+          ${renderCompactSummaryList([
+            {
+              label: "Produit sélectionné",
+              value: selectionValue,
+              note: selectionSecondary,
+              tone: quickAction.record ? "success" : hasProductOptions ? "warning" : "neutral",
+              entityKey: quickAction.record ? null : "entity_prochaine_intervention",
+            },
+            {
+              label: "Déclaration",
+              value: declarationValue,
+              note: declarationSecondary,
+              tone: canDeclare ? "success" : recommendationTone,
+              entityKey: canDeclare ? null : "entity_prochaine_intervention",
+            },
+          ])}
         </div>
       </section>
     `;
@@ -647,35 +710,40 @@ function renderInterventionTechnicalSummary(card, recommendation, debug) {
           <div class="tab-panel__eyebrow">Repères techniques</div>
           <div class="tab-panel__section-meta">${escapeHtml(debug?.statusLabel || "Analyse moteur")}</div>
         </div>
-        <div class="tab-panel__grid tab-panel__grid--products tab-panel__grid--featured">
-          ${card._renderStatCard(
-            "Score",
-            scoreValue,
-            scoreTone,
-            "mdi:signal",
-            recommendation.scoreLevel ? `Niveau: ${formatStatusLabel(recommendation.scoreLevel)}` : "",
-          )}
-          ${card._renderStatCard(
-            "Bloquantes",
-            String(blockingConstraints),
-            blockingConstraints > 0 ? "danger" : "success",
-            blockingConstraints > 0 ? "mdi:alert-circle-outline" : "mdi:check-circle-outline",
-            blockingConstraints > 0 ? "Une ou plusieurs contraintes bloquent la déclaration." : "Aucune contrainte bloquante.",
-          )}
-          ${card._renderStatCard(
-            "Non bloquantes",
-            String(nonBlockingConstraints),
-            nonBlockingConstraints > 0 ? "warning" : "neutral",
-            "mdi:shield-alert-outline",
-            nonBlockingConstraints > 0 ? "Signaux dégradants ou neutres pris en compte." : "Aucun signal secondaire détaillé.",
-          )}
-          ${card._renderStatCard(
-            "Manquants",
-            String(missingRequirements),
-            missingRequirements > 0 ? "warning" : "success",
-            missingRequirements > 0 ? "mdi:clipboard-alert-outline" : "mdi:check-circle-outline",
-            missingRequirements > 0 ? "Des étapes restent à compléter avant déclaration." : "Aucun pré-requis manquant.",
-          )}
+        <div class="decision-plan tab-panel__decision-plan tab-panel__decision-plan--technical">
+          <div class="decision-plan__header">
+            <div class="decision-plan__label">Score</div>
+            <div class="decision-plan__meta">${escapeHtml(scoreValue)}</div>
+          </div>
+          <div class="decision-plan__summary">${escapeHtml(recommendation.ui?.summary || debug?.summary || "Analyse moteur")}</div>
+          <div class="decision-plan__chips">
+            ${renderStatusPill(`Niveau ${formatStatusLabel(recommendation.scoreLevel || "neutral")}`, scoreTone, "mdi:signal", "debug-chip")}
+            ${renderStatusPill(`${blockingConstraints} bloquante${blockingConstraints > 1 ? "s" : ""}`, blockingConstraints > 0 ? "danger" : "success", blockingConstraints > 0 ? "mdi:alert-circle-outline" : "mdi:check-circle-outline", "debug-chip")}
+            ${renderStatusPill(`${nonBlockingConstraints} signal${nonBlockingConstraints > 1 ? "s" : ""}`, nonBlockingConstraints > 0 ? "warning" : "neutral", "mdi:shield-alert-outline", "debug-chip")}
+            ${renderStatusPill(`${missingRequirements} manquant${missingRequirements > 1 ? "s" : ""}`, missingRequirements > 0 ? "warning" : "success", missingRequirements > 0 ? "mdi:clipboard-alert-outline" : "mdi:check-circle-outline", "debug-chip")}
+          </div>
+        </div>
+        <div class="tab-panel__section-summary-list">
+          ${renderCompactSummaryList([
+            {
+              label: "Bloquantes",
+              value: String(blockingConstraints),
+              note: blockingConstraints > 0 ? "Une ou plusieurs contraintes bloquent la déclaration." : "Aucune contrainte bloquante.",
+              tone: blockingConstraints > 0 ? "danger" : "success",
+            },
+            {
+              label: "Non bloquantes",
+              value: String(nonBlockingConstraints),
+              note: nonBlockingConstraints > 0 ? "Signaux dégradants ou neutres pris en compte." : "Aucun signal secondaire détaillé.",
+              tone: nonBlockingConstraints > 0 ? "warning" : "neutral",
+            },
+            {
+              label: "Manquants",
+              value: String(missingRequirements),
+              note: missingRequirements > 0 ? "Des étapes restent à compléter avant déclaration." : "Aucun pré-requis manquant.",
+              tone: missingRequirements > 0 ? "warning" : "success",
+            },
+          ])}
         </div>
       </section>
     `;
@@ -881,27 +949,28 @@ function renderCatalogueProductCards(card) {
   if (!products.length) {
     return `<div class="tab-panel__empty">Aucun produit enregistré.</div>`;
   }
-  return products.map((product) => {
-    const productId = String(product.id || "").trim();
-    const productName = String(product.nom || productId || "").trim() || "Produit";
-    const productType = String(product.type || "").trim();
-    const usageMode = String(product.usage_mode || "").trim();
-    const monthsLabel = String(product.application_months_label || "").trim();
-    const requiresWateringAfter = Boolean(product.application_requires_watering_after);
-    const isSelected = selectedProductId && productId.toLowerCase() === selectedProductId;
-    const secondaryParts = [
-      usageMode ? `Mode ${formatProductUsageMode(usageMode)}` : "",
-      monthsLabel,
-      requiresWateringAfter ? "Arrosage après application" : "",
-    ].filter(Boolean);
-    return card._renderStatCard(
-      productType ? formatStatusLabel(productType) : "Produit",
-      productName,
-      isSelected ? "accent" : "neutral",
-      isSelected ? "mdi:package-variant" : "mdi:package-variant-closed",
-      secondaryParts.join(" · "),
-    );
-  }).join("");
+  return renderCompactSummaryList(
+    products.map((product) => {
+      const productId = String(product.id || "").trim();
+      const productName = String(product.nom || productId || "").trim() || "Produit";
+      const productType = String(product.type || "").trim();
+      const usageMode = String(product.usage_mode || "").trim();
+      const monthsLabel = String(product.application_months_label || "").trim();
+      const requiresWateringAfter = Boolean(product.application_requires_watering_after);
+      const isSelected = selectedProductId && productId.toLowerCase() === selectedProductId;
+      const secondaryParts = [
+        usageMode ? `Mode ${formatProductUsageMode(usageMode)}` : "",
+        monthsLabel,
+        requiresWateringAfter ? "Arrosage après application" : "",
+      ].filter(Boolean);
+      return {
+        label: productType ? formatStatusLabel(productType) : "Produit",
+        value: productName,
+        note: secondaryParts.join(" · "),
+        tone: isSelected ? "success" : "neutral",
+      };
+    }),
+  );
 }
 
 function renderProductsScopeSection() {
@@ -957,21 +1026,33 @@ export function renderProductSummarySection(card) {
         <div class="tab-panel__section-head">
           <div class="tab-panel__eyebrow">Vue produit</div>
         </div>
-        <div class="tab-panel__grid tab-panel__grid--products">
-          ${card._renderStatCard(
-            "Produit sélectionné",
-            selectionValue,
-            selection.selectedProductName ? "accent" : "neutral",
-            "mdi:package-variant",
-            selectionDetails,
-          )}
-          ${card._renderStatCard(
-            "Catalogue local",
-            catalogueLabel,
-            catalogue.hasProducts ? "success" : "neutral",
-            "mdi:package-variant-closed",
-            catalogue.hasProducts ? "Le référentiel local alimente le choix du produit et l’historique." : "Aucun produit enregistré",
-          )}
+        <div class="decision-plan tab-panel__decision-plan tab-panel__decision-plan--products">
+          <div class="decision-plan__header">
+            <div class="decision-plan__label">Produit sélectionné</div>
+            <div class="decision-plan__meta">${escapeHtml(catalogueLabel)}</div>
+          </div>
+          <div class="decision-plan__summary">${escapeHtml(selectionValue)}</div>
+          <div class="decision-plan__chips">
+            ${selection.selectedProductName ? renderStatusPill("Sélection active", "success", "mdi:package-variant", "debug-chip") : renderStatusPill("Sélection à faire", "neutral", "mdi:package-variant-closed", "debug-chip")}
+            ${catalogue.hasProducts ? renderStatusPill(catalogue.summary || "Catalogue local", "success", "mdi:package-variant-closed", "debug-chip") : renderStatusPill("Aucun produit enregistré", "neutral", "mdi:package-variant-closed", "debug-chip")}
+          </div>
+        </div>
+        <div class="tab-panel__section-summary-list">
+          ${renderCompactSummaryList([
+            {
+              label: "Sélection active",
+              value: selectionValue,
+              note: selectionDetails,
+              tone: selection.selectedProductName ? "success" : "neutral",
+              entityKey: selection.selectedProductName ? null : "entity_produit_intervention",
+            },
+            {
+              label: "Catalogue local",
+              value: catalogueLabel,
+              note: catalogue.hasProducts ? "Le référentiel local alimente le choix du produit et l’historique." : "Aucun produit enregistré",
+              tone: catalogue.hasProducts ? "success" : "neutral",
+            },
+          ])}
         </div>
       </section>
     `;
@@ -1317,11 +1398,21 @@ export function renderOverviewTab(card) {
 
         ${renderWateringProgressSection(card, wateringProgress)}
 
-        <div class="tab-panel__grid tab-panel__grid--overview tab-panel__grid--priority">
-          ${facts
-            .map((fact) => card._renderLinkedStatCard(fact))
-            .join("")}
-        </div>
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--overview-facts">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Essentiel</div>
+            <div class="tab-panel__section-meta">${escapeHtml(`${facts.length} repère${facts.length > 1 ? "s" : ""}`)}</div>
+          </div>
+          ${renderCompactSummaryList(
+            facts.map((fact) => ({
+              label: fact.label,
+              value: fact.value,
+              note: fact.secondary,
+              tone: fact.tone,
+              entityKey: fact.entityKey,
+            })),
+          )}
+        </section>
 
         ${
           derivedFacts.length
@@ -1331,20 +1422,13 @@ export function renderOverviewTab(card) {
                   <div class="tab-panel__eyebrow">Lecture dérivée</div>
                   <div class="tab-panel__section-meta">Raccourci lisible</div>
                 </div>
-                <div class="tab-panel__grid">
-                  ${derivedFacts
-                    .map(({ key, fact }) =>
-                      card._renderLinkedStatCard({
-                        label: fact.label,
-                        value: fact.value,
-                        tone: fact.tone,
-                        icon: fact.icon,
-                        secondary: fact.secondary,
-                        entityKey: key,
-                      }),
-                    )
-                    .join("")}
-                </div>
+                ${renderCompactSummaryList(
+                  derivedFacts.map(({ fact }) => ({
+                    label: fact.label,
+                    value: fact.value,
+                    note: fact.secondary,
+                  })),
+                )}
               </section>
             `
             : ""
@@ -1567,107 +1651,70 @@ export function renderMowingTab(card) {
   const heightSecondary = heightMin !== null && heightMax !== null ? `${formatCm(heightMin)} → ${formatCm(heightMax)}` : "";
   const windowSummary = windowState.entity ? windowState.displaySummary || windowState.summary : "Fenêtre optimale non disponible";
   const mowingStatusIcon = card._config?.show_icons ? "mdi:content-cut" : null;
-  const mowingFacts = [
+  const mowingDecisionSummary = actionPossible
+    ? "Terrain et machine alignés."
+    : mowerState.present
+      ? mowerState.reason || "Machine non prête pour une nouvelle tonte."
+      : "Tondeuse non disponible.";
+  const mowingDecisionPills = [
     {
-      label: "Terrain",
-      value: tonteAutorisee === "on" ? "Autorisé" : "Bloqué",
+      label: "Gazon",
+      value: tonteAutorisee === "on" ? "Permet la tonte" : "Bloque la tonte",
       tone: tonteAutorisee === "on" ? "success" : "danger",
       icon: "mdi:grass",
-      secondary: mowingBlock.blocked ? mowingBlock.detail || mowingBlock.reasonLabel : "Le gazon permet la tonte.",
-      entityKey: "entity_tonte_autorisee",
-    },
-    {
-      label: "Blocage",
-      value: mowingBlock.blocked ? mowingBlock.reasonLabel || "Blocage actif" : "Aucun",
-      tone: mowingBlock.blocked ? mowingBlock.tone || "danger" : "neutral",
-      icon: "mdi:cancel",
-      secondary: mowingBlock.blocked ? mowingBlock.detail || "" : "Aucun frein hydrique ou post-produit.",
-      entityKey: "entity_tonte_autorisee",
     },
     {
       label: "Machine",
-      value: machinePermetTonte ? "Prête" : mowerState.present ? mowerState.label : "Absente",
-      tone: machinePermetTonte ? "success" : mowerState.present ? mowerState.tone : "neutral",
-      icon: "mdi:robot-mower",
-      secondary: mowerState.present ? mowerState.reason || "Tondeuse détectée" : "Tondeuse non disponible",
-      entityKey: "entity_tonte",
+      value: machinePermetTonte ? "Prête" : "Non prête",
+      tone: machinePermetTonte ? "success" : mowerState.present ? "danger" : "neutral",
+      icon: mowerState.present ? "mdi:robot-mower" : "mdi:robot-mower-off",
     },
     {
-      label: "Action possible",
+      label: "Action",
       value: actionPossible ? "Possible" : "Impossible",
-      tone: actionPossible ? "success" : "danger",
+      tone: actionPossible ? "success" : "warning",
       icon: "mdi:check-circle-outline",
-      secondary: actionPossible ? "Terrain et machine alignés" : "Terrain ou machine non prêt",
-      entityKey: "entity_tonte",
     },
+  ];
+  const mowingSummaryItems = [
     {
       label: "État de tonte",
       value: tonteValue,
+      note: mowerState.present ? mowerState.label : "",
       tone: computeTonteTone(tonteValue),
-      icon: "mdi:content-cut",
-      secondary: "",
-      entityKey: "entity_tonte",
+    },
+    {
+      label: "Machine",
+      value: mowerState.present ? (machinePermetTonte ? "Prête" : "Indisponible") : "Absente",
+      note: mowerState.present ? mowerState.reason || "" : "Tondeuse non disponible",
+      tone: machinePermetTonte ? "success" : mowerState.present ? "danger" : "neutral",
+    },
+    {
+      label: "Blocage",
+      value: mowingBlock.blocked ? mowingBlock.reasonLabel || "Actif" : "Aucun",
+      note: mowingBlock.blocked ? mowingBlock.detail || "" : "Aucun frein hydrique ou post-produit.",
+      tone: mowingBlock.blocked ? "danger" : "success",
+    },
+    {
+      label: "Fenêtre optimale",
+      value: windowSummary,
+      note: windowState.nextActionDisplay || windowState.nextAction || "",
+      tone: windowState.tone,
     },
     {
       label: "Hauteur conseillée",
       value: heightValue,
+      note: heightSecondary || "Lecture agronomique stable.",
       tone: card._phaseTone(),
-      icon: "mdi:ruler-square",
-      secondary: heightSecondary,
-      entityKey: "entity_hauteur",
     },
-      {
-      label: "Fenêtre optimale",
-      value: windowSummary,
-      tone: windowState.tone,
-      icon: "mdi:clock-outline",
-      secondary: windowState.nextActionDisplay || windowState.nextAction || "",
-      entityKey: "entity_fenetre_optimale",
-      },
-    ];
-  if (mowingBlock.blocked || mowingBlock.postApplicationActive) {
-    mowingFacts.splice(
-      1,
-      0,
-      {
-        label: "Blocage tonte",
-        value: mowingBlock.reasonLabel || "Blocage actif",
-        tone: mowingBlock.tone || "danger",
-        icon: "mdi:cancel",
-        secondary: mowingBlock.detail || "",
-        entityKey: "entity_tonte_autorisee",
-      },
-    );
-  }
+  ];
   if (mowerState.present) {
-    mowingFacts.splice(
-      mowingBlock.blocked || mowingBlock.postApplicationActive ? 6 : 5,
-      0,
-      {
-        label: mowerState.name ? `Robot · ${mowerState.name}` : "Robot tondeuse",
-        value: mowerState.label,
-        tone: mowerState.tone,
-        icon: "mdi:robot-mower",
-        secondary: mowerState.reason || "",
-        entityKey: "entity_tonte",
-      },
-      {
-        label: "Batterie tondeuse",
-        value: mowerState.battery === null ? "Non disponible" : `${mowerState.battery} %`,
-        tone: mowerState.battery !== null && mowerState.battery <= 20 ? "warning" : "neutral",
-        icon: "mdi:battery",
-        secondary: mowerState.nextDeparture || "",
-      },
-    );
-    if (mowerState.cuttingHeightMm !== null) {
-      mowingFacts.push({
-        label: "Hauteur de coupe",
-        value: `${mowerState.cuttingHeightMm} mm`,
-        tone: "neutral",
-        icon: "mdi:grass",
-        secondary: "",
-      });
-    }
+    mowingSummaryItems.push({
+      label: "Batterie tondeuse",
+      value: mowerState.battery === null ? "Non disponible" : `${mowerState.battery} %`,
+      note: mowerState.nextDeparture || "",
+      tone: mowerState.battery === null ? "neutral" : mowerState.battery < 25 ? "danger" : "success",
+    });
   }
 
   return `
@@ -1680,9 +1727,25 @@ export function renderMowingTab(card) {
           ${renderStatusPill(tonteValue, computeTonteTone(tonteValue), mowingStatusIcon, "tab-panel__status")}
         </div>
 
-        <div class="tab-panel__grid tab-panel__grid--mowing tab-panel__grid--decision-board">
-          ${mowingFacts.map((fact) => card._renderLinkedStatCard(fact)).join("")}
+        <div class="decision-plan tab-panel__decision-plan tab-panel__decision-plan--mowing">
+          <div class="decision-plan__header">
+            <div class="decision-plan__label">Lecture rapide</div>
+            <div class="decision-plan__meta">${escapeHtml(mowingDecisionSummary)}</div>
+          </div>
+          <div class="decision-plan__chips">
+            ${renderStatusPill(mowingDecisionPills[0].value, mowingDecisionPills[0].tone, mowingDecisionPills[0].icon, "debug-chip")}
+            ${renderStatusPill(mowingDecisionPills[1].value, mowingDecisionPills[1].tone, mowingDecisionPills[1].icon, "debug-chip")}
+            ${renderStatusPill(mowingDecisionPills[2].value, mowingDecisionPills[2].tone, mowingDecisionPills[2].icon, "debug-chip")}
+          </div>
         </div>
+
+        <section class="tab-panel__section tab-panel__section--mowing-summary">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Lecture rapide</div>
+            <div class="tab-panel__section-meta">${escapeHtml(mowingBlock.blocked ? mowingBlock.reasonLabel || "Blocage actif" : "Aucun blocage")}</div>
+          </div>
+          ${renderCompactSummaryList(mowingSummaryItems)}
+        </section>
       </section>
     `;
 }

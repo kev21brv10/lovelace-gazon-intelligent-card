@@ -2955,16 +2955,27 @@ class GazonIntelligentCard extends HTMLElement {
       || String(tonteAttrs.mower_operation_label || "").toLowerCase().includes("en cours")
       || String(tonteAttrs.mower_reason_label || "").toLowerCase().includes("en cours")
     );
+    const mowingImpossibleReason = assistant.status === "blocked" && assistant.action === "tonte"
+      ? assistant.reason || assistant.summary || "Tonte impossible"
+      : mowerState.present
+        ? mowerState.ready === false
+          ? mowerState.reason || mowerState.label || "Machine non prête"
+          : mowerState.label || "Tonte impossible"
+        : "Tonte impossible";
     const mowingHeaderValue = mowingBusy
       ? "Tonte en cours"
       : actionPossible
         ? "Tonte possible"
-        : tonteValue;
+        : "Tonte impossible";
     const mowingHeaderTone = mowingBusy
       ? "warning"
       : actionPossible
         ? "success"
-        : computeTonteTone(tonteValue);
+        : assistant.status === "blocked" && assistant.action === "tonte"
+          ? "warning"
+          : mowerState.present && mowerState.ready === false
+            ? "danger"
+            : "danger";
     const heightValue = height ? formatCm(height.state) : "Non disponible";
     const heightMin = asNumber(height?.attributes?.hauteur_tonte_min_cm);
     const heightMax = asNumber(height?.attributes?.hauteur_tonte_max_cm);
@@ -3108,6 +3119,7 @@ class GazonIntelligentCard extends HTMLElement {
           <div>
             <div class="tab-panel__eyebrow">Tonte</div>
             <div class="tab-panel__title">État, hauteur et créneau</div>
+            ${!actionPossible && !mowingBusy ? `<div class="tab-panel__header-hint">${escapeHtml(mowingImpossibleReason)}</div>` : ""}
           </div>
           ${renderStatusPill(mowingHeaderValue, mowingHeaderTone, mowingStatusIcon, "tab-panel__status")}
         </div>

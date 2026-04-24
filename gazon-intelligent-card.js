@@ -3115,7 +3115,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.75";
+const CARD_VERSION = "0.1.76";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -10459,6 +10459,8 @@ function renderMowingTab(card) {
   const mowingStatusIcon = card._config?.show_icons ? "mdi:content-cut" : null;
   const mowingDecisionSummary = actionPossible
     ? "Terrain et machine alignés."
+    : mowingBlock.blocked
+      ? mowingBlock.reasonLabel || mowingBlock.detail || mowerState.reason || "Tonte bloquée par conditions."
     : mowerState.present
       ? mowerState.reason || "Machine non prête pour une nouvelle tonte."
       : "Tondeuse non disponible.";

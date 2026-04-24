@@ -1653,6 +1653,8 @@ export function renderMowingTab(card) {
   const mowingStatusIcon = card._config?.show_icons ? "mdi:content-cut" : null;
   const mowingDecisionSummary = actionPossible
     ? "Terrain et machine alignés."
+    : mowingBlock.blocked
+      ? mowingBlock.reasonLabel || mowingBlock.detail || mowerState.reason || "Tonte bloquée par conditions."
     : mowerState.present
       ? mowerState.reason || "Machine non prête pour une nouvelle tonte."
       : "Tondeuse non disponible.";

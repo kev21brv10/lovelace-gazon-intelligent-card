@@ -80,6 +80,11 @@ class CardContractTests(unittest.TestCase):
         self.assertIn('const mowerNextDeparture = normalizeOptionalDisplayValue(mowerState.nextDeparture);', body)
         self.assertIn('secondary: mowerNextDeparture', body)
 
+    def test_mowing_tab_summary_prefers_hard_block_reason(self):
+        body = extract_function_body(LAYOUT_SRC, "renderMowingTab")
+        self.assertIn('mowingBlock.blocked', body)
+        self.assertIn('mowingBlock.reasonLabel || mowingBlock.detail || mowerState.reason || "Tonte bloquée par conditions."', body)
+
 
 if __name__ == "__main__":
     unittest.main()

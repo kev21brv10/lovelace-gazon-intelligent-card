@@ -3115,7 +3115,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.74";
+const CARD_VERSION = "0.1.75";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -4395,6 +4395,11 @@ function renderStatusPill(text, tone = "neutral", icon = null, extraClass = "") 
 }
 
 
+
+function normalizeOptionalDisplayValue(value) {
+  const normalized = normalizeDisplayValue(value);
+  return normalized === "Non disponible" ? "" : normalized;
+}
 
 
 // Shared constants are imported from ./constants.js.
@@ -5678,25 +5683,25 @@ class GazonIntelligentCard extends HTMLElement {
       || attrs.tondeuse_statut
       || "",
     ).trim().toLowerCase();
-    const operationLabel = String(
+    const operationLabel = normalizeOptionalDisplayValue(
       attrs.mower_operation_label
       || attrs.tondeuse_statut_libelle
       || formatStatusLabel(status || "non disponible"),
-    ).trim();
+    );
     const battery = asNumber(attrs.tondeuse_batterie);
-    const nextDeparture = String(
+    const nextDeparture = normalizeOptionalDisplayValue(
       attrs.tondeuse_prochain_depart_display
       || humanDateTimeText(attrs.tondeuse_prochain_depart)
       || "",
-    ).trim();
+    );
     const cuttingHeightMm = asNumber(attrs.tondeuse_hauteur_coupe_mm);
-    const reason = String(
+    const reason = normalizeOptionalDisplayValue(
       attrs.mower_reason_label
       || formatMowerReasonLabel(attrs.mower_reason_code)
       || attrs.tondeuse_raison
       || attrs.tondeuse_erreur_libelle
       || "",
-    ).trim();
+    );
     const reasonCode = String(attrs.mower_reason_code || "").trim().toLowerCase();
     const hardBlockReason = ["ambiguous", "mower_ambiguous", "missing", "mower_missing", "configured_missing", "mower_configured_missing"].includes(reasonCode);
     const name = String(attrs.tondeuse_nom || "").trim();
@@ -5705,7 +5710,7 @@ class GazonIntelligentCard extends HTMLElement {
     const coordinationEnabled = attrs.mower_coordination_enabled;
     const coordinationReady = attrs.mower_coordination_ready;
     const presenceState = String(attrs.mower_presence_state || "").trim().toLowerCase();
-    let presenceLabel = String(attrs.mower_presence_label || formatStatusLabel(presenceState || "non disponible")).trim();
+    let presenceLabel = normalizeOptionalDisplayValue(attrs.mower_presence_label || formatStatusLabel(presenceState || "non disponible"));
     if (presenceState === "dockee") {
       presenceLabel = "À la station";
     }
@@ -7309,20 +7314,18 @@ class GazonIntelligentCard extends HTMLElement {
     const mowingStatusIcon = this._config?.show_icons ? "mdi:content-cut" : null;
     const mowerIsMowing = ["mowing", "tonte", "tonte_en_cours"].includes(String(mowerState.status || "").trim().toLowerCase())
       || String(mowerState.operationLabel || "").toLowerCase().includes("tonte");
-    const machineStateLabel = mowerState.present
-      ? mowingBusy || mowerIsMowing
-        ? "Tonte en cours"
-        : mowerState.ready === true
+    const machineStateLabel = mowingBusy || mowerIsMowing
+      ? "Tonte en cours"
+      : mowerState.present
+        ? mowerState.ready === true
           ? "Prête"
           : mowerState.reason || mowerState.operationLabel || "Non prête"
-      : "Indisponible";
-    const machineStateSecondary = mowerState.present
-      ? mowingBusy
-        ? assistant.reason || mowerState.reason || mowerState.operationLabel
-        : mowerIsMowing
-          ? mowerState.reason || mowerState.operationLabel || mowerState.label
-          : mowerState.reason || mowerState.operationLabel || mowerState.label
-      : "Tondeuse non disponible";
+        : "Indisponible";
+    const machineStateSecondary = mowingBusy || mowerIsMowing
+      ? assistant.reason || mowerState.reason || mowerState.operationLabel || "Tondeuse en cours de tonte."
+      : mowerState.present
+        ? mowerState.reason || mowerState.operationLabel || mowerState.label
+        : "Tondeuse non disponible";
     const mowingFacts = [
       {
         label: "État de tonte",
@@ -7389,9 +7392,12 @@ class GazonIntelligentCard extends HTMLElement {
     }
     if (mowerState.present) {
       const mowerCoordinationState = this._mowerCoordinationSwitchState();
+      const mowerOperationLabel = normalizeOptionalDisplayValue(mowerState.operationLabel);
+      const mowerReasonLabel = normalizeOptionalDisplayValue(mowerState.reason);
+      const mowerNextDeparture = normalizeOptionalDisplayValue(mowerState.nextDeparture);
       const mowerSecondary = [
-        mowerState.label !== mowerState.operationLabel ? `État: ${mowerState.operationLabel}` : "",
-        mowerState.reason || "",
+        mowerState.label !== mowerState.operationLabel && mowerOperationLabel ? `État: ${mowerOperationLabel}` : "",
+        mowerReasonLabel,
       ].filter(Boolean).join(" · ");
       const coordinationSecondary = [
         mowerState.safeForWatering === undefined ? "" : `Arrosage sûr: ${mowerState.safeForWatering ? "Oui" : "Non"}`,
@@ -7421,7 +7427,7 @@ class GazonIntelligentCard extends HTMLElement {
           value: mowerState.battery === null ? "Non disponible" : `${mowerState.battery} %`,
           tone: mowerState.battery !== null && mowerState.battery <= 20 ? "warning" : "neutral",
           icon: "mdi:battery",
-          secondary: mowerState.nextDeparture || "",
+          secondary: mowerNextDeparture,
           entityKey: "entity_tonte",
         },
         {
@@ -7433,10 +7439,10 @@ class GazonIntelligentCard extends HTMLElement {
           entityKey: "entity_tonte",
         },
       );
-      if (mowerState.nextDeparture) {
+      if (mowerNextDeparture) {
         mowingFacts.push({
           label: "Prochain départ",
-          value: mowerState.nextDeparture,
+          value: mowerNextDeparture,
           tone: "neutral",
           icon: "mdi:calendar-clock",
           secondary: "",

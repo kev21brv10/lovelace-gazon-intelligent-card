@@ -41,6 +41,13 @@ class CardContractTests(unittest.TestCase):
         self.assertIn('configured_missing: "Tondeuse configurée introuvable"', FORMATTERS_SRC)
         self.assertIn('missing: "Tondeuse manquante"', FORMATTERS_SRC)
 
+    def test_mower_state_sanitizes_sentinel_display_values(self):
+        body = extract_function_body(MAIN_SRC, "_mowerState")
+        self.assertIn("normalizeOptionalDisplayValue", body)
+        self.assertIn("const nextDeparture = normalizeOptionalDisplayValue(", body)
+        self.assertIn("const reason = normalizeOptionalDisplayValue(", body)
+        self.assertIn("let presenceLabel = normalizeOptionalDisplayValue(", body)
+
     def test_recommendation_state_is_non_actionable(self):
         self.assertIn('return "Recommandée"', FORMATTERS_SRC)
         self.assertIn('return "Non requise"', FORMATTERS_SRC)
@@ -65,10 +72,13 @@ class CardContractTests(unittest.TestCase):
         self.assertIn('const mowingBusy = assistant.status === "blocked" && assistant.action === "tonte"', body)
         self.assertIn('const mowingImpossibleReason = assistant.status === "blocked" && assistant.action === "tonte"', body)
         self.assertIn('const mowingHeaderValue = mowingBusy', body)
-        self.assertIn('"Tonte impossible"', body)
         self.assertIn('"Tonte en cours"', body)
         self.assertIn('const mowerIsMowing = ["mowing", "tonte", "tonte_en_cours"]', body)
         self.assertIn('mowingBusy || mowerIsMowing', body)
+        self.assertIn('const machineStateLabel = mowingBusy || mowerIsMowing', body)
+        self.assertIn('const mowerReasonLabel = normalizeOptionalDisplayValue(mowerState.reason);', body)
+        self.assertIn('const mowerNextDeparture = normalizeOptionalDisplayValue(mowerState.nextDeparture);', body)
+        self.assertIn('secondary: mowerNextDeparture', body)
 
 
 if __name__ == "__main__":

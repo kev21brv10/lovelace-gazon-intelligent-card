@@ -565,6 +565,27 @@ export const CARD_STYLES = String.raw`
           overflow: hidden;
         }
 
+        .tab-panel__history-inline {
+          margin-top: 12px;
+          border-top: 1px solid color-mix(in srgb, var(--gi-surface-border) 74%, transparent);
+          padding-top: 12px;
+        }
+
+        .tab-panel__history-inline-head {
+          display: flex;
+          align-items: baseline;
+          justify-content: space-between;
+          gap: 10px;
+          margin-bottom: 10px;
+        }
+
+        .tab-panel__history-inline-meta {
+          font-size: var(--gi-font-xs);
+          line-height: var(--gi-body-line);
+          color: var(--secondary-text-color);
+          text-align: right;
+        }
+
         .tab-panel__history-rail-body {
           max-height: 320px;
           overflow-y: auto;
@@ -581,6 +602,11 @@ export const CARD_STYLES = String.raw`
         .tab-panel__history-rail-body::-webkit-scrollbar-thumb {
           border-radius: 999px;
           background: color-mix(in srgb, var(--gazon-section-accent) 22%, transparent);
+        }
+
+        .tab-panel__history-rail-body--inline {
+          max-height: 360px;
+          padding: 0 4px 0 0;
         }
 
         .tab-panel__history-rail-track {
@@ -2964,6 +2990,9 @@ export const CARD_STYLES = String.raw`
           --gi-theme-base: #0f1418;
           --gi-theme-base-strong: #0b1014;
           --gi-theme-base-soft: #151c21;
+          --gi-warning-ink: #dbe7a4;
+          --gi-warning-border: color-mix(in srgb, #b8ca69 34%, rgba(255, 255, 255, 0.14));
+          --gi-warning-surface: #182017;
           --gi-theme-border-override: color-mix(in srgb, var(--gazon-section-accent) 24%, rgba(255, 255, 255, 0.12));
           --gi-theme-shadow-override: 0 22px 40px rgba(0, 0, 0, 0.42);
           --gi-surface-fill: #12181d;
@@ -3127,6 +3156,75 @@ export const CARD_STYLES = String.raw`
           border-color: color-mix(in srgb, var(--gazon-section-accent) 18%, rgba(255, 255, 255, 0.12));
         }
 
+        .card--theme-dark .gi-pill--warning,
+        .card--theme-dark .decision-status--warning {
+          background: transparent;
+          border-color: var(--gi-warning-border);
+          color: var(--gi-warning-ink);
+        }
+
+        .card--theme-dark .gi-pill--warning .gi-pill__value,
+        .card--theme-dark .gi-pill--warning .gi-pill__label,
+        .card--theme-dark .decision-status--warning {
+          color: var(--gi-warning-ink);
+        }
+
+        .card--theme-dark .tab-panel__intervention-card--proposed,
+        .card--theme-dark .tab-panel__temperature-constraint--warning {
+          border-color: var(--gi-warning-border);
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.008) 0%, rgba(255, 255, 255, 0.003) 100%),
+            #12181d;
+        }
+
+        .card--theme-dark .tab-panel__intervention-card--proposed .tab-panel__section-summary,
+        .card--theme-dark .tab-panel__intervention-card--proposed .tab-panel__section-hint,
+        .card--theme-dark .tab-panel__temperature-constraint--warning .tab-panel__temperature-detail {
+          color: color-mix(in srgb, var(--gi-warning-ink) 82%, var(--primary-text-color));
+        }
+
+        .card--theme-dark .tab-panel__intervention-card--proposed .tab-panel__section-meta,
+        .card--theme-dark .tab-panel__temperature-constraint--warning .tab-panel__temperature-hint,
+        .card--theme-dark .tab-panel__metric-row--warning .tab-panel__metric-note {
+          color: color-mix(in srgb, var(--gi-warning-ink) 52%, var(--secondary-text-color));
+        }
+
+        .card--theme-dark .tab-panel__summary-row--warning {
+          --tab-panel-summary-value-color: color-mix(in srgb, var(--gi-warning-ink) 88%, var(--primary-text-color));
+        }
+
+        .card--theme-dark .tab-panel__metric-row--warning {
+          border-color: var(--gi-warning-border);
+        }
+
+        .card--theme-dark .tab-panel--intervention .tab-panel__decision-strip {
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 0.003) 100%),
+            #12181d;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 18%, rgba(255, 255, 255, 0.10));
+        }
+
+        .card--theme-dark .tab-panel__intervention-card {
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0%, rgba(255, 255, 255, 0.004) 100%),
+            #131a1f;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 18%, rgba(255, 255, 255, 0.10));
+        }
+
+        .card--theme-dark .tab-panel__intervention-card--picker {
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0%, rgba(255, 255, 255, 0.004) 100%),
+            #131b20;
+          border-color: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 20%, rgba(255, 255, 255, 0.10));
+        }
+
+        .card--theme-dark .tab-panel__intervention-card--action {
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0%, rgba(255, 255, 255, 0.004) 100%),
+            #141c18;
+          border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 20%, rgba(255, 255, 255, 0.10));
+        }
+
         .card--theme-dark .header__icon--warning { background: color-mix(in srgb, var(--gazon-warning-color) 74%, black); }
         .card--theme-dark .header__icon--danger { background: color-mix(in srgb, var(--gazon-danger-color) 74%, black); }
         .card--theme-dark .header__icon--success { background: color-mix(in srgb, var(--gazon-success-color) 74%, black); }
@@ -3228,6 +3326,15 @@ export const CARD_STYLES = String.raw`
 
           .tab-panel__intervention-card--action .tab-panel__cta {
             min-height: 70px;
+          }
+
+          .tab-panel__history-inline-head {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .tab-panel__history-inline-meta {
+            text-align: left;
           }
         }
 

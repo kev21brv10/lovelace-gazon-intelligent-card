@@ -1075,6 +1075,38 @@ function renderApplicationHistoryFoldout(items) {
     `;
 }
 
+function renderApplicationHistoryInline(items) {
+  const history = Array.isArray(items) ? items.filter((item) => item && typeof item === "object") : [];
+  if (!history.length) {
+    return "";
+  }
+  const countLabel = history.length > 1 ? `${history.length} applications enregistrées` : "1 application enregistrée";
+  const rows = buildApplicationHistoryRows(history);
+  return `
+      <div class="tab-panel__history-inline">
+        <div class="tab-panel__history-inline-head">
+          <div class="tab-panel__eyebrow">Historique</div>
+          <div class="tab-panel__history-inline-meta">${escapeHtml(countLabel)} · plus récente en haut</div>
+        </div>
+        <div class="tab-panel__history-rail-body tab-panel__history-rail-body--inline">
+          <div class="tab-panel__history-rail-track">
+            ${rows
+              .map(
+                (row) => `
+                  <div class="tab-panel__history-rail-item tab-panel__summary-row tab-panel__summary-row--${escapeHtml(row.tone || "neutral")}">
+                    ${row.label ? `<div class="tab-panel__summary-label">${escapeHtml(row.label)}</div>` : ""}
+                    <div class="tab-panel__summary-value">${escapeHtml(row.value || "Non disponible")}</div>
+                    ${row.note ? `<div class="tab-panel__summary-note">${escapeHtml(row.note)}</div>` : ""}
+                  </div>
+                `,
+              )
+              .join("")}
+          </div>
+        </div>
+      </div>
+    `;
+}
+
 export function renderProductsTab(card) {
   const selection = card._productSelectionState();
   const catalogue = card._catalogueState();
@@ -1144,7 +1176,7 @@ export function renderProductsTab(card) {
             </div>
             <div class="tab-panel__section-summary">${escapeHtml(lastApplicationSummary)}</div>
             <div class="tab-panel__section-hint">${escapeHtml(lastApplicationHint)}</div>
-            ${renderApplicationHistoryFoldout(applicationHistory)}
+            ${renderApplicationHistoryInline(applicationHistory)}
           </section>
         </div>
       </section>

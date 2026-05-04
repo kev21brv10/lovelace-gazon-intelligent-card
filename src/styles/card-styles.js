@@ -2966,10 +2966,8 @@ export const CARD_STYLES = String.raw`
           --gi-theme-base-soft: #151c21;
           --gi-theme-border-override: color-mix(in srgb, var(--gazon-section-accent) 24%, rgba(255, 255, 255, 0.12));
           --gi-theme-shadow-override: 0 22px 40px rgba(0, 0, 0, 0.42);
-          --gi-surface-fill:
-            linear-gradient(180deg, color-mix(in srgb, #172028 90%, var(--gazon-section-accent) 10%) 0%, #0b1014 100%);
-          --gi-surface-fill-accent:
-            linear-gradient(180deg, color-mix(in srgb, #1d2830 84%, var(--gazon-section-accent) 16%) 0%, #0b1014 100%);
+          --gi-surface-fill: #12181d;
+          --gi-surface-fill-accent: #151d23;
           --gi-surface-border: color-mix(in srgb, var(--gazon-section-accent) 22%, rgba(255, 255, 255, 0.09));
           --gi-surface-border-strong: color-mix(in srgb, var(--gazon-section-accent) 34%, rgba(255, 255, 255, 0.16));
           --gi-surface-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
@@ -2984,6 +2982,10 @@ export const CARD_STYLES = String.raw`
           border-color: color-mix(in srgb, var(--gazon-section-accent) 20%, rgba(255, 255, 255, 0.08));
         }
 
+        .card.card--theme-dark {
+          background: var(--gi-theme-base);
+        }
+
         .card.card--theme-light.card--solid,
         .card.card--theme-dark.card--solid {
           background: transparent;
@@ -2994,7 +2996,7 @@ export const CARD_STYLES = String.raw`
         }
 
         .card.card--theme-dark::before {
-          background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 48%, transparent 100%);
+          background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.04) 48%, transparent 100%);
         }
 
         .card.card--theme-light.card--gradient::after,
@@ -3020,10 +3022,8 @@ export const CARD_STYLES = String.raw`
 
         .card--theme-dark :is(.tab-panel__hero, .tab-panel__section, .tab-panel__block, .gi-info, .gi-info--main, .gi-info--secondary, .decision-hero, .decision-plan, .decision-context, .decision-block, .decision-footer, .gi-card-core, .gi-tab, .tab-nav__item, .hero__lead, .decision) {
           background:
-            radial-gradient(circle at 84% 0%, color-mix(in srgb, var(--gi-tab-companion) 14%, transparent) 0%, transparent 24%),
-            radial-gradient(circle at 10% 94%, color-mix(in srgb, var(--gi-tab-mist-color) 10%, transparent) 0%, transparent 28%),
-            radial-gradient(circle at 52% 14%, color-mix(in srgb, var(--gi-tab-accent) 9%, transparent) 0%, transparent 24%),
-            linear-gradient(180deg, color-mix(in srgb, #182129 88%, var(--gi-tab-accent) 12%) 0%, #0b1014 100%);
+            linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0%, rgba(255, 255, 255, 0.005) 100%),
+            var(--gi-surface-fill);
           border-color: color-mix(in srgb, var(--gazon-section-accent) 24%, rgba(255, 255, 255, 0.12));
           box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.03),
@@ -3036,8 +3036,8 @@ export const CARD_STYLES = String.raw`
 
         .card--theme-dark :is(.gi-card-core--tile, .gi-card-core--metric, .gi-card-core--stat) {
           background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 12%, transparent) 0%, transparent 24%),
-            linear-gradient(180deg, #182129 0%, #0d1217 100%);
+            linear-gradient(180deg, rgba(255, 255, 255, 0.014) 0%, rgba(255, 255, 255, 0.004) 100%),
+            #151d23;
         }
 
         .card--theme-light .gi-card-core__secondary,
@@ -3115,8 +3115,15 @@ export const CARD_STYLES = String.raw`
           color: color-mix(in srgb, #ffffff 58%, var(--secondary-text-color));
         }
 
+        .card--theme-dark .advanced-group {
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0%, rgba(255, 255, 255, 0.004) 100%),
+            #13191e;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 20%, rgba(255, 255, 255, 0.10));
+        }
+
         .card--theme-dark :is(.gi-pill--neutral) {
-          background: linear-gradient(180deg, #161d23 0%, #0e1317 100%);
+          background: #141b20;
           border-color: color-mix(in srgb, var(--gazon-section-accent) 18%, rgba(255, 255, 255, 0.12));
         }
 

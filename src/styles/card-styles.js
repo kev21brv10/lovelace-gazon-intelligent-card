@@ -1092,19 +1092,51 @@ export const CARD_STYLES = String.raw`
           min-width: 0;
         }
 
-        .tab-panel__catalogue-slider .tab-panel__summary-list {
-          display: flex;
-          flex-direction: column;
-          gap: 0;
+        .tab-panel__card-slider {
+          min-width: 0;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding-bottom: 2px;
+          scrollbar-width: thin;
+          scrollbar-color: color-mix(in srgb, var(--gazon-section-accent) 24%, transparent) transparent;
         }
 
-        .tab-panel__catalogue-slider .tab-panel__summary-row {
+        .tab-panel__card-slider::-webkit-scrollbar {
+          height: 7px;
+        }
+
+        .tab-panel__card-slider::-webkit-scrollbar-thumb {
+          border-radius: 999px;
+          background: color-mix(in srgb, var(--gazon-section-accent) 22%, transparent);
+        }
+
+        .tab-panel__card-slider-track {
+          display: grid;
+          grid-auto-flow: column;
+          grid-auto-columns: minmax(220px, 1fr);
+          gap: 10px;
+          align-items: stretch;
+        }
+
+        .tab-panel__card-slider-item {
           min-width: 0;
+        }
+
+        .tab-panel__card-slider-item > * {
+          height: 100%;
+        }
+
+        .tab-panel__card-slider--catalogue .tab-panel__card-slider-track {
+          grid-auto-columns: minmax(240px, 280px);
+        }
+
+        .tab-panel__card-slider--config .tab-panel__card-slider-track {
+          grid-auto-columns: minmax(220px, 260px);
         }
 
         .tab-panel__products-layout {
           display: grid;
-          grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+          grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
           gap: 12px;
           align-items: stretch;
         }
@@ -1220,6 +1252,30 @@ export const CARD_STYLES = String.raw`
 
         .tab-panel--intervention .tab-panel__intervention-layout {
           gap: 14px;
+        }
+
+        .tab-panel__intervention-layout--workflow {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .tab-panel__intervention-layout--workflow .tab-panel__intervention-card--proposed {
+          grid-column: 1 / -1;
+        }
+
+        .tab-panel__intervention-card--proposed {
+          border-color: color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 18%, var(--divider-color));
+          background:
+            radial-gradient(circle at 8% 14%, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 10%, transparent) 0%, transparent 26%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 5%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
+        }
+
+        .tab-panel__intervention-card--proposed .tab-panel__section-summary,
+        .tab-panel__intervention-card--proposed .tab-panel__section-hint {
+          color: color-mix(in srgb, var(--primary-text-color) 90%, var(--gazon-warning-color, #d6a34f));
+        }
+
+        .tab-panel__intervention-card--proposed .tab-panel__section-meta {
+          color: color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 42%, var(--secondary-text-color));
         }
 
         .tab-panel__chips {
@@ -3078,10 +3134,6 @@ export const CARD_STYLES = String.raw`
             max-width: 100%;
           }
 
-          .tab-panel--products .tab-panel__grid--products {
-            grid-template-columns: 1fr;
-          }
-
           .tab-panel__products-layout {
             grid-template-columns: 1fr;
           }
@@ -3135,46 +3187,22 @@ export const CARD_STYLES = String.raw`
             grid-template-columns: 1fr;
           }
 
-          .tab-panel__catalogue-slider .tab-panel__summary-list {
-            display: flex;
-            flex-direction: row;
-            gap: 8px;
-            overflow-x: auto;
-            overflow-y: hidden;
+          .tab-panel__card-slider-track {
+            grid-auto-columns: min(84vw, 260px);
+          }
+
+          .tab-panel__card-slider--config .tab-panel__card-slider-track {
+            grid-auto-columns: min(84vw, 240px);
+          }
+
+          .tab-panel__card-slider-item {
+            scroll-snap-align: start;
+          }
+
+          .tab-panel__card-slider {
             scroll-snap-type: x proximity;
             scroll-padding-inline: 6px;
             -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            padding-bottom: 2px;
-          }
-
-          .tab-panel__catalogue-slider .tab-panel__summary-list::-webkit-scrollbar {
-            display: none;
-          }
-
-          .tab-panel__catalogue-slider .tab-panel__summary-row {
-            flex: 0 0 min(260px, 82vw);
-            scroll-snap-align: start;
-            padding: 10px 11px 11px;
-            border: 1px solid color-mix(in srgb, var(--gi-surface-border) 84%, transparent);
-            border-radius: 16px;
-            background:
-              linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 93%, black) 100%);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-          }
-
-          .tab-panel__catalogue-slider .tab-panel__summary-label {
-            font-size: var(--gi-font-xxs);
-          }
-
-          .tab-panel__catalogue-slider .tab-panel__summary-value {
-            font-size: var(--gi-font-sm);
-            line-height: 1.15;
-          }
-
-          .tab-panel__catalogue-slider .tab-panel__summary-note {
-            font-size: var(--gi-font-xxs);
-            line-height: 1.28;
           }
 
           .tab-panel__history-foldout-summary {

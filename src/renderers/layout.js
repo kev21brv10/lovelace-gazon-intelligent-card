@@ -368,6 +368,20 @@ function renderCompactSummaryList(items, emptyText = "Aucune information supplé
   `;
 }
 
+function renderCardSlider(items, extraClass = "") {
+  const cards = Array.isArray(items) ? items.filter(Boolean) : [];
+  if (!cards.length) {
+    return "";
+  }
+  return `
+    <div class="tab-panel__card-slider ${escapeHtml(extraClass)}">
+      <div class="tab-panel__card-slider-track">
+        ${cards.map((cardHtml) => `<div class="tab-panel__card-slider-item">${cardHtml}</div>`).join("")}
+      </div>
+    </div>
+  `;
+}
+
 function getDebugInterventionState(card) {
   const entity = card._entity("entity_debug_intervention");
   if (!entity) {
@@ -624,15 +638,33 @@ function renderInterventionOverviewSection(
   },
 ) {
   const proposedProductValue = recommendation.product.name || ui.summary || "Aucun produit retenu";
+  const productOptions = card._catalogueProductOptions();
+  const selectedProductOptionLabel = quickAction.optionLabel || (productOptions.length === 1 ? productOptions[0].label : "");
+  const selectionMeta = quickAction.record
+    ? "Sélection active"
+    : hasProductOptions
+      ? "Produit à sélectionner"
+      : "Aucun produit disponible";
   const selectionValue = quickAction.record ? quickAction.label : "Aucun produit sélectionné";
   const selectionSecondary = [
     quickAction.summary || "",
     hasProductOptions && !quickAction.record ? "Sélection nécessaire avant déclaration." : "",
   ].filter(Boolean).join(" · ");
+  const declarationMeta = ui.badge || formatStatusLabel(recommendation.status) || "Non disponible";
+  const declarationActionLabel = canDeclare
+    ? quickAction.actionLabel || "Déclarer le produit"
+    : `Action : ${ui.actionLabel || "Choisir le produit"}`;
   const declarationValue = canDeclare ? "Déclaration possible" : `Action : ${ui.actionLabel || "Choisir le produit"}`;
   const declarationSecondary = [
     ui.declarationSummary || "",
     ui.declarationHint || "",
+  ].filter(Boolean).join(" · ");
+  const productSecondary = [
+    recommendation.product.type ? formatStatusLabel(recommendation.product.type) : "",
+    recommendation.product.monthsLabel || "",
+    recommendation.score !== null && recommendation.score !== undefined
+      ? `Score ${formatNumber(recommendation.score, 0)}/100`
+      : "",
   ].filter(Boolean).join(" · ");
   return `
       <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-overview">
@@ -640,44 +672,74 @@ function renderInterventionOverviewSection(
           <div class="tab-panel__eyebrow">Pilotage intervention</div>
           <div class="tab-panel__section-meta">${escapeHtml(ui.badge || "Analyse active")}</div>
         </div>
-        <div class="decision-plan tab-panel__decision-plan tab-panel__decision-plan--intervention">
-          <div class="decision-plan__header">
-            <div class="decision-plan__label">Produit proposé</div>
-            <div class="decision-plan__meta">${escapeHtml(ui.actionLabel || "Choisir le produit")}</div>
-          </div>
-          <div class="decision-plan__summary">${escapeHtml(proposedProductValue)}</div>
-          <div class="decision-plan__chips">
-            ${ui.badge ? renderStatusPill(ui.badge, recommendationTone, recommendationIcon, "debug-chip") : ""}
-            ${recommendation.product.type ? renderStatusPill(formatStatusLabel(recommendation.product.type), "neutral", "mdi:package-variant", "debug-chip") : ""}
-            ${
-              recommendation.product.monthsLabel
-                ? renderStatusPill(recommendation.product.monthsLabel, "neutral", "mdi:calendar-month", "debug-chip")
-                : ""
-            }
-            ${
-              recommendation.score !== null && recommendation.score !== undefined
-                ? renderStatusPill(`Score ${formatNumber(recommendation.score, 0)}/100`, recommendationTone, "mdi:signal", "debug-chip")
-                : ""
-            }
-          </div>
+        <div class="tab-panel__decision-strip" aria-hidden="true">
+          ${card._renderTabPill("Recommandation", ui.badge || "Non disponible", recommendationTone, recommendationIcon)}
+          ${card._renderTabPill("Sélection", quickAction.record ? "Active" : selectionMeta, quickAction.record ? "success" : hasProductOptions ? "warning" : "neutral", "mdi:package-variant")}
+          ${card._renderTabPill("Déclaration", canDeclare ? "Possible" : declarationMeta, canDeclare ? "success" : recommendationTone, recommendationIcon)}
         </div>
-        <div class="tab-panel__section-summary-list">
-          ${renderCompactSummaryList([
-            {
-              label: "Produit sélectionné",
-              value: selectionValue,
-              note: selectionSecondary,
-              tone: quickAction.record ? "success" : hasProductOptions ? "warning" : "neutral",
-              entityKey: quickAction.record ? null : "entity_prochaine_intervention",
-            },
-            {
-              label: "Déclaration",
-              value: declarationValue,
-              note: declarationSecondary,
-              tone: canDeclare ? "success" : recommendationTone,
-              entityKey: canDeclare ? null : "entity_prochaine_intervention",
-            },
-          ])}
+        <div class="tab-panel__intervention-layout tab-panel__intervention-layout--workflow">
+          <div class="tab-panel__intervention-card tab-panel__intervention-card--proposed">
+            <div class="tab-panel__section-head">
+              <div class="tab-panel__eyebrow">Produit proposé</div>
+              <div class="tab-panel__section-meta">${escapeHtml(ui.actionLabel || "Choisir le produit")}</div>
+            </div>
+            <div class="tab-panel__section-summary">${escapeHtml(proposedProductValue)}</div>
+            <div class="tab-panel__section-hint">${escapeHtml(productSecondary || ui.hint || "Aucun détail complémentaire.")}</div>
+          </div>
+
+          <div class="tab-panel__intervention-card tab-panel__intervention-card--picker">
+            <div class="tab-panel__section-head">
+              <div class="tab-panel__eyebrow">Sélection</div>
+              <div class="tab-panel__section-meta">${escapeHtml(selectionMeta)}</div>
+            </div>
+            <label class="tab-panel__field">
+              <span class="tab-panel__field-label">Produit à déclarer</span>
+              <div class="tab-panel__select-shell">
+                <span class="tab-panel__select-prefix" aria-hidden="true">
+                  ${renderIconBox("mdi:package-variant-closed", "sm")}
+                </span>
+                <select
+                  class="tab-panel__select"
+                  data-gazon-action="select-intervention-product"
+                  aria-label="Choisir le produit d'intervention"
+                  ${hasProductOptions ? "" : "disabled"}
+                >
+                  <option value="">${escapeHtml(hasProductOptions ? "Choisir un produit" : "Aucun produit disponible")}</option>
+                  ${productOptions
+                    .map(
+                      (option) => `
+                        <option value="${escapeHtml(option.label)}" ${option.label === selectedProductOptionLabel ? "selected" : ""}>
+                          ${escapeHtml(option.label)}
+                        </option>
+                      `,
+                    )
+                    .join("")}
+                </select>
+                <span class="tab-panel__select-chevron" aria-hidden="true">${renderIconBox("mdi:chevron-down", "sm")}</span>
+              </div>
+            </label>
+            <div class="tab-panel__section-summary">${escapeHtml(selectionValue)}</div>
+            <div class="tab-panel__section-hint">${escapeHtml(selectionSecondary || "La sélection prépare la déclaration.")}</div>
+          </div>
+
+          <div class="tab-panel__intervention-card tab-panel__intervention-card--action">
+            <div class="tab-panel__section-head">
+              <div class="tab-panel__eyebrow">Déclaration</div>
+              <div class="tab-panel__section-meta">${escapeHtml(declarationMeta)}</div>
+            </div>
+            <button
+              type="button"
+              class="gi-action gi-action--primary tab-panel__cta"
+              data-gazon-action="declare-product-intervention"
+              ${canDeclare ? "" : "disabled"}
+              aria-label="${escapeHtml(canDeclare ? (quickAction.actionLabel || "Déclarer le produit") : (ui.actionLabel || "Choisir le produit"))}"
+            >
+              ${renderIconBox("mdi:spray-bottle", "sm")}
+              <span>${escapeHtml(declarationActionLabel)}</span>
+            </button>
+            <div class="tab-panel__section-summary">${escapeHtml(declarationValue)}</div>
+            <div class="tab-panel__section-hint">${escapeHtml(declarationSecondary || "La déclaration suit le produit sélectionné.")}</div>
+          </div>
         </div>
       </section>
     `;
@@ -816,32 +878,30 @@ function renderCatalogueProductCards(card) {
   if (!products.length) {
     return `<div class="tab-panel__empty">Aucun produit enregistré.</div>`;
   }
-  return `
-    <div class="tab-panel__catalogue-slider">
-      ${renderCompactSummaryList(
-        products.map((product) => {
-          const productId = String(product.id || "").trim();
-          const productName = String(product.nom || productId || "").trim() || "Produit";
-          const productType = String(product.type || "").trim();
-          const usageMode = String(product.usage_mode || "").trim();
-          const monthsLabel = String(product.application_months_label || "").trim();
-          const requiresWateringAfter = Boolean(product.application_requires_watering_after);
-          const isSelected = selectedProductId && productId.toLowerCase() === selectedProductId;
-          const secondaryParts = [
-            usageMode ? `Mode ${formatProductUsageMode(usageMode)}` : "",
-            monthsLabel,
-            requiresWateringAfter ? "Arrosage après application" : "",
-          ].filter(Boolean);
-          return {
-            label: productType ? formatStatusLabel(productType) : "Produit",
-            value: productName,
-            note: secondaryParts.join(" · "),
-            tone: isSelected ? "success" : "neutral",
-          };
-        }),
-      )}
-    </div>
-  `;
+  return renderCardSlider(
+    products.map((product) => {
+      const productId = String(product.id || "").trim();
+      const productName = String(product.nom || productId || "").trim() || "Produit";
+      const productType = String(product.type || "").trim();
+      const usageMode = String(product.usage_mode || "").trim();
+      const monthsLabel = String(product.application_months_label || "").trim();
+      const requiresWateringAfter = Boolean(product.application_requires_watering_after);
+      const isSelected = selectedProductId && productId.toLowerCase() === selectedProductId;
+      const secondaryParts = [
+        usageMode ? `Mode ${formatProductUsageMode(usageMode)}` : "",
+        monthsLabel,
+        requiresWateringAfter ? "Arrosage après application" : "",
+      ].filter(Boolean);
+      return card._renderStatCard(
+        productType ? formatStatusLabel(productType) : "Produit",
+        productName,
+        isSelected ? "success" : "accent",
+        "mdi:package-variant-closed",
+        secondaryParts.join(" · "),
+      );
+    }),
+    "tab-panel__card-slider--catalogue",
+  );
 }
 
 function buildApplicationHistoryRows(items) {
@@ -987,9 +1047,7 @@ export function renderProductsTab(card) {
             </div>
             <div class="tab-panel__section-summary">Produits disponibles dans le référentiel local</div>
             <div class="tab-panel__section-hint">Le catalogue sert au choix du produit et à l’historique, sans reprendre l’analyse métier détaillée.</div>
-            <div class="tab-panel__grid tab-panel__grid--products">
-              ${renderCatalogueProductCards(card)}
-            </div>
+            ${renderCatalogueProductCards(card)}
           </section>
 
           <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
@@ -1010,10 +1068,8 @@ export function renderInterventionTab(card) {
   const recommendation = card._interventionRecommendationState();
   const debug = getDebugInterventionState(card);
   const quickAction = card._selectedProductInterventionState();
-  const productOptions = card._catalogueProductOptions();
   const ui = recommendation.ui || {};
-  const selectedProductOptionLabel = quickAction.optionLabel || (productOptions.length === 1 ? productOptions[0].label : "");
-  const hasProductOptions = productOptions.length > 0;
+  const hasProductOptions = card._catalogueProductOptions().length > 0;
   const canDeclare = Boolean(quickAction.record && !quickAction.disabled);
   const recommendationTone = ui.tone || formatIrrigationSignalTone({
     reasonKind: recommendation.status,
@@ -1025,23 +1081,6 @@ export function renderInterventionTab(card) {
     summary: ui.summary,
     reasonKind: recommendation.status,
   });
-  const selectionMeta = quickAction.record
-    ? "Sélection active"
-    : hasProductOptions
-      ? "Produit à sélectionner"
-      : "Aucun produit disponible";
-  const declarationMeta = ui.badge || formatStatusLabel(recommendation.status) || "Non disponible";
-  const declarationActionLabel = canDeclare
-    ? quickAction.actionLabel || "Déclarer le produit"
-    : `Action : ${ui.actionLabel || "Choisir le produit"}`;
-  const pickerSummary = ui.selectionSummary || (quickAction.record ? "Sélection active." : hasProductOptions ? "Sélectionne un produit dans la liste." : "Aucun produit disponible.");
-  const pickerHint = ui.selectionHint || "La sélection met à jour le produit actif.";
-  const actionSummary = canDeclare
-    ? "Déclaration manuelle disponible."
-    : ui.declarationSummary || "Déclaration indisponible.";
-  const actionHint = canDeclare
-    ? "Le produit sélectionné peut maintenant être déclaré depuis la carte."
-    : ui.declarationHint || "La déclaration suit le produit sélectionné.";
   const temperatureConstraint = (Array.isArray(recommendation.constraints)
     ? recommendation.constraints.find((constraint) => constraint?.code === "temperature_range")
     : null);
@@ -1088,81 +1127,6 @@ export function renderInterventionTab(card) {
           recommendationTone,
           recommendationIcon,
         })}
-
-        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-decision">
-          <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Actions</div>
-            <div class="tab-panel__section-meta">${escapeHtml(declarationMeta)}</div>
-          </div>
-          <div class="tab-panel__decision-strip" aria-hidden="true">
-            ${card._renderTabPill("Recommandation", ui.badge || "Non disponible", recommendationTone, recommendationIcon)}
-            ${card._renderTabPill("Sélection", selectionMeta, quickAction.record ? "success" : hasProductOptions ? "warning" : "neutral", "mdi:package-variant")}
-            ${card._renderTabPill("Déclaration", declarationMeta, canDeclare ? "success" : recommendationTone, recommendationIcon)}
-          </div>
-          <div class="tab-panel__intervention-layout">
-            <div class="tab-panel__intervention-card tab-panel__intervention-card--picker">
-              <div class="tab-panel__section-head">
-                <div class="tab-panel__eyebrow">Sélection</div>
-                <div class="tab-panel__section-meta">${escapeHtml(selectionMeta)}</div>
-              </div>
-              <label class="tab-panel__field">
-                <span class="tab-panel__field-label">Produit à déclarer</span>
-                <div class="tab-panel__select-shell">
-                  <span class="tab-panel__select-prefix" aria-hidden="true">
-                    ${renderIconBox("mdi:package-variant-closed", "sm")}
-                  </span>
-                  <select
-                    class="tab-panel__select"
-                    data-gazon-action="select-intervention-product"
-                    aria-label="Choisir le produit d'intervention"
-                    ${hasProductOptions ? "" : "disabled"}
-                  >
-                    <option value="">${escapeHtml(hasProductOptions ? "Choisir un produit" : "Aucun produit disponible")}</option>
-                    ${productOptions
-                      .map(
-                        (option) => `
-                          <option value="${escapeHtml(option.label)}" ${option.label === selectedProductOptionLabel ? "selected" : ""}>
-                            ${escapeHtml(option.label)}
-                          </option>
-                        `,
-                      )
-                      .join("")}
-                  </select>
-                  <span class="tab-panel__select-chevron" aria-hidden="true">${renderIconBox("mdi:chevron-down", "sm")}</span>
-                </div>
-              </label>
-              <div class="tab-panel__section-summary">
-                ${escapeHtml(pickerSummary)}
-              </div>
-              <div class="tab-panel__section-hint">
-                ${escapeHtml(pickerHint)}
-              </div>
-            </div>
-
-            <div class="tab-panel__intervention-card tab-panel__intervention-card--action">
-              <div class="tab-panel__section-head">
-                <div class="tab-panel__eyebrow">Déclaration</div>
-                <div class="tab-panel__section-meta">${escapeHtml(declarationMeta)}</div>
-              </div>
-              <button
-                type="button"
-                class="gi-action gi-action--primary tab-panel__cta"
-                data-gazon-action="declare-product-intervention"
-                ${canDeclare ? "" : "disabled"}
-                aria-label="${escapeHtml(canDeclare ? (quickAction.actionLabel || "Déclarer le produit") : (ui.actionLabel || "Choisir le produit"))}"
-              >
-                ${renderIconBox("mdi:spray-bottle", "sm")}
-                <span>${escapeHtml(declarationActionLabel)}</span>
-              </button>
-              <div class="tab-panel__section-summary">
-                ${escapeHtml(actionSummary)}
-              </div>
-              <div class="tab-panel__section-hint">
-                ${escapeHtml(actionHint)}
-              </div>
-            </div>
-          </div>
-        </section>
 
         ${renderInterventionTechnicalSummary(card, recommendation, debug)}
 
@@ -1616,11 +1580,14 @@ export function renderConfigTab(card) {
     .map((entry) => {
       const config = card._renderConfigValue(entry.key, "mm/h");
       return card._renderConfigActionCard(entry.label, entry.key, config.value, config.tone, "mdi:sprinkler");
-    })
-    .join("");
+    });
   const heightMin = card._renderConfigValue("entity_hauteur_min_tondeuse", "cm");
   const heightMax = card._renderConfigValue("entity_hauteur_max_tondeuse", "cm");
   const mowingCooldown = card._renderConfigValue("entity_delai_reprise_tonte_apres_arrosage", "min");
+  const heightCards = [
+    card._renderConfigActionCard("Hauteur min tondeuse", "entity_hauteur_min_tondeuse", heightMin.value, heightMin.tone, "mdi:ruler-square"),
+    card._renderConfigActionCard("Hauteur max tondeuse", "entity_hauteur_max_tondeuse", heightMax.value, heightMax.tone, "mdi:ruler-square"),
+  ];
 
   return `
       <section class="tab-panel gi-panel tab-panel--config">
@@ -1644,14 +1611,9 @@ export function renderConfigTab(card) {
 
         <div class="tab-panel__section tab-panel__section--config-debits">
           <div class="tab-panel__section-title">Débits des zones</div>
-          <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">
-            ${zoneCards || `<div class="tab-panel__empty">Débits non configurés.</div>`}
-          </div>
+          ${zoneCards.length ? renderCardSlider(zoneCards, "tab-panel__card-slider--config") : `<div class="tab-panel__empty">Débits non configurés.</div>`}
           <div class="tab-panel__section-title">Hauteurs de tondeuse</div>
-          <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-debits">
-            ${card._renderConfigActionCard("Hauteur min tondeuse", "entity_hauteur_min_tondeuse", heightMin.value, heightMin.tone, "mdi:ruler-square")}
-            ${card._renderConfigActionCard("Hauteur max tondeuse", "entity_hauteur_max_tondeuse", heightMax.value, heightMax.tone, "mdi:ruler-square")}
-          </div>
+          ${renderCardSlider(heightCards, "tab-panel__card-slider--config")}
         </div>
       </section>
     `;

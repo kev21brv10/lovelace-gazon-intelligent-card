@@ -867,18 +867,6 @@ const CARD_STYLES = String.raw`
           gap: 10px;
         }
 
-        .tab-panel__debug-foldout {
-          display: block;
-          margin-top: 10px;
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 10%, var(--divider-color));
-          border-radius: 18px;
-          overflow: hidden;
-          background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 8%, transparent) 0%, transparent 34%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 4%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 100%, white) 100%);
-          box-shadow: var(--gi-surface-shadow);
-        }
-
         .tab-panel__debug-foldout[open] {
           border-color: color-mix(in srgb, var(--gazon-section-accent) 16%, var(--divider-color));
         }
@@ -963,6 +951,52 @@ const CARD_STYLES = String.raw`
           grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         }
 
+        .tab-panel__products-layout {
+          display: grid;
+          grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+          gap: 12px;
+          align-items: stretch;
+        }
+
+        .tab-panel__products-layout > .tab-panel__section {
+          min-width: 0;
+        }
+
+        .tab-panel__products-layout .tab-panel__section--products-scope {
+          grid-column: 1 / -1;
+        }
+
+        .tab-panel--products .tab-panel__hero {
+          position: relative;
+          overflow: hidden;
+        }
+
+        .tab-panel--products .tab-panel__hero::after {
+          content: "";
+          position: absolute;
+          inset-inline: 0;
+          inset-block-end: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 45%, transparent), transparent);
+          pointer-events: none;
+        }
+
+        .tab-panel--products .tab-panel__hero-next {
+          max-width: 58ch;
+        }
+
+        .tab-panel--products .tab-panel__hero-hint {
+          max-width: 66ch;
+        }
+
+        .tab-panel--products .tab-panel__section--catalogue-reference {
+          gap: 10px;
+        }
+
+        .tab-panel--products .tab-panel__grid--products {
+          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        }
+
         .tab-panel__grid--featured {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
@@ -1000,6 +1034,41 @@ const CARD_STYLES = String.raw`
 
         .tab-panel__section--application-history {
           min-height: 100%;
+        }
+
+        .tab-panel--intervention .tab-panel__hero {
+          position: relative;
+          overflow: hidden;
+        }
+
+        .tab-panel--intervention .tab-panel__hero::after {
+          content: "";
+          position: absolute;
+          inset-inline: 0;
+          inset-block-end: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 42%, transparent), transparent);
+          pointer-events: none;
+        }
+
+        .tab-panel--intervention .tab-panel__hero-next {
+          max-width: 62ch;
+        }
+
+        .tab-panel--intervention .tab-panel__hero-hint {
+          max-width: 66ch;
+        }
+
+        .tab-panel--intervention .tab-panel__decision-strip {
+          padding: 10px 12px;
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 10%, var(--divider-color));
+          border-radius: 18px;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 4%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, white) 100%);
+        }
+
+        .tab-panel--intervention .tab-panel__intervention-layout {
+          gap: 14px;
         }
 
         .tab-panel__chips {
@@ -1619,6 +1688,17 @@ const CARD_STYLES = String.raw`
 
         .tab-panel__section--debug-intervention {
           gap: 12px;
+        }
+
+        .tab-panel__debug-foldout {
+          margin-top: 12px;
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
+          border-radius: 20px;
+          overflow: hidden;
+          background:
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 8%, transparent) 0%, transparent 34%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 4%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 100%, white) 100%);
+          box-shadow: var(--gi-surface-shadow-strong);
         }
 
         .tab-panel__debug-columns {
@@ -2841,6 +2921,10 @@ const CARD_STYLES = String.raw`
             grid-template-columns: 1fr;
           }
 
+          .tab-panel__products-layout {
+            grid-template-columns: 1fr;
+          }
+
           .tab-panel__grid--priority,
           .tab-panel__grid--featured,
           .tab-panel__grid--decision-board {
@@ -2883,8 +2967,13 @@ const CARD_STYLES = String.raw`
             align-items: stretch;
           }
 
+          .tab-panel--intervention .tab-panel__decision-strip {
+            padding: 8px 10px;
+          }
+
           .tab-panel--intervention .tab-panel__intervention-layout {
             gap: 8px;
+            grid-template-columns: 1fr;
           }
 
           .tab-panel--intervention .tab-panel__intervention-card {
@@ -3115,7 +3204,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.78";
+const CARD_VERSION = "0.1.79";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -9729,26 +9818,36 @@ function renderProductsTab(card) {
           <div class="tab-panel__hero-next">${escapeHtml(productsSummary)}</div>
           <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Le référentiel produit sert de base à la recommandation et à la déclaration.")} · ${escapeHtml("L’analyse détaillée reste dans Intervention.")}</div>
         </div>
-        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--catalogue-reference">
-          <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Catalogue</div>
-            <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
-          </div>
-          <div class="tab-panel__section-summary">Produits disponibles dans le référentiel local</div>
-          <div class="tab-panel__section-hint">Le catalogue sert au choix du produit et à l’historique, sans reprendre l’analyse métier détaillée.</div>
-          <div class="tab-panel__grid tab-panel__grid--products">
-            ${renderCatalogueProductCards(card)}
-          </div>
-        </section>
-        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
-          <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Dernière application</div>
-            <div class="tab-panel__section-meta">${escapeHtml(hasApplication ? "Historique local" : "Aucune application")}</div>
-          </div>
-          <div class="tab-panel__section-summary">${escapeHtml(lastApplicationSummary)}</div>
-          <div class="tab-panel__section-hint">${escapeHtml(lastApplicationHint)}</div>
-        </section>
-        ${renderProductsScopeSection()}
+        <div class="tab-panel__products-layout">
+          <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--catalogue-reference">
+            <div class="tab-panel__section-head">
+              <div class="tab-panel__eyebrow">Catalogue</div>
+              <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
+            </div>
+            <div class="tab-panel__section-summary">Produits disponibles dans le référentiel local</div>
+            <div class="tab-panel__section-hint">Le catalogue sert au choix du produit et à l’historique, sans reprendre l’analyse métier détaillée.</div>
+            <div class="tab-panel__grid tab-panel__grid--products">
+              ${renderCatalogueProductCards(card)}
+            </div>
+          </section>
+
+          <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
+            <div class="tab-panel__section-head">
+              <div class="tab-panel__eyebrow">Dernière application</div>
+              <div class="tab-panel__section-meta">${escapeHtml(hasApplication ? "Historique local" : "Aucune application")}</div>
+            </div>
+            <div class="tab-panel__section-summary">${escapeHtml(lastApplicationSummary)}</div>
+            <div class="tab-panel__section-hint">${escapeHtml(lastApplicationHint)}</div>
+          </section>
+
+          <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-scope">
+            <div class="tab-panel__section-head">
+              <div class="tab-panel__eyebrow">Repère</div>
+            </div>
+            <div class="tab-panel__section-summary">Catalogue, sélection active et historique produit</div>
+            <div class="tab-panel__section-hint">L’analyse détaillée et la déclaration restent dans l’onglet Intervention.</div>
+          </section>
+        </div>
       </section>
     `;
 }

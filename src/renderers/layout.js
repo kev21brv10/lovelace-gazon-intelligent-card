@@ -897,26 +897,36 @@ export function renderProductsTab(card) {
           <div class="tab-panel__hero-next">${escapeHtml(productsSummary)}</div>
           <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Le référentiel produit sert de base à la recommandation et à la déclaration.")} · ${escapeHtml("L’analyse détaillée reste dans Intervention.")}</div>
         </div>
-        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--catalogue-reference">
-          <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Catalogue</div>
-            <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
-          </div>
-          <div class="tab-panel__section-summary">Produits disponibles dans le référentiel local</div>
-          <div class="tab-panel__section-hint">Le catalogue sert au choix du produit et à l’historique, sans reprendre l’analyse métier détaillée.</div>
-          <div class="tab-panel__grid tab-panel__grid--products">
-            ${renderCatalogueProductCards(card)}
-          </div>
-        </section>
-        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
-          <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Dernière application</div>
-            <div class="tab-panel__section-meta">${escapeHtml(hasApplication ? "Historique local" : "Aucune application")}</div>
-          </div>
-          <div class="tab-panel__section-summary">${escapeHtml(lastApplicationSummary)}</div>
-          <div class="tab-panel__section-hint">${escapeHtml(lastApplicationHint)}</div>
-        </section>
-        ${renderProductsScopeSection()}
+        <div class="tab-panel__products-layout">
+          <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--catalogue-reference">
+            <div class="tab-panel__section-head">
+              <div class="tab-panel__eyebrow">Catalogue</div>
+              <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
+            </div>
+            <div class="tab-panel__section-summary">Produits disponibles dans le référentiel local</div>
+            <div class="tab-panel__section-hint">Le catalogue sert au choix du produit et à l’historique, sans reprendre l’analyse métier détaillée.</div>
+            <div class="tab-panel__grid tab-panel__grid--products">
+              ${renderCatalogueProductCards(card)}
+            </div>
+          </section>
+
+          <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
+            <div class="tab-panel__section-head">
+              <div class="tab-panel__eyebrow">Dernière application</div>
+              <div class="tab-panel__section-meta">${escapeHtml(hasApplication ? "Historique local" : "Aucune application")}</div>
+            </div>
+            <div class="tab-panel__section-summary">${escapeHtml(lastApplicationSummary)}</div>
+            <div class="tab-panel__section-hint">${escapeHtml(lastApplicationHint)}</div>
+          </section>
+
+          <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-scope">
+            <div class="tab-panel__section-head">
+              <div class="tab-panel__eyebrow">Repère</div>
+            </div>
+            <div class="tab-panel__section-summary">Catalogue, sélection active et historique produit</div>
+            <div class="tab-panel__section-hint">L’analyse détaillée et la déclaration restent dans l’onglet Intervention.</div>
+          </section>
+        </div>
       </section>
     `;
 }

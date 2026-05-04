@@ -2008,6 +2008,15 @@ class GazonIntelligentCard extends HTMLElement {
     return service;
   }
 
+  _serviceTargetEntityId() {
+    return (
+      this._entityId("entity_assistant") ||
+      this._entityId("entity_mode") ||
+      this._entityId("entity_conseil") ||
+      this._entityId("entity_tonte")
+    );
+  }
+
   _manualActionLabel() {
     const label = String(this._config?.manual_action_label || "").trim();
     if (!label || label.toLowerCase() === "lancer l'arrosage manuel") {
@@ -4382,7 +4391,12 @@ ${CARD_STYLES}
     if (!service) {
       return;
     }
+    const targetEntityId = this._serviceTargetEntityId();
+    if (!targetEntityId) {
+      return;
+    }
     this._hass.callService(service.domain, service.service, {
+      entity_id: targetEntityId,
       objectif_mm: objective,
     });
   }
@@ -4405,7 +4419,12 @@ ${CARD_STYLES}
     if (!service) {
       return;
     }
+    const targetEntityId = this._serviceTargetEntityId();
+    if (!targetEntityId) {
+      return;
+    }
     const payload = {
+      entity_id: targetEntityId,
       intervention,
       date_action: this._todayIsoDate(),
       produit_id: productId,
@@ -4489,7 +4508,13 @@ ${CARD_STYLES}
     if (!service) {
       return;
     }
-    this._hass.callService(service.domain, service.service, {});
+    const targetEntityId = this._serviceTargetEntityId();
+    if (!targetEntityId) {
+      return;
+    }
+    this._hass.callService(service.domain, service.service, {
+      entity_id: targetEntityId,
+    });
   }
 
 }

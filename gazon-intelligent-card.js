@@ -3115,7 +3115,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.76";
+const CARD_VERSION = "0.1.77";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -6333,6 +6333,15 @@ class GazonIntelligentCard extends HTMLElement {
     return service;
   }
 
+  _serviceTargetEntityId() {
+    return (
+      this._entityId("entity_assistant") ||
+      this._entityId("entity_mode") ||
+      this._entityId("entity_conseil") ||
+      this._entityId("entity_tonte")
+    );
+  }
+
   _manualActionLabel() {
     const label = String(this._config?.manual_action_label || "").trim();
     if (!label || label.toLowerCase() === "lancer l'arrosage manuel") {
@@ -8707,7 +8716,12 @@ ${CARD_STYLES}
     if (!service) {
       return;
     }
+    const targetEntityId = this._serviceTargetEntityId();
+    if (!targetEntityId) {
+      return;
+    }
     this._hass.callService(service.domain, service.service, {
+      entity_id: targetEntityId,
       objectif_mm: objective,
     });
   }
@@ -8730,7 +8744,12 @@ ${CARD_STYLES}
     if (!service) {
       return;
     }
+    const targetEntityId = this._serviceTargetEntityId();
+    if (!targetEntityId) {
+      return;
+    }
     const payload = {
+      entity_id: targetEntityId,
       intervention,
       date_action: this._todayIsoDate(),
       produit_id: productId,
@@ -8814,7 +8833,13 @@ ${CARD_STYLES}
     if (!service) {
       return;
     }
-    this._hass.callService(service.domain, service.service, {});
+    const targetEntityId = this._serviceTargetEntityId();
+    if (!targetEntityId) {
+      return;
+    }
+    this._hass.callService(service.domain, service.service, {
+      entity_id: targetEntityId,
+    });
   }
 
 }
@@ -9616,138 +9641,6 @@ function renderWateringProgressSection(card, progressState) {
   }
 }
 
-function formatDerivedTriggerLabel(triggerKind) {
-  const normalized = String(triggerKind ?? "").trim().toLowerCase();
-  if (!normalized) {
-    return "Aucun";
-  }
-  if (normalized === "soft") {
-    return "Signal faible";
-  }
-  if (normalized === "recommended") {
-    return "Recommandé";
-  }
-  if (normalized === "ready") {
-    return "Prêt à déclarer";
-  }
-  if (normalized === "post_application") {
-    return "Post-application";
-  }
-  if (normalized === "hydrique") {
-    return "Hydrique";
-  }
-  return formatStatusLabel(normalized);
-}
-
-function getDerivedPertinencePresentation(entity) {
-  if (!entity) {
-    return null;
-  }
-  const score = asNumber(entity.attributes?.score);
-  const state = String(entity.state ?? "").trim();
-  const summary = String(entity.attributes?.summary || "").trim();
-  const tone = String(entity.attributes?.tone || "").trim().toLowerCase();
-  return {
-    label: "Niveau de pertinence",
-    value: formatStatusLabel(state),
-    tone: tone === "success" || tone === "warning" || tone === "neutral" ? tone : state === "élevé" ? "success" : state === "moyen" ? "warning" : "neutral",
-    icon: "mdi:signal",
-    secondary: [summary, score !== null ? `Score: ${formatNumber(score, 0)}/100` : ""].filter(Boolean).join(" · "),
-  };
-}
-
-function getDerivedWindowPresentation(entity) {
-  if (!entity) {
-    return null;
-  }
-  const state = String(entity.state ?? "").trim();
-  const status = String(entity.attributes?.status || state).trim().toLowerCase();
-  const summary = String(entity.attributes?.summary || "").trim();
-  const blockReason = String(entity.attributes?.block_reason || "").trim();
-  const blockLabel = String(entity.attributes?.block_label || "").trim();
-  const wateringCause = String(entity.attributes?.watering_cause || "").trim().toLowerCase();
-  const isPostApplication = wateringCause === "post_application";
-  let tone = state === "attendre" ? "warning" : ["maintenant", "ce_matin"].includes(state) ? "success" : ["demain_matin", "apres_pluie", "soir"].includes(state) ? "accent" : "neutral";
-  let value = formatStatusLabel(state);
-  if (isPostApplication) {
-    if (status === "auto") {
-      value = "Post-produit auto";
-      tone = "success";
-    } else if (status === "autorise") {
-      value = "Post-produit autorisé";
-      tone = "success";
-    } else if (status === "en_attente") {
-      value = "Post-produit en attente";
-      tone = "warning";
-    } else if (status === "bloque") {
-      value = "Post-produit bloqué";
-      tone = "danger";
-    } else {
-      value = formatWateringCauseLabel(wateringCause);
-    }
-  }
-  return {
-    label: "Prochaine fenêtre optimale",
-    value,
-    tone,
-    icon: "mdi:clock-outline",
-    secondary: [summary, isPostApplication ? `Cause: ${formatWateringCauseLabel(wateringCause)}` : "", blockLabel || formatStatusLabel(blockReason)].filter(Boolean).join(" · "),
-  };
-}
-
-function getDerivedBlockPresentation(entity) {
-  if (!entity) {
-    return null;
-  }
-  const state = String(entity.state ?? "").trim();
-  const summary = String(entity.attributes?.summary || "").trim();
-  const blockLabel = String(entity.attributes?.block_label || "").trim();
-  const blockReason = String(entity.attributes?.block_reason || "").trim();
-  return {
-    label: "Prochain blocage attendu",
-    value: blockLabel || formatStatusLabel(state),
-    tone: state ? "danger" : "neutral",
-    icon: "mdi:alert-circle-outline",
-    secondary: [summary, blockReason && blockReason !== state ? `Cause: ${formatDerivedTriggerLabel(blockReason)}` : ""].filter(Boolean).join(" · "),
-  };
-}
-
-function getDerivedSignalPresentation(entity, label, icon = "mdi:information-outline") {
-  if (!entity) {
-    return null;
-  }
-  const summary = String(entity.attributes?.summary || "").trim();
-  const actionLabel = String(entity.attributes?.action_label || "").trim();
-  const reasonKind = String(entity.attributes?.reason_kind || "").trim().toLowerCase();
-  const triggerKind = String(entity.attributes?.trigger_kind || "").trim().toLowerCase();
-  const sourceStatus = String(entity.attributes?.source_status || "").trim();
-  const wateringCause = String(entity.attributes?.watering_cause || "").trim().toLowerCase();
-  const tone = formatIrrigationSignalTone({ reasonKind, triggerKind });
-  const secondaryParts = [];
-  if (actionLabel && actionLabel !== summary) {
-    secondaryParts.push(actionLabel);
-  }
-  if (wateringCause) {
-    secondaryParts.push(`Cause: ${formatWateringCauseLabel(wateringCause)}`);
-  }
-  if (reasonKind) {
-    secondaryParts.push(`Raison: ${formatStatusLabel(reasonKind)}`);
-  }
-  if (triggerKind) {
-    secondaryParts.push(`Déclencheur: ${formatDerivedTriggerLabel(triggerKind)}`);
-  }
-  if (sourceStatus && sourceStatus !== triggerKind) {
-    secondaryParts.push(`Statut source: ${formatStatusLabel(sourceStatus)}`);
-  }
-  return {
-    label,
-    value: formatIrrigationSignalLabel({ actionLabel, summary, reasonKind }),
-    tone,
-    icon,
-    secondary: secondaryParts.join(" · "),
-  };
-}
-
 function renderCatalogueProductCards(card) {
   const products = card._catalogueProducts();
   const selection = card._productSelectionState();
@@ -9785,81 +9678,8 @@ function renderProductsScopeSection() {
         <div class="tab-panel__section-head">
           <div class="tab-panel__eyebrow">Repère</div>
         </div>
-        <div class="tab-panel__section-summary">Catalogue, sélection active et dernière application</div>
-        <div class="tab-panel__section-hint">L’analyse de pertinence détaillée reste dans l’onglet Intervention.</div>
-      </section>
-    `;
-}
-
-function renderProductSummarySection(card) {
-  const selection = card._productSelectionState();
-  const catalogue = card._catalogueState();
-  const hasProductData = Boolean(
-    selection.selectedProductId || selection.selectedProductName || catalogue.hasProducts,
-  );
-  const emptyStateMessage = "Aucune donnée produit disponible";
-  const catalogueLabel = catalogue.count === 1 ? "1 produit" : `${catalogue.count || 0} produits`;
-  const selectionDetailsParts = [];
-  if (selection.selectedProductId) {
-    selectionDetailsParts.push(`ID: ${selection.selectedProductId}`);
-  }
-  if (selection.selectedProductMonthsLabel) {
-    selectionDetailsParts.push(`Période: ${selection.selectedProductMonthsLabel}`);
-  }
-  if (selection.usageModeLabel) {
-    selectionDetailsParts.push(`Mode: ${selection.usageModeLabel}`);
-  }
-  if (selection.maxApplicationsPerYearLabel) {
-    selectionDetailsParts.push(`Max/an: ${selection.maxApplicationsPerYearLabel}`);
-  }
-  const selectionDetails = selectionDetailsParts.join(" · ") || selection.summary || "Sélection active";
-  const selectionValue = selection.selectedProductName || (catalogue.hasProducts ? "Sélection à faire" : "Aucun produit");
-
-  if (!hasProductData) {
-    return `
-      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
-        <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Vue produit</div>
-          ${renderStatusPill(emptyStateMessage, "neutral", "mdi:package-variant-closed", "tab-panel__status")}
-        </div>
-        <div class="tab-panel__section-summary">${escapeHtml(emptyStateMessage)}</div>
-      </section>
-    `;
-  }
-
-  return `
-      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products">
-        <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Vue produit</div>
-        </div>
-        <div class="decision-plan tab-panel__decision-plan tab-panel__decision-plan--products">
-          <div class="decision-plan__header">
-            <div class="decision-plan__label">Produit sélectionné</div>
-            <div class="decision-plan__meta">${escapeHtml(catalogueLabel)}</div>
-          </div>
-          <div class="decision-plan__summary">${escapeHtml(selectionValue)}</div>
-          <div class="decision-plan__chips">
-            ${selection.selectedProductName ? renderStatusPill("Sélection active", "success", "mdi:package-variant", "debug-chip") : renderStatusPill("Sélection à faire", "neutral", "mdi:package-variant-closed", "debug-chip")}
-            ${catalogue.hasProducts ? renderStatusPill(catalogue.summary || "Catalogue local", "success", "mdi:package-variant-closed", "debug-chip") : renderStatusPill("Aucun produit enregistré", "neutral", "mdi:package-variant-closed", "debug-chip")}
-          </div>
-        </div>
-        <div class="tab-panel__section-summary-list">
-          ${renderCompactSummaryList([
-            {
-              label: "Sélection active",
-              value: selectionValue,
-              note: selectionDetails,
-              tone: selection.selectedProductName ? "success" : "neutral",
-              entityKey: selection.selectedProductName ? null : "entity_produit_intervention",
-            },
-            {
-              label: "Catalogue local",
-              value: catalogueLabel,
-              note: catalogue.hasProducts ? "Le référentiel local alimente le choix du produit et l’historique." : "Aucun produit enregistré",
-              tone: catalogue.hasProducts ? "success" : "neutral",
-            },
-          ])}
-        </div>
+        <div class="tab-panel__section-summary">Catalogue, sélection active et historique produit</div>
+        <div class="tab-panel__section-hint">L’analyse détaillée et la déclaration restent dans l’onglet Intervention.</div>
       </section>
     `;
 }
@@ -9909,8 +9729,6 @@ function renderProductsTab(card) {
           <div class="tab-panel__hero-next">${escapeHtml(productsSummary)}</div>
           <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Le référentiel produit sert de base à la recommandation et à la déclaration.")} · ${escapeHtml("L’analyse détaillée reste dans Intervention.")}</div>
         </div>
-
-        ${renderProductSummarySection(card)}
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--catalogue-reference">
           <div class="tab-panel__section-head">
             <div class="tab-panel__eyebrow">Catalogue</div>
@@ -9939,20 +9757,21 @@ function renderInterventionTab(card) {
   const recommendation = card._interventionRecommendationState();
   const debug = getDebugInterventionState(card);
   const quickAction = card._selectedProductInterventionState();
-  const lastApplication = card._lastApplicationState();
   const productOptions = card._catalogueProductOptions();
   const ui = recommendation.ui || {};
   const selectedProductOptionLabel = quickAction.optionLabel || (productOptions.length === 1 ? productOptions[0].label : "");
   const hasProductOptions = productOptions.length > 0;
   const canDeclare = Boolean(quickAction.record && !quickAction.disabled);
-  const hasSelection = Boolean(quickAction.record && !quickAction.disabled);
-  const hasApplication = Boolean(lastApplication.hasApplication);
-  const lastApplicationSummary = hasApplication ? lastApplication.summary : "Aucune application enregistrée.";
-  const lastApplicationHint = hasApplication
-    ? lastApplication.detail || "Dernière application détectée."
-    : "Le bouton restera désactivé tant qu'aucune application n'est présente dans l'historique.";
-  const recommendationTone = ui.tone || "neutral";
+  const recommendationTone = ui.tone || formatIrrigationSignalTone({
+    reasonKind: recommendation.status,
+    triggerKind: recommendation.triggerKind,
+  }) || "neutral";
   const recommendationIcon = ui.icon || "mdi:spray-bottle";
+  const recommendationLabel = formatIrrigationSignalLabel({
+    actionLabel: ui.actionLabel,
+    summary: ui.summary,
+    reasonKind: recommendation.status,
+  });
   const selectionMeta = quickAction.record
     ? "Sélection active"
     : hasProductOptions
@@ -9980,7 +9799,7 @@ function renderInterventionTab(card) {
         <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${recommendationTone}">
           <div class="tab-panel__hero-top">
             <div class="tab-panel__hero-summary">${escapeHtml(ui.title || "Non disponible")}</div>
-            ${renderStatusPill(ui.badge || "Non disponible", recommendationTone, recommendationIcon, `tab-panel__status tab-panel__status--${recommendationTone}`)}
+            ${renderStatusPill(recommendationLabel || ui.badge || "Non disponible", recommendationTone, recommendationIcon, `tab-panel__status tab-panel__status--${recommendationTone}`)}
           </div>
           <div class="tab-panel__hero-next">${escapeHtml(ui.summary || "Non disponible")}</div>
           <div class="tab-panel__hero-hint">${escapeHtml(ui.hint || "Aucune recommandation disponible.")}</div>
@@ -10105,25 +9924,6 @@ function renderInterventionTab(card) {
           </summary>
           ${renderDebugInterventionSection(card, debug, false)}
         </details>
-
-        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
-          <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Dernière application</div>
-            <div class="tab-panel__section-meta">${escapeHtml(ui.historySummary || (hasApplication ? "Peut être supprimée" : "Aucune action possible"))}</div>
-          </div>
-          <div class="tab-panel__section-summary">${escapeHtml(lastApplicationSummary)}</div>
-          <div class="tab-panel__section-hint">${escapeHtml(ui.historyHint || lastApplicationHint)}</div>
-          <button
-            type="button"
-            class="gi-action gi-action--danger tab-panel__cta"
-            data-gazon-action="remove-last-application"
-            ${hasApplication ? "" : "disabled"}
-            aria-label="Supprimer la dernière application"
-          >
-            ${renderIconBox("mdi:delete-outline", "sm")}
-            <span>Supprimer la dernière application</span>
-          </button>
-        </section>
       </section>
     `;
 }
@@ -10184,12 +9984,6 @@ function renderOverviewTab(card) {
   const overviewIcon = card._config?.show_icons ? proposal.icon : null;
   const facts = card._overviewFacts();
   const wateringProgress = card._wateringProgressState();
-  const derivedFacts = [
-    { key: "entity_niveau_pertinence", fact: getDerivedPertinencePresentation(card._entity("entity_niveau_pertinence")) },
-    { key: "entity_prochaine_fenetre_optimale", fact: getDerivedWindowPresentation(card._entity("entity_prochaine_fenetre_optimale")) },
-    { key: "entity_prochain_blocage_attendu", fact: getDerivedBlockPresentation(card._entity("entity_prochain_blocage_attendu")) },
-    { key: "entity_signal_irrigation", fact: getDerivedSignalPresentation(card._entity("entity_signal_irrigation"), "Signal irrigation", "mdi:sprinkler") },
-  ].filter(({ fact }) => Boolean(fact));
 
   return `
       <section class="tab-panel gi-panel tab-panel--overview">
@@ -10199,7 +9993,7 @@ function renderOverviewTab(card) {
             ${renderStatusPill(proposal.title, overviewTone, overviewIcon, `tab-panel__status tab-panel__status--${overviewTone}`)}
           </div>
           <div class="tab-panel__hero-next">${escapeHtml(proposal.hint || windowState.displaySummary || windowState.summary || planState.summary || "Vue d’ensemble de la carte.")}</div>
-          <div class="tab-panel__hero-hint">${escapeHtml("Le résumé s’adapte automatiquement à la situation réelle et remonte les informations utiles en premier.")}</div>
+          <div class="tab-panel__hero-hint">${escapeHtml("Le résumé remonte d’abord la décision utile, puis les repères importants.")}</div>
         </div>
 
         ${renderWateringProgressSection(card, wateringProgress)}
@@ -10219,26 +10013,6 @@ function renderOverviewTab(card) {
             })),
           )}
         </section>
-
-        ${
-          derivedFacts.length
-            ? `
-              <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--derived-insights">
-                <div class="tab-panel__section-head">
-                  <div class="tab-panel__eyebrow">Lecture dérivée</div>
-                  <div class="tab-panel__section-meta">Raccourci lisible</div>
-                </div>
-                ${renderCompactSummaryList(
-                  derivedFacts.map(({ fact }) => ({
-                    label: fact.label,
-                    value: fact.value,
-                    note: fact.secondary,
-                  })),
-                )}
-              </section>
-            `
-            : ""
-        }
 
       </section>
     `;
@@ -10283,26 +10057,22 @@ function renderWateringTab(card) {
   const wateringCauseLabel = formatWateringCauseLabel(windowState.wateringCause || irrigationSignal.wateringCause || "hydrique");
   const wateringTypeLabel = formatWateringTypeLabel(irrigationSignal.typeArrosage || context.typeArrosage);
 
-  const planChips = [
-    card._renderTabPill("Zones", planState.zoneCount ? `${planState.zoneCount}` : "0", planState.zoneCount > 1 ? "accent" : "neutral", "mdi:pipe"),
-    card._renderTabPill("Passages", planState.passages ? `${planState.passages}` : "1", planState.fractionation ? "warning" : "neutral", "mdi:cached"),
-    card._renderTabPill("Fractionnement", planState.fractionation ? "Oui" : "Non", planState.fractionation ? "warning" : "neutral", "mdi:call-split"),
-    card._renderTabPill("Type de plan", planTypeLabel, card._planTypeTone(planState.planType), "mdi:shape"),
-    card._renderTabPill("Objectif", objectiveLabel, objective > 0 ? "success" : "neutral", "mdi:water"),
+  const decisionPills = [
+    card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
+    card._renderTabPill("Signal", irrigationSignal.actionLabel || "Non disponible", tone, "mdi:sprinkler"),
     card._renderTabPill("Cause", wateringCauseLabel, windowState.isPostApplication ? "accent" : "neutral", "mdi:source-branch"),
     card._renderTabPill("Type", wateringTypeLabel, isEmpty(irrigationSignal.typeArrosage || context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
-    card._renderTabPill("Signal", irrigationSignal.actionLabel || "Non disponible", tone, "mdi:sprinkler"),
-    card._renderTabPill("Raison", formatStatusLabel(irrigationSignal.reasonKind), tone, "mdi:information-outline"),
-    card._renderTabPill("Coordination tondeuse", mowerCoordinationState.label, mowerCoordinationState.tone, "mdi:robot-mower"),
-    (irrigationSignal.wateringBlockedByMower || ["ambiguous", "mower_ambiguous", "missing", "mower_missing", "configured_missing", "mower_configured_missing"].includes(mowerState.reasonCode))
-      ? card._renderTabPill("Blocage tondeuse", irrigationSignal.wateringBlockReasonLabel || mowerState.reason || "Tondeuse à vérifier", "danger", "mdi:robot-mower-alert")
-      : "",
-    card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
-    windowState.optimalWindowDisplay ? card._renderTabPill("Optimal", windowState.optimalWindowDisplay, "neutral", "mdi:clock-time-eight-outline") : "",
-    windowState.wateringWindowDisplay ? card._renderTabPill("Créneau", windowState.wateringWindowDisplay, "neutral", "mdi:timeline-clock-outline") : "",
+  ];
+  const contextPills = [
     context.hydricState ? card._renderTabPill("État hydrique", formatStatusLabel(context.hydricState), context.hydricState === "plein" ? "success" : "warning", "mdi:water-percent-alert") : "",
     context.reserveActuelle !== null ? card._renderTabPill("Réserve", `${formatNumber(context.reserveActuelle, 1)} mm`, "neutral", "mdi:cup-water") : "",
     context.depletionRatio !== null ? card._renderTabPill("Déplétion", formatNumber(context.depletionRatio, 3), "neutral", "mdi:gauge") : "",
+    context.temperature !== null ? card._renderTabPill("Température", `${formatNumber(context.temperature, 1)} °C`, context.temperature >= 24 ? "warning" : "neutral", "mdi:thermometer") : "",
+    context.etp !== null ? card._renderTabPill("ETP", `${formatNumber(context.etp, 1)} mm`, context.etp >= 4 ? "warning" : "neutral", "mdi:weather-sunny") : "",
+    card._renderTabPill("Coordination", mowerCoordinationState.label, mowerCoordinationState.tone, "mdi:robot-mower"),
+    (irrigationSignal.wateringBlockedByMower || ["ambiguous", "mower_ambiguous", "missing", "mower_missing", "configured_missing", "mower_configured_missing"].includes(mowerState.reasonCode))
+      ? card._renderTabPill("Blocage robot", irrigationSignal.wateringBlockReasonLabel || mowerState.reason || "Tondeuse à vérifier", "danger", "mdi:robot-mower-alert")
+      : "",
   ];
   const wateringProgress = card._wateringProgressState();
 
@@ -10329,13 +10099,26 @@ function renderWateringTab(card) {
 
         <section class="gi-info gi-info--main tab-panel__section">
           <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Plan d'irrigation</div>
+            <div class="tab-panel__eyebrow">Décision eau</div>
             <div class="tab-panel__section-meta">${escapeHtml(planState.durationHuman)} · ${escapeHtml(planTypeLabel)}</div>
           </div>
-          <div class="tab-panel__section-summary">${escapeHtml(planState.summary)}</div>
+          <div class="tab-panel__section-summary">${escapeHtml(windowState.summary || planState.summary || "Aucune irrigation à lancer.")}</div>
           ${
             card._config?.show_secondary_info
-              ? `<div class="tab-panel__chips">${planChips.join("")}</div>`
+              ? `<div class="tab-panel__chips">${decisionPills.join("")}</div>`
+              : ""
+          }
+        </section>
+
+        <section class="gi-info gi-info--secondary tab-panel__section">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Contexte terrain</div>
+            <div class="tab-panel__section-meta">${escapeHtml(windowState.displayNextAction || windowState.nextAction || "Lecture hydrique")}</div>
+          </div>
+          <div class="tab-panel__section-summary">${escapeHtml(planState.summary || "Le plan s’adapte au contexte réel.")}</div>
+          ${
+            card._config?.show_secondary_info
+              ? `<div class="tab-panel__chips">${contextPills.filter(Boolean).join("")}</div>`
               : ""
           }
         </section>
@@ -10411,7 +10194,7 @@ function renderGazonTab(card) {
         <div class="tab-panel__header">
           <div>
             <div class="tab-panel__eyebrow">Gazon</div>
-            <div class="tab-panel__title">Phase, sous-phase et contexte avancé</div>
+            <div class="tab-panel__title">Phase, sous-phase et pilotage métier</div>
             <div class="tab-panel__header-hint">${escapeHtml(gazonSummary)}${gazonHint ? ` · ${escapeHtml(gazonHint)}` : ""}</div>
           </div>
           ${renderStatusPill(formatStatusLabel(action), computeActionTone(action), gazonStatusIcon, "tab-panel__status")}
@@ -10458,7 +10241,7 @@ function renderMowingTab(card) {
   const windowSummary = windowState.entity ? windowState.displaySummary || windowState.summary : "Fenêtre optimale non disponible";
   const mowingStatusIcon = card._config?.show_icons ? "mdi:content-cut" : null;
   const mowingDecisionSummary = actionPossible
-    ? "Terrain et machine alignés."
+    ? "Tonte lançable."
     : mowingBlock.blocked
       ? mowingBlock.reasonLabel || mowingBlock.detail || mowerState.reason || "Tonte bloquée par conditions."
     : mowerState.present
@@ -10504,9 +10287,9 @@ function renderMowingTab(card) {
       tone: mowingBlock.blocked ? "danger" : "success",
     },
     {
-      label: "Fenêtre optimale",
+      label: "Fenêtre",
       value: windowSummary,
-      note: windowState.nextActionDisplay || windowState.nextAction || "",
+      note: windowState.reasonSummary || windowState.nextActionDisplay || windowState.nextAction || "",
       tone: windowState.tone,
     },
     {
@@ -10530,7 +10313,7 @@ function renderMowingTab(card) {
         <div class="tab-panel__header">
           <div>
             <div class="tab-panel__eyebrow">Tonte</div>
-            <div class="tab-panel__title">Tableau de décision, hauteur et créneau</div>
+            <div class="tab-panel__title">Décision robot, hauteur et fenêtre</div>
           </div>
           ${renderStatusPill(tonteValue, computeTonteTone(tonteValue), mowingStatusIcon, "tab-panel__status")}
         </div>

@@ -3791,7 +3791,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.95";
+const CARD_VERSION = "0.1.96";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -6281,9 +6281,25 @@ class GazonIntelligentCard extends HTMLElement {
     if (attrs.application_irrigation_mode) {
       detailParts.push(`Mode: ${formatStatusLabel(attrs.application_irrigation_mode)}`);
     }
-    const history = Array.isArray(attrs.application_history)
+    let history = Array.isArray(attrs.application_history)
       ? attrs.application_history.filter((item) => item && typeof item === "object")
       : [];
+    if (!history.length && hasApplication) {
+      history = [
+        {
+          libelle: String(attrs.libelle || attrs.produit || rawState || "Application").trim(),
+          produit: String(attrs.produit || attrs.libelle || rawState || "Application").trim(),
+          type: String(attrs.type || attrs.application_type || "").trim(),
+          dose: String(attrs.dose || "").trim(),
+          application_type: String(attrs.application_type || "").trim(),
+          application_irrigation_mode: String(attrs.application_irrigation_mode || "").trim(),
+          note: String(attrs.note || "").trim(),
+          date_action: String(attrs.date_action || attrs.date || "").trim(),
+          date: String(attrs.date || "").trim(),
+          declared_at: attrs.declared_at || null,
+        },
+      ];
+    }
     return {
       entity,
       hasApplication,

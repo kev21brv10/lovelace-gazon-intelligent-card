@@ -816,32 +816,36 @@ function renderCatalogueProductCards(card) {
   if (!products.length) {
     return `<div class="tab-panel__empty">Aucun produit enregistré.</div>`;
   }
-  return renderCompactSummaryList(
-    products.map((product) => {
-      const productId = String(product.id || "").trim();
-      const productName = String(product.nom || productId || "").trim() || "Produit";
-      const productType = String(product.type || "").trim();
-      const usageMode = String(product.usage_mode || "").trim();
-      const monthsLabel = String(product.application_months_label || "").trim();
-      const requiresWateringAfter = Boolean(product.application_requires_watering_after);
-      const isSelected = selectedProductId && productId.toLowerCase() === selectedProductId;
-      const secondaryParts = [
-        usageMode ? `Mode ${formatProductUsageMode(usageMode)}` : "",
-        monthsLabel,
-        requiresWateringAfter ? "Arrosage après application" : "",
-      ].filter(Boolean);
-      return {
-        label: productType ? formatStatusLabel(productType) : "Produit",
-        value: productName,
-        note: secondaryParts.join(" · "),
-        tone: isSelected ? "success" : "neutral",
-      };
-    }),
-  );
+  return `
+    <div class="tab-panel__catalogue-slider">
+      ${renderCompactSummaryList(
+        products.map((product) => {
+          const productId = String(product.id || "").trim();
+          const productName = String(product.nom || productId || "").trim() || "Produit";
+          const productType = String(product.type || "").trim();
+          const usageMode = String(product.usage_mode || "").trim();
+          const monthsLabel = String(product.application_months_label || "").trim();
+          const requiresWateringAfter = Boolean(product.application_requires_watering_after);
+          const isSelected = selectedProductId && productId.toLowerCase() === selectedProductId;
+          const secondaryParts = [
+            usageMode ? `Mode ${formatProductUsageMode(usageMode)}` : "",
+            monthsLabel,
+            requiresWateringAfter ? "Arrosage après application" : "",
+          ].filter(Boolean);
+          return {
+            label: productType ? formatStatusLabel(productType) : "Produit",
+            value: productName,
+            note: secondaryParts.join(" · "),
+            tone: isSelected ? "success" : "neutral",
+          };
+        }),
+      )}
+    </div>
+  `;
 }
 
-function renderApplicationHistoryItems(items) {
-  const rows = Array.isArray(items)
+function buildApplicationHistoryRows(items) {
+  return Array.isArray(items)
     ? items
         .filter((item) => item && typeof item === "object")
         .slice()
@@ -878,10 +882,26 @@ function renderApplicationHistoryItems(items) {
           };
         })
     : [];
+}
+
+function renderApplicationHistoryItems(items) {
+  const rows = buildApplicationHistoryRows(items);
   if (!rows.length) {
     return `<div class="tab-panel__empty">Aucune application enregistrée dans l’historique local.</div>`;
   }
   return renderCompactSummaryList(rows, "Aucune application enregistrée dans l’historique local.");
+}
+
+function renderApplicationHistoryPreview(items, limit = 2) {
+  const rows = buildApplicationHistoryRows(items).slice(0, Math.max(0, limit));
+  if (!rows.length) {
+    return "";
+  }
+  return `
+    <div class="tab-panel__history-foldout-preview">
+      ${renderCompactSummaryList(rows, "Aucune application enregistrée dans l’historique local.")}
+    </div>
+  `;
 }
 
 function renderApplicationHistoryFoldout(items) {
@@ -899,6 +919,7 @@ function renderApplicationHistoryFoldout(items) {
           </div>
           <div class="tab-panel__section-summary">Toutes les applications enregistrées</div>
           <div class="tab-panel__section-hint">Déplie pour voir la liste complète, classée de la plus récente à la plus ancienne.</div>
+          ${history.length > 1 ? renderApplicationHistoryPreview(history, 2) : ""}
         </summary>
         <div class="tab-panel__history-foldout-body">
           ${renderApplicationHistoryItems(history)}

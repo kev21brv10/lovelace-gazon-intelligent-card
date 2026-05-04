@@ -532,6 +532,48 @@ export const CARD_STYLES = String.raw`
 
         .tab-panel__decision-strip--overview {
           margin-top: 6px;
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+        }
+
+        .tab-panel__decision-strip--overview .gi-pill {
+          width: 100%;
+          min-width: 0;
+        }
+
+        .tab-panel__history-foldout-preview {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+          gap: 8px;
+          margin-top: 2px;
+        }
+
+        .tab-panel__history-foldout-preview .tab-panel__summary-list {
+          display: contents;
+        }
+
+        .tab-panel__history-foldout-preview .tab-panel__summary-row {
+          padding: 10px 11px 11px;
+          border: 1px solid color-mix(in srgb, var(--gi-surface-border) 84%, transparent);
+          border-radius: 16px;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 93%, black) 100%);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .tab-panel__history-foldout-preview .tab-panel__summary-label {
+          font-size: var(--gi-font-xxs);
+        }
+
+        .tab-panel__history-foldout-preview .tab-panel__summary-value {
+          font-size: var(--gi-font-sm);
+          line-height: 1.15;
+        }
+
+        .tab-panel__history-foldout-preview .tab-panel__summary-note {
+          font-size: var(--gi-font-xxs);
+          line-height: 1.28;
         }
 
         .tab-panel__section-title {
@@ -1022,6 +1064,20 @@ export const CARD_STYLES = String.raw`
 
         .tab-panel__grid--products {
           grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+
+        .tab-panel__catalogue-slider {
+          min-width: 0;
+        }
+
+        .tab-panel__catalogue-slider .tab-panel__summary-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+        }
+
+        .tab-panel__catalogue-slider .tab-panel__summary-row {
+          min-width: 0;
         }
 
         .tab-panel__products-layout {
@@ -3038,6 +3094,56 @@ export const CARD_STYLES = String.raw`
 
           .tab-panel--overview .tab-panel__summary-list {
             grid-template-columns: 1fr;
+          }
+
+          .tab-panel__decision-strip--overview {
+            grid-template-columns: 1fr;
+          }
+
+          .tab-panel__history-foldout-preview {
+            grid-template-columns: 1fr;
+          }
+
+          .tab-panel__catalogue-slider .tab-panel__summary-list {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x proximity;
+            scroll-padding-inline: 6px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 2px;
+          }
+
+          .tab-panel__catalogue-slider .tab-panel__summary-list::-webkit-scrollbar {
+            display: none;
+          }
+
+          .tab-panel__catalogue-slider .tab-panel__summary-row {
+            flex: 0 0 min(260px, 82vw);
+            scroll-snap-align: start;
+            padding: 10px 11px 11px;
+            border: 1px solid color-mix(in srgb, var(--gi-surface-border) 84%, transparent);
+            border-radius: 16px;
+            background:
+              linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 93%, black) 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+          }
+
+          .tab-panel__catalogue-slider .tab-panel__summary-label {
+            font-size: var(--gi-font-xxs);
+          }
+
+          .tab-panel__catalogue-slider .tab-panel__summary-value {
+            font-size: var(--gi-font-sm);
+            line-height: 1.15;
+          }
+
+          .tab-panel__catalogue-slider .tab-panel__summary-note {
+            font-size: var(--gi-font-xxs);
+            line-height: 1.28;
           }
 
           .tab-panel__history-foldout-summary {

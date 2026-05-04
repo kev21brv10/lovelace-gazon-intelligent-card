@@ -3518,7 +3518,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.90";
+const CARD_VERSION = "0.1.91";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -10532,7 +10532,6 @@ function renderOverviewTab(card) {
   const overviewIcon = card._config?.show_icons ? proposal.icon : null;
   const facts = card._overviewFacts();
   const wateringProgress = card._wateringProgressState();
-  const lastWateringTotal = card._lastWateringTotalState();
   const overviewStrip = [
     card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
     card._renderTabPill("Plan", planState.planType ? formatPlanType(planState.planType) : "Non défini", "neutral", "mdi:timer-outline"),
@@ -10574,6 +10573,7 @@ function renderWateringTab(card) {
   const mowerState = card._mowerState();
   const mowerCoordinationState = card._mowerCoordinationSwitchState();
   const context = card._objectiveContext();
+  const lastWateringTotal = card._lastWateringTotalState();
   const nextActionText = windowState.displayNextAction || windowState.nextActionDisplay || windowState.nextAction;
   const planState = card._planState();
   const objective = windowState.objective;

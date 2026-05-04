@@ -844,6 +844,8 @@ function renderApplicationHistoryItems(items) {
   const rows = Array.isArray(items)
     ? items
         .filter((item) => item && typeof item === "object")
+        .slice()
+        .reverse()
         .map((item) => {
           const productLabel = String(item.libelle || item.produit || item.type || "Application").trim();
           const whenLabel = humanDateTimeText(item.date_action || item.date || item.declared_at) || String(item.date || "").trim() || "";
@@ -882,15 +884,26 @@ function renderApplicationHistoryItems(items) {
   return renderCompactSummaryList(rows, "Aucune application enregistrée dans l’historique local.");
 }
 
-function renderProductsScopeSection() {
+function renderApplicationHistoryFoldout(items) {
+  const history = Array.isArray(items) ? items.filter((item) => item && typeof item === "object") : [];
+  if (!history.length) {
+    return "";
+  }
+  const countLabel = history.length > 1 ? `${history.length} applications enregistrées` : "1 application enregistrée";
   return `
-      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-scope">
-        <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Historique complet</div>
+      <details class="tab-panel__history-foldout gi-info gi-info--secondary">
+        <summary class="tab-panel__history-foldout-summary">
+          <div class="tab-panel__section-head tab-panel__history-foldout-head">
+            <div class="tab-panel__eyebrow">Historique complet</div>
+            <div class="tab-panel__section-meta">${escapeHtml(countLabel)}</div>
+          </div>
+          <div class="tab-panel__section-summary">Toutes les applications enregistrées</div>
+          <div class="tab-panel__section-hint">Déplie pour voir la liste complète, classée de la plus récente à la plus ancienne.</div>
+        </summary>
+        <div class="tab-panel__history-foldout-body">
+          ${renderApplicationHistoryItems(history)}
         </div>
-        <div class="tab-panel__section-summary">Toutes les applications enregistrées</div>
-        <div class="tab-panel__section-hint">La dernière application reste résumée au-dessus; cette zone liste tout l’historique disponible.</div>
-      </section>
+      </details>
     `;
 }
 
@@ -965,7 +978,7 @@ export function renderProductsTab(card) {
             </div>
             <div class="tab-panel__section-summary">${escapeHtml(lastApplicationSummary)}</div>
             <div class="tab-panel__section-hint">${escapeHtml(lastApplicationHint)}</div>
-            ${renderApplicationHistoryItems(applicationHistory)}
+            ${renderApplicationHistoryFoldout(applicationHistory)}
           </section>
         </div>
       </section>

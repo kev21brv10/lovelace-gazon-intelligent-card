@@ -218,6 +218,22 @@ export const CARD_STYLES = String.raw`
           scroll-snap-type: x proximity;
         }
 
+        @media (min-width: 760px) {
+          .gi-tabs,
+          .tab-nav,
+          .section-nav {
+            flex-wrap: wrap;
+            overflow-x: visible;
+            scroll-snap-type: none;
+          }
+
+          .gi-tab,
+          .tab-nav__item,
+          .section-nav__item {
+            min-width: 0;
+          }
+        }
+
         .gi-tabs::-webkit-scrollbar,
         .tab-nav::-webkit-scrollbar,
         .section-nav::-webkit-scrollbar {
@@ -459,6 +475,40 @@ export const CARD_STYLES = String.raw`
         .tab-panel__section--intervention-overview,
         .tab-panel__section--intervention-technical {
           gap: 8px;
+        }
+
+        .tab-panel__history-foldout {
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
+          border-radius: 20px;
+          overflow: hidden;
+        }
+
+        .tab-panel__history-foldout[open] {
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 18%, var(--divider-color));
+        }
+
+        .tab-panel__history-foldout-summary {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          padding: 12px 14px;
+          cursor: pointer;
+          list-style: none;
+          user-select: none;
+        }
+
+        .tab-panel__history-foldout-summary::-webkit-details-marker {
+          display: none;
+        }
+
+        .tab-panel__history-foldout-head {
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+        }
+
+        .tab-panel__history-foldout-body {
+          padding: 0 14px 14px;
         }
 
         .tab-panel__section-title {
@@ -2903,6 +2953,7 @@ export const CARD_STYLES = String.raw`
           .tab-panel--products .tab-panel__section-head,
           .tab-panel--intervention .tab-panel__hero-top,
           .tab-panel--intervention .tab-panel__section-head,
+          .tab-panel__history-foldout-head,
           .tab-panel--intervention .tab-panel__debug-foldout-summary {
             flex-direction: column;
             align-items: flex-start;
@@ -2960,6 +3011,14 @@ export const CARD_STYLES = String.raw`
           .tab-panel--products .tab-panel__section-hint {
             font-size: var(--gi-font-sm);
             line-height: 1.22;
+          }
+
+          .tab-panel__history-foldout-summary {
+            padding: 11px 12px;
+          }
+
+          .tab-panel__history-foldout-body {
+            padding: 0 12px 12px;
           }
 
           .tab-panel--intervention .tab-panel__decision-strip {

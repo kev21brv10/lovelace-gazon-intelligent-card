@@ -218,6 +218,22 @@ const CARD_STYLES = String.raw`
           scroll-snap-type: x proximity;
         }
 
+        @media (min-width: 760px) {
+          .gi-tabs,
+          .tab-nav,
+          .section-nav {
+            flex-wrap: wrap;
+            overflow-x: visible;
+            scroll-snap-type: none;
+          }
+
+          .gi-tab,
+          .tab-nav__item,
+          .section-nav__item {
+            min-width: 0;
+          }
+        }
+
         .gi-tabs::-webkit-scrollbar,
         .tab-nav::-webkit-scrollbar,
         .section-nav::-webkit-scrollbar {
@@ -459,6 +475,40 @@ const CARD_STYLES = String.raw`
         .tab-panel__section--intervention-overview,
         .tab-panel__section--intervention-technical {
           gap: 8px;
+        }
+
+        .tab-panel__history-foldout {
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
+          border-radius: 20px;
+          overflow: hidden;
+        }
+
+        .tab-panel__history-foldout[open] {
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 18%, var(--divider-color));
+        }
+
+        .tab-panel__history-foldout-summary {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          padding: 12px 14px;
+          cursor: pointer;
+          list-style: none;
+          user-select: none;
+        }
+
+        .tab-panel__history-foldout-summary::-webkit-details-marker {
+          display: none;
+        }
+
+        .tab-panel__history-foldout-head {
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+        }
+
+        .tab-panel__history-foldout-body {
+          padding: 0 14px 14px;
         }
 
         .tab-panel__section-title {
@@ -2903,6 +2953,7 @@ const CARD_STYLES = String.raw`
           .tab-panel--products .tab-panel__section-head,
           .tab-panel--intervention .tab-panel__hero-top,
           .tab-panel--intervention .tab-panel__section-head,
+          .tab-panel__history-foldout-head,
           .tab-panel--intervention .tab-panel__debug-foldout-summary {
             flex-direction: column;
             align-items: flex-start;
@@ -2960,6 +3011,14 @@ const CARD_STYLES = String.raw`
           .tab-panel--products .tab-panel__section-hint {
             font-size: var(--gi-font-sm);
             line-height: 1.22;
+          }
+
+          .tab-panel__history-foldout-summary {
+            padding: 11px 12px;
+          }
+
+          .tab-panel__history-foldout-body {
+            padding: 0 12px 12px;
           }
 
           .tab-panel--intervention .tab-panel__decision-strip {
@@ -3204,7 +3263,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.80";
+const CARD_VERSION = "0.1.81";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -9769,6 +9828,8 @@ function renderApplicationHistoryItems(items) {
   const rows = Array.isArray(items)
     ? items
         .filter((item) => item && typeof item === "object")
+        .slice()
+        .reverse()
         .map((item) => {
           const productLabel = String(item.libelle || item.produit || item.type || "Application").trim();
           const whenLabel = humanDateTimeText(item.date_action || item.date || item.declared_at) || String(item.date || "").trim() || "";
@@ -9807,15 +9868,26 @@ function renderApplicationHistoryItems(items) {
   return renderCompactSummaryList(rows, "Aucune application enregistrée dans l’historique local.");
 }
 
-function renderProductsScopeSection() {
+function renderApplicationHistoryFoldout(items) {
+  const history = Array.isArray(items) ? items.filter((item) => item && typeof item === "object") : [];
+  if (!history.length) {
+    return "";
+  }
+  const countLabel = history.length > 1 ? `${history.length} applications enregistrées` : "1 application enregistrée";
   return `
-      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-scope">
-        <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Historique complet</div>
+      <details class="tab-panel__history-foldout gi-info gi-info--secondary">
+        <summary class="tab-panel__history-foldout-summary">
+          <div class="tab-panel__section-head tab-panel__history-foldout-head">
+            <div class="tab-panel__eyebrow">Historique complet</div>
+            <div class="tab-panel__section-meta">${escapeHtml(countLabel)}</div>
+          </div>
+          <div class="tab-panel__section-summary">Toutes les applications enregistrées</div>
+          <div class="tab-panel__section-hint">Déplie pour voir la liste complète, classée de la plus récente à la plus ancienne.</div>
+        </summary>
+        <div class="tab-panel__history-foldout-body">
+          ${renderApplicationHistoryItems(history)}
         </div>
-        <div class="tab-panel__section-summary">Toutes les applications enregistrées</div>
-        <div class="tab-panel__section-hint">La dernière application reste résumée au-dessus; cette zone liste tout l’historique disponible.</div>
-      </section>
+      </details>
     `;
 }
 
@@ -9890,7 +9962,7 @@ function renderProductsTab(card) {
             </div>
             <div class="tab-panel__section-summary">${escapeHtml(lastApplicationSummary)}</div>
             <div class="tab-panel__section-hint">${escapeHtml(lastApplicationHint)}</div>
-            ${renderApplicationHistoryItems(applicationHistory)}
+            ${renderApplicationHistoryFoldout(applicationHistory)}
           </section>
         </div>
       </section>

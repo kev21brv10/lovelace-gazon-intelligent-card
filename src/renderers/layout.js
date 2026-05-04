@@ -382,6 +382,25 @@ function renderCardSlider(items, extraClass = "") {
   `;
 }
 
+function renderFactCards(card, items, extraClass = "") {
+  const facts = Array.isArray(items) ? items.filter(Boolean) : [];
+  if (!facts.length) {
+    return `<div class="tab-panel__empty">Aucune information supplémentaire.</div>`;
+  }
+  return `
+    <div class="tab-panel__facts-grid ${escapeHtml(extraClass)}">
+      ${facts.map((fact) => card._renderLinkedStatCard({
+        label: fact.label,
+        value: fact.value,
+        tone: fact.tone || "neutral",
+        icon: fact.icon || null,
+        secondary: fact.secondary || fact.note || "",
+        entityKey: fact.entityKey || null,
+      })).join("")}
+    </div>
+  `;
+}
+
 function getDebugInterventionState(card) {
   const entity = card._entity("entity_debug_intervention");
   if (!entity) {
@@ -1229,15 +1248,7 @@ export function renderOverviewTab(card) {
             <div class="tab-panel__eyebrow">Essentiel</div>
             <div class="tab-panel__section-meta">${escapeHtml(`${facts.length} repère${facts.length > 1 ? "s" : ""}`)}</div>
           </div>
-          ${renderCompactSummaryList(
-            facts.map((fact) => ({
-              label: fact.label,
-              value: fact.value,
-              note: fact.secondary,
-              tone: fact.tone,
-              entityKey: fact.entityKey,
-            })),
-          )}
+          ${renderFactCards(card, facts, "tab-panel__facts-grid--overview")}
         </section>
 
       </section>
@@ -1283,24 +1294,67 @@ export function renderWateringTab(card) {
   const wateringCauseLabel = formatWateringCauseLabel(windowState.wateringCause || irrigationSignal.wateringCause || "hydrique");
   const wateringTypeLabel = formatWateringTypeLabel(irrigationSignal.typeArrosage || context.typeArrosage);
 
-  const decisionPills = [
-    card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
-    card._renderTabPill("Signal", irrigationSignal.actionLabel || "Non disponible", tone, "mdi:sprinkler"),
-    card._renderTabPill("Cause", wateringCauseLabel, windowState.isPostApplication ? "accent" : "neutral", "mdi:source-branch"),
-    card._renderTabPill("Type", wateringTypeLabel, isEmpty(irrigationSignal.typeArrosage || context.typeArrosage) ? "neutral" : "accent", "mdi:sprinkler"),
-  ];
-  const contextPills = [
-    context.hydricState ? card._renderTabPill("État hydrique", formatStatusLabel(context.hydricState), context.hydricState === "plein" ? "success" : "warning", "mdi:water-percent-alert") : "",
-    context.reserveActuelle !== null ? card._renderTabPill("Réserve", `${formatNumber(context.reserveActuelle, 1)} mm`, "neutral", "mdi:cup-water") : "",
-    context.depletionRatio !== null ? card._renderTabPill("Déplétion", formatNumber(context.depletionRatio, 3), "neutral", "mdi:gauge") : "",
-    context.temperature !== null ? card._renderTabPill("Température", `${formatNumber(context.temperature, 1)} °C`, context.temperature >= 24 ? "warning" : "neutral", "mdi:thermometer") : "",
-    context.etp !== null ? card._renderTabPill("ETP", `${formatNumber(context.etp, 1)} mm`, context.etp >= 4 ? "warning" : "neutral", "mdi:weather-sunny") : "",
-    card._renderTabPill("Coordination", mowerCoordinationState.label, mowerCoordinationState.tone, "mdi:robot-mower"),
-    (irrigationSignal.wateringBlockedByMower || ["ambiguous", "mower_ambiguous", "missing", "mower_missing", "configured_missing", "mower_configured_missing"].includes(mowerState.reasonCode))
-      ? card._renderTabPill("Blocage robot", irrigationSignal.wateringBlockReasonLabel || mowerState.reason || "Tondeuse à vérifier", "danger", "mdi:robot-mower-alert")
-      : "",
-  ];
   const wateringProgress = card._wateringProgressState();
+  const decisionFacts = [
+    {
+      label: "Fenêtre",
+      value: windowState.statusLabel,
+      secondary: windowState.displaySummary || windowState.summary || "",
+      tone: windowState.tone,
+      icon: "mdi:clock-outline",
+    },
+    {
+      label: "Signal",
+      value: irrigationSignal.actionLabel || "Non disponible",
+      secondary: irrigationSignal.summary || "",
+      tone,
+      icon: "mdi:sprinkler",
+    },
+    {
+      label: "Cause",
+      value: wateringCauseLabel,
+      secondary: windowState.reasonSummary || "",
+      tone: windowState.isPostApplication ? "accent" : "neutral",
+      icon: "mdi:source-branch",
+    },
+    {
+      label: "Type",
+      value: wateringTypeLabel,
+      secondary: planState.summary || "",
+      tone: isEmpty(irrigationSignal.typeArrosage || context.typeArrosage) ? "neutral" : "accent",
+      icon: "mdi:water-sync",
+    },
+  ];
+  const contextFacts = [
+    context.hydricState ? {
+      label: "État hydrique",
+      value: formatStatusLabel(context.hydricState),
+      secondary: context.reserveActuelle !== null ? `${formatNumber(context.reserveActuelle, 1)} mm disponibles` : "",
+      tone: context.hydricState === "plein" ? "success" : "warning",
+      icon: "mdi:water-percent-alert",
+    } : null,
+    context.temperature !== null ? {
+      label: "Température",
+      value: `${formatNumber(context.temperature, 1)} °C`,
+      secondary: context.etp !== null ? `ETP ${formatNumber(context.etp, 1)} mm` : "",
+      tone: context.temperature >= 24 ? "warning" : "neutral",
+      icon: "mdi:thermometer",
+    } : null,
+    {
+      label: "Coordination",
+      value: mowerCoordinationState.label,
+      secondary: irrigationSignal.wateringBlockedByMower ? (irrigationSignal.wateringBlockReasonLabel || "Blocage robot actif") : (mowerState.reason || ""),
+      tone: irrigationSignal.wateringBlockedByMower ? "danger" : mowerCoordinationState.tone,
+      icon: "mdi:robot-mower",
+    },
+    {
+      label: "Plan",
+      value: planTypeLabel,
+      secondary: planState.durationHuman,
+      tone: "accent",
+      icon: "mdi:timer-outline",
+    },
+  ].filter(Boolean);
 
   return `
       <section class="tab-panel gi-panel tab-panel--watering">
@@ -1331,7 +1385,7 @@ export function renderWateringTab(card) {
           <div class="tab-panel__section-summary">${escapeHtml(windowState.summary || planState.summary || "Aucune irrigation à lancer.")}</div>
           ${
             card._config?.show_secondary_info
-              ? `<div class="tab-panel__chips">${decisionPills.join("")}</div>`
+              ? renderFactCards(card, decisionFacts, "tab-panel__facts-grid--watering")
               : ""
           }
         </section>
@@ -1344,7 +1398,7 @@ export function renderWateringTab(card) {
           <div class="tab-panel__section-summary">${escapeHtml(planState.summary || "Le plan s’adapte au contexte réel.")}</div>
           ${
             card._config?.show_secondary_info
-              ? `<div class="tab-panel__chips">${contextPills.filter(Boolean).join("")}</div>`
+              ? renderFactCards(card, contextFacts, "tab-panel__facts-grid--watering")
               : ""
           }
         </section>
@@ -1561,7 +1615,23 @@ export function renderMowingTab(card) {
             <div class="tab-panel__eyebrow">Lecture rapide</div>
             <div class="tab-panel__section-meta">${escapeHtml(mowingBlock.blocked ? mowingBlock.reasonLabel || "Blocage actif" : "Aucun blocage")}</div>
           </div>
-          ${renderCompactSummaryList(mowingSummaryItems)}
+          ${renderFactCards(
+            card,
+            mowingSummaryItems.map((item) => ({
+              label: item.label,
+              value: item.value,
+              secondary: item.note,
+              tone: item.tone,
+              icon:
+                item.label === "État de tonte" ? "mdi:content-cut"
+                  : item.label === "Machine" ? "mdi:robot-mower"
+                    : item.label === "Blocage" ? "mdi:alert-circle-outline"
+                      : item.label === "Fenêtre" ? "mdi:clock-outline"
+                        : item.label === "Hauteur conseillée" ? "mdi:ruler-square"
+                          : "mdi:battery"
+            })),
+            "tab-panel__facts-grid--mowing",
+          )}
         </section>
       </section>
     `;

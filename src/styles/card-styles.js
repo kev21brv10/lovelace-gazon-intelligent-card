@@ -1079,6 +1079,27 @@ export const CARD_STYLES = String.raw`
           font-size: var(--gi-font-xl);
         }
 
+        .tab-panel__facts-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          align-items: stretch;
+        }
+
+        .tab-panel__facts-grid > * {
+          min-width: 0;
+        }
+
+        .tab-panel__facts-grid .gi-card-core {
+          min-height: 92px;
+        }
+
+        .tab-panel__facts-grid--overview .gi-card-core,
+        .tab-panel__facts-grid--watering .gi-card-core,
+        .tab-panel__facts-grid--mowing .gi-card-core {
+          min-height: 96px;
+        }
+
         .tab-panel__grid--config {
           grid-template-columns: var(--gi-grid-template);
           gap: var(--gi-grid-gap);
@@ -3175,11 +3196,11 @@ export const CARD_STYLES = String.raw`
             line-height: 1.22;
           }
 
-          .tab-panel--overview .tab-panel__summary-list {
+          .tab-panel__decision-strip--overview {
             grid-template-columns: 1fr;
           }
 
-          .tab-panel__decision-strip--overview {
+          .tab-panel__facts-grid {
             grid-template-columns: 1fr;
           }
 

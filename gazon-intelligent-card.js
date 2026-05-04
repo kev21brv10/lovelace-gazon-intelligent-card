@@ -11,6 +11,10 @@ const CARD_STYLES = String.raw`
           --gi-font-lg: clamp(1.06rem, 0.98rem + 0.32vw, 1.20rem);
           --gi-font-xl: clamp(1.14rem, 1.02rem + 0.44vw, 1.36rem);
           --gi-font-2xl: clamp(1.34rem, 1.18rem + 0.62vw, 1.62rem);
+          --gi-label-size: var(--gi-font-xxs);
+          --gi-label-spacing: 0.08em;
+          --gi-body-line: 1.34;
+          --gi-tight-line: 1.18;
           --gi-motion-fast: 180ms;
           --gi-motion-medium: 260ms;
           --gi-ease-standard: cubic-bezier(0.2, 0, 0, 1);
@@ -255,7 +259,9 @@ const CARD_STYLES = String.raw`
           color: var(--secondary-text-color);
           border-radius: 12px;
           padding: var(--gi-nav-item-padding);
-          font-size: var(--gi-font-xxs);
+          font-size: var(--gi-font-xs);
+          font-weight: 700;
+          line-height: 1.15;
           cursor: pointer;
           user-select: none;
           -webkit-tap-highlight-color: transparent;
@@ -442,9 +448,9 @@ const CARD_STYLES = String.raw`
         }
 
         .tab-panel__hero-summary {
-          font-size: var(--gi-font-xxs);
+          font-size: var(--gi-label-size);
           text-transform: uppercase;
-          letter-spacing: 0.12em;
+          letter-spacing: var(--gi-label-spacing);
           font-weight: 800;
           line-height: 1.2;
           color: var(--secondary-text-color);
@@ -470,13 +476,13 @@ const CARD_STYLES = String.raw`
         .tab-panel__stat-secondary,
         .tab-panel__empty {
           font-size: var(--gi-font-sm);
-          line-height: 1.3;
+          line-height: var(--gi-body-line);
         }
 
         .tab-panel__hero-next {
           font-size: var(--gi-font-xl);
           font-weight: 900;
-          line-height: 1.18;
+          line-height: var(--gi-tight-line);
           color: var(--primary-text-color);
           letter-spacing: -0.01em;
         }
@@ -641,16 +647,17 @@ const CARD_STYLES = String.raw`
         }
 
         .tab-panel__section-title {
-          font-size: var(--gi-font-xxs);
+          font-size: var(--gi-label-size);
           text-transform: uppercase;
-          letter-spacing: 0.04em;
+          letter-spacing: var(--gi-label-spacing);
+          line-height: 1.15;
         }
 
         .tab-panel__header-hint {
           margin-top: 4px;
           color: var(--secondary-text-color);
-          font-size: var(--gi-font-xxs);
-          line-height: 1.3;
+          font-size: var(--gi-font-xs);
+          line-height: var(--gi-body-line);
         }
 
         .tab-panel__section-summary {
@@ -728,9 +735,9 @@ const CARD_STYLES = String.raw`
         }
 
         .tab-panel__summary-label {
-          font-size: var(--gi-font-xxs);
+          font-size: var(--gi-label-size);
           text-transform: uppercase;
-          letter-spacing: 0.05em;
+          letter-spacing: var(--gi-label-spacing);
           color: var(--secondary-text-color);
           line-height: 1.15;
         }
@@ -739,7 +746,7 @@ const CARD_STYLES = String.raw`
           min-width: 0;
           font-size: var(--gi-font-md);
           font-weight: 800;
-          line-height: 1.2;
+          line-height: 1.22;
           letter-spacing: -0.01em;
           color: var(--tab-panel-summary-value-color);
           overflow-wrap: anywhere;
@@ -748,7 +755,7 @@ const CARD_STYLES = String.raw`
         .tab-panel__summary-note {
           min-width: 0;
           font-size: var(--gi-font-xs);
-          line-height: 1.35;
+          line-height: var(--gi-body-line);
           color: var(--secondary-text-color);
           overflow-wrap: anywhere;
         }
@@ -1140,6 +1147,122 @@ const CARD_STYLES = String.raw`
         .tab-panel__facts-grid--watering .gi-card-core,
         .tab-panel__facts-grid--mowing .gi-card-core {
           min-height: 96px;
+        }
+
+        .tab-panel__metric-rail {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .tab-panel__metric-row {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: center;
+          gap: 12px;
+          width: 100%;
+          min-width: 0;
+          padding: 12px 14px;
+          border: 1px solid color-mix(in srgb, var(--gi-surface-border) 88%, transparent);
+          border-radius: 18px;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.05),
+            0 6px 16px rgba(0,0,0,0.06);
+          text-align: left;
+          box-sizing: border-box;
+        }
+
+        button.tab-panel__metric-row {
+          cursor: pointer;
+          font: inherit;
+          color: inherit;
+          appearance: none;
+          -webkit-appearance: none;
+        }
+
+        button.tab-panel__metric-row:hover {
+          transform: translateY(-1px);
+          border-color: var(--gi-surface-border-strong);
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.05),
+            0 10px 22px rgba(0,0,0,0.10);
+        }
+
+        button.tab-panel__metric-row:focus-visible {
+          outline: none;
+          box-shadow:
+            0 0 0 2px color-mix(in srgb, var(--gazon-card-accent) 24%, transparent),
+            inset 0 1px 0 rgba(255,255,255,0.05),
+            0 8px 18px rgba(0,0,0,0.08);
+        }
+
+        .tab-panel__metric-row--danger {
+          border-color: color-mix(in srgb, var(--gazon-danger-color) 24%, var(--gi-surface-border));
+        }
+
+        .tab-panel__metric-row--warning {
+          border-color: color-mix(in srgb, var(--gazon-warning-color) 24%, var(--gi-surface-border));
+        }
+
+        .tab-panel__metric-row--success {
+          border-color: color-mix(in srgb, var(--gazon-success-color) 24%, var(--gi-surface-border));
+        }
+
+        .tab-panel__metric-row--accent {
+          border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 24%, var(--gi-surface-border));
+        }
+
+        .tab-panel__metric-main {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .tab-panel__metric-head {
+          display: flex;
+          align-items: baseline;
+          justify-content: space-between;
+          gap: 12px;
+          min-width: 0;
+        }
+
+        .tab-panel__metric-label {
+          font-size: var(--gi-label-size);
+          text-transform: uppercase;
+          letter-spacing: var(--gi-label-spacing);
+          color: var(--secondary-text-color);
+          line-height: 1.14;
+          flex: 0 1 auto;
+          min-width: 0;
+        }
+
+        .tab-panel__metric-value {
+          font-size: var(--gi-font-md);
+          font-weight: 800;
+          line-height: 1.18;
+          color: var(--primary-text-color);
+          text-align: right;
+          flex: 0 0 auto;
+        }
+
+        .tab-panel__metric-note {
+          font-size: var(--gi-font-xs);
+          line-height: var(--gi-body-line);
+          color: var(--secondary-text-color);
+          min-width: 0;
+          overflow-wrap: anywhere;
+        }
+
+        .tab-panel__metric-icon {
+          width: 22px;
+          height: 22px;
+          display: grid;
+          place-items: center;
+          color: color-mix(in srgb, var(--gazon-section-accent) 72%, var(--primary-text-color));
+          opacity: 0.92;
         }
 
         .tab-panel__grid--config {
@@ -1759,9 +1882,9 @@ const CARD_STYLES = String.raw`
         .decision-plan__label,
         .decision-context__label,
         .decision-block__label {
-          font-size: var(--gi-font-xxs);
+          font-size: var(--gi-label-size);
           text-transform: uppercase;
-          letter-spacing: 0.04em;
+          letter-spacing: var(--gi-label-spacing);
           color: var(--secondary-text-color);
           margin-bottom: 4px;
         }
@@ -1790,7 +1913,7 @@ const CARD_STYLES = String.raw`
         .decision-plan__summary {
           font-size: var(--gi-font-md);
           font-weight: 800;
-          line-height: 1.26;
+          line-height: 1.24;
           min-width: 0;
           overflow-wrap: anywhere;
         }
@@ -2403,7 +2526,7 @@ const CARD_STYLES = String.raw`
         .header__subtitle {
           color: var(--secondary-text-color);
           font-size: var(--gi-font-xs);
-          line-height: 1.28;
+          line-height: var(--gi-body-line);
         }
 
         .header__subtitle::before {
@@ -3122,12 +3245,12 @@ const CARD_STYLES = String.raw`
 
           .header__title {
             font-size: var(--gi-font-md);
-            line-height: 1.12;
+            line-height: 1.14;
           }
 
           .header__subtitle {
-            font-size: var(--gi-font-xxs);
-            line-height: 1.18;
+            font-size: var(--gi-font-xs);
+            line-height: 1.22;
           }
 
           .header__action {
@@ -3212,14 +3335,14 @@ const CARD_STYLES = String.raw`
           }
 
           .tab-panel__hero-summary {
-            font-size: var(--gi-font-md);
-            line-height: 1.18;
+            font-size: var(--gi-font-xs);
+            line-height: 1.16;
           }
 
           .tab-panel__hero-next,
           .tab-panel__hero-hint {
-            font-size: var(--gi-font-xs);
-            line-height: 1.18;
+            font-size: var(--gi-font-sm);
+            line-height: 1.24;
           }
 
           .tab-panel--products .gi-card-core--stat {
@@ -3244,6 +3367,16 @@ const CARD_STYLES = String.raw`
 
           .tab-panel__facts-grid {
             grid-template-columns: 1fr;
+          }
+
+          .tab-panel__metric-head {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+          }
+
+          .tab-panel__metric-value {
+            text-align: left;
           }
 
           .tab-panel__history-foldout-preview {
@@ -3518,7 +3651,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.91";
+const CARD_VERSION = "0.1.92";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -9695,6 +9828,56 @@ function renderFactCards(card, items, extraClass = "") {
   `;
 }
 
+function renderMetricRail(card, items, extraClass = "") {
+  const rows = Array.isArray(items)
+    ? items.filter(Boolean).map((item) => ({
+        label: String(item.label || "").trim(),
+        value: String(item.value || "").trim() || "Non disponible",
+        secondary: String(item.secondary || item.note || "").trim(),
+        tone: String(item.tone || "neutral").trim().toLowerCase() || "neutral",
+        icon: item.icon || null,
+        entityKey: String(item.entityKey || "").trim() || null,
+      }))
+    : [];
+  if (!rows.length) {
+    return `<div class="tab-panel__empty">Aucune information supplémentaire.</div>`;
+  }
+  return `
+    <div class="tab-panel__metric-rail ${escapeHtml(extraClass)}">
+      ${rows.map((row) => {
+        const iconHtml = row.icon ? renderIconBox(row.icon, "sm") : "";
+        const inner = `
+          <div class="tab-panel__metric-main">
+            <div class="tab-panel__metric-head">
+              ${row.label ? `<div class="tab-panel__metric-label">${escapeHtml(row.label)}</div>` : ""}
+              <div class="tab-panel__metric-value">${escapeHtml(row.value)}</div>
+            </div>
+            ${row.secondary ? `<div class="tab-panel__metric-note">${escapeHtml(row.secondary)}</div>` : ""}
+          </div>
+          ${iconHtml ? `<div class="tab-panel__metric-icon">${iconHtml}</div>` : ""}
+        `;
+        if (row.entityKey) {
+          return `
+            <button
+              type="button"
+              class="tab-panel__metric-row tab-panel__metric-row--${escapeHtml(row.tone)}"
+              data-more-info-entity="${escapeHtml(row.entityKey)}"
+              aria-label="${escapeHtml(row.label ? `Ouvrir ${row.label}` : row.value)}"
+            >
+              ${inner}
+            </button>
+          `;
+        }
+        return `
+          <div class="tab-panel__metric-row tab-panel__metric-row--${escapeHtml(row.tone)}">
+            ${inner}
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
 function getDebugInterventionState(card) {
   const entity = card._entity("entity_debug_intervention");
   if (!entity) {
@@ -10705,7 +10888,7 @@ function renderWateringTab(card) {
           <div class="tab-panel__section-summary">${escapeHtml(windowState.summary || planState.summary || "Aucune irrigation à lancer.")}</div>
           ${
             card._config?.show_secondary_info
-              ? renderFactCards(card, decisionFacts, "tab-panel__facts-grid--watering")
+              ? renderMetricRail(card, decisionFacts, "tab-panel__metric-rail--watering")
               : ""
           }
         </section>
@@ -10718,7 +10901,7 @@ function renderWateringTab(card) {
           <div class="tab-panel__section-summary">${escapeHtml(planState.summary || "Le plan s’adapte au contexte réel.")}</div>
           ${
             card._config?.show_secondary_info
-              ? renderFactCards(card, contextFacts, "tab-panel__facts-grid--watering")
+              ? renderMetricRail(card, contextFacts, "tab-panel__metric-rail--watering")
               : ""
           }
         </section>
@@ -10800,9 +10983,7 @@ function renderGazonTab(card) {
           ${renderStatusPill(formatStatusLabel(action), computeActionTone(action), gazonStatusIcon, "tab-panel__status")}
         </div>
 
-        <div class="tab-panel__grid">
-          ${gazonFacts.map((fact) => card._renderLinkedStatCard(fact)).join("")}
-        </div>
+        ${renderMetricRail(card, gazonFacts, "tab-panel__metric-rail--gazon")}
 
         <div class="tab-panel__section">
           <div class="tab-panel__section-title">Progression de la sous-phase</div>
@@ -10944,22 +11125,30 @@ function renderMowingTab(card) {
             <div class="tab-panel__eyebrow">Lecture rapide</div>
             <div class="tab-panel__section-meta">${escapeHtml(mowingBlock.blocked ? mowingBlock.reasonLabel || "Blocage actif" : "Aucun blocage")}</div>
           </div>
-          ${renderFactCards(
+          ${renderMetricRail(
             card,
             mowingSummaryItems.map((item) => ({
               label: item.label,
               value: item.value,
               secondary: item.note,
               tone: item.tone,
+              entityKey:
+                item.label === "État de tonte" ? "entity_tonte"
+                  : item.label === "Fenêtre" ? "entity_fenetre_optimale"
+                    : item.label === "Hauteur conseillée" ? "entity_hauteur"
+                      : item.label === "Hauteur réglée" ? "entity_hauteur_coupe_tondeuse"
+                        : item.label === "Machine" ? "entity_tonte_autorisee"
+                          : null,
               icon:
                 item.label === "État de tonte" ? "mdi:content-cut"
                   : item.label === "Machine" ? "mdi:robot-mower"
                     : item.label === "Blocage" ? "mdi:alert-circle-outline"
                       : item.label === "Fenêtre" ? "mdi:clock-outline"
                         : item.label === "Hauteur conseillée" ? "mdi:ruler-square"
-                          : "mdi:battery"
+                          : item.label === "Hauteur réglée" ? "mdi:tune-vertical"
+                            : "mdi:battery"
             })),
-            "tab-panel__facts-grid--mowing",
+            "tab-panel__metric-rail--mowing",
           )}
         </section>
       </section>

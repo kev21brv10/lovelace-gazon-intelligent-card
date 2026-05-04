@@ -401,6 +401,56 @@ function renderFactCards(card, items, extraClass = "") {
   `;
 }
 
+function renderMetricRail(card, items, extraClass = "") {
+  const rows = Array.isArray(items)
+    ? items.filter(Boolean).map((item) => ({
+        label: String(item.label || "").trim(),
+        value: String(item.value || "").trim() || "Non disponible",
+        secondary: String(item.secondary || item.note || "").trim(),
+        tone: String(item.tone || "neutral").trim().toLowerCase() || "neutral",
+        icon: item.icon || null,
+        entityKey: String(item.entityKey || "").trim() || null,
+      }))
+    : [];
+  if (!rows.length) {
+    return `<div class="tab-panel__empty">Aucune information supplémentaire.</div>`;
+  }
+  return `
+    <div class="tab-panel__metric-rail ${escapeHtml(extraClass)}">
+      ${rows.map((row) => {
+        const iconHtml = row.icon ? renderIconBox(row.icon, "sm") : "";
+        const inner = `
+          <div class="tab-panel__metric-main">
+            <div class="tab-panel__metric-head">
+              ${row.label ? `<div class="tab-panel__metric-label">${escapeHtml(row.label)}</div>` : ""}
+              <div class="tab-panel__metric-value">${escapeHtml(row.value)}</div>
+            </div>
+            ${row.secondary ? `<div class="tab-panel__metric-note">${escapeHtml(row.secondary)}</div>` : ""}
+          </div>
+          ${iconHtml ? `<div class="tab-panel__metric-icon">${iconHtml}</div>` : ""}
+        `;
+        if (row.entityKey) {
+          return `
+            <button
+              type="button"
+              class="tab-panel__metric-row tab-panel__metric-row--${escapeHtml(row.tone)}"
+              data-more-info-entity="${escapeHtml(row.entityKey)}"
+              aria-label="${escapeHtml(row.label ? `Ouvrir ${row.label}` : row.value)}"
+            >
+              ${inner}
+            </button>
+          `;
+        }
+        return `
+          <div class="tab-panel__metric-row tab-panel__metric-row--${escapeHtml(row.tone)}">
+            ${inner}
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
 function getDebugInterventionState(card) {
   const entity = card._entity("entity_debug_intervention");
   if (!entity) {
@@ -1411,7 +1461,7 @@ export function renderWateringTab(card) {
           <div class="tab-panel__section-summary">${escapeHtml(windowState.summary || planState.summary || "Aucune irrigation à lancer.")}</div>
           ${
             card._config?.show_secondary_info
-              ? renderFactCards(card, decisionFacts, "tab-panel__facts-grid--watering")
+              ? renderMetricRail(card, decisionFacts, "tab-panel__metric-rail--watering")
               : ""
           }
         </section>
@@ -1424,7 +1474,7 @@ export function renderWateringTab(card) {
           <div class="tab-panel__section-summary">${escapeHtml(planState.summary || "Le plan s’adapte au contexte réel.")}</div>
           ${
             card._config?.show_secondary_info
-              ? renderFactCards(card, contextFacts, "tab-panel__facts-grid--watering")
+              ? renderMetricRail(card, contextFacts, "tab-panel__metric-rail--watering")
               : ""
           }
         </section>
@@ -1506,9 +1556,7 @@ export function renderGazonTab(card) {
           ${renderStatusPill(formatStatusLabel(action), computeActionTone(action), gazonStatusIcon, "tab-panel__status")}
         </div>
 
-        <div class="tab-panel__grid">
-          ${gazonFacts.map((fact) => card._renderLinkedStatCard(fact)).join("")}
-        </div>
+        ${renderMetricRail(card, gazonFacts, "tab-panel__metric-rail--gazon")}
 
         <div class="tab-panel__section">
           <div class="tab-panel__section-title">Progression de la sous-phase</div>
@@ -1650,22 +1698,30 @@ export function renderMowingTab(card) {
             <div class="tab-panel__eyebrow">Lecture rapide</div>
             <div class="tab-panel__section-meta">${escapeHtml(mowingBlock.blocked ? mowingBlock.reasonLabel || "Blocage actif" : "Aucun blocage")}</div>
           </div>
-          ${renderFactCards(
+          ${renderMetricRail(
             card,
             mowingSummaryItems.map((item) => ({
               label: item.label,
               value: item.value,
               secondary: item.note,
               tone: item.tone,
+              entityKey:
+                item.label === "État de tonte" ? "entity_tonte"
+                  : item.label === "Fenêtre" ? "entity_fenetre_optimale"
+                    : item.label === "Hauteur conseillée" ? "entity_hauteur"
+                      : item.label === "Hauteur réglée" ? "entity_hauteur_coupe_tondeuse"
+                        : item.label === "Machine" ? "entity_tonte_autorisee"
+                          : null,
               icon:
                 item.label === "État de tonte" ? "mdi:content-cut"
                   : item.label === "Machine" ? "mdi:robot-mower"
                     : item.label === "Blocage" ? "mdi:alert-circle-outline"
                       : item.label === "Fenêtre" ? "mdi:clock-outline"
                         : item.label === "Hauteur conseillée" ? "mdi:ruler-square"
-                          : "mdi:battery"
+                          : item.label === "Hauteur réglée" ? "mdi:tune-vertical"
+                            : "mdi:battery"
             })),
-            "tab-panel__facts-grid--mowing",
+            "tab-panel__metric-rail--mowing",
           )}
         </section>
       </section>

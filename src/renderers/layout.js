@@ -765,6 +765,7 @@ function renderInterventionOverviewSection(
 }
 
 function renderInterventionTechnicalSummary(card, recommendation, debug) {
+  const lastUserAction = card._lastUserActionState();
   const scoreValue = recommendation.score !== null && recommendation.score !== undefined
     ? `${formatNumber(recommendation.score, 0)}/100`
     : "—";
@@ -823,6 +824,14 @@ function renderInterventionTechnicalSummary(card, recommendation, debug) {
               note: missingRequirements > 0 ? "Des étapes restent à compléter avant déclaration." : "Aucun pré-requis manquant.",
               tone: missingRequirements > 0 ? "warning" : "success",
             },
+            ...(lastUserAction.summary
+              ? [{
+                  label: "Dernière exécution",
+                  value: lastUserAction.action || lastUserAction.state || "Exécution",
+                  note: [lastUserAction.when, lastUserAction.reason].filter(Boolean).join(" · ") || lastUserAction.summary,
+                  tone: "neutral",
+                }]
+              : []),
           ])}
         </div>
       </section>
@@ -1229,6 +1238,7 @@ export function renderOverviewTab(card) {
   const overviewIcon = card._config?.show_icons ? proposal.icon : null;
   const facts = card._overviewFacts();
   const wateringProgress = card._wateringProgressState();
+  const lastWateringTotal = card._lastWateringTotalState();
   const overviewStrip = [
     card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
     card._renderTabPill("Plan", planState.planType ? formatPlanType(planState.planType) : "Non défini", "neutral", "mdi:timer-outline"),
@@ -1363,6 +1373,13 @@ export function renderWateringTab(card) {
       tone: "accent",
       icon: "mdi:timer-outline",
     },
+    lastWateringTotal.value !== null ? {
+      label: "Arrosage cumulé",
+      value: lastWateringTotal.label,
+      secondary: lastWateringTotal.detail,
+      tone: "neutral",
+      icon: "mdi:water-sync",
+    } : null,
   ].filter(Boolean);
 
   return `
@@ -1511,6 +1528,7 @@ export function renderMowingTab(card) {
   const tonteAutorisee = card._entityState("entity_tonte_autorisee", null);
   const tonteAutoriseeEntity = card._entity("entity_tonte_autorisee");
   const height = card._entity("entity_hauteur");
+  const mowerCutHeightValue = card._renderConfigValue("entity_hauteur_coupe_tondeuse", "mm");
   const windowState = card._windowState();
   const mowerState = card._mowerState();
   const mowingBlock = card._mowingBlockState();
@@ -1594,6 +1612,14 @@ export function renderMowingTab(card) {
       value: mowerState.battery === null ? "Non disponible" : `${mowerState.battery} %`,
       note: mowerState.nextDeparture || "",
       tone: mowerState.battery === null ? "neutral" : mowerState.battery < 25 ? "danger" : "success",
+    });
+  }
+  if (mowerCutHeightValue.value && mowerCutHeightValue.value !== "Non disponible") {
+    mowingSummaryItems.push({
+      label: "Hauteur réglée",
+      value: mowerCutHeightValue.value,
+      note: "Réglage réel de la machine.",
+      tone: "accent",
     });
   }
 

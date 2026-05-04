@@ -131,7 +131,9 @@ entity_assistant: sensor.gazon_intelligent_assistant
 entity_fenetre_optimale: sensor.gazon_intelligent_fenetre_optimale
 entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
 entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
+entity_dernier_arrosage_total_zones: sensor.gazon_intelligent_dernier_arrosage_total_zones
 entity_derniere_application: sensor.gazon_intelligent_derniere_application
+entity_derniere_action_utilisateur: sensor.gazon_intelligent_derniere_action_utilisateur
 entity_catalogue_produits: sensor.gazon_intelligent_catalogue_produits
 entity_prochaine_intervention: sensor.gazon_intelligent_prochaine_intervention
 entity_produit_intervention: select.gazon_intelligent_produit_d_intervention
@@ -153,6 +155,7 @@ entity_debit_zone_4: number.gazon_intelligent_debit_zone_4
 entity_debit_zone_5: number.gazon_intelligent_debit_zone_5
 entity_hauteur_min_tondeuse: number.gazon_intelligent_hauteur_min_tondeuse
 entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
+entity_hauteur_coupe_tondeuse: number.gazon_intelligent_hauteur_coupe_tondeuse
 entity_delai_reprise_tonte_apres_arrosage: number.gazon_intelligent_delai_reprise_tonte_apres_arrosage
 show_advanced_details: false
 ```
@@ -236,7 +239,9 @@ entity_weather: weather.forecast_home
 entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
 entity_arrosage_en_cours: sensor.gazon_intelligent_arrosage_en_cours
 entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
+entity_dernier_arrosage_total_zones: sensor.gazon_intelligent_dernier_arrosage_total_zones
 entity_derniere_application: sensor.gazon_intelligent_derniere_application
+entity_derniere_action_utilisateur: sensor.gazon_intelligent_derniere_action_utilisateur
 entity_catalogue_produits: sensor.gazon_intelligent_catalogue_produits
 entity_prochaine_intervention: sensor.gazon_intelligent_prochaine_intervention
 entity_produit_intervention: select.gazon_intelligent_produit_d_intervention
@@ -277,6 +282,7 @@ entity_debit_zone_4: number.gazon_intelligent_debit_zone_4
 entity_debit_zone_5: number.gazon_intelligent_debit_zone_5
 entity_hauteur_min_tondeuse: number.gazon_intelligent_hauteur_min_tondeuse
 entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
+entity_hauteur_coupe_tondeuse: number.gazon_intelligent_hauteur_coupe_tondeuse
 entity_delai_reprise_tonte_apres_arrosage: number.gazon_intelligent_delai_reprise_tonte_apres_arrosage
 ```
 
@@ -297,7 +303,9 @@ Les attributs `gazon_permet_tonte`, `machine_permet_tonte` et `action_possible` 
 - `entity_plan_arrosage`
 - `entity_arrosage_en_cours`
 - `entity_dernier_arrosage`
+- `entity_dernier_arrosage_total_zones`
 - `entity_derniere_application`
+- `entity_derniere_action_utilisateur`
 - `entity_catalogue_produits`
 - `entity_prochaine_intervention`
 - `entity_produit_intervention`
@@ -338,6 +346,7 @@ Les attributs `gazon_permet_tonte`, `machine_permet_tonte` et `action_possible` 
 - `entity_debit_zone_5`
 - `entity_hauteur_min_tondeuse`
 - `entity_hauteur_max_tondeuse`
+- `entity_hauteur_coupe_tondeuse`
 - `entity_delai_reprise_tonte_apres_arrosage`
 - `show_icons`
 - `show_header`

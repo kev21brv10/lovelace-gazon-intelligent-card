@@ -352,6 +352,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_arrosage_apres_application_autorise", "Post-application")}
             ${this._renderEntityInput("entity_signal_irrigation", "Signal irrigation")}
             ${this._renderEntityInput("entity_dernier_arrosage", "Dernier arrosage")}
+            ${this._renderEntityInput("entity_dernier_arrosage_total_zones", "Arrosage cumulé")}
             ${this._renderEntityInput("entity_niveau", "Niveau d'action")}
           </div>
         </section>
@@ -386,6 +387,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_tonte", "État de tonte")}
             ${this._renderEntityInput("entity_tonte_autorisee", "Gazon permet la tonte")}
             ${this._renderEntityInput("entity_hauteur", "Hauteur de tonte conseillée")}
+            ${this._renderEntityInput("entity_hauteur_coupe_tondeuse", "Hauteur coupe tondeuse")}
           </div>
         </section>
 
@@ -413,6 +415,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_conseil", "Conseil principal")}
             ${this._renderEntityInput("entity_action", "Action recommandée")}
             ${this._renderEntityInput("entity_avoid", "Action à éviter")}
+            ${this._renderEntityInput("entity_derniere_action_utilisateur", "Dernière exécution")}
             ${this._renderEntityInput("entity_debug_intervention", "Debug métier")}
             ${this._renderEntityInput("entity_arrosage_en_cours", "Irrigation en cours")}
             ${this._renderEntityInput("entity_etat_hydrique", "État hydrique")}

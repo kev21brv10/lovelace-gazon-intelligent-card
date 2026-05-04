@@ -1,6 +1,6 @@
 export const CARD_TYPE = "gazon-intelligent-card";
 export const CARD_NAME = "Gazon Intelligent Card";
-export const CARD_VERSION = "0.1.89";
+export const CARD_VERSION = "0.1.90";
 
 export const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -22,7 +22,9 @@ export const DEFAULT_CONFIG = {
   entity_weather: "weather.forecast_home",
   entity_plan_arrosage: "sensor.gazon_intelligent_plan_d_arrosage",
   entity_dernier_arrosage: "sensor.gazon_intelligent_dernier_arrosage_detecte",
+  entity_dernier_arrosage_total_zones: "sensor.gazon_intelligent_dernier_arrosage_total_zones",
   entity_derniere_application: "sensor.gazon_intelligent_derniere_application",
+  entity_derniere_action_utilisateur: "sensor.gazon_intelligent_derniere_action_utilisateur",
   entity_catalogue_produits: "sensor.gazon_intelligent_catalogue_produits",
   entity_produit_intervention: "select.gazon_intelligent_produit_d_intervention",
   entity_debug_intervention: "sensor.gazon_intelligent_debug_intervention",
@@ -64,6 +66,7 @@ export const DEFAULT_CONFIG = {
   entity_debit_zone_5: "number.gazon_intelligent_debit_zone_5",
   entity_hauteur_min_tondeuse: "number.gazon_intelligent_hauteur_min_tondeuse",
   entity_hauteur_max_tondeuse: "number.gazon_intelligent_hauteur_max_tondeuse",
+  entity_hauteur_coupe_tondeuse: "number.gazon_intelligent_hauteur_coupe_tondeuse",
   entity_delai_reprise_tonte_apres_arrosage: "number.gazon_intelligent_delai_reprise_tonte_apres_arrosage",
   manual_action_service: "gazon_intelligent.start_manual_irrigation",
   manual_action_label: "Irrigation manuelle",
@@ -95,7 +98,9 @@ export const ENTITY_KEYS = [
   { key: "entity_plan_arrosage", label: "Plan d'irrigation", icon: "mdi:timer-outline", domain: ["sensor"] },
   { key: "entity_arrosage_en_cours", label: "Irrigation en cours", icon: "mdi:progress-clock", domain: ["sensor"] },
   { key: "entity_dernier_arrosage", label: "Dernier arrosage", icon: "mdi:water-check", domain: ["sensor"] },
+  { key: "entity_dernier_arrosage_total_zones", label: "Dernier arrosage cumulé", icon: "mdi:water-sync", domain: ["sensor"] },
   { key: "entity_derniere_application", label: "Dernière application", icon: "mdi:spray-bottle", domain: ["sensor"] },
+  { key: "entity_derniere_action_utilisateur", label: "Dernière exécution", icon: "mdi:gesture-tap-button", domain: ["sensor"] },
   { key: "entity_catalogue_produits", label: "Référentiel produits", icon: "mdi:package-variant-closed", domain: ["sensor"] },
   { key: "entity_produit_intervention", label: "Produit sélectionné", icon: "mdi:package-variant", domain: ["select"] },
   { key: "entity_debug_intervention", label: "Debug métier", icon: "mdi:bug-outline", domain: ["sensor"] },
@@ -136,6 +141,7 @@ export const ENTITY_KEYS = [
   { key: "entity_debit_zone_5", label: "Débit zone 5", icon: "mdi:sprinkler", domain: ["number"] },
   { key: "entity_hauteur_min_tondeuse", label: "Hauteur min tondeuse", icon: "mdi:ruler-square", domain: ["number"] },
   { key: "entity_hauteur_max_tondeuse", label: "Hauteur max tondeuse", icon: "mdi:ruler-square", domain: ["number"] },
+  { key: "entity_hauteur_coupe_tondeuse", label: "Hauteur coupe tondeuse", icon: "mdi:ruler-square-compass", domain: ["number"] },
   { key: "entity_delai_reprise_tonte_apres_arrosage", label: "Cooldown tonte après arrosage", icon: "mdi:timer-cog-outline", domain: ["number"] },
 ];
 

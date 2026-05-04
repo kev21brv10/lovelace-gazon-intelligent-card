@@ -132,7 +132,9 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_weather", selector: { entity: { domain: ["weather"] } } },
         { name: "entity_plan_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_dernier_arrosage", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_dernier_arrosage_total_zones", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_derniere_application", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_derniere_action_utilisateur", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_catalogue_produits", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_produit_intervention", selector: { entity: { domain: ["select"] } } },
         { name: "entity_prochaine_intervention", selector: { entity: { domain: ["sensor"] } } },
@@ -172,6 +174,7 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_debit_zone_5", selector: { entity: { domain: ["number"] } } },
         { name: "entity_hauteur_min_tondeuse", selector: { entity: { domain: ["number"] } } },
         { name: "entity_hauteur_max_tondeuse", selector: { entity: { domain: ["number"] } } },
+        { name: "entity_hauteur_coupe_tondeuse", selector: { entity: { domain: ["number"] } } },
         { name: "entity_delai_reprise_tonte_apres_arrosage", selector: { entity: { domain: ["number"] } } },
         { name: "entity_tonte", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_hauteur", selector: { entity: { domain: ["sensor"] } } },
@@ -789,6 +792,10 @@ class GazonIntelligentCard extends HTMLElement {
     return this._entity("entity_derniere_application");
   }
 
+  _lastUserActionEntity() {
+    return this._entity("entity_derniere_action_utilisateur");
+  }
+
   _catalogueEntity() {
     return this._entity("entity_catalogue_produits");
   }
@@ -1280,6 +1287,27 @@ class GazonIntelligentCard extends HTMLElement {
       productName: String(attrs.produit || attrs.libelle || "").trim() || null,
       when,
       history,
+    };
+  }
+
+  _lastUserActionState() {
+    const entity = this._lastUserActionEntity();
+    const attrs = entity?.attributes || {};
+    const summary = String(attrs.summary || "").trim();
+    const when = String(attrs.last_action_when || "").trim();
+    const action = String(attrs.execution_action || "").trim();
+    const reason = String(attrs.execution_reason || "").trim();
+    const state = String(attrs.execution_state || entity?.state || "").trim();
+    if (!entity || isUnavailableState(String(entity?.state || ""))) {
+      return { entity, summary: "", when: "", action: "", reason: "", state: "" };
+    }
+    return {
+      entity,
+      summary: summary || action || state || "",
+      when,
+      action,
+      reason,
+      state,
     };
   }
 
@@ -1928,6 +1956,27 @@ class GazonIntelligentCard extends HTMLElement {
       value: rawValue,
       source,
       wateringCause,
+    };
+  }
+
+  _lastWateringTotalState() {
+    const entity = this._entity("entity_dernier_arrosage_total_zones");
+    if (!entity) {
+      return { label: "", detail: "", value: null };
+    }
+    const rawValue = asNumber(entity.state);
+    const summary = String(entity.attributes?.summary || "").trim();
+    const zoneCount = asNumber(entity.attributes?.zone_count);
+    if (rawValue === null || rawValue <= 0) {
+      return { label: "", detail: "", value: null };
+    }
+    return {
+      label: formatMm(rawValue),
+      detail: [
+        zoneCount !== null ? `${zoneCount} zone${zoneCount > 1 ? "s" : ""}` : "",
+        summary,
+      ].filter(Boolean).join(" · "),
+      value: rawValue,
     };
   }
 

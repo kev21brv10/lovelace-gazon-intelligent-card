@@ -3518,7 +3518,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.89";
+const CARD_VERSION = "0.1.90";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -3540,7 +3540,9 @@ const DEFAULT_CONFIG = {
   entity_weather: "weather.forecast_home",
   entity_plan_arrosage: "sensor.gazon_intelligent_plan_d_arrosage",
   entity_dernier_arrosage: "sensor.gazon_intelligent_dernier_arrosage_detecte",
+  entity_dernier_arrosage_total_zones: "sensor.gazon_intelligent_dernier_arrosage_total_zones",
   entity_derniere_application: "sensor.gazon_intelligent_derniere_application",
+  entity_derniere_action_utilisateur: "sensor.gazon_intelligent_derniere_action_utilisateur",
   entity_catalogue_produits: "sensor.gazon_intelligent_catalogue_produits",
   entity_produit_intervention: "select.gazon_intelligent_produit_d_intervention",
   entity_debug_intervention: "sensor.gazon_intelligent_debug_intervention",
@@ -3582,6 +3584,7 @@ const DEFAULT_CONFIG = {
   entity_debit_zone_5: "number.gazon_intelligent_debit_zone_5",
   entity_hauteur_min_tondeuse: "number.gazon_intelligent_hauteur_min_tondeuse",
   entity_hauteur_max_tondeuse: "number.gazon_intelligent_hauteur_max_tondeuse",
+  entity_hauteur_coupe_tondeuse: "number.gazon_intelligent_hauteur_coupe_tondeuse",
   entity_delai_reprise_tonte_apres_arrosage: "number.gazon_intelligent_delai_reprise_tonte_apres_arrosage",
   manual_action_service: "gazon_intelligent.start_manual_irrigation",
   manual_action_label: "Irrigation manuelle",
@@ -3613,7 +3616,9 @@ const ENTITY_KEYS = [
   { key: "entity_plan_arrosage", label: "Plan d'irrigation", icon: "mdi:timer-outline", domain: ["sensor"] },
   { key: "entity_arrosage_en_cours", label: "Irrigation en cours", icon: "mdi:progress-clock", domain: ["sensor"] },
   { key: "entity_dernier_arrosage", label: "Dernier arrosage", icon: "mdi:water-check", domain: ["sensor"] },
+  { key: "entity_dernier_arrosage_total_zones", label: "Dernier arrosage cumulé", icon: "mdi:water-sync", domain: ["sensor"] },
   { key: "entity_derniere_application", label: "Dernière application", icon: "mdi:spray-bottle", domain: ["sensor"] },
+  { key: "entity_derniere_action_utilisateur", label: "Dernière exécution", icon: "mdi:gesture-tap-button", domain: ["sensor"] },
   { key: "entity_catalogue_produits", label: "Référentiel produits", icon: "mdi:package-variant-closed", domain: ["sensor"] },
   { key: "entity_produit_intervention", label: "Produit sélectionné", icon: "mdi:package-variant", domain: ["select"] },
   { key: "entity_debug_intervention", label: "Debug métier", icon: "mdi:bug-outline", domain: ["sensor"] },
@@ -3654,6 +3659,7 @@ const ENTITY_KEYS = [
   { key: "entity_debit_zone_5", label: "Débit zone 5", icon: "mdi:sprinkler", domain: ["number"] },
   { key: "entity_hauteur_min_tondeuse", label: "Hauteur min tondeuse", icon: "mdi:ruler-square", domain: ["number"] },
   { key: "entity_hauteur_max_tondeuse", label: "Hauteur max tondeuse", icon: "mdi:ruler-square", domain: ["number"] },
+  { key: "entity_hauteur_coupe_tondeuse", label: "Hauteur coupe tondeuse", icon: "mdi:ruler-square-compass", domain: ["number"] },
   { key: "entity_delai_reprise_tonte_apres_arrosage", label: "Cooldown tonte après arrosage", icon: "mdi:timer-cog-outline", domain: ["number"] },
 ];
 
@@ -4860,7 +4866,9 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_weather", selector: { entity: { domain: ["weather"] } } },
         { name: "entity_plan_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_dernier_arrosage", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_dernier_arrosage_total_zones", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_derniere_application", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_derniere_action_utilisateur", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_catalogue_produits", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_produit_intervention", selector: { entity: { domain: ["select"] } } },
         { name: "entity_prochaine_intervention", selector: { entity: { domain: ["sensor"] } } },
@@ -4900,6 +4908,7 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_debit_zone_5", selector: { entity: { domain: ["number"] } } },
         { name: "entity_hauteur_min_tondeuse", selector: { entity: { domain: ["number"] } } },
         { name: "entity_hauteur_max_tondeuse", selector: { entity: { domain: ["number"] } } },
+        { name: "entity_hauteur_coupe_tondeuse", selector: { entity: { domain: ["number"] } } },
         { name: "entity_delai_reprise_tonte_apres_arrosage", selector: { entity: { domain: ["number"] } } },
         { name: "entity_tonte", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_hauteur", selector: { entity: { domain: ["sensor"] } } },
@@ -5517,6 +5526,10 @@ class GazonIntelligentCard extends HTMLElement {
     return this._entity("entity_derniere_application");
   }
 
+  _lastUserActionEntity() {
+    return this._entity("entity_derniere_action_utilisateur");
+  }
+
   _catalogueEntity() {
     return this._entity("entity_catalogue_produits");
   }
@@ -6008,6 +6021,27 @@ class GazonIntelligentCard extends HTMLElement {
       productName: String(attrs.produit || attrs.libelle || "").trim() || null,
       when,
       history,
+    };
+  }
+
+  _lastUserActionState() {
+    const entity = this._lastUserActionEntity();
+    const attrs = entity?.attributes || {};
+    const summary = String(attrs.summary || "").trim();
+    const when = String(attrs.last_action_when || "").trim();
+    const action = String(attrs.execution_action || "").trim();
+    const reason = String(attrs.execution_reason || "").trim();
+    const state = String(attrs.execution_state || entity?.state || "").trim();
+    if (!entity || isUnavailableState(String(entity?.state || ""))) {
+      return { entity, summary: "", when: "", action: "", reason: "", state: "" };
+    }
+    return {
+      entity,
+      summary: summary || action || state || "",
+      when,
+      action,
+      reason,
+      state,
     };
   }
 
@@ -6656,6 +6690,27 @@ class GazonIntelligentCard extends HTMLElement {
       value: rawValue,
       source,
       wateringCause,
+    };
+  }
+
+  _lastWateringTotalState() {
+    const entity = this._entity("entity_dernier_arrosage_total_zones");
+    if (!entity) {
+      return { label: "", detail: "", value: null };
+    }
+    const rawValue = asNumber(entity.state);
+    const summary = String(entity.attributes?.summary || "").trim();
+    const zoneCount = asNumber(entity.attributes?.zone_count);
+    if (rawValue === null || rawValue <= 0) {
+      return { label: "", detail: "", value: null };
+    }
+    return {
+      label: formatMm(rawValue),
+      detail: [
+        zoneCount !== null ? `${zoneCount} zone${zoneCount > 1 ? "s" : ""}` : "",
+        summary,
+      ].filter(Boolean).join(" · "),
+      value: rawValue,
     };
   }
 
@@ -10004,6 +10059,7 @@ function renderInterventionOverviewSection(
 }
 
 function renderInterventionTechnicalSummary(card, recommendation, debug) {
+  const lastUserAction = card._lastUserActionState();
   const scoreValue = recommendation.score !== null && recommendation.score !== undefined
     ? `${formatNumber(recommendation.score, 0)}/100`
     : "—";
@@ -10062,6 +10118,14 @@ function renderInterventionTechnicalSummary(card, recommendation, debug) {
               note: missingRequirements > 0 ? "Des étapes restent à compléter avant déclaration." : "Aucun pré-requis manquant.",
               tone: missingRequirements > 0 ? "warning" : "success",
             },
+            ...(lastUserAction.summary
+              ? [{
+                  label: "Dernière exécution",
+                  value: lastUserAction.action || lastUserAction.state || "Exécution",
+                  note: [lastUserAction.when, lastUserAction.reason].filter(Boolean).join(" · ") || lastUserAction.summary,
+                  tone: "neutral",
+                }]
+              : []),
           ])}
         </div>
       </section>
@@ -10468,6 +10532,7 @@ function renderOverviewTab(card) {
   const overviewIcon = card._config?.show_icons ? proposal.icon : null;
   const facts = card._overviewFacts();
   const wateringProgress = card._wateringProgressState();
+  const lastWateringTotal = card._lastWateringTotalState();
   const overviewStrip = [
     card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
     card._renderTabPill("Plan", planState.planType ? formatPlanType(planState.planType) : "Non défini", "neutral", "mdi:timer-outline"),
@@ -10602,6 +10667,13 @@ function renderWateringTab(card) {
       tone: "accent",
       icon: "mdi:timer-outline",
     },
+    lastWateringTotal.value !== null ? {
+      label: "Arrosage cumulé",
+      value: lastWateringTotal.label,
+      secondary: lastWateringTotal.detail,
+      tone: "neutral",
+      icon: "mdi:water-sync",
+    } : null,
   ].filter(Boolean);
 
   return `
@@ -10750,6 +10822,7 @@ function renderMowingTab(card) {
   const tonteAutorisee = card._entityState("entity_tonte_autorisee", null);
   const tonteAutoriseeEntity = card._entity("entity_tonte_autorisee");
   const height = card._entity("entity_hauteur");
+  const mowerCutHeightValue = card._renderConfigValue("entity_hauteur_coupe_tondeuse", "mm");
   const windowState = card._windowState();
   const mowerState = card._mowerState();
   const mowingBlock = card._mowingBlockState();
@@ -10833,6 +10906,14 @@ function renderMowingTab(card) {
       value: mowerState.battery === null ? "Non disponible" : `${mowerState.battery} %`,
       note: mowerState.nextDeparture || "",
       tone: mowerState.battery === null ? "neutral" : mowerState.battery < 25 ? "danger" : "success",
+    });
+  }
+  if (mowerCutHeightValue.value && mowerCutHeightValue.value !== "Non disponible") {
+    mowingSummaryItems.push({
+      label: "Hauteur réglée",
+      value: mowerCutHeightValue.value,
+      note: "Réglage réel de la machine.",
+      tone: "accent",
     });
   }
 
@@ -11322,6 +11403,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_arrosage_apres_application_autorise", "Post-application")}
             ${this._renderEntityInput("entity_signal_irrigation", "Signal irrigation")}
             ${this._renderEntityInput("entity_dernier_arrosage", "Dernier arrosage")}
+            ${this._renderEntityInput("entity_dernier_arrosage_total_zones", "Arrosage cumulé")}
             ${this._renderEntityInput("entity_niveau", "Niveau d'action")}
           </div>
         </section>
@@ -11356,6 +11438,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_tonte", "État de tonte")}
             ${this._renderEntityInput("entity_tonte_autorisee", "Gazon permet la tonte")}
             ${this._renderEntityInput("entity_hauteur", "Hauteur de tonte conseillée")}
+            ${this._renderEntityInput("entity_hauteur_coupe_tondeuse", "Hauteur coupe tondeuse")}
           </div>
         </section>
 
@@ -11383,6 +11466,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_conseil", "Conseil principal")}
             ${this._renderEntityInput("entity_action", "Action recommandée")}
             ${this._renderEntityInput("entity_avoid", "Action à éviter")}
+            ${this._renderEntityInput("entity_derniere_action_utilisateur", "Dernière exécution")}
             ${this._renderEntityInput("entity_debug_intervention", "Debug métier")}
             ${this._renderEntityInput("entity_arrosage_en_cours", "Irrigation en cours")}
             ${this._renderEntityInput("entity_etat_hydrique", "État hydrique")}

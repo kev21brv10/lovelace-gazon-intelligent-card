@@ -477,6 +477,25 @@ const CARD_STYLES = String.raw`
           gap: 8px;
         }
 
+        .tab-panel--overview .tab-panel__summary-list {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .tab-panel--overview .tab-panel__summary-row {
+          padding: 12px 12px 13px;
+          border: 1px solid color-mix(in srgb, var(--gi-surface-border) 86%, transparent);
+          border-radius: 18px;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .tab-panel--overview .tab-panel__summary-row:first-child {
+          padding-top: 12px;
+        }
+
         .tab-panel__history-foldout {
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
           border-radius: 20px;
@@ -509,6 +528,10 @@ const CARD_STYLES = String.raw`
 
         .tab-panel__history-foldout-body {
           padding: 0 14px 14px;
+        }
+
+        .tab-panel__decision-strip--overview {
+          margin-top: 6px;
         }
 
         .tab-panel__section-title {
@@ -3013,6 +3036,10 @@ const CARD_STYLES = String.raw`
             line-height: 1.22;
           }
 
+          .tab-panel--overview .tab-panel__summary-list {
+            grid-template-columns: 1fr;
+          }
+
           .tab-panel__history-foldout-summary {
             padding: 11px 12px;
           }
@@ -3263,7 +3290,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.81";
+const CARD_VERSION = "0.1.82";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -10200,6 +10227,11 @@ function renderOverviewTab(card) {
   const overviewIcon = card._config?.show_icons ? proposal.icon : null;
   const facts = card._overviewFacts();
   const wateringProgress = card._wateringProgressState();
+  const overviewStrip = [
+    card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
+    card._renderTabPill("Plan", planState.planType ? formatPlanType(planState.planType) : "Non défini", "neutral", "mdi:timer-outline"),
+    card._renderTabPill("Action", windowState.displayNextAction || windowState.nextAction || "Aucun", windowState.isBlocked ? "danger" : windowState.isAwaiting ? "warning" : "neutral", "mdi:sprinkler"),
+  ];
 
   return `
       <section class="tab-panel gi-panel tab-panel--overview">
@@ -10213,6 +10245,10 @@ function renderOverviewTab(card) {
         </div>
 
         ${renderWateringProgressSection(card, wateringProgress)}
+
+        <div class="tab-panel__decision-strip tab-panel__decision-strip--overview" aria-label="Repères synthèse">
+          ${overviewStrip.join("")}
+        </div>
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--overview-facts">
           <div class="tab-panel__section-head">

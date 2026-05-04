@@ -1216,6 +1216,11 @@ export function renderOverviewTab(card) {
   const overviewIcon = card._config?.show_icons ? proposal.icon : null;
   const facts = card._overviewFacts();
   const wateringProgress = card._wateringProgressState();
+  const overviewStrip = [
+    card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
+    card._renderTabPill("Plan", planState.planType ? formatPlanType(planState.planType) : "Non défini", "neutral", "mdi:timer-outline"),
+    card._renderTabPill("Action", windowState.displayNextAction || windowState.nextAction || "Aucun", windowState.isBlocked ? "danger" : windowState.isAwaiting ? "warning" : "neutral", "mdi:sprinkler"),
+  ];
 
   return `
       <section class="tab-panel gi-panel tab-panel--overview">
@@ -1229,6 +1234,10 @@ export function renderOverviewTab(card) {
         </div>
 
         ${renderWateringProgressSection(card, wateringProgress)}
+
+        <div class="tab-panel__decision-strip tab-panel__decision-strip--overview" aria-label="Repères synthèse">
+          ${overviewStrip.join("")}
+        </div>
 
         <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--overview-facts">
           <div class="tab-panel__section-head">

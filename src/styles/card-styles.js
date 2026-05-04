@@ -477,6 +477,25 @@ export const CARD_STYLES = String.raw`
           gap: 8px;
         }
 
+        .tab-panel--overview .tab-panel__summary-list {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .tab-panel--overview .tab-panel__summary-row {
+          padding: 12px 12px 13px;
+          border: 1px solid color-mix(in srgb, var(--gi-surface-border) 86%, transparent);
+          border-radius: 18px;
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .tab-panel--overview .tab-panel__summary-row:first-child {
+          padding-top: 12px;
+        }
+
         .tab-panel__history-foldout {
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
           border-radius: 20px;
@@ -509,6 +528,10 @@ export const CARD_STYLES = String.raw`
 
         .tab-panel__history-foldout-body {
           padding: 0 14px 14px;
+        }
+
+        .tab-panel__decision-strip--overview {
+          margin-top: 6px;
         }
 
         .tab-panel__section-title {
@@ -3011,6 +3034,10 @@ export const CARD_STYLES = String.raw`
           .tab-panel--products .tab-panel__section-hint {
             font-size: var(--gi-font-sm);
             line-height: 1.22;
+          }
+
+          .tab-panel--overview .tab-panel__summary-list {
+            grid-template-columns: 1fr;
           }
 
           .tab-panel__history-foldout-summary {

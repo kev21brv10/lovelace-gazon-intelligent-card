@@ -2031,10 +2031,10 @@ class GazonIntelligentCard extends HTMLElement {
 
   _manualActionStyle() {
     return [
-      "background: linear-gradient(135deg, #2ec86f 0%, #19a3ff 100%)",
-      "border: 1px solid #1e8f55",
-      "color: #ffffff",
-      "box-shadow: 0 12px 24px rgba(30, 143, 85, 0.28), 0 0 0 1px rgba(30, 143, 85, 0.18)",
+      "background: linear-gradient(135deg, color-mix(in srgb, var(--gazon-success-color) 88%, white) 0%, color-mix(in srgb, var(--gazon-water-color) 84%, white) 100%)",
+      "border: 1px solid color-mix(in srgb, var(--gazon-success-color) 52%, var(--divider-color))",
+      "color: var(--primary-text-color)",
+      "box-shadow: 0 12px 24px color-mix(in srgb, var(--gazon-success-color) 22%, transparent), 0 0 0 1px color-mix(in srgb, var(--gazon-success-color) 16%, transparent)",
     ].join("; ");
   }
 

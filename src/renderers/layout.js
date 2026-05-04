@@ -989,21 +989,30 @@ function renderApplicationHistoryFoldout(items) {
     return "";
   }
   const countLabel = history.length > 1 ? `${history.length} applications enregistrées` : "1 application enregistrée";
+  const rows = buildApplicationHistoryRows(history);
   return `
-      <details class="tab-panel__history-foldout gi-info gi-info--secondary">
-        <summary class="tab-panel__history-foldout-summary">
-          <div class="tab-panel__section-head tab-panel__history-foldout-head">
-            <div class="tab-panel__eyebrow">Historique complet</div>
-            <div class="tab-panel__section-meta">${escapeHtml(countLabel)}</div>
-          </div>
-          <div class="tab-panel__section-summary">Toutes les applications enregistrées</div>
-          <div class="tab-panel__section-hint">Déplie pour voir la liste complète, classée de la plus récente à la plus ancienne.</div>
-          ${history.length > 1 ? renderApplicationHistoryPreview(history, 2) : ""}
-        </summary>
-        <div class="tab-panel__history-foldout-body">
-          ${renderApplicationHistoryItems(history)}
+      <section class="tab-panel__history-rail gi-info gi-info--secondary">
+        <div class="tab-panel__section-head tab-panel__history-foldout-head">
+          <div class="tab-panel__eyebrow">Historique complet</div>
+          <div class="tab-panel__section-meta">${escapeHtml(countLabel)}</div>
         </div>
-      </details>
+        <div class="tab-panel__section-hint">Défilement vertical, de la plus récente à la plus ancienne.</div>
+        <div class="tab-panel__history-rail-body">
+          <div class="tab-panel__history-rail-track">
+            ${rows
+              .map(
+                (row) => `
+                  <div class="tab-panel__history-rail-item tab-panel__summary-row tab-panel__summary-row--${escapeHtml(row.tone || "neutral")}">
+                    ${row.label ? `<div class="tab-panel__summary-label">${escapeHtml(row.label)}</div>` : ""}
+                    <div class="tab-panel__summary-value">${escapeHtml(row.value || "Non disponible")}</div>
+                    ${row.note ? `<div class="tab-panel__summary-note">${escapeHtml(row.note)}</div>` : ""}
+                  </div>
+                `,
+              )
+              .join("")}
+          </div>
+        </div>
+      </section>
     `;
 }
 

@@ -552,6 +552,48 @@ const CARD_STYLES = String.raw`
           padding: 0 14px 14px;
         }
 
+        .tab-panel__history-rail {
+          gap: 10px;
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
+          border-radius: 20px;
+          overflow: hidden;
+        }
+
+        .tab-panel__history-rail-body {
+          max-height: 320px;
+          overflow-y: auto;
+          overflow-x: hidden;
+          padding: 0 14px 14px;
+          scrollbar-width: thin;
+          scrollbar-color: color-mix(in srgb, var(--gazon-section-accent) 24%, transparent) transparent;
+        }
+
+        .tab-panel__history-rail-body::-webkit-scrollbar {
+          width: 7px;
+        }
+
+        .tab-panel__history-rail-body::-webkit-scrollbar-thumb {
+          border-radius: 999px;
+          background: color-mix(in srgb, var(--gazon-section-accent) 22%, transparent);
+        }
+
+        .tab-panel__history-rail-track {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+        }
+
+        .tab-panel__history-rail-item {
+          padding: 12px 0;
+          border-top: 1px solid color-mix(in srgb, var(--gi-surface-border) 82%, transparent);
+          background: transparent;
+        }
+
+        .tab-panel__history-rail-item:first-child {
+          padding-top: 0;
+          border-top: 0;
+        }
+
         .tab-panel__decision-strip--overview {
           margin-top: 6px;
           display: grid;
@@ -3476,7 +3518,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.88";
+const CARD_VERSION = "0.1.89";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -10186,21 +10228,30 @@ function renderApplicationHistoryFoldout(items) {
     return "";
   }
   const countLabel = history.length > 1 ? `${history.length} applications enregistrées` : "1 application enregistrée";
+  const rows = buildApplicationHistoryRows(history);
   return `
-      <details class="tab-panel__history-foldout gi-info gi-info--secondary">
-        <summary class="tab-panel__history-foldout-summary">
-          <div class="tab-panel__section-head tab-panel__history-foldout-head">
-            <div class="tab-panel__eyebrow">Historique complet</div>
-            <div class="tab-panel__section-meta">${escapeHtml(countLabel)}</div>
-          </div>
-          <div class="tab-panel__section-summary">Toutes les applications enregistrées</div>
-          <div class="tab-panel__section-hint">Déplie pour voir la liste complète, classée de la plus récente à la plus ancienne.</div>
-          ${history.length > 1 ? renderApplicationHistoryPreview(history, 2) : ""}
-        </summary>
-        <div class="tab-panel__history-foldout-body">
-          ${renderApplicationHistoryItems(history)}
+      <section class="tab-panel__history-rail gi-info gi-info--secondary">
+        <div class="tab-panel__section-head tab-panel__history-foldout-head">
+          <div class="tab-panel__eyebrow">Historique complet</div>
+          <div class="tab-panel__section-meta">${escapeHtml(countLabel)}</div>
         </div>
-      </details>
+        <div class="tab-panel__section-hint">Défilement vertical, de la plus récente à la plus ancienne.</div>
+        <div class="tab-panel__history-rail-body">
+          <div class="tab-panel__history-rail-track">
+            ${rows
+              .map(
+                (row) => `
+                  <div class="tab-panel__history-rail-item tab-panel__summary-row tab-panel__summary-row--${escapeHtml(row.tone || "neutral")}">
+                    ${row.label ? `<div class="tab-panel__summary-label">${escapeHtml(row.label)}</div>` : ""}
+                    <div class="tab-panel__summary-value">${escapeHtml(row.value || "Non disponible")}</div>
+                    ${row.note ? `<div class="tab-panel__summary-note">${escapeHtml(row.note)}</div>` : ""}
+                  </div>
+                `,
+              )
+              .join("")}
+          </div>
+        </div>
+      </section>
     `;
 }
 

@@ -552,6 +552,48 @@ export const CARD_STYLES = String.raw`
           padding: 0 14px 14px;
         }
 
+        .tab-panel__history-rail {
+          gap: 10px;
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
+          border-radius: 20px;
+          overflow: hidden;
+        }
+
+        .tab-panel__history-rail-body {
+          max-height: 320px;
+          overflow-y: auto;
+          overflow-x: hidden;
+          padding: 0 14px 14px;
+          scrollbar-width: thin;
+          scrollbar-color: color-mix(in srgb, var(--gazon-section-accent) 24%, transparent) transparent;
+        }
+
+        .tab-panel__history-rail-body::-webkit-scrollbar {
+          width: 7px;
+        }
+
+        .tab-panel__history-rail-body::-webkit-scrollbar-thumb {
+          border-radius: 999px;
+          background: color-mix(in srgb, var(--gazon-section-accent) 22%, transparent);
+        }
+
+        .tab-panel__history-rail-track {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+        }
+
+        .tab-panel__history-rail-item {
+          padding: 12px 0;
+          border-top: 1px solid color-mix(in srgb, var(--gi-surface-border) 82%, transparent);
+          background: transparent;
+        }
+
+        .tab-panel__history-rail-item:first-child {
+          padding-top: 0;
+          border-top: 0;
+        }
+
         .tab-panel__decision-strip--overview {
           margin-top: 6px;
           display: grid;

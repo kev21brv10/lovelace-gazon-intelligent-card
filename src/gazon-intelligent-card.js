@@ -1267,6 +1267,9 @@ class GazonIntelligentCard extends HTMLElement {
     if (attrs.application_irrigation_mode) {
       detailParts.push(`Mode: ${formatStatusLabel(attrs.application_irrigation_mode)}`);
     }
+    const history = Array.isArray(attrs.application_history)
+      ? attrs.application_history.filter((item) => item && typeof item === "object")
+      : [];
     return {
       entity,
       hasApplication,
@@ -1276,6 +1279,7 @@ class GazonIntelligentCard extends HTMLElement {
       productId: String(attrs.produit_id || "").trim() || null,
       productName: String(attrs.produit || attrs.libelle || "").trim() || null,
       when,
+      history,
     };
   }
 

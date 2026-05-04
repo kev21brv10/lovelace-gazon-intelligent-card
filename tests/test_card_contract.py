@@ -28,7 +28,7 @@ class CardContractTests(unittest.TestCase):
         self.assertNotIn("formatStatusLabel(entity?.state)", body)
 
     def test_layout_signal_presentation_does_not_promote_raw_on_state(self):
-        body = extract_function_body(LAYOUT_SRC, "getDerivedSignalPresentation")
+        body = extract_function_body(LAYOUT_SRC, "renderInterventionTab")
         self.assertIn("formatIrrigationSignalLabel", body)
         self.assertIn("formatIrrigationSignalTone", body)
         self.assertNotIn('state === "on"', body)
@@ -59,6 +59,11 @@ class CardContractTests(unittest.TestCase):
         self.assertIn("Gazon permet la tonte", MAIN_SRC)
         self.assertIn('label: "Machine"', MAIN_SRC)
         self.assertIn("Action possible", MAIN_SRC)
+
+    def test_products_tab_exposes_application_history(self):
+        self.assertIn("application_history", MAIN_SRC)
+        self.assertIn("renderApplicationHistoryItems", LAYOUT_SRC)
+        self.assertIn("Dernière application", LAYOUT_SRC)
 
     def test_overview_proposal_keeps_blocked_mowing_as_in_progress(self):
         body = extract_function_body(MAIN_SRC, "_overviewProposal")

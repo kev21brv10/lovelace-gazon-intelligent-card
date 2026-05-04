@@ -3204,7 +3204,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.79";
+const CARD_VERSION = "0.1.80";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -5681,6 +5681,9 @@ class GazonIntelligentCard extends HTMLElement {
     if (attrs.application_irrigation_mode) {
       detailParts.push(`Mode: ${formatStatusLabel(attrs.application_irrigation_mode)}`);
     }
+    const history = Array.isArray(attrs.application_history)
+      ? attrs.application_history.filter((item) => item && typeof item === "object")
+      : [];
     return {
       entity,
       hasApplication,
@@ -5690,6 +5693,7 @@ class GazonIntelligentCard extends HTMLElement {
       productId: String(attrs.produit_id || "").trim() || null,
       productName: String(attrs.produit || attrs.libelle || "").trim() || null,
       when,
+      history,
     };
   }
 
@@ -9761,14 +9765,56 @@ function renderCatalogueProductCards(card) {
   );
 }
 
+function renderApplicationHistoryItems(items) {
+  const rows = Array.isArray(items)
+    ? items
+        .filter((item) => item && typeof item === "object")
+        .map((item) => {
+          const productLabel = String(item.libelle || item.produit || item.type || "Application").trim();
+          const whenLabel = humanDateTimeText(item.date_action || item.date || item.declared_at) || String(item.date || "").trim() || "";
+          const detailParts = [];
+          const typeLabel = String(item.type || "").trim();
+          const dose = String(item.dose || "").trim();
+          const applicationType = String(item.application_type || "").trim();
+          const irrigationMode = String(item.application_irrigation_mode || "").trim();
+          const note = String(item.note || "").trim();
+          if (typeLabel) {
+            detailParts.push(formatStatusLabel(typeLabel));
+          }
+          if (dose) {
+            detailParts.push(dose);
+          }
+          if (applicationType) {
+            detailParts.push(formatStatusLabel(applicationType));
+          }
+          if (irrigationMode) {
+            detailParts.push(`Mode ${formatApplicationMode(irrigationMode)}`);
+          }
+          if (note) {
+            detailParts.push(note);
+          }
+          return {
+            label: whenLabel || "Application",
+            value: productLabel,
+            note: detailParts.join(" · "),
+            tone: "neutral",
+          };
+        })
+    : [];
+  if (!rows.length) {
+    return `<div class="tab-panel__empty">Aucune application enregistrée dans l’historique local.</div>`;
+  }
+  return renderCompactSummaryList(rows, "Aucune application enregistrée dans l’historique local.");
+}
+
 function renderProductsScopeSection() {
   return `
       <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-scope">
         <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Repère</div>
+          <div class="tab-panel__eyebrow">Historique complet</div>
         </div>
-        <div class="tab-panel__section-summary">Catalogue, sélection active et historique produit</div>
-        <div class="tab-panel__section-hint">L’analyse détaillée et la déclaration restent dans l’onglet Intervention.</div>
+        <div class="tab-panel__section-summary">Toutes les applications enregistrées</div>
+        <div class="tab-panel__section-hint">La dernière application reste résumée au-dessus; cette zone liste tout l’historique disponible.</div>
       </section>
     `;
 }
@@ -9779,6 +9825,7 @@ function renderProductsTab(card) {
   const application = card._applicationEntity();
   const lastApplication = card._lastApplicationState();
   const hasApplication = Boolean(lastApplication.hasApplication);
+  const applicationHistory = Array.isArray(lastApplication.history) ? lastApplication.history : [];
   const hasProductData = Boolean(
     selection.selectedProductId || selection.selectedProductName || catalogue.hasProducts || application,
   );
@@ -9807,6 +9854,11 @@ function renderProductsTab(card) {
   const lastApplicationHint = hasApplication
     ? lastApplication.detail || "Dernière application détectée."
     : "Aucune application enregistrée dans l’historique local.";
+  const applicationHistorySummary = hasApplication
+    ? applicationHistory.length > 1
+      ? `${applicationHistory.length} applications enregistrées`
+      : "1 application enregistrée"
+    : "Aucune application enregistrée";
 
   return `
       <section class="tab-panel gi-panel tab-panel--products">
@@ -9834,18 +9886,11 @@ function renderProductsTab(card) {
           <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
             <div class="tab-panel__section-head">
               <div class="tab-panel__eyebrow">Dernière application</div>
-              <div class="tab-panel__section-meta">${escapeHtml(hasApplication ? "Historique local" : "Aucune application")}</div>
+              <div class="tab-panel__section-meta">${escapeHtml(hasApplication ? applicationHistorySummary : "Aucune application")}</div>
             </div>
             <div class="tab-panel__section-summary">${escapeHtml(lastApplicationSummary)}</div>
             <div class="tab-panel__section-hint">${escapeHtml(lastApplicationHint)}</div>
-          </section>
-
-          <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--products-scope">
-            <div class="tab-panel__section-head">
-              <div class="tab-panel__eyebrow">Repère</div>
-            </div>
-            <div class="tab-panel__section-summary">Catalogue, sélection active et historique produit</div>
-            <div class="tab-panel__section-hint">L’analyse détaillée et la déclaration restent dans l’onglet Intervention.</div>
+            ${renderApplicationHistoryItems(applicationHistory)}
           </section>
         </div>
       </section>

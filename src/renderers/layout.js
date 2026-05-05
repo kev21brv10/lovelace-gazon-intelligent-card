@@ -1320,10 +1320,14 @@ export function renderOverviewTab(card) {
   const overviewIcon = card._config?.show_icons ? proposal.icon : null;
   const facts = card._overviewFacts();
   const wateringProgress = card._wateringProgressState();
+  const nextWatering = card._nextWateringState();
+  const nextMowing = card._nextMowingState();
+  const lastWatering = card._lastWateringState();
   const overviewStrip = [
     card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
-    card._renderTabPill("Plan", planState.planType ? formatPlanType(planState.planType) : "Non défini", "neutral", "mdi:timer-outline"),
-    card._renderTabPill("Action", windowState.displayNextAction || windowState.nextAction || "Aucun", windowState.isBlocked ? "danger" : windowState.isAwaiting ? "warning" : "neutral", "mdi:sprinkler"),
+    card._renderTabPill("Prochain arrosage", nextWatering.label, nextWatering.tone, "mdi:clock-water-outline"),
+    card._renderTabPill("Prochaine tonte", nextMowing.label, nextMowing.tone, "mdi:calendar-clock"),
+    card._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
   ];
 
   return `
@@ -1361,6 +1365,8 @@ export function renderWateringTab(card) {
   const mowerState = card._mowerState();
   const mowerCoordinationState = card._mowerCoordinationSwitchState();
   const context = card._objectiveContext();
+  const nextWatering = card._nextWateringState();
+  const lastWatering = card._lastWateringState();
   const lastWateringTotal = card._lastWateringTotalState();
   const nextActionText = windowState.displayNextAction || windowState.nextActionDisplay || windowState.nextAction;
   const planState = card._planState();
@@ -1454,6 +1460,20 @@ export function renderWateringTab(card) {
       secondary: planState.durationHuman,
       tone: "accent",
       icon: "mdi:timer-outline",
+    },
+    {
+      label: "Prochain arrosage",
+      value: nextWatering.label,
+      secondary: nextWatering.detail,
+      tone: nextWatering.tone,
+      icon: "mdi:clock-water-outline",
+    },
+    {
+      label: "Dernier arrosage",
+      value: lastWatering.label,
+      secondary: lastWatering.detail,
+      tone: lastWatering.value !== null ? "success" : "neutral",
+      icon: "mdi:water-check",
     },
     lastWateringTotal.value !== null ? {
       label: "Arrosage cumulé",
@@ -1626,6 +1646,7 @@ export function renderMowingTab(card) {
   const heightMax = asNumber(height?.attributes?.hauteur_tonte_max_cm);
   const heightSecondary = heightMin !== null && heightMax !== null ? `${formatCm(heightMin)} → ${formatCm(heightMax)}` : "";
   const windowSummary = windowState.entity ? windowState.displaySummary || windowState.summary : "Fenêtre optimale non disponible";
+  const nextMowing = card._nextMowingState();
   const mowingStatusIcon = card._config?.show_icons ? "mdi:content-cut" : null;
   const mowingDecisionSummary = actionPossible
     ? "Tonte lançable."
@@ -1678,6 +1699,12 @@ export function renderMowingTab(card) {
       value: windowSummary,
       note: windowState.reasonSummary || windowState.nextActionDisplay || windowState.nextAction || "",
       tone: windowState.tone,
+    },
+    {
+      label: "Prochaine tonte",
+      value: nextMowing.label,
+      note: nextMowing.detail || "Aucune date de reprise calculée.",
+      tone: nextMowing.tone,
     },
     {
       label: "Hauteur conseillée",
@@ -1740,6 +1767,7 @@ export function renderMowingTab(card) {
               entityKey:
                 item.label === "État de tonte" ? "entity_tonte"
                   : item.label === "Fenêtre" ? "entity_fenetre_optimale"
+                    : item.label === "Prochaine tonte" ? "entity_prochaine_tonte"
                     : item.label === "Hauteur conseillée" ? "entity_hauteur"
                       : item.label === "Hauteur réglée" ? "entity_hauteur_coupe_tondeuse"
                         : item.label === "Machine" ? "entity_tonte_autorisee"
@@ -1749,6 +1777,7 @@ export function renderMowingTab(card) {
                   : item.label === "Machine" ? "mdi:robot-mower"
                     : item.label === "Blocage" ? "mdi:alert-circle-outline"
                       : item.label === "Fenêtre" ? "mdi:clock-outline"
+                        : item.label === "Prochaine tonte" ? "mdi:calendar-clock"
                         : item.label === "Hauteur conseillée" ? "mdi:ruler-square"
                           : item.label === "Hauteur réglée" ? "mdi:tune-vertical"
                             : "mdi:battery"

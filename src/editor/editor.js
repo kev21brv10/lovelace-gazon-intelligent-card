@@ -351,6 +351,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_arrosage_recommande", "Irrigation")}
             ${this._renderEntityInput("entity_arrosage_apres_application_autorise", "Post-application")}
             ${this._renderEntityInput("entity_signal_irrigation", "Signal irrigation")}
+            ${this._renderEntityInput("entity_prochain_arrosage", "Prochain arrosage")}
             ${this._renderEntityInput("entity_dernier_arrosage", "Dernier arrosage")}
             ${this._renderEntityInput("entity_dernier_arrosage_total_zones", "Arrosage cumulé")}
             ${this._renderEntityInput("entity_niveau", "Niveau d'action")}
@@ -386,6 +387,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_risque", "Risque gazon")}
             ${this._renderEntityInput("entity_tonte", "État de tonte")}
             ${this._renderEntityInput("entity_tonte_autorisee", "Gazon permet la tonte")}
+            ${this._renderEntityInput("entity_prochaine_tonte", "Prochaine tonte")}
             ${this._renderEntityInput("entity_hauteur", "Hauteur de tonte conseillée")}
             ${this._renderEntityInput("entity_hauteur_coupe_tondeuse", "Hauteur coupe tondeuse")}
           </div>

@@ -1,6 +1,6 @@
 export const CARD_TYPE = "gazon-intelligent-card";
 export const CARD_NAME = "Gazon Intelligent Card";
-export const CARD_VERSION = "0.1.97";
+export const CARD_VERSION = "0.1.99";
 
 export const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -23,6 +23,8 @@ export const DEFAULT_CONFIG = {
   entity_plan_arrosage: "sensor.gazon_intelligent_plan_d_arrosage",
   entity_dernier_arrosage: "sensor.gazon_intelligent_dernier_arrosage_detecte",
   entity_dernier_arrosage_total_zones: "sensor.gazon_intelligent_dernier_arrosage_total_zones",
+  entity_prochain_arrosage: "sensor.gazon_intelligent_prochain_arrosage",
+  entity_prochaine_tonte: "sensor.gazon_intelligent_prochaine_tonte",
   entity_derniere_application: "sensor.gazon_intelligent_derniere_application",
   entity_derniere_action_utilisateur: "sensor.gazon_intelligent_derniere_action_utilisateur",
   entity_catalogue_produits: "sensor.gazon_intelligent_catalogue_produits",
@@ -99,6 +101,8 @@ export const ENTITY_KEYS = [
   { key: "entity_arrosage_en_cours", label: "Irrigation en cours", icon: "mdi:progress-clock", domain: ["sensor"] },
   { key: "entity_dernier_arrosage", label: "Dernier arrosage", icon: "mdi:water-check", domain: ["sensor"] },
   { key: "entity_dernier_arrosage_total_zones", label: "Dernier arrosage cumulé", icon: "mdi:water-sync", domain: ["sensor"] },
+  { key: "entity_prochain_arrosage", label: "Prochain arrosage", icon: "mdi:clock-water-outline", domain: ["sensor"] },
+  { key: "entity_prochaine_tonte", label: "Prochaine tonte", icon: "mdi:calendar-clock", domain: ["sensor"] },
   { key: "entity_derniere_application", label: "Dernière application", icon: "mdi:spray-bottle", domain: ["sensor"] },
   { key: "entity_derniere_action_utilisateur", label: "Dernière exécution", icon: "mdi:gesture-tap-button", domain: ["sensor"] },
   { key: "entity_catalogue_produits", label: "Référentiel produits", icon: "mdi:package-variant-closed", domain: ["sensor"] },
@@ -170,15 +174,19 @@ export const SECTION_FIELDS = {
     "entity_mode",
     "entity_fenetre_optimale",
     "entity_plan_arrosage",
-  "entity_dernier_arrosage",
-  "entity_derniere_application",
-  "entity_debug_intervention",
-  "entity_prochaine_intervention",
-  "entity_switch_arrosage_automatique",
-  "entity_switch_coordination_tondeuse",
+    "entity_prochain_arrosage",
+    "entity_prochaine_tonte",
+    "entity_dernier_arrosage",
+    "entity_derniere_application",
+    "entity_debug_intervention",
+    "entity_prochaine_intervention",
+    "entity_switch_arrosage_automatique",
+    "entity_switch_coordination_tondeuse",
   ],
   watering: [
     "entity_fenetre_optimale",
+    "entity_prochain_arrosage",
+    "entity_dernier_arrosage",
     "entity_arrosage_recommande",
     "entity_objectif_arrosage",
     "entity_type_arrosage",
@@ -187,6 +195,7 @@ export const SECTION_FIELDS = {
   ],
   mowing: [
     "entity_tonte",
+    "entity_prochaine_tonte",
     "entity_hauteur",
     "entity_tonte_autorisee",
   ],
@@ -223,6 +232,8 @@ export const OVERVIEW_ENTITY_KEYS = new Set([
   "entity_mode",
   "entity_fenetre_optimale",
   "entity_plan_arrosage",
+  "entity_prochain_arrosage",
+  "entity_prochaine_tonte",
   "entity_dernier_arrosage",
   "entity_derniere_application",
   "entity_switch_arrosage_automatique",
@@ -249,6 +260,8 @@ export const RENDER_SIGNATURE_ATTRS = {
   ],
   entity_niveau_pertinence: ["score", "score_level", "summary", "tone", "source_entity"],
   entity_prochaine_fenetre_optimale: ["source_entity", "source_state", "block_reason", "confidence_score", "phase", "month", "temperature", "summary"],
+  entity_prochain_arrosage: ["target_date", "target_display", "target_datetime", "optimal_target_datetime", "target_window", "target_window_label", "next_action", "summary", "objective_mm", "type_arrosage", "watering_cause", "block_reason", "block_reason_label", "confidence_score", "confidence_reasons", "forecast_pluie_j2", "forecast_pluie_3j", "forecast_probabilite_max_3j", "watering_window_display", "optimal_window_display"],
+  entity_prochaine_tonte: ["target_date", "target_display", "target_datetime", "target_datetime_display", "action_possible", "tonte_statut", "block_reason", "reason", "summary"],
   entity_prochain_blocage_attendu: ["source_entity", "source_status", "block_reason", "block_label", "confidence_score", "phase", "month", "temperature", "summary"],
   entity_plan_arrosage: ["summary", "duration_human", "zone_count", "objective_mm", "plan_type", "passages", "fractionation", "total_duration_min"],
   entity_arrosage_en_cours: ["active", "started_at_utc", "last_activity_at_utc", "active_zone_count", "zone_count", "progress_percent", "active_zones", "active_zone_labels", "current_passage", "passage_count", "source", "watering_cause"],

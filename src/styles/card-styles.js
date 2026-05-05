@@ -566,9 +566,9 @@ export const CARD_STYLES = String.raw`
         }
 
         .tab-panel__history-inline {
-          margin-top: 12px;
+          margin-top: 8px;
           border-top: 1px solid color-mix(in srgb, var(--gi-surface-border) 74%, transparent);
-          padding-top: 12px;
+          padding-top: 8px;
         }
 
         .tab-panel__history-inline-head {
@@ -576,12 +576,12 @@ export const CARD_STYLES = String.raw`
           align-items: baseline;
           justify-content: space-between;
           gap: 10px;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
         }
 
         .tab-panel__history-inline-meta {
-          font-size: var(--gi-font-xs);
-          line-height: var(--gi-body-line);
+          font-size: var(--gi-font-xxs);
+          line-height: 1.25;
           color: var(--secondary-text-color);
           text-align: right;
         }
@@ -605,7 +605,7 @@ export const CARD_STYLES = String.raw`
         }
 
         .tab-panel__history-rail-body--inline {
-          max-height: 360px;
+          max-height: 160px;
           padding: 0 4px 0 0;
         }
 
@@ -616,7 +616,7 @@ export const CARD_STYLES = String.raw`
         }
 
         .tab-panel__history-rail-item {
-          padding: 12px 0;
+          padding: 6px 0;
           border-top: 1px solid color-mix(in srgb, var(--gi-surface-border) 82%, transparent);
           background: transparent;
         }
@@ -624,6 +624,23 @@ export const CARD_STYLES = String.raw`
         .tab-panel__history-rail-item:first-child {
           padding-top: 0;
           border-top: 0;
+        }
+
+        .tab-panel__history-inline .tab-panel__summary-label {
+          font-size: var(--gi-font-xxs);
+          line-height: 1.15;
+          margin-bottom: 1px;
+        }
+
+        .tab-panel__history-inline .tab-panel__summary-value {
+          font-size: var(--gi-font-xs);
+          line-height: 1.08;
+        }
+
+        .tab-panel__history-inline .tab-panel__summary-note {
+          font-size: var(--gi-font-xxs);
+          line-height: 1.18;
+          margin-top: 1px;
         }
 
         .tab-panel__decision-strip--overview {
@@ -1385,11 +1402,28 @@ export const CARD_STYLES = String.raw`
         }
 
         .tab-panel--products .tab-panel__section--catalogue-reference {
-          gap: 10px;
+          gap: 8px;
         }
 
         .tab-panel--products .tab-panel__grid--products {
           grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        }
+
+        .tab-panel--products .tab-panel__section--catalogue-reference .tab-panel__section-summary,
+        .tab-panel--products .tab-panel__section--application-history .tab-panel__section-summary {
+          font-size: var(--gi-font-md);
+          line-height: 1.16;
+        }
+
+        .tab-panel--products .tab-panel__section--catalogue-reference .tab-panel__section-hint,
+        .tab-panel--products .tab-panel__section--application-history .tab-panel__section-hint {
+          font-size: var(--gi-font-xs);
+          line-height: 1.24;
+        }
+
+        .tab-panel--products .tab-panel__section--catalogue-reference .tab-panel__section-head,
+        .tab-panel--products .tab-panel__section--application-history .tab-panel__section-head {
+          margin-bottom: 2px;
         }
 
         .tab-panel__grid--featured {
@@ -1420,15 +1454,38 @@ export const CARD_STYLES = String.raw`
         }
 
         .tab-panel__section--products {
-          gap: 7px;
+          gap: 6px;
         }
 
         .tab-panel__section--products .gi-card-core--stat {
-          min-height: 72px;
+          min-height: 58px;
         }
 
         .tab-panel__section--application-history {
           min-height: 100%;
+        }
+
+        .tab-panel--products .tab-panel__card-slider--catalogue .tab-panel__card-slider-track {
+          grid-auto-columns: minmax(210px, 240px);
+        }
+
+        .tab-panel--products .tab-panel__card-slider--catalogue .gi-card-core--stat {
+          padding: 10px 12px;
+        }
+
+        .tab-panel--products .tab-panel__card-slider--catalogue .gi-card-core__label {
+          font-size: var(--gi-font-xxs);
+          line-height: 1.12;
+        }
+
+        .tab-panel--products .tab-panel__card-slider--catalogue .gi-card-core__value {
+          font-size: var(--gi-font-sm);
+          line-height: 1.1;
+        }
+
+        .tab-panel--products .tab-panel__card-slider--catalogue .gi-card-core__secondary {
+          font-size: var(--gi-font-xxs);
+          line-height: 1.2;
         }
 
         .tab-panel--intervention .tab-panel__hero {
@@ -3187,13 +3244,13 @@ export const CARD_STYLES = String.raw`
         .card--theme-dark .tab-panel__intervention-card--proposed .tab-panel__section-summary,
         .card--theme-dark .tab-panel__intervention-card--proposed .tab-panel__section-hint,
         .card--theme-dark .tab-panel__temperature-constraint--warning .tab-panel__temperature-detail {
-          color: color-mix(in srgb, var(--gi-warning-ink) 82%, var(--primary-text-color));
+          color: color-mix(in srgb, #ffffff 88%, var(--primary-text-color));
         }
 
         .card--theme-dark .tab-panel__intervention-card--proposed .tab-panel__section-meta,
         .card--theme-dark .tab-panel__temperature-constraint--warning .tab-panel__temperature-hint,
         .card--theme-dark .tab-panel__metric-row--warning .tab-panel__metric-note {
-          color: color-mix(in srgb, var(--gi-warning-ink) 52%, var(--secondary-text-color));
+          color: color-mix(in srgb, #ffffff 72%, var(--secondary-text-color));
         }
 
         .card--theme-dark .tab-panel__summary-row--warning {
@@ -3262,6 +3319,33 @@ export const CARD_STYLES = String.raw`
           background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 0.003) 100%),
             #141b20;
+        }
+
+        .card--theme-dark .tab-panel--intervention .gi-pill--context,
+        .card--theme-dark .tab-panel--intervention .gi-pill--context .gi-pill__label,
+        .card--theme-dark .tab-panel--intervention .gi-pill--context .gi-pill__value {
+          color: color-mix(in srgb, #ffffff 92%, var(--primary-text-color));
+        }
+
+        .card--theme-dark .tab-panel--intervention .gi-pill--warning,
+        .card--theme-dark .tab-panel--intervention .gi-pill--warning .gi-pill__label,
+        .card--theme-dark .tab-panel--intervention .gi-pill--warning .gi-pill__value,
+        .card--theme-dark .tab-panel--intervention .gi-pill--success,
+        .card--theme-dark .tab-panel--intervention .gi-pill--success .gi-pill__label,
+        .card--theme-dark .tab-panel--intervention .gi-pill--success .gi-pill__value,
+        .card--theme-dark .tab-panel--intervention .gi-pill--accent,
+        .card--theme-dark .tab-panel--intervention .gi-pill--accent .gi-pill__label,
+        .card--theme-dark .tab-panel--intervention .gi-pill--accent .gi-pill__value,
+        .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--proposed .tab-panel__section-summary,
+        .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--proposed .tab-panel__section-hint,
+        .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--proposed .tab-panel__section-meta,
+        .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--picker .tab-panel__section-summary,
+        .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--picker .tab-panel__section-hint,
+        .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--picker .tab-panel__section-meta,
+        .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--action .tab-panel__section-summary,
+        .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--action .tab-panel__section-hint,
+        .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--action .tab-panel__section-meta {
+          color: color-mix(in srgb, #ffffff 92%, var(--primary-text-color)) !important;
         }
 
         .card--theme-dark .tab-panel--intervention .tab-panel__select-prefix {
@@ -3409,6 +3493,27 @@ export const CARD_STYLES = String.raw`
 
           .tab-panel__history-inline-meta {
             text-align: left;
+          }
+        }
+
+        @media (max-width: 1400px) {
+          .tab-panel__products-layout,
+          .tab-panel__intervention-layout,
+          .tab-panel__intervention-layout--workflow,
+          .tab-panel__grid--priority,
+          .tab-panel__grid--featured,
+          .tab-panel__grid--decision-board,
+          .tab-panel__facts-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .tab-panel__intervention-layout--workflow .tab-panel__intervention-card--proposed,
+          .tab-panel__products-layout .tab-panel__section--products-scope {
+            grid-column: auto;
+          }
+
+          .tab-panel__decision-strip--overview {
+            grid-template-columns: 1fr;
           }
         }
 

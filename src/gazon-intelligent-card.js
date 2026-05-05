@@ -133,6 +133,8 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_plan_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_dernier_arrosage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_dernier_arrosage_total_zones", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_prochain_arrosage", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_prochaine_tonte", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_derniere_application", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_derniere_action_utilisateur", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_catalogue_produits", selector: { entity: { domain: ["sensor"] } } },
@@ -222,11 +224,16 @@ class GazonIntelligentCard extends HTMLElement {
   getGridOptions() {
     const size = this.getCardSize();
     const rows = Math.max(3, Math.ceil((size * 50 + 8) / 64));
+    const viewportWidth =
+      window?.innerWidth ||
+      document?.documentElement?.clientWidth ||
+      1440;
+    const minColumns = viewportWidth < 1500 ? 12 : 6;
     return {
       rows,
       columns: 12,
       min_rows: rows,
-      min_columns: 6,
+      min_columns: minColumns,
     };
   }
 
@@ -1996,6 +2003,179 @@ class GazonIntelligentCard extends HTMLElement {
     };
   }
 
+  _nextMowingState() {
+    const predictiveEntity = this._entity("entity_prochaine_tonte");
+    if (predictiveEntity) {
+      const attrs = predictiveEntity.attributes || {};
+      const actionPossible = attrs.action_possible !== undefined ? Boolean(attrs.action_possible) : null;
+      const normalized = (value) => {
+        const text = String(value || "").trim();
+        if (!text) {
+          return "";
+        }
+        return text.toLowerCase() === "unavailable" ? "" : text;
+      };
+      const sensorState = normalized(predictiveEntity.state);
+      const label = String(
+        normalized(attrs.target_datetime_display)
+        || normalized(attrs.target_display)
+        || normalized(attrs.target_date)
+        || sensorState
+        || "",
+      ).trim();
+      const detail = String(attrs.reason || attrs.summary || "").trim();
+      const blockReason = String(attrs.block_reason || attrs.reason || "").trim().toLowerCase();
+      const tone = actionPossible === true
+        ? "success"
+        : (blockReason.includes("blo") || blockReason.includes("interd") || blockReason.includes("attend"))
+          ? "warning"
+          : "neutral";
+      if (label) {
+        return {
+          label,
+          detail,
+          tone,
+          value: label,
+        };
+      }
+    }
+
+    const tonteEntity = this._entity("entity_tonte");
+    const tonteAutoriseeEntity = this._entity("entity_tonte_autorisee");
+    const tonteAttrs = tonteEntity?.attributes || tonteAutoriseeEntity?.attributes || {};
+    const mowerState = this._mowerState();
+    const mowingBlock = this._mowingBlockState();
+    const gazonPermetTonte = tonteAttrs.gazon_permet_tonte !== undefined
+      ? Boolean(tonteAttrs.gazon_permet_tonte)
+      : this._entityState("entity_tonte_autorisee", null) === "on";
+    const machinePermetTonte = tonteAttrs.machine_permet_tonte !== undefined
+      ? Boolean(tonteAttrs.machine_permet_tonte)
+      : mowerState.present ? mowerState.ready === true : false;
+    const actionPossible = tonteAttrs.action_possible !== undefined
+      ? Boolean(tonteAttrs.action_possible)
+      : gazonPermetTonte && machinePermetTonte && !mowingBlock.blocked;
+    const nextDisplay = String(
+      tonteAttrs.next_mowing_display
+      || tonteAttrs.next_mowing_date
+      || mowerState.nextDeparture
+      || "",
+    ).trim();
+    if (actionPossible) {
+      return {
+        label: "Maintenant",
+        detail: mowerState.present ? (mowerState.reason || "Terrain et machine prêts") : "Terrain prêt",
+        tone: "success",
+        value: "now",
+      };
+    }
+    if (nextDisplay) {
+      return {
+        label: nextDisplay,
+        detail: mowingBlock.reasonLabel || mowingBlock.detail || mowerState.reason || "",
+        tone: mowingBlock.blocked ? "warning" : "neutral",
+        value: nextDisplay,
+      };
+    }
+    return {
+      label: "À estimer",
+      detail: mowingBlock.reasonLabel || mowerState.reason || "Aucune fenêtre de tonte calculée",
+      tone: mowingBlock.blocked ? "warning" : "neutral",
+      value: null,
+    };
+  }
+
+  _nextWateringState() {
+    const predictiveEntity = this._entity("entity_prochain_arrosage");
+    if (predictiveEntity) {
+      const attrs = predictiveEntity.attributes || {};
+      const normalized = (value) => {
+        const text = String(value || "").trim();
+        if (!text) {
+          return "";
+        }
+        return text.toLowerCase() === "unavailable" ? "" : text;
+      };
+      const stateValue = normalized(predictiveEntity.state);
+      const lowerState = stateValue.toLowerCase();
+      const hasBlock = String(attrs.block_reason || "").trim().length > 0;
+      const noAction = lowerState.includes("non requis");
+      const label = String(
+        noAction || hasBlock
+          ? stateValue
+          : (
+            normalized(attrs.target_display)
+            || normalized(attrs.target_datetime)
+            || normalized(attrs.target_window_label)
+            || normalized(attrs.target_window)
+            || stateValue
+            || ""
+          ),
+      ).trim();
+      const detail = String(
+        attrs.summary
+        || attrs.next_action
+        || attrs.block_reason_label
+        || attrs.block_reason
+        || "",
+      ).trim();
+      const isNoAction = noAction || detail.toLowerCase().includes("aucun arrosage nécessaire");
+      const tone = isNoAction
+        ? "neutral"
+        : hasBlock
+          ? "warning"
+          : lowerState.includes("maintenant") || lowerState.includes("en cours")
+            ? "accent"
+            : "neutral";
+      if (label) {
+        return {
+          label,
+          detail,
+          tone,
+          value: label,
+        };
+      }
+    }
+
+    const nextWindowEntity = this._entity("entity_prochaine_fenetre_optimale");
+    const windowState = this._windowState();
+    const wateringProgress = this._wateringProgressState();
+    if (wateringProgress.active) {
+      return {
+        label: "En cours",
+        detail: wateringProgress.detail || wateringProgress.summary,
+        tone: "accent",
+        value: "active",
+      };
+    }
+    const nextWindowState = String(nextWindowEntity?.state || "").trim().toLowerCase();
+    const nextWindowLabel = formatStatusLabel(nextWindowState);
+    const nextWindowSummary = String(nextWindowEntity?.attributes?.summary || "").trim();
+    const nextActionDate = String(windowState.nextActionDate || "").trim();
+    const windowLabel = windowState.optimalWindowDisplay || windowState.wateringWindowDisplay || "";
+    if (windowState.isNoActionRequired) {
+      return {
+        label: "Non requis",
+        detail: windowState.displaySummary || nextWindowSummary || "Aucun arrosage nécessaire",
+        tone: "neutral",
+        value: null,
+      };
+    }
+    if (nextActionDate || windowLabel || nextWindowState) {
+      return {
+        label: nextActionDate || windowLabel || nextWindowLabel,
+        detail: windowState.displayNextAction || nextWindowSummary || windowState.summary,
+        tone: windowState.tone,
+        value: nextActionDate || windowLabel || nextWindowState,
+      };
+    }
+    return {
+      label: windowState.statusLabel || "À définir",
+      detail: windowState.displaySummary || windowState.summary || "Aucune fenêtre d'arrosage calculée",
+      tone: windowState.tone,
+      value: null,
+    };
+  }
+
   _objectiveContext() {
     const entity = this._objectiveEntity();
     const temperature = asNumber(entity?.attributes?.temperature);
@@ -2379,6 +2559,8 @@ class GazonIntelligentCard extends HTMLElement {
     const wateringCause = irrigationSignal.wateringCause || windowState.wateringCause || this._inferWateringCause({ typeArrosage });
     const niveauHydrique = String(this._entityAttribute("entity_niveau", "niveau_action_hydrique", "") || "").trim();
     const lastWatering = this._lastWateringState();
+    const nextWatering = this._nextWateringState();
+    const nextMowing = this._nextMowingState();
     const height = this._entity("entity_hauteur");
     const heightValue = height ? formatCm(height.state) : "Non disponible";
     const heightSecondary =
@@ -2441,36 +2623,20 @@ class GazonIntelligentCard extends HTMLElement {
         entityKey: "entity_signal_irrigation",
       },
       {
-        label: "Fenêtre optimale",
-        value: windowState.statusLabel,
-        tone: windowState.tone,
-        icon: "mdi:clock-outline",
-        secondary: [
-          windowState.reasonSummary || windowState.summary,
-          windowState.optimalWindowDisplay ? `Optimal: ${windowState.optimalWindowDisplay}` : "",
-          windowState.wateringWindowDisplay ? `Créneau: ${windowState.wateringWindowDisplay}` : "",
-        ].filter(Boolean).join(" · "),
-        entityKey: "entity_fenetre_optimale",
+        label: "Prochain arrosage",
+        value: nextWatering.label,
+        tone: nextWatering.tone,
+        icon: "mdi:clock-water-outline",
+        secondary: nextWatering.detail,
+        entityKey: "entity_prochain_arrosage",
       },
       {
-        label: "Objectif d'irrigation",
-        value: objectiveLabel,
-        tone: objective > 0 ? "success" : "neutral",
-        icon: "mdi:water-percent",
-        secondary: [
-          typeArrosage ? `Type: ${formatWateringTypeLabel(typeArrosage)}` : "",
-          wateringCause ? `Cause: ${formatWateringCauseLabel(wateringCause)}` : "",
-          niveauHydrique ? `Hydrique: ${formatStatusLabel(niveauHydrique)}` : "",
-        ].filter(Boolean).join(" · "),
-        entityKey: "entity_objectif_arrosage",
-      },
-      {
-        label: "Plan d'irrigation",
-        value: planState.summary,
-        tone: this._planTypeTone(planState.planType),
-        icon: "mdi:timer-outline",
-        secondary: `${planState.durationHuman}${planState.zoneCount ? ` · ${planState.zoneCount} zone${planState.zoneCount > 1 ? "s" : ""}` : ""}`,
-        entityKey: "entity_plan_arrosage",
+        label: "Dernier arrosage",
+        value: lastWatering.label,
+        tone: lastWatering.value !== null ? "success" : "neutral",
+        icon: "mdi:water-check",
+        secondary: lastWatering.detail,
+        entityKey: "entity_dernier_arrosage",
       },
     ];
 
@@ -2482,6 +2648,14 @@ class GazonIntelligentCard extends HTMLElement {
         icon: "mdi:content-cut",
         secondary: heightValue !== "Non disponible" ? `Hauteur: ${heightValue}` : "",
         entityKey: "entity_tonte",
+      },
+      {
+        label: "Prochaine tonte",
+        value: nextMowing.label,
+        tone: nextMowing.tone,
+        icon: "mdi:calendar-clock",
+        secondary: nextMowing.detail,
+        entityKey: "entity_prochaine_tonte",
       },
       {
         label: "Risque",

@@ -240,6 +240,8 @@ entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
 entity_arrosage_en_cours: sensor.gazon_intelligent_arrosage_en_cours
 entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
 entity_dernier_arrosage_total_zones: sensor.gazon_intelligent_dernier_arrosage_total_zones
+entity_prochain_arrosage: sensor.gazon_intelligent_prochain_arrosage
+entity_prochaine_tonte: sensor.gazon_intelligent_prochaine_tonte
 entity_derniere_application: sensor.gazon_intelligent_derniere_application
 entity_derniere_action_utilisateur: sensor.gazon_intelligent_derniere_action_utilisateur
 entity_catalogue_produits: sensor.gazon_intelligent_catalogue_produits
@@ -304,6 +306,8 @@ Les attributs `gazon_permet_tonte`, `machine_permet_tonte` et `action_possible` 
 - `entity_arrosage_en_cours`
 - `entity_dernier_arrosage`
 - `entity_dernier_arrosage_total_zones`
+- `entity_prochain_arrosage`
+- `entity_prochaine_tonte`
 - `entity_derniere_application`
 - `entity_derniere_action_utilisateur`
 - `entity_catalogue_produits`

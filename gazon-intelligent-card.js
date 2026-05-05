@@ -3169,6 +3169,13 @@ const CARD_STYLES = String.raw`
           color: var(--gi-warning-ink);
         }
 
+        .card--theme-dark .gi-pill--success .gi-pill__label,
+        .card--theme-dark .gi-pill--success .gi-pill__value,
+        .card--theme-dark .gi-pill--accent .gi-pill__label,
+        .card--theme-dark .gi-pill--accent .gi-pill__value {
+          color: color-mix(in srgb, #ffffff 90%, var(--primary-text-color));
+        }
+
         .card--theme-dark .tab-panel__intervention-card--proposed,
         .card--theme-dark .tab-panel__temperature-constraint--warning {
           border-color: var(--gi-warning-border);
@@ -3218,11 +3225,78 @@ const CARD_STYLES = String.raw`
           border-color: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 20%, rgba(255, 255, 255, 0.10));
         }
 
+        .card--theme-dark .tab-panel__intervention-card--picker .tab-panel__section-summary,
+        .card--theme-dark .tab-panel__intervention-card--picker .tab-panel__section-hint,
+        .card--theme-dark .tab-panel__intervention-card--picker .tab-panel__section-meta {
+          color: color-mix(in srgb, #ffffff 88%, var(--primary-text-color));
+        }
+
         .card--theme-dark .tab-panel__intervention-card--action {
           background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0%, rgba(255, 255, 255, 0.004) 100%),
             #141c18;
           border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 20%, rgba(255, 255, 255, 0.10));
+        }
+
+        .card--theme-dark .tab-panel__intervention-card--action .tab-panel__section-summary,
+        .card--theme-dark .tab-panel__intervention-card--action .tab-panel__section-hint,
+        .card--theme-dark .tab-panel__intervention-card--action .tab-panel__section-meta {
+          color: color-mix(in srgb, #ffffff 88%, var(--primary-text-color));
+        }
+
+        .card--theme-dark .tab-panel--intervention .tab-panel__workflow-step,
+        .card--theme-dark .tab-panel--intervention .tab-panel__workflow-step--active,
+        .card--theme-dark .tab-panel--intervention .tab-panel__workflow-step--done,
+        .card--theme-dark .tab-panel--intervention .tab-panel__workflow-label,
+        .card--theme-dark .tab-panel--intervention .tab-panel__section-meta,
+        .card--theme-dark .tab-panel--intervention .tab-panel__select,
+        .card--theme-dark .tab-panel--intervention .tab-panel__select-chevron,
+        .card--theme-dark .tab-panel--intervention .tab-panel__select-prefix,
+        .card--theme-dark .tab-panel--intervention .gi-action--primary,
+        .card--theme-dark .tab-panel--intervention .gi-action--primary span,
+        .card--theme-dark .tab-panel--intervention .gi-action--primary::after {
+          color: color-mix(in srgb, #ffffff 92%, var(--primary-text-color));
+        }
+
+        .card--theme-dark .tab-panel--intervention .tab-panel__workflow-step {
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 0.003) 100%),
+            #141b20;
+        }
+
+        .card--theme-dark .tab-panel--intervention .tab-panel__select-prefix {
+          background: rgba(255, 255, 255, 0.06);
+        }
+
+        .card--theme-dark .tab-panel--intervention .gi-action--primary:disabled,
+        .card--theme-dark .tab-panel--intervention .gi-action--primary:disabled span,
+        .card--theme-dark .tab-panel--intervention .gi-action--primary:disabled::after {
+          color: color-mix(in srgb, #ffffff 82%, var(--secondary-text-color));
+          opacity: 1;
+        }
+
+        .card--theme-dark .tab-panel__metric-row {
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 0.003) 100%),
+            #141b20;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 18%, rgba(255, 255, 255, 0.10));
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.03),
+            0 10px 22px rgba(0,0,0,0.24);
+        }
+
+        .card--theme-dark button.tab-panel__metric-row:hover {
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 24%, rgba(255, 255, 255, 0.14));
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.03),
+            0 14px 28px rgba(0,0,0,0.30);
+        }
+
+        .card--theme-dark button.tab-panel__metric-row:focus-visible {
+          box-shadow:
+            0 0 0 2px color-mix(in srgb, var(--gazon-card-accent) 24%, transparent),
+            inset 0 1px 0 rgba(255,255,255,0.03),
+            0 12px 24px rgba(0,0,0,0.28);
         }
 
         .card--theme-dark .header__icon--warning { background: color-mix(in srgb, var(--gazon-warning-color) 74%, black); }
@@ -3791,7 +3865,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.1.96";
+const CARD_VERSION = "0.1.97";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

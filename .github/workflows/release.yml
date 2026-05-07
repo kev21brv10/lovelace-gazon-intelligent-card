@@ -26,9 +26,21 @@ jobs:
       - name: Validate
         run: python3 scripts/validate.py
 
-      - name: Publish GitHub release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            gazon-intelligent-card.js
-            gazon-intelligent-card.js.gz
+      - name: Publish or update GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            gh release upload "$TAG_NAME" \
+              gazon-intelligent-card.js \
+              gazon-intelligent-card.js.gz \
+              --clobber
+          else
+            gh release create "$TAG_NAME" \
+              gazon-intelligent-card.js \
+              gazon-intelligent-card.js.gz \
+              --title "$TAG_NAME"
+          fi

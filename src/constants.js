@@ -84,6 +84,27 @@ export function createStubConfig() {
   };
 }
 
+// Public backend/card contract kept intentionally narrow and explicit.
+// These entities carry the core decision surface that the card must preserve
+// across UI refactors and backend evolutions.
+export const MINIMAL_PUBLIC_CONTRACT_ENTITY_KEYS = [
+  "entity_assistant",
+  "entity_prochain_arrosage",
+  "entity_prochaine_tonte",
+  "entity_prochaine_intervention",
+  "entity_signal_irrigation",
+  "entity_signal_intervention",
+];
+
+export const MINIMAL_PUBLIC_CONTRACT_REQUIRED_ATTRIBUTES = {
+  entity_assistant: ["action", "status", "reason"],
+  entity_prochain_arrosage: ["target_window_label", "next_action", "summary", "block_reason"],
+  entity_prochaine_tonte: ["target_display", "block_reason", "reason", "summary"],
+  entity_prochaine_intervention: ["recommended_action", "summary", "hint"],
+  entity_signal_irrigation: ["reason_kind", "action_label", "summary"],
+  entity_signal_intervention: ["recommended_action", "summary"],
+};
+
 export const TAB_DEFS = [
   { key: "overview", label: "Synthèse", icon: "mdi:view-dashboard" },
   { key: "watering", label: "Irrigation", icon: "mdi:water" },

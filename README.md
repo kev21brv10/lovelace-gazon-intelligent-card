@@ -379,6 +379,14 @@ python3 scripts/build.py
 python3 scripts/validate.py
 ```
 
+Discipline de publication:
+
+- mets à jour les sources
+- rebuild le bundle
+- valide le dépôt
+- publie toujours le `bundle + sources ensemble`
+- ne publie jamais seulement `src/` ou seulement `gazon-intelligent-card.js`
+
 ## 🚫 Ce que la card ne cherche pas à faire
 
 - remplacer l’intégration backend

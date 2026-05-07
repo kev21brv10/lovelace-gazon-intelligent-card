@@ -4066,6 +4066,27 @@ function createStubConfig() {
   };
 }
 
+// Public backend/card contract kept intentionally narrow and explicit.
+// These entities carry the core decision surface that the card must preserve
+// across UI refactors and backend evolutions.
+const MINIMAL_PUBLIC_CONTRACT_ENTITY_KEYS = [
+  "entity_assistant",
+  "entity_prochain_arrosage",
+  "entity_prochaine_tonte",
+  "entity_prochaine_intervention",
+  "entity_signal_irrigation",
+  "entity_signal_intervention",
+];
+
+const MINIMAL_PUBLIC_CONTRACT_REQUIRED_ATTRIBUTES = {
+  entity_assistant: ["action", "status", "reason"],
+  entity_prochain_arrosage: ["target_window_label", "next_action", "summary", "block_reason"],
+  entity_prochaine_tonte: ["target_display", "block_reason", "reason", "summary"],
+  entity_prochaine_intervention: ["recommended_action", "summary", "hint"],
+  entity_signal_irrigation: ["reason_kind", "action_label", "summary"],
+  entity_signal_intervention: ["recommended_action", "summary"],
+};
+
 const TAB_DEFS = [
   { key: "overview", label: "Synthèse", icon: "mdi:view-dashboard" },
   { key: "watering", label: "Irrigation", icon: "mdi:water" },
@@ -4861,8 +4882,22 @@ function formatStatusLabel(status) {
   return formatStateLabel(status);
 }
 
+function sanitizePublicDecisionText(value) {
+  const text = String(value ?? "").replace(/\s+/g, " ").trim();
+  if (!text) {
+    return "";
+  }
+  return text
+    .replace(
+      /\s*\((?=[^)]*(?:phase=|meteo[_a-z0-9-]*|espacement=|forecast_|source_entity=|source_status=|trigger_kind=|reason_kind=|runtime_probe=))[^)]*\)\s*$/i,
+      "",
+    )
+    .replace(/\s+[·•]\s*$/u, "")
+    .trim();
+}
+
 function compactDecisionText(value, { maxLength = 140, preferFirstSentence = true } = {}) {
-  const text = String(value || "").replace(/\s+/g, " ").trim();
+  const text = sanitizePublicDecisionText(value);
   if (!text) {
     return "";
   }
@@ -7603,7 +7638,7 @@ class GazonIntelligentCard extends HTMLElement {
     }
 
     const keys = new Set([
-      "entity_assistant",
+      ...MINIMAL_PUBLIC_CONTRACT_ENTITY_KEYS,
       "entity_phase",
       "entity_sous_phase",
       "entity_tonte",

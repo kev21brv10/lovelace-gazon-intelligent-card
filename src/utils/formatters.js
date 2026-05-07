@@ -468,8 +468,22 @@ export function formatStatusLabel(status) {
   return formatStateLabel(status);
 }
 
+export function sanitizePublicDecisionText(value) {
+  const text = String(value ?? "").replace(/\s+/g, " ").trim();
+  if (!text) {
+    return "";
+  }
+  return text
+    .replace(
+      /\s*\((?=[^)]*(?:phase=|meteo[_a-z0-9-]*|espacement=|forecast_|source_entity=|source_status=|trigger_kind=|reason_kind=|runtime_probe=))[^)]*\)\s*$/i,
+      "",
+    )
+    .replace(/\s+[·•]\s*$/u, "")
+    .trim();
+}
+
 export function compactDecisionText(value, { maxLength = 140, preferFirstSentence = true } = {}) {
-  const text = String(value || "").replace(/\s+/g, " ").trim();
+  const text = sanitizePublicDecisionText(value);
   if (!text) {
     return "";
   }

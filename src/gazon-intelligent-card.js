@@ -5,6 +5,7 @@ import {
   SECTION_ACCENTS,
   DEFAULT_CONFIG,
   ENTITY_KEYS,
+  MINIMAL_PUBLIC_CONTRACT_ENTITY_KEYS,
   RENDER_SIGNATURE_ATTRS,
   SECTION_DEFS,
   STATUS_COLORS,
@@ -2367,7 +2368,7 @@ class GazonIntelligentCard extends HTMLElement {
     }
 
     const keys = new Set([
-      "entity_assistant",
+      ...MINIMAL_PUBLIC_CONTRACT_ENTITY_KEYS,
       "entity_phase",
       "entity_sous_phase",
       "entity_tonte",

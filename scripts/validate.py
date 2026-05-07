@@ -56,6 +56,8 @@ UNIQUE_CONSTANTS = (
     "CARD_NAME",
     "CARD_VERSION",
     "DEFAULT_CONFIG",
+    "MINIMAL_PUBLIC_CONTRACT_ENTITY_KEYS",
+    "MINIMAL_PUBLIC_CONTRACT_REQUIRED_ATTRIBUTES",
     "TAB_DEFS",
     "SECTION_DEFS",
     "ENTITY_KEYS",
@@ -76,6 +78,20 @@ def extract_default_config_keys(source):
     match = re.search(r"export const DEFAULT_CONFIG = \{(?P<body>.*?)\n\};", source, re.S)
     if not match:
         raise SystemExit("Could not find DEFAULT_CONFIG in src/constants.js")
+    return re.findall(r"^\s*([a-zA-Z0-9_]+):", match.group("body"), re.M)
+
+
+def extract_exported_string_array(source, export_name):
+    match = re.search(rf"export const {re.escape(export_name)} = \[(?P<body>.*?)\n\];", source, re.S)
+    if not match:
+        raise SystemExit(f"Could not find {export_name} in src/constants.js")
+    return re.findall(r'"([^"]+)"', match.group("body"))
+
+
+def extract_exported_object_keys(source, export_name):
+    match = re.search(rf"export const {re.escape(export_name)} = \{{(?P<body>.*?)\n\}};", source, re.S)
+    if not match:
+        raise SystemExit(f"Could not find {export_name} in src/constants.js")
     return re.findall(r"^\s*([a-zA-Z0-9_]+):", match.group("body"), re.M)
 
 
@@ -113,6 +129,11 @@ def extract_readme_complete_yaml_keys(source):
     if not match:
         raise SystemExit("README.md must contain a complete YAML example block")
     return re.findall(r"^(?!\s)([a-zA-Z0-9_]+):", match.group("body"), re.M)
+
+
+def ensure_readme_section(source, heading):
+    if heading not in source:
+        raise SystemExit(f"README.md must contain the section '{heading}'")
 
 
 def ensure_same_keys(label, expected, actual):
@@ -198,6 +219,8 @@ main_src = src_files["src/gazon-intelligent-card.js"]
 constants_src = src_files["src/constants.js"]
 editor_src = src_files["src/editor/editor.js"]
 default_config_keys = extract_default_config_keys(constants_src)
+minimal_contract_keys = extract_exported_string_array(constants_src, "MINIMAL_PUBLIC_CONTRACT_ENTITY_KEYS")
+minimal_contract_attr_keys = extract_exported_object_keys(constants_src, "MINIMAL_PUBLIC_CONTRACT_REQUIRED_ATTRIBUTES")
 config_form_names = extract_config_form_names(main_src)
 editor_config_keys = extract_editor_config_keys(editor_src)
 readme_option_keys = extract_readme_option_keys(readme)
@@ -211,9 +234,27 @@ ensure_same_keys(
     ["type", *default_config_keys],
     ["type", *[key for key in readme_complete_yaml_keys if key != "type"]],
 )
+ensure_same_keys(
+    "minimal public contract list vs attribute contract keys",
+    minimal_contract_keys,
+    minimal_contract_attr_keys,
+)
 validate_hass_action_contract(main_src)
 validate_irrigation_signal_contract(main_src, (ROOT / "src/renderers/layout.js").read_text(encoding="utf-8"))
 validate_mower_reason_labels((ROOT / "src/utils/formatters.js").read_text(encoding="utf-8"))
+
+for key in minimal_contract_keys:
+    if key not in default_config_keys:
+        raise SystemExit(f"Minimal public contract key missing from DEFAULT_CONFIG: {key}")
+    if key not in readme_option_keys:
+        raise SystemExit(f"README options must document minimal public contract key: {key}")
+    if key not in readme_complete_yaml_keys:
+        raise SystemExit(f"README complete YAML must include minimal public contract key: {key}")
+
+ensure_readme_section(readme, "## 🧩 Exemple minimal")
+ensure_readme_section(readme, "## 🧱 Exemple YAML complet")
+ensure_readme_section(readme, "## ⚙️ Options principales")
+ensure_readme_section(readme, "## 🧪 Développement")
 
 if 'from "./constants.js"' not in main_src:
     raise SystemExit('src/gazon-intelligent-card.js must import shared constants')
@@ -260,6 +301,9 @@ if gz_text != root_src:
 
 if "/local/gazon-intelligent-card/gazon-intelligent-card.js" not in readme:
     raise SystemExit("README.md must document the local Lovelace resource path")
+
+if "bundle + sources ensemble" not in readme:
+    raise SystemExit("README.md must document that bundle and sources must be published together")
 
 if 'import { CARD_STYLES } from "./styles/card-styles.js";' not in main_src:
     raise SystemExit('Missing CARD_STYLES import in src/gazon-intelligent-card.js')

@@ -442,6 +442,15 @@ const MOWING_BLOCK_REASON_LABELS = {
   post_application_active: "Post-produit actif",
   watering_in_progress: "Arrosage en cours",
   watering_cooldown: "Cooldown tonte après arrosage",
+  phase_sursemis: "Phase Sursemis",
+  phase_traitement: "Phase Traitement",
+  phase_hivernage: "Phase Hivernage",
+  mowing_spacing: "Espacement tonte",
+  recent_watering: "Arrosage récent",
+  wet_grass: "Herbe mouillée",
+  rosee_persistante: "Rosée persistante",
+  soil_wet: "Sol humide",
+  machine_unavailable: "Machine indisponible",
 };
 
 export function formatMowingBlockReason(value) {
@@ -457,6 +466,23 @@ export function formatMowingBlockReason(value) {
 
 export function formatStatusLabel(status) {
   return formatStateLabel(status);
+}
+
+export function compactDecisionText(value, { maxLength = 140, preferFirstSentence = true } = {}) {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  if (!text) {
+    return "";
+  }
+  if (preferFirstSentence) {
+    const firstSentence = text.match(/^.+?[.!?](?:\s|$)/)?.[0]?.trim();
+    if (firstSentence && firstSentence.length <= maxLength) {
+      return firstSentence;
+    }
+  }
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return `${text.slice(0, Math.max(0, maxLength - 1)).trimEnd()}…`;
 }
 
 export function iconForField(field) {

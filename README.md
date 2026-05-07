@@ -1,90 +1,96 @@
-# 🌱 Gazon Intelligent Card
+# Gazon Intelligent Card
 
-![Version](https://img.shields.io/github/v/release/kev21brv10/lovelace-gazon-intelligent-card?color=green)
-![HACS](https://img.shields.io/badge/HACS-Custom-orange)
-![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.3.2+-blue)
-![License](https://img.shields.io/github/license/kev21brv10/lovelace-gazon-intelligent-card?style=flat-square)
+<p align="center">
+  <strong>La carte Lovelace dédiée à l’intégration Home Assistant Gazon Intelligent.</strong><br>
+  Une lecture claire de la tonte, de l’arrosage, des phases, des produits et des réglages, pensée pour un usage réel dans Home Assistant.
+</p>
 
-> Une carte Lovelace claire et premium conçue comme frontend dédié de l’intégration Home Assistant **Gazon Intelligent**.
+<p align="center">
+  <img src="https://img.shields.io/github/v/release/kev21brv10/lovelace-gazon-intelligent-card?color=2f9e44" alt="Version">
+  <img src="https://img.shields.io/badge/HACS-Custom-f57c00" alt="HACS">
+  <img src="https://img.shields.io/badge/Home%20Assistant-2026.3.2+-1e88e5" alt="Home Assistant">
+  <img src="https://img.shields.io/github/license/kev21brv10/lovelace-gazon-intelligent-card" alt="License">
+</p>
+
+## 🌱 Pourquoi cette card
 
 Cette card n’est pas une carte d’irrigation générique.
-Elle est pensée pour lire et présenter les entités, attributs et contrats publics exposés par **ton intégration Home Assistant Gazon Intelligent**.
 
-Gazon Intelligent Card affiche dans Home Assistant les décisions métier les plus utiles de ton intégration Gazon Intelligent :
-- navigation par onglets pour séparer clairement synthèse, irrigation, tonte, gazon, produits, intervention et réglages
-- barre d’onglets horizontale qui se recentre automatiquement quand elle déborde
-- résumé adaptatif qui met en avant l’information vraiment utile selon la situation
-- tuiles de la synthèse, de la tonte, du gazon, des produits et des réglages cliquables pour ouvrir le bon `more-info`
-- zone produit dédiée pour le catalogue local, le produit d’intervention et la dernière application
-- bloc `Intervention` orienté décision avec recommandation automatique, guidage produit et déclaration rapide
-- barre de progression visible quand une irrigation est en cours
-- fenêtre optimale, objectif d'irrigation et profil d'irrigation bien lisibles
-- produit courant et référentiel produits lisibles pour guider les interventions
-- bouton unique `Irrigation manuelle immédiate` quand une irrigation est possible
-- résumé compact du plan d'irrigation
-- contexte utile dans les détails: dernier arrosage, application, phase et risque
-- blocage explicite quand aucune action n'est possible
-- pied de carte avec le mode du gazon et l'autorisation d'irrigation
+Elle a été conçue comme **frontend dédié** de l’intégration [`Gazon Intelligent`](https://github.com/kev21brv10/gazon_intelligent), pour afficher proprement sa façade publique:
 
----
+- assistant
+- prochain arrosage
+- prochaine tonte
+- phase dominante
+- produits et interventions
+- réglages et coordination tondeuse
 
-## 📸 Aperçu
+Le but est simple:
 
-Capture Lovelace à documenter dans une prochaine révision du README.
+- réduire le bruit
+- faire ressortir la bonne information
+- garder une lecture exploitable quand l’état devient plus complexe
 
----
+## ✨ Ce que la version actuelle apporte
 
-## ✨ Ce que fait la carte
+- navigation par onglets:
+  - synthèse
+  - irrigation
+  - tonte
+  - gazon
+  - produits
+  - intervention
+  - réglages
+- vue prioritaire qui met en avant la vraie décision utile du moment
+- lecture cohérente de la tonte, de l’arrosage et du contexte gazon
+- tuiles synthétiques compactes pour les signaux importants
+- support des cas multi-pelouse
+- gestion propre des textes longs, des blocages et des fallbacks
+- bouton d’action manuelle quand il est pertinent
+- rendu pensé pour Home Assistant, pas pour une simple démo
 
-- agit comme compagnon frontend dédié de l’intégration **Gazon Intelligent**
-- affiche une lecture claire et hiérarchisée du moteur Gazon Intelligent
-- met en avant la fenêtre optimale, l'objectif d'irrigation et l'action manuelle unique
-- expose le produit d’intervention sélectionné et le catalogue produit du moteur
-- consomme la prochaine intervention recommandée via le `payload` structuré exposé par l’intégration (`schema_version: 3`)
-- lit un contrat stable où les champs racine restent présents, avec `null`, `[]` ou `{}` quand l’information manque
-- sépare la zone produit du reste du résumé pour éviter les doublons visuels
-- affiche la progression d'irrigation en cours dès qu'une session est active
-- sépare les usages par onglets: synthèse, irrigation, tonte, gazon, produits, intervention et réglages
-- reste lisible même si certaines entités sont absentes
-- s’adapte au thème clair ou sombre de Home Assistant
-- propose un éditeur visuel simple pour la configuration courante
-- garde un mode avancé optionnel dont le contenu suit l’onglet actif
+## 🧠 Philosophie
 
----
+La card suit la structure métier de l’intégration:
 
-## 🧩 Installation via HACS
+1. **Le contexte**
+   - phase
+   - sous-phase
+   - risque
+   - fenêtre
 
-Prérequis :
+2. **La décision**
+   - quoi faire
+   - pourquoi attendre
+   - quand reconsidérer
 
-- l’intégration Home Assistant **Gazon Intelligent** doit déjà être installée et fonctionnelle
+3. **L’exécution**
+   - machine prête ou non
+   - coordination active ou non
+   - action possible ou non
 
-1. Ajoute ce dépôt dans HACS comme **Frontend / Dashboard card**
-2. Installe **Gazon Intelligent Card**
-3. Redémarre Home Assistant ou recharge les ressources Lovelace
-4. Ajoute la carte dans ton dashboard
+L’objectif est d’éviter les cartes qui disent tout à la fois sans hiérarchie.
 
-### Ressource Lovelace
+## 📦 Installation
 
-La ressource réellement utilisée par cette carte via HACS est :
+### Via HACS
+
+1. Ouvre **HACS → Frontend**
+2. Ajoute `https://github.com/kev21brv10/lovelace-gazon-intelligent-card` comme dépôt personnalisé
+3. Choisis la catégorie **Dashboard card**
+4. Installe `Gazon Intelligent Card`
+5. Recharge les ressources Lovelace ou redémarre Home Assistant
+
+### Ressource utilisée
 
 ```yaml
 /hacsfiles/lovelace-gazon-intelligent-card/gazon-intelligent-card.js
 ```
 
-Si tu l’ajoutes manuellement :
+### Installation manuelle
 
-```yaml
-resources:
-  - url: /hacsfiles/lovelace-gazon-intelligent-card/gazon-intelligent-card.js
-    type: module
-```
-
----
-
-## 🔧 Installation manuelle
-
-1. Copie le fichier `gazon-intelligent-card.js` dans `config/www/gazon-intelligent-card/gazon-intelligent-card.js`.
-2. Ajoute cette ressource Lovelace :
+1. Copie [`gazon-intelligent-card.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/gazon-intelligent-card.js) dans `config/www/gazon-intelligent-card/`
+2. Ajoute la ressource Lovelace:
 
 ```yaml
 resources:
@@ -92,126 +98,106 @@ resources:
     type: module
 ```
 
-3. Utilise la carte dans ton dashboard.
+## ✅ Compatibilité
 
----
+- Home Assistant `2026.3.2+`
+- installation via HACS ou manuelle
+- thèmes clair et sombre
+- dashboards classiques et sections
 
-## 🧠 Compatibilité
+## 🔗 Dépendance importante
 
-- intégration Home Assistant **Gazon Intelligent** requise
-- Home Assistant `2026.3.2` ou plus récent
-- thème clair / sombre
-- dashboard classique et sections
-- installations HACS et manuelles
-- la carte fournit ses tailles via `getCardSize()` et `getGridOptions()` sans hauteur fixe forcée, avec une largeur par défaut de 12 colonnes et une largeur minimale de 6 colonnes en sections
+Cette card dépend de l’intégration:
 
----
+- [`Gazon Intelligent`](https://github.com/kev21brv10/gazon_intelligent)
 
-## 🧱 Structure du projet
+Elle n’est pas conçue pour consommer un schéma arbitraire d’autres intégrations d’arrosage.
 
-- `src/gazon-intelligent-card.js` : point d'entrée source de la carte
-- `src/renderers/layout.js` : rendu du header, des onglets et des panneaux
-- `src/renderers/primitives.js` : primitives communes pour pills et cartes
-- `src/utils/formatters.js` : formatage et fonctions de tonalité
-- `src/constants.js` : constantes partagées entre les couches
-- `src/editor/editor.js` : éditeur visuel de la carte
-- `src/styles/card-styles.js` : styles de la carte Lovelace
-- `src/styles/editor-styles.js` : styles de l'éditeur
-- `gazon-intelligent-card.js` : bundle final consommé par Home Assistant et HACS
-- `docs/frontend-dependency-manifest.md` : manifeste léger des dépendances frontend critiques
+Elle attend les entités publiques et attributs exposés par `Gazon Intelligent`, en particulier:
 
----
+- `sensor.gazon_intelligent_assistant`
+- `sensor.gazon_intelligent_prochain_arrosage`
+- `sensor.gazon_intelligent_prochaine_tonte`
+- `sensor.gazon_intelligent_prochaine_intervention`
 
-## 🪄 Exemple YAML simple
+## 📊 Ce que la card affiche le mieux
 
-```yaml
-type: custom:gazon-intelligent-card
-title: Gazon du jardin
-entity_assistant: sensor.gazon_intelligent_assistant
-entity_fenetre_optimale: sensor.gazon_intelligent_fenetre_optimale
-entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
-entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
-entity_dernier_arrosage_total_zones: sensor.gazon_intelligent_dernier_arrosage_total_zones
-entity_derniere_application: sensor.gazon_intelligent_derniere_application
-entity_derniere_action_utilisateur: sensor.gazon_intelligent_derniere_action_utilisateur
-entity_catalogue_produits: sensor.gazon_intelligent_catalogue_produits
-entity_prochaine_intervention: sensor.gazon_intelligent_prochaine_intervention
-entity_produit_intervention: select.gazon_intelligent_produit_d_intervention
-entity_conseil: sensor.gazon_intelligent_conseil_principal
-entity_signal_irrigation: binary_sensor.gazon_intelligent_signal_irrigation
-entity_niveau: sensor.gazon_intelligent_niveau_d_action
-entity_mode: select.gazon_intelligent_mode_du_gazon
-entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique_autorise
-entity_switch_coordination_tondeuse: switch.gazon_intelligent_coordination_tondeuse
-entity_arrosage_recommande: binary_sensor.gazon_intelligent_arrosage_recommande
-entity_objectif_arrosage: sensor.gazon_intelligent_objectif_d_arrosage
-entity_type_arrosage: sensor.gazon_intelligent_type_d_arrosage
-entity_tonte: sensor.gazon_intelligent_etat_de_tonte
-entity_hauteur: sensor.gazon_intelligent_hauteur_de_tonte_conseillee
-entity_debit_zone_1: number.gazon_intelligent_debit_zone_1
-entity_debit_zone_2: number.gazon_intelligent_debit_zone_2
-entity_debit_zone_3: number.gazon_intelligent_debit_zone_3
-entity_debit_zone_4: number.gazon_intelligent_debit_zone_4
-entity_debit_zone_5: number.gazon_intelligent_debit_zone_5
-entity_hauteur_min_tondeuse: number.gazon_intelligent_hauteur_min_tondeuse
-entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
-entity_hauteur_coupe_tondeuse: number.gazon_intelligent_hauteur_coupe_tondeuse
-entity_delai_reprise_tonte_apres_arrosage: number.gazon_intelligent_delai_reprise_tonte_apres_arrosage
-show_advanced_details: false
-```
+### Synthèse
 
-### Dépendances entités
+- décision prioritaire
+- assistant
+- niveau global
+- prochaine tonte
+- prochain arrosage
+- derniers repères utiles
 
-Cette card est couplée au modèle d’entités public de l’intégration **Gazon Intelligent**.
-Elle attend en priorité les entités et attributs standard exposés par cette intégration, et non un schéma arbitraire d’autres cartes ou backends d’arrosage.
+### Irrigation
 
-Dans ce README, les noms comme `entity_produit_intervention` ou `entity_conseil` sont des **clés de configuration de la card**, pas des entités Home Assistant.
+- fenêtre optimale
+- objectif d’arrosage
+- plan calculé
+- arrosage en cours
+- dernier arrosage
 
-Exemple:
+### Tonte
 
-- `entity_produit_intervention` = champ YAML de la carte
-- `select.gazon_intelligent_produit_d_intervention` = vraie entité Home Assistant à sélectionner
-- dans l’interface Home Assistant, cette entité apparaît généralement comme **Produit sélectionné**
+- état de tonte
+- machine
+- blocage
+- prochaine tonte
+- hauteur conseillée
 
-En pratique, la card est déjà **préremplie automatiquement** avec les entités publiques standard de l’intégration. Si ton backend Gazon Intelligent expose bien les IDs publics par défaut, tu peux souvent partir du YAML minimal.
+### Gazon
 
-| Clé de config | Entité réelle par défaut | Usage |
-|---|---|---|
-| `entity_fenetre_optimale` | `sensor.gazon_intelligent_fenetre_optimale` | synthèse, irrigation |
-| `entity_plan_arrosage` | `sensor.gazon_intelligent_plan_d_arrosage` | synthèse, irrigation |
-| `entity_prochaine_intervention` | `sensor.gazon_intelligent_prochaine_intervention` | synthèse, intervention |
-| `entity_produit_intervention` | `select.gazon_intelligent_produit_d_intervention` | produits, intervention |
-| `entity_objectif_arrosage` | `sensor.gazon_intelligent_objectif_d_arrosage` | synthèse, irrigation |
-| `entity_tonte` | `sensor.gazon_intelligent_etat_de_tonte` | tonte |
-| `entity_hauteur` | `sensor.gazon_intelligent_hauteur_de_tonte_conseillee` | tonte |
+- phase dominante
+- sous-phase
+- risque
+- état hydrique
 
-Tu ajustes le YAML seulement si:
+### Produits / intervention
 
-- ton instance utilise un autre `entity_id`
-- tu veux brancher une météo différente via `entity_weather`
-- tu veux enrichir la carte avec les entités avancées comme `entity_debug_intervention`, `entity_signal_irrigation` ou `entity_arrosage_en_cours`
-- tu veux personnaliser le bouton manuel ou les actions de carte
+- catalogue
+- produit sélectionné
+- prochaine intervention
+- niveau de pertinence
+- debug intervention si activé
 
-La liste complète des clés supportées reste plus bas dans `Options principales`.
+### Réglages
 
-Même si une entité est absente ou renvoie `unknown` / `unavailable`, la carte garde sa structure et affiche un fallback propre.
+- irrigation automatique
+- coordination tondeuse
+- débits
+- hauteurs
+- cooldown reprise tonte
 
-### Exemple minimal
+## 🔎 Lecture de la décision
+
+La card privilégie ce qui est réellement utile.
+
+Exemples:
+
+- si le gazon est en `Sursemis`, la vue prioritaire doit parler de tonte interdite
+- si l’arrosage est bloqué par pluie suffisante, la vue prioritaire doit parler d’attente météo
+- si la machine est indisponible, la card doit distinguer:
+  - gazon OK
+  - machine non prête
+
+Elle ne se contente donc pas d’afficher des entités à plat.
+
+## 🧩 Exemple minimal
 
 ```yaml
 type: custom:gazon-intelligent-card
 title: Gazon Intelligent
 ```
 
-Cette version affiche la structure complète avec des fallbacks quand les entités ne sont pas encore branchées.
-
----
+Cette version fonctionne si les entités publiques standard de l’intégration sont présentes.
 
 ## 🧱 Exemple YAML complet
 
 ```yaml
 type: custom:gazon-intelligent-card
-title: Gazon intelligent
+title: Gazon Principal
 show_icons: true
 show_header: true
 show_background: true
@@ -222,30 +208,24 @@ theme_mode: auto
 accent_color: ""
 icon_size: 24
 border_radius: 24
-background_style: solid
+background_style: glass
 use_gradient: true
-show_secondary_info: true
+show_secondary_info: false
 manual_action_service: gazon_intelligent.start_manual_irrigation
 manual_action_label: Irrigation manuelle
-tap_action:
-  action: more-info
-hold_action:
-  action: none
-double_tap_action:
-  action: none
 entity_assistant: sensor.gazon_intelligent_assistant
 entity_fenetre_optimale: sensor.gazon_intelligent_fenetre_optimale
-entity_weather: weather.forecast_home
+entity_weather: weather.forecast_maison
 entity_plan_arrosage: sensor.gazon_intelligent_plan_d_arrosage
-entity_arrosage_en_cours: sensor.gazon_intelligent_arrosage_en_cours
-entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
 entity_dernier_arrosage_total_zones: sensor.gazon_intelligent_dernier_arrosage_total_zones
 entity_prochain_arrosage: sensor.gazon_intelligent_prochain_arrosage
-entity_prochaine_tonte: sensor.gazon_intelligent_prochaine_tonte
+entity_arrosage_en_cours: sensor.gazon_intelligent_arrosage_en_cours
+entity_dernier_arrosage: sensor.gazon_intelligent_dernier_arrosage_detecte
 entity_derniere_application: sensor.gazon_intelligent_derniere_application
 entity_derniere_action_utilisateur: sensor.gazon_intelligent_derniere_action_utilisateur
 entity_catalogue_produits: sensor.gazon_intelligent_catalogue_produits
 entity_prochaine_intervention: sensor.gazon_intelligent_prochaine_intervention
+entity_prochaine_tonte: sensor.gazon_intelligent_prochaine_tonte
 entity_produit_intervention: select.gazon_intelligent_produit_d_intervention
 entity_conseil: sensor.gazon_intelligent_conseil_principal
 entity_action: sensor.gazon_intelligent_action_recommandee
@@ -256,7 +236,6 @@ entity_prochaine_fenetre_optimale: sensor.gazon_intelligent_prochaine_fenetre_op
 entity_prochain_blocage_attendu: sensor.gazon_intelligent_prochain_blocage_attendu
 entity_mode: select.gazon_intelligent_mode_du_gazon
 entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique_autorise
-entity_switch_coordination_tondeuse: switch.gazon_intelligent_coordination_tondeuse
 entity_arrosage_recommande: binary_sensor.gazon_intelligent_arrosage_recommande
 entity_arrosage_apres_application_autorise: binary_sensor.gazon_intelligent_arrosage_apres_application_autorise
 entity_signal_irrigation: binary_sensor.gazon_intelligent_signal_irrigation
@@ -285,25 +264,40 @@ entity_debit_zone_5: number.gazon_intelligent_debit_zone_5
 entity_hauteur_min_tondeuse: number.gazon_intelligent_hauteur_min_tondeuse
 entity_hauteur_max_tondeuse: number.gazon_intelligent_hauteur_max_tondeuse
 entity_hauteur_coupe_tondeuse: number.gazon_intelligent_hauteur_coupe_tondeuse
+entity_switch_coordination_tondeuse: switch.gazon_intelligent_coordination_tondeuse
 entity_delai_reprise_tonte_apres_arrosage: number.gazon_intelligent_delai_reprise_tonte_apres_arrosage
+manual_action_service: gazon_intelligent.start_manual_irrigation
+manual_action_label: Irrigation manuelle
+tap_action:
+  action: more-info
+hold_action:
+  action: none
+double_tap_action:
+  action: none
 ```
-
-Les attributs `gazon_permet_tonte`, `machine_permet_tonte` et `action_possible` sont exposés sur les entités de tonte pour rendre la lecture explicite:
-
-- `gazon_permet_tonte` = autorisation agronomique
-- `machine_permet_tonte` = disponibilité réelle de la tondeuse
-- `action_possible` = verdict exécutable final
-
----
 
 ## ⚙️ Options principales
 
+Toutes les clés de configuration supportées par la card:
+
 - `title`
+- `show_icons`
+- `show_header`
+- `show_background`
+- `compact`
+- `minimal_mode`
+- `show_advanced_details`
+- `theme_mode`
+- `accent_color`
+- `icon_size`
+- `border_radius`
+- `background_style`
+- `use_gradient`
+- `show_secondary_info`
 - `entity_assistant`
 - `entity_fenetre_optimale`
 - `entity_weather`
 - `entity_plan_arrosage`
-- `entity_arrosage_en_cours`
 - `entity_dernier_arrosage`
 - `entity_dernier_arrosage_total_zones`
 - `entity_prochain_arrosage`
@@ -311,22 +305,23 @@ Les attributs `gazon_permet_tonte`, `machine_permet_tonte` et `action_possible` 
 - `entity_derniere_application`
 - `entity_derniere_action_utilisateur`
 - `entity_catalogue_produits`
-- `entity_prochaine_intervention`
 - `entity_produit_intervention`
-- `entity_conseil`
-- `entity_action`
-- `entity_avoid`
 - `entity_debug_intervention`
 - `entity_niveau_pertinence`
 - `entity_prochaine_fenetre_optimale`
 - `entity_prochain_blocage_attendu`
+- `entity_signal_intervention`
+- `entity_signal_irrigation`
+- `entity_prochaine_intervention`
+- `entity_conseil`
+- `entity_action`
+- `entity_avoid`
 - `entity_mode`
 - `entity_switch_arrosage_automatique`
 - `entity_switch_coordination_tondeuse`
 - `entity_arrosage_recommande`
 - `entity_arrosage_apres_application_autorise`
-- `entity_signal_irrigation`
-- `entity_signal_intervention`
+- `entity_tonte_autorisee`
 - `entity_objectif_arrosage`
 - `entity_objectif_legacy`
 - `entity_objectif_depletion`
@@ -336,13 +331,13 @@ Les attributs `gazon_permet_tonte`, `machine_permet_tonte` et `action_possible` 
 - `entity_et0`
 - `entity_etc`
 - `entity_type_arrosage`
+- `entity_risque`
 - `entity_phase`
 - `entity_sous_phase`
-- `entity_risque`
 - `entity_niveau`
-- `entity_tonte_autorisee`
 - `entity_tonte`
 - `entity_hauteur`
+- `entity_arrosage_en_cours`
 - `entity_debit_zone_1`
 - `entity_debit_zone_2`
 - `entity_debit_zone_3`
@@ -352,68 +347,46 @@ Les attributs `gazon_permet_tonte`, `machine_permet_tonte` et `action_possible` 
 - `entity_hauteur_max_tondeuse`
 - `entity_hauteur_coupe_tondeuse`
 - `entity_delai_reprise_tonte_apres_arrosage`
-- `show_icons`
-- `show_header`
-- `show_background`
-- `compact`
-- `minimal_mode`
-- `show_advanced_details`
-- `theme_mode`
-- `accent_color`
 - `manual_action_service`
 - `manual_action_label`
 - `tap_action`
 - `hold_action`
 - `double_tap_action`
-- `icon_size`
-- `border_radius`
-- `background_style`
-- `use_gradient`
-- `show_secondary_info`
 
----
+## 🧱 Structure du projet
 
-## 🖊️ Éditeur visuel
+- [`src/gazon-intelligent-card.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/src/gazon-intelligent-card.js): point d’entrée source
+- [`src/renderers/layout.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/src/renderers/layout.js): rendu du layout et des panneaux
+- [`src/renderers/primitives.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/src/renderers/primitives.js): primitives communes
+- [`src/utils/formatters.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/src/utils/formatters.js): formatage et tonalités
+- [`src/styles/card-styles.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/src/styles/card-styles.js): styles de la carte
+- [`src/editor/editor.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/src/editor/editor.js): éditeur visuel
+- [`gazon-intelligent-card.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/gazon-intelligent-card.js): bundle distribué
 
-La carte expose un éditeur visuel natif dans Home Assistant pour :
-- la carte elle-même: titre, style, fond, icônes et bouton manuel
-- la synthèse et l’irrigation: assistant, fenêtre, plan, objectif, signaux et dernières actions
-- la zone produit: catalogue local, produit d’intervention et dernière application
-- l’intervention: recommandation, signal métier et debug
-- le gazon et la tonte: mode, profil d’irrigation, phase, risque, tonte autorisée et hauteur
-- le suivi hydrique avancé: état hydrique, réserve, déplétion, ET0, ETc et comparaison legacy/déplétion
-- l'onglet Réglages avec le switch auto, les débits et les hauteurs
-- les options visuelles de base
-- l’affichage optionnel des détails avancés et des écrans de diagnostic
+## 🧪 Développement
 
-Dans la carte elle-même, l’onglet **Réglages** propose aussi des tuiles cliquables qui ouvrent directement le contrôle Home Assistant des entités associées. C’est le chemin le plus simple pour ajuster un switch, un sélecteur ou un nombre sans quitter la vue.
-
-Même logique pour l’éditeur: il affiche les **clés de config** de la carte, mais tu dois y brancher les **vraies entités Home Assistant**. Par exemple, `entity_produit_intervention` doit pointer vers l’entité visible **Produit sélectionné** (`select.gazon_intelligent_produit_d_intervention`).
-
-Quand `show_advanced_details` est activé, la vue avancée suit l’onglet actif au lieu d’afficher un bloc partagé unique.
-
-Par défaut, le switch d’autorisation pointe vers `switch.gazon_intelligent_arrosage_automatique_autorise`. Si ton instance expose un identifiant différent, ajuste `entity_switch_arrosage_automatique`.
-
-Pour les réglages avancés, l’édition YAML reste la voie la plus directe.
-
----
-
-## 🚀 Développement local
+Scripts disponibles:
 
 ```bash
 python3 scripts/build.py
 python3 scripts/validate.py
 ```
 
-Le fichier distribué est généré à la racine du dépôt :
+La release locale habituelle:
 
-```text
-gazon-intelligent-card.js
-gazon-intelligent-card.js.gz
+```bash
+python3 scripts/build.py
+python3 scripts/validate.py
 ```
 
----
+## 🚫 Ce que la card ne cherche pas à faire
+
+- remplacer l’intégration backend
+- inventer une logique métier différente du moteur
+- masquer les incohérences du runtime
+
+Son rôle est d’afficher proprement la façade publique de l’intégration, pas de réécrire ses décisions.
 
 ## 📄 Licence
 
-MIT
+Projet publié sous licence MIT. Voir [`LICENSE`](https://github.com/kev21brv10/lovelace-gazon-intelligent-card/blob/main/LICENSE).

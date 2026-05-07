@@ -45,7 +45,7 @@ const CARD_STYLES = String.raw`
           --gi-action-padding-inline: 18px;
           --gi-action-padding-inline-end: 22px;
           --gi-action-padding-block: 15px;
-          --gi-action-min-height: 84px;
+          --gi-action-min-height: 78px;
           --gi-action-gap: 12px;
           --gi-action-radius: 22px;
           --gi-action-icon-size: 26px;
@@ -54,8 +54,8 @@ const CARD_STYLES = String.raw`
           --gi-decision-grid-gap: 10px;
           --gi-tiles-gap: 6px;
           --gi-card-core-gap: 12px;
-          --gi-card-core-padding: 15px 16px;
-          --gi-card-core-min-height: 88px;
+          --gi-card-core-padding: 13px 15px;
+          --gi-card-core-min-height: 82px;
           --gi-card-core-radius: 24px;
           --gi-card-core-icon-size: 22px;
           --gi-card-core-icon-glyph-size: 13px;
@@ -319,14 +319,15 @@ const CARD_STYLES = String.raw`
           border-color: var(--gi-surface-border-strong);
           background:
             radial-gradient(circle at 16% 18%, color-mix(in srgb, var(--gi-tab-companion) 18%, transparent) 0%, transparent 24%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 26%, transparent) 0%, transparent 100%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 34%, transparent) 0%, transparent 100%),
             color-mix(in srgb, var(--secondary-background-color) 96%, white);
           box-shadow:
-            0 10px 26px rgba(0, 0, 0, 0.12),
-            0 0 0 1px color-mix(in srgb, var(--gi-tab-glow-color) 16%, transparent),
-            0 0 28px color-mix(in srgb, var(--gi-tab-glow-color) 12%, transparent),
+            0 12px 30px rgba(0, 0, 0, 0.16),
+            0 0 0 1px color-mix(in srgb, var(--gi-tab-glow-color) 22%, transparent),
+            0 0 34px color-mix(in srgb, var(--gi-tab-glow-color) 16%, transparent),
             inset 0 1px 0 rgba(255, 255, 255, 0.06);
-          transform: translateY(-1px);
+          transform: translateY(-1px) scale(1.01);
+          font-weight: 700;
         }
 
         .gi-tab--active::before,
@@ -1266,8 +1267,9 @@ const CARD_STYLES = String.raw`
 
         .tab-panel__metric-head {
           display: flex;
-          align-items: baseline;
+          align-items: flex-start;
           justify-content: space-between;
+          flex-wrap: wrap;
           gap: 12px;
           min-width: 0;
         }
@@ -1288,7 +1290,10 @@ const CARD_STYLES = String.raw`
           line-height: 1.18;
           color: var(--primary-text-color);
           text-align: right;
-          flex: 0 0 auto;
+          flex: 0 1 auto;
+          min-width: 0;
+          white-space: normal;
+          overflow-wrap: anywhere;
         }
 
         .tab-panel__metric-note {
@@ -1367,7 +1372,7 @@ const CARD_STYLES = String.raw`
           display: grid;
           grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
           gap: 12px;
-          align-items: stretch;
+          align-items: start;
         }
 
         .tab-panel__products-layout > .tab-panel__section {
@@ -1461,8 +1466,9 @@ const CARD_STYLES = String.raw`
           min-height: 58px;
         }
 
-        .tab-panel__section--application-history {
-          min-height: 100%;
+        .tab-panel__section--application-history,
+        .tab-panel__section--catalogue-reference {
+          min-height: 0;
         }
 
         .tab-panel--products .tab-panel__card-slider--catalogue .tab-panel__card-slider-track {
@@ -1981,8 +1987,9 @@ const CARD_STYLES = String.raw`
 
         .decision-plan__header {
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: space-between;
+          flex-wrap: wrap;
           gap: 10px;
           min-width: 0;
         }
@@ -1990,7 +1997,11 @@ const CARD_STYLES = String.raw`
         .decision-plan__meta {
           font-size: var(--gi-font-xs);
           color: var(--secondary-text-color);
-          white-space: nowrap;
+          white-space: normal;
+          overflow-wrap: anywhere;
+          min-width: 0;
+          flex: 1 1 320px;
+          text-align: left;
         }
 
         .decision-plan__summary {
@@ -2802,12 +2813,12 @@ const CARD_STYLES = String.raw`
         .gi-card-core--stat,
         .gi-card-core--tile,
         .gi-card-core--metric {
-          min-height: 88px;
+          min-height: 80px;
         }
 
         .gi-card-core--metric {
-          min-height: 82px;
-          padding: 13px 14px;
+          min-height: 76px;
+          padding: 12px 13px;
         }
 
         .gi-card-core--interactive {
@@ -2916,6 +2927,7 @@ const CARD_STYLES = String.raw`
           min-width: 0;
           overflow-wrap: break-word;
           word-break: normal;
+          hyphens: auto;
           font-size: var(--gi-font-md);
           line-height: 1.18;
           display: -webkit-box;
@@ -2975,7 +2987,7 @@ const CARD_STYLES = String.raw`
           min-height: 1.15em;
           display: -webkit-box;
           -webkit-box-orient: vertical;
-          -webkit-line-clamp: 2;
+          -webkit-line-clamp: 3;
           overflow: hidden;
         }
 
@@ -4823,6 +4835,15 @@ const MOWING_BLOCK_REASON_LABELS = {
   post_application_active: "Post-produit actif",
   watering_in_progress: "Arrosage en cours",
   watering_cooldown: "Cooldown tonte après arrosage",
+  phase_sursemis: "Phase Sursemis",
+  phase_traitement: "Phase Traitement",
+  phase_hivernage: "Phase Hivernage",
+  mowing_spacing: "Espacement tonte",
+  recent_watering: "Arrosage récent",
+  wet_grass: "Herbe mouillée",
+  rosee_persistante: "Rosée persistante",
+  soil_wet: "Sol humide",
+  machine_unavailable: "Machine indisponible",
 };
 
 function formatMowingBlockReason(value) {
@@ -4838,6 +4859,23 @@ function formatMowingBlockReason(value) {
 
 function formatStatusLabel(status) {
   return formatStateLabel(status);
+}
+
+function compactDecisionText(value, { maxLength = 140, preferFirstSentence = true } = {}) {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  if (!text) {
+    return "";
+  }
+  if (preferFirstSentence) {
+    const firstSentence = text.match(/^.+?[.!?](?:\s|$)/)?.[0]?.trim();
+    if (firstSentence && firstSentence.length <= maxLength) {
+      return firstSentence;
+    }
+  }
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return `${text.slice(0, Math.max(0, maxLength - 1)).trimEnd()}…`;
 }
 
 function iconForField(field) {
@@ -6568,12 +6606,17 @@ class GazonIntelligentCard extends HTMLElement {
       tone = "warning";
     }
     const isPassiveState = action === "aucune_action" && moment === "attendre";
+    const isBlockedByConditions = action === "aucune_action" && status === "blocked_due_to_conditions";
     const isBlockedMowing = status === "blocked" && action === "tonte" && (
       normalizedReason.includes("déjà en cours")
       || normalizedReason.includes("en cours")
       || normalizedReason.includes("mower_mowing")
     );
-    const summary = isPassiveState
+    const summary = isBlockedByConditions
+      ? (momentLabel && moment !== "attendre"
+          ? `Attendre ${momentLabel.toLowerCase()}`
+          : "Attendre conditions favorables")
+      : isPassiveState
       ? "Aucune action immédiate"
       : isBlockedMowing
         ? "Tonte en cours"
@@ -6700,8 +6743,10 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _mowingBlockState() {
+    const predictiveEntity = this._entity("entity_prochaine_tonte");
     const tonteEntity = this._entity("entity_tonte");
     const tonteAutoriseeEntity = this._entity("entity_tonte_autorisee");
+    const predictiveAttrs = predictiveEntity?.attributes || {};
     const tonteAttrs = tonteEntity?.attributes || {};
     const fallbackAttrs = tonteAutoriseeEntity?.attributes || {};
     const attrs = tonteAttrs.mowing_block_reason_code
@@ -6710,15 +6755,20 @@ class GazonIntelligentCard extends HTMLElement {
       || tonteAttrs.mowing_cooldown_remaining_minutes !== undefined
       ? tonteAttrs
       : fallbackAttrs;
-    const blocked = attrs.mowing_blocked_by_watering === true || Boolean(attrs.mowing_block_reason_code || attrs.mowing_block_reason_label);
-    const reasonCode = String(attrs.mowing_block_reason_code || "").trim().toLowerCase();
-    const reasonLabel = String(
-      attrs.mowing_block_reason_label
-      || formatMowingBlockReason(reasonCode),
+    const predictiveBlocked = predictiveAttrs.action_possible === false && Boolean(predictiveAttrs.block_reason || predictiveAttrs.reason || predictiveAttrs.summary);
+    const blocked = predictiveBlocked || attrs.mowing_blocked_by_watering === true || Boolean(attrs.mowing_block_reason_code || attrs.mowing_block_reason_label);
+    const reasonCode = String(predictiveAttrs.block_reason || attrs.mowing_block_reason_code || "").trim().toLowerCase();
+    const reasonLabel = String(formatMowingBlockReason(reasonCode)).trim();
+    const reasonDetail = String(
+      predictiveAttrs.reason
+      || predictiveAttrs.summary
+      || attrs.mowing_block_reason_label
+      || reasonLabel,
     ).trim();
     const cooldownRemainingMinutes = asNumber(attrs.mowing_cooldown_remaining_minutes);
     const postApplicationActive = attrs.mowing_post_application_active === true;
     const detail = [
+      reasonDetail,
       cooldownRemainingMinutes !== null && cooldownRemainingMinutes > 0 ? `Encore ${formatDurationHuman(cooldownRemainingMinutes)}` : "",
     ].filter(Boolean).join(" · ");
     let tone = "neutral";
@@ -6731,6 +6781,7 @@ class GazonIntelligentCard extends HTMLElement {
       blocked,
       reasonCode,
       reasonLabel,
+      reasonDetail,
       cooldownRemainingMinutes,
       postApplicationActive,
       detail,
@@ -6764,8 +6815,19 @@ class GazonIntelligentCard extends HTMLElement {
     const displaySummary = isBlocked
       ? (isPostApplication ? "Arrosage post-produit bloqué" : "Irrigation bloquée")
       : (reasonSummary || summary);
+    const normalizedBlockedAction = String(nextActionDisplay || nextAction || "").trim().toLowerCase();
+    const blockedFallbackAction = publicState === "apres_pluie"
+      ? "Attendre après la pluie"
+      : blockReasonLabel
+        ? `Attendre: ${blockReasonLabel}`
+        : "Attendre des conditions favorables";
     const displayNextAction = isBlocked
-      ? blockReasonLabel || nextActionDisplay || nextAction || "Attendre la fin du bloc"
+      ? (
+          !normalizedBlockedAction
+          || normalizedBlockedAction === "attendre la fin du bloc"
+            ? blockedFallbackAction
+            : (nextActionDisplay || nextAction)
+        )
       : nextActionDisplay || nextAction || "";
     let tone = statusTone(status);
     if (isPostApplication) {
@@ -7222,12 +7284,12 @@ class GazonIntelligentCard extends HTMLElement {
         || sensorState
         || "",
       ).trim();
-      const detail = String(attrs.reason || attrs.summary || "").trim();
+      const detail = compactDecisionText(String(attrs.reason || attrs.summary || "").trim(), { maxLength: 132 });
       const blockReason = String(attrs.block_reason || attrs.reason || "").trim().toLowerCase();
       const tone = actionPossible === true
         ? "success"
-        : (blockReason.includes("blo") || blockReason.includes("interd") || blockReason.includes("attend"))
-          ? "warning"
+        : blockReason
+          ? (blockReason.startsWith("phase_") ? "danger" : "warning")
           : "neutral";
       if (label) {
         return {
@@ -7362,14 +7424,14 @@ class GazonIntelligentCard extends HTMLElement {
     if (nextActionDate || windowLabel || nextWindowState) {
       return {
         label: nextActionDate || windowLabel || nextWindowLabel,
-        detail: windowState.displayNextAction || nextWindowSummary || windowState.summary,
+        detail: compactDecisionText(windowState.displayNextAction || nextWindowSummary || windowState.summary, { maxLength: 120 }),
         tone: windowState.tone,
         value: nextActionDate || windowLabel || nextWindowState,
       };
     }
     return {
       label: windowState.statusLabel || "À définir",
-      detail: windowState.displaySummary || windowState.summary || "Aucune fenêtre d'arrosage calculée",
+      detail: compactDecisionText(windowState.displaySummary || windowState.summary || "Aucune fenêtre d'arrosage calculée", { maxLength: 120 }),
       tone: windowState.tone,
       value: null,
     };
@@ -7760,6 +7822,8 @@ class GazonIntelligentCard extends HTMLElement {
     const lastWatering = this._lastWateringState();
     const nextWatering = this._nextWateringState();
     const nextMowing = this._nextMowingState();
+    const nextMowingEntity = this._entity("entity_prochaine_tonte");
+    const nextMowingBlockReason = String(nextMowingEntity?.attributes?.block_reason || "").trim().toLowerCase();
     const height = this._entity("entity_hauteur");
     const heightValue = height ? formatCm(height.state) : "Non disponible";
     const heightSecondary =
@@ -7784,6 +7848,10 @@ class GazonIntelligentCard extends HTMLElement {
       tonteAutorisee === "off" ||
       !isEmpty(phase) ||
       !isEmpty(subPhase);
+    const strongMowingFocus =
+      nextMowingBlockReason.startsWith("phase_")
+      || computeTonteTone(tonte) === "danger"
+      || computeTonteTone(tonte) === "critical";
     const configFocus =
       switchState.tone !== "success" ||
       ["bloque", "en_attente", "non_autorise"].includes(afterApplicationInfo.kind) ||
@@ -7916,7 +7984,15 @@ class GazonIntelligentCard extends HTMLElement {
 
     pushGroup(priorityGroup);
 
-    if (wateringFocus) {
+    if (strongMowingFocus) {
+      pushGroup(mowingGroup);
+      if (facts.length < 4) {
+        pushGroup(waterGroup);
+      }
+      if (facts.length < 4) {
+        pushGroup(configGroup);
+      }
+    } else if (wateringFocus) {
       pushGroup(waterGroup);
       if (facts.length < 4) {
         pushGroup(mowingGroup);
@@ -8055,9 +8131,13 @@ class GazonIntelligentCard extends HTMLElement {
     const wateringCause = irrigationSignal.wateringCause || windowState.wateringCause || this._inferWateringCause({ typeArrosage: this._entityState("entity_type_arrosage", null) });
     const tonteAutorisee = this._entityState("entity_tonte_autorisee", null);
     const tonteEntity = this._entity("entity_tonte");
+    const prochaineTonteEntity = this._entity("entity_prochaine_tonte");
     const tonteAttrs = tonteEntity?.attributes || {};
+    const nextMowingBlockReason = String(prochaineTonteEntity?.attributes?.block_reason || "").trim().toLowerCase();
     const tonteReason = String(
-      tonteEntity?.attributes?.raison_blocage_tonte
+      prochaineTonteEntity?.attributes?.reason
+      || prochaineTonteEntity?.attributes?.summary
+      || tonteEntity?.attributes?.raison_blocage_tonte
       || tonteEntity?.attributes?.summary
       || "",
     ).trim();
@@ -8070,11 +8150,15 @@ class GazonIntelligentCard extends HTMLElement {
     ).trim();
     const tonteStatusLabel = formatStatusLabel(tonte);
     const tonteTone = computeTonteTone(tonte);
+    const strongMowingBlock =
+      nextMowingBlockReason.startsWith("phase_")
+      || tonteTone === "danger"
+      || tonteTone === "critical";
     const interventionSignal = this._entity("entity_signal_intervention");
     const actionTone = this._actionTone();
 
     let title = "Vue d’ensemble";
-    let hint = conseil || planState.summary || windowState.summary || "Les paramètres restent cohérents.";
+    let hint = compactDecisionText(conseil || planState.summary || windowState.summary || "Les paramètres restent cohérents.", { maxLength: 150 });
     let tone = "neutral";
     let icon = "mdi:check-circle-outline";
     const mowingBusy = assistant.status === "blocked" && assistant.action === "tonte" && (
@@ -8089,39 +8173,44 @@ class GazonIntelligentCard extends HTMLElement {
       ? Boolean(tonteAttrs.action_possible)
       : tonteAutorisee === "on" && mowerState.ready === true;
 
-    if (wateringCause === "post_application" && irrigationSignal.reasonKind === "blocked") {
+    if (strongMowingBlock) {
+      title = tonteStatusLabel || "Tonte interdite";
+      hint = compactDecisionText(tonteReason || avoid || "Tonte déconseillée dans les conditions actuelles.", { maxLength: 150 });
+      tone = tonteTone === "critical" ? "critical" : "danger";
+      icon = "mdi:content-cut";
+    } else if (wateringCause === "post_application" && irrigationSignal.reasonKind === "blocked") {
       title = "Post-produit bloqué";
-      hint = irrigationSignal.summary || windowState.displaySummary || "Un blocage empêche l’arrosage post-produit.";
+      hint = compactDecisionText(irrigationSignal.summary || windowState.displaySummary || "Un blocage empêche l’arrosage post-produit.", { maxLength: 150 });
       tone = "danger";
       icon = "mdi:cancel";
     } else if (wateringCause === "post_application" && irrigationSignal.reasonKind === "waiting") {
       title = "Post-produit en attente";
-      hint = irrigationSignal.summary || windowState.displaySummary || "Le post-arrosage reste en attente.";
+      hint = compactDecisionText(irrigationSignal.summary || windowState.displaySummary || "Le post-arrosage reste en attente.", { maxLength: 150 });
       tone = "warning";
       icon = "mdi:clock-outline";
     } else if (wateringCause === "post_application" && ["post_application", "hydric_need"].includes(irrigationSignal.reasonKind)) {
       title = irrigationSignal.actionLabel || "Post-produit prêt";
-      hint = irrigationSignal.summary || windowState.displaySummary || "Le post-arrosage est prêt.";
+      hint = compactDecisionText(irrigationSignal.summary || windowState.displaySummary || "Le post-arrosage est prêt.", { maxLength: 150 });
       tone = "success";
       icon = "mdi:sprinkler";
     } else if (assistant.entity && assistant.status === "action_required") {
       title = assistant.summary || assistant.actionLabel;
-      hint = conseil || assistant.reason || irrigationSignal.summary || planState.summary || windowState.displaySummary;
+      hint = compactDecisionText(conseil || assistant.reason || irrigationSignal.summary || planState.summary || windowState.displaySummary, { maxLength: 150 });
       tone = assistant.tone || "success";
       icon = assistant.action.includes("arros") ? "mdi:sprinkler" : assistant.action.includes("tonte") ? "mdi:content-cut" : "mdi:account-tie-hat-outline";
     } else if (irrigationSignal.reasonKind === "blocked") {
       title = irrigationSignal.actionLabel || "Irrigation bloquée";
-      hint = irrigationSignal.summary || windowState.displaySummary || "Un blocage empêche l’arrosage.";
+      hint = compactDecisionText(irrigationSignal.summary || windowState.displaySummary || "Un blocage empêche l’arrosage.", { maxLength: 150 });
       tone = "danger";
       icon = "mdi:cancel";
     } else if (irrigationSignal.reasonKind === "waiting" && objective > 0) {
       title = irrigationSignal.actionLabel || "Attendre";
-      hint = irrigationSignal.summary || windowState.displaySummary || "Le prochain créneau n’est pas encore ouvert.";
+      hint = compactDecisionText(irrigationSignal.summary || windowState.displaySummary || "Le prochain créneau n’est pas encore ouvert.", { maxLength: 150 });
       tone = "warning";
       icon = "mdi:clock-outline";
     } else if (windowState.isAwaiting && objective > 0) {
       title = "Irrigation prévue demain matin";
-      hint = `${windowState.nextAction || "Attendre le créneau prévu."}${planState.summary ? ` · ${planState.summary}` : ""}`;
+      hint = compactDecisionText(`${windowState.nextAction || "Attendre le créneau prévu."}${planState.summary ? ` · ${planState.summary}` : ""}`, { maxLength: 150 });
       tone = "warning";
       icon = "mdi:clock-outline";
     } else if (windowState.showManualAction && objective > 0) {
@@ -8136,22 +8225,22 @@ class GazonIntelligentCard extends HTMLElement {
       icon = "mdi:cancel";
     } else if (mowingBusy) {
       title = "Tonte en cours";
-      hint = assistant.reason || tonteReason || "La tondeuse est déjà en train de tondre.";
+      hint = compactDecisionText(assistant.reason || tonteReason || "La tondeuse est déjà en train de tondre.", { maxLength: 150 });
       tone = "warning";
       icon = "mdi:content-cut";
     } else if (assistant.status === "blocked" && assistant.action === "tonte") {
       title = assistant.reason || assistant.summary || "Tonte différée";
-      hint = assistant.reason || tonteReason || conseil || planState.summary || windowState.displaySummary;
+      hint = compactDecisionText(assistant.reason || tonteReason || conseil || planState.summary || windowState.displaySummary, { maxLength: 150 });
       tone = assistant.tone === "danger" ? "danger" : "warning";
       icon = "mdi:content-cut";
     } else if (mowingActionPossible) {
       title = "Tonte possible";
-      hint = assistant.reason || tonteReason || conseil || planState.summary || windowState.displaySummary;
+      hint = compactDecisionText(assistant.reason || tonteReason || conseil || planState.summary || windowState.displaySummary, { maxLength: 150 });
       tone = "success";
       icon = "mdi:content-cut";
     } else if (tonteTone === "danger" || tonteTone === "critical") {
       title = tonteStatusLabel || "Tonte interdite";
-      hint = tonteReason || avoid || "Tonte déconseillée dans les conditions actuelles.";
+      hint = compactDecisionText(tonteReason || avoid || "Tonte déconseillée dans les conditions actuelles.", { maxLength: 150 });
       tone = tonteTone === "critical" ? "critical" : "danger";
       icon = "mdi:content-cut";
     } else if (tonteTone === "warning") {
@@ -8159,10 +8248,10 @@ class GazonIntelligentCard extends HTMLElement {
       const mowerHint = mowerState.present && mowerState.nextDeparture
         ? `Prochain départ programmé le ${mowerState.nextDeparture}.`
         : "";
-      hint = [
+      hint = compactDecisionText([
         tonteReason,
         mowerHint || (tonteNextMowing ? `Prochaine tonte estimée le ${tonteNextMowing}.` : ""),
-      ].filter(Boolean).join(" ") || conseil || "Attendre une meilleure fenêtre de tonte.";
+      ].filter(Boolean).join(" ") || conseil || "Attendre une meilleure fenêtre de tonte.", { maxLength: 150 });
       tone = "warning";
       icon = "mdi:content-cut";
     } else if (computeRisqueTone(risk) === "danger" || computeRisqueTone(risk) === "critical") {
@@ -11286,7 +11375,7 @@ function renderOverviewTab(card) {
             <div class="tab-panel__hero-summary">Vue prioritaire</div>
             ${renderStatusPill(proposal.title, overviewTone, overviewIcon, `tab-panel__status tab-panel__status--${overviewTone}`)}
           </div>
-          <div class="tab-panel__hero-next">${escapeHtml(proposal.hint || windowState.displaySummary || windowState.summary || planState.summary || "Vue d’ensemble de la carte.")}</div>
+          <div class="tab-panel__hero-next">${escapeHtml(proposal.hint || "Vue d’ensemble de la carte.")}</div>
           <div class="tab-panel__hero-hint">${escapeHtml("Le résumé remonte d’abord la décision utile, puis les repères importants.")}</div>
         </div>
 
@@ -11600,8 +11689,8 @@ function renderMowingTab(card) {
   const mowingDecisionSummary = actionPossible
     ? "Tonte lançable."
     : mowingBlock.blocked
-      ? mowingBlock.reasonLabel || mowingBlock.detail || mowerState.reason || "Tonte bloquée par conditions."
-    : mowerState.present
+      ? compactDecisionText(mowingBlock.reasonDetail || mowingBlock.detail || mowerState.reason || "Tonte bloquée par conditions.", { maxLength: 132 })
+      : mowerState.present
       ? mowerState.reason || "Machine non prête pour une nouvelle tonte."
       : "Tondeuse non disponible.";
   const mowingDecisionPills = [
@@ -11640,7 +11729,7 @@ function renderMowingTab(card) {
     {
       label: "Blocage",
       value: mowingBlock.blocked ? mowingBlock.reasonLabel || "Actif" : "Aucun",
-      note: mowingBlock.blocked ? mowingBlock.detail || "" : "Aucun frein hydrique ou post-produit.",
+      note: mowingBlock.blocked ? compactDecisionText(mowingBlock.reasonDetail || mowingBlock.detail || "", { maxLength: 118 }) : "Aucun frein hydrique ou post-produit.",
       tone: mowingBlock.blocked ? "danger" : "success",
     },
     {
@@ -11652,7 +11741,7 @@ function renderMowingTab(card) {
     {
       label: "Prochaine tonte",
       value: nextMowing.label,
-      note: nextMowing.detail || "Aucune date de reprise calculée.",
+      note: compactDecisionText(nextMowing.detail || "Aucune date de reprise calculée.", { maxLength: 118 }),
       tone: nextMowing.tone,
     },
     {

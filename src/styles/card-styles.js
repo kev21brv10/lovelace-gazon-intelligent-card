@@ -45,7 +45,7 @@ export const CARD_STYLES = String.raw`
           --gi-action-padding-inline: 18px;
           --gi-action-padding-inline-end: 22px;
           --gi-action-padding-block: 15px;
-          --gi-action-min-height: 84px;
+          --gi-action-min-height: 78px;
           --gi-action-gap: 12px;
           --gi-action-radius: 22px;
           --gi-action-icon-size: 26px;
@@ -54,8 +54,8 @@ export const CARD_STYLES = String.raw`
           --gi-decision-grid-gap: 10px;
           --gi-tiles-gap: 6px;
           --gi-card-core-gap: 12px;
-          --gi-card-core-padding: 15px 16px;
-          --gi-card-core-min-height: 88px;
+          --gi-card-core-padding: 13px 15px;
+          --gi-card-core-min-height: 82px;
           --gi-card-core-radius: 24px;
           --gi-card-core-icon-size: 22px;
           --gi-card-core-icon-glyph-size: 13px;
@@ -319,14 +319,15 @@ export const CARD_STYLES = String.raw`
           border-color: var(--gi-surface-border-strong);
           background:
             radial-gradient(circle at 16% 18%, color-mix(in srgb, var(--gi-tab-companion) 18%, transparent) 0%, transparent 24%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 26%, transparent) 0%, transparent 100%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 34%, transparent) 0%, transparent 100%),
             color-mix(in srgb, var(--secondary-background-color) 96%, white);
           box-shadow:
-            0 10px 26px rgba(0, 0, 0, 0.12),
-            0 0 0 1px color-mix(in srgb, var(--gi-tab-glow-color) 16%, transparent),
-            0 0 28px color-mix(in srgb, var(--gi-tab-glow-color) 12%, transparent),
+            0 12px 30px rgba(0, 0, 0, 0.16),
+            0 0 0 1px color-mix(in srgb, var(--gi-tab-glow-color) 22%, transparent),
+            0 0 34px color-mix(in srgb, var(--gi-tab-glow-color) 16%, transparent),
             inset 0 1px 0 rgba(255, 255, 255, 0.06);
-          transform: translateY(-1px);
+          transform: translateY(-1px) scale(1.01);
+          font-weight: 700;
         }
 
         .gi-tab--active::before,
@@ -1266,8 +1267,9 @@ export const CARD_STYLES = String.raw`
 
         .tab-panel__metric-head {
           display: flex;
-          align-items: baseline;
+          align-items: flex-start;
           justify-content: space-between;
+          flex-wrap: wrap;
           gap: 12px;
           min-width: 0;
         }
@@ -1288,7 +1290,10 @@ export const CARD_STYLES = String.raw`
           line-height: 1.18;
           color: var(--primary-text-color);
           text-align: right;
-          flex: 0 0 auto;
+          flex: 0 1 auto;
+          min-width: 0;
+          white-space: normal;
+          overflow-wrap: anywhere;
         }
 
         .tab-panel__metric-note {
@@ -1367,7 +1372,7 @@ export const CARD_STYLES = String.raw`
           display: grid;
           grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
           gap: 12px;
-          align-items: stretch;
+          align-items: start;
         }
 
         .tab-panel__products-layout > .tab-panel__section {
@@ -1461,8 +1466,9 @@ export const CARD_STYLES = String.raw`
           min-height: 58px;
         }
 
-        .tab-panel__section--application-history {
-          min-height: 100%;
+        .tab-panel__section--application-history,
+        .tab-panel__section--catalogue-reference {
+          min-height: 0;
         }
 
         .tab-panel--products .tab-panel__card-slider--catalogue .tab-panel__card-slider-track {
@@ -1981,8 +1987,9 @@ export const CARD_STYLES = String.raw`
 
         .decision-plan__header {
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: space-between;
+          flex-wrap: wrap;
           gap: 10px;
           min-width: 0;
         }
@@ -1990,7 +1997,11 @@ export const CARD_STYLES = String.raw`
         .decision-plan__meta {
           font-size: var(--gi-font-xs);
           color: var(--secondary-text-color);
-          white-space: nowrap;
+          white-space: normal;
+          overflow-wrap: anywhere;
+          min-width: 0;
+          flex: 1 1 320px;
+          text-align: left;
         }
 
         .decision-plan__summary {
@@ -2802,12 +2813,12 @@ export const CARD_STYLES = String.raw`
         .gi-card-core--stat,
         .gi-card-core--tile,
         .gi-card-core--metric {
-          min-height: 88px;
+          min-height: 80px;
         }
 
         .gi-card-core--metric {
-          min-height: 82px;
-          padding: 13px 14px;
+          min-height: 76px;
+          padding: 12px 13px;
         }
 
         .gi-card-core--interactive {
@@ -2916,6 +2927,7 @@ export const CARD_STYLES = String.raw`
           min-width: 0;
           overflow-wrap: break-word;
           word-break: normal;
+          hyphens: auto;
           font-size: var(--gi-font-md);
           line-height: 1.18;
           display: -webkit-box;
@@ -2975,7 +2987,7 @@ export const CARD_STYLES = String.raw`
           min-height: 1.15em;
           display: -webkit-box;
           -webkit-box-orient: vertical;
-          -webkit-line-clamp: 2;
+          -webkit-line-clamp: 3;
           overflow: hidden;
         }
 

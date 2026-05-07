@@ -20,6 +20,7 @@ import {
   formatWateringCauseLabel,
   formatWateringBlockReason,
   formatWateringTypeLabel,
+  compactDecisionText,
   safeFormatMonthLabel as formatMonthLabel,
   safeRenderIconBox as renderIconBox,
   safeRenderStatusPill as renderStatusPill,
@@ -1337,7 +1338,7 @@ export function renderOverviewTab(card) {
             <div class="tab-panel__hero-summary">Vue prioritaire</div>
             ${renderStatusPill(proposal.title, overviewTone, overviewIcon, `tab-panel__status tab-panel__status--${overviewTone}`)}
           </div>
-          <div class="tab-panel__hero-next">${escapeHtml(proposal.hint || windowState.displaySummary || windowState.summary || planState.summary || "Vue d’ensemble de la carte.")}</div>
+          <div class="tab-panel__hero-next">${escapeHtml(proposal.hint || "Vue d’ensemble de la carte.")}</div>
           <div class="tab-panel__hero-hint">${escapeHtml("Le résumé remonte d’abord la décision utile, puis les repères importants.")}</div>
         </div>
 
@@ -1651,8 +1652,8 @@ export function renderMowingTab(card) {
   const mowingDecisionSummary = actionPossible
     ? "Tonte lançable."
     : mowingBlock.blocked
-      ? mowingBlock.reasonLabel || mowingBlock.detail || mowerState.reason || "Tonte bloquée par conditions."
-    : mowerState.present
+      ? compactDecisionText(mowingBlock.reasonDetail || mowingBlock.detail || mowerState.reason || "Tonte bloquée par conditions.", { maxLength: 132 })
+      : mowerState.present
       ? mowerState.reason || "Machine non prête pour une nouvelle tonte."
       : "Tondeuse non disponible.";
   const mowingDecisionPills = [
@@ -1691,7 +1692,7 @@ export function renderMowingTab(card) {
     {
       label: "Blocage",
       value: mowingBlock.blocked ? mowingBlock.reasonLabel || "Actif" : "Aucun",
-      note: mowingBlock.blocked ? mowingBlock.detail || "" : "Aucun frein hydrique ou post-produit.",
+      note: mowingBlock.blocked ? compactDecisionText(mowingBlock.reasonDetail || mowingBlock.detail || "", { maxLength: 118 }) : "Aucun frein hydrique ou post-produit.",
       tone: mowingBlock.blocked ? "danger" : "success",
     },
     {
@@ -1703,7 +1704,7 @@ export function renderMowingTab(card) {
     {
       label: "Prochaine tonte",
       value: nextMowing.label,
-      note: nextMowing.detail || "Aucune date de reprise calculée.",
+      note: compactDecisionText(nextMowing.detail || "Aucune date de reprise calculée.", { maxLength: 118 }),
       tone: nextMowing.tone,
     },
     {

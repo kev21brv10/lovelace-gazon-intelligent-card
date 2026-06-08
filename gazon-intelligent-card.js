@@ -4275,7 +4275,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.2.4";
+const CARD_VERSION = "0.2.5";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -7786,6 +7786,10 @@ class GazonIntelligentCard extends HTMLElement {
     const hydricBalanceLevel = String(entity?.attributes?.hydric_balance_level || "").trim();
     const reserveActuelle = asNumber(entity?.attributes?.reserve_actuelle_mm);
     const reserveStock = asNumber(entity?.attributes?.reserve_stock_mm);
+    const reserveStockMax = asNumber(entity?.attributes?.reserve_stock_max_mm);
+    const reserveUsefulMax = asNumber(entity?.attributes?.reserve_utile_max_mm ?? entity?.attributes?.reserve_utile_mm);
+    const reserveSurplus = asNumber(entity?.attributes?.reserve_surplus_mm);
+    const depletionMm = asNumber(entity?.attributes?.depletion_mm);
     const depletionRatio = asNumber(entity?.attributes?.depletion_ratio);
     const et0 = asNumber(entity?.attributes?.et0_mm);
     const etc = asNumber(entity?.attributes?.etc_mm);
@@ -7802,6 +7806,10 @@ class GazonIntelligentCard extends HTMLElement {
       hydricBalanceLevel,
       reserveActuelle,
       reserveStock,
+      reserveStockMax,
+      reserveUsefulMax,
+      reserveSurplus,
+      depletionMm,
       depletionRatio,
       et0,
       etc,
@@ -11783,29 +11791,29 @@ function renderWateringTab(card) {
     reserveActuelle: context.reserveActuelle,
     reserveUsefulMax: context.reserveUsefulMax,
   });
-  const reserveTotalValue = context.reserveStock !== null
-    ? (context.reserveStockMax !== null && context.reserveStockMax > 0
+  const reserveTotalValue = context.reserveStock != null
+    ? (context.reserveStockMax != null && context.reserveStockMax > 0
         ? `${formatNumber(context.reserveStock, 1)} / ${formatNumber(context.reserveStockMax, 1)} mm`
         : `${formatNumber(context.reserveStock, 1)} mm`)
     : "Non disponible";
-  const reserveUsefulValue = context.reserveActuelle !== null
-    ? (context.reserveUsefulMax !== null && context.reserveUsefulMax > 0
+  const reserveUsefulValue = context.reserveActuelle != null
+    ? (context.reserveUsefulMax != null && context.reserveUsefulMax > 0
         ? `${formatNumber(context.reserveActuelle, 1)} / ${formatNumber(context.reserveUsefulMax, 1)} mm`
         : `${formatNumber(context.reserveActuelle, 1)} mm`)
     : "Non disponible";
-  const surplusHydriqueValue = context.reserveSurplus !== null
+  const surplusHydriqueValue = context.reserveSurplus != null
     ? `${formatNumber(context.reserveSurplus, 1)} mm`
-    : "Non disponible";
-  const depletionUsefulValue = context.depletionRatio !== null
+    : "—";
+  const depletionUsefulValue = context.depletionRatio != null
     ? `${formatNumber(Math.max(0, context.depletionRatio) * 100, 0)} %`
     : "Non disponible";
   const hydricUsefulWidth = (
-    context.reserveStockMax !== null && context.reserveStockMax > 0 && context.reserveActuelle !== null
+    context.reserveStockMax != null && context.reserveStockMax > 0 && context.reserveActuelle != null
       ? Math.max(0, Math.min(100, (context.reserveActuelle / context.reserveStockMax) * 100))
       : 0
   );
   const hydricSurplusWidth = (
-    context.reserveStockMax !== null && context.reserveStockMax > 0 && context.reserveSurplus !== null
+    context.reserveStockMax != null && context.reserveStockMax > 0 && context.reserveSurplus != null
       ? Math.max(0, Math.min(100, (context.reserveSurplus / context.reserveStockMax) * 100))
       : 0
   );
@@ -11823,15 +11831,15 @@ function renderWateringTab(card) {
       label: "Surplus",
       value: surplusHydriqueValue,
       secondary: "Au-dessus de la réserve utile",
-      tone: context.reserveSurplus !== null && context.reserveSurplus > 0 ? "success" : "neutral",
+      tone: context.reserveSurplus != null && context.reserveSurplus > 0 ? "success" : "neutral",
       icon: "mdi:water-plus",
       entityKey: "entity_reserve_actuelle",
     },
     {
       label: "Déplétion",
       value: depletionUsefulValue,
-      secondary: context.depletionMm !== null ? `${formatNumber(context.depletionMm, 1)} mm consommés` : "Part consommée de la réserve utile",
-      tone: context.depletionRatio !== null && context.depletionRatio > 0 ? "warning" : "success",
+      secondary: context.depletionMm != null ? `${formatNumber(context.depletionMm, 1)} mm consommés` : "Part consommée de la réserve utile",
+      tone: context.depletionRatio != null && context.depletionRatio > 0 ? "warning" : "success",
       icon: "mdi:water-minus",
       entityKey: "entity_reserve_actuelle",
     },

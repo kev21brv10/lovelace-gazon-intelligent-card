@@ -2205,6 +2205,10 @@ class GazonIntelligentCard extends HTMLElement {
     const hydricBalanceLevel = String(entity?.attributes?.hydric_balance_level || "").trim();
     const reserveActuelle = asNumber(entity?.attributes?.reserve_actuelle_mm);
     const reserveStock = asNumber(entity?.attributes?.reserve_stock_mm);
+    const reserveStockMax = asNumber(entity?.attributes?.reserve_stock_max_mm);
+    const reserveUsefulMax = asNumber(entity?.attributes?.reserve_utile_max_mm ?? entity?.attributes?.reserve_utile_mm);
+    const reserveSurplus = asNumber(entity?.attributes?.reserve_surplus_mm);
+    const depletionMm = asNumber(entity?.attributes?.depletion_mm);
     const depletionRatio = asNumber(entity?.attributes?.depletion_ratio);
     const et0 = asNumber(entity?.attributes?.et0_mm);
     const etc = asNumber(entity?.attributes?.etc_mm);
@@ -2221,6 +2225,10 @@ class GazonIntelligentCard extends HTMLElement {
       hydricBalanceLevel,
       reserveActuelle,
       reserveStock,
+      reserveStockMax,
+      reserveUsefulMax,
+      reserveSurplus,
+      depletionMm,
       depletionRatio,
       et0,
       etc,

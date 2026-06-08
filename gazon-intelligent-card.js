@@ -4275,7 +4275,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.2.2";
+const CARD_VERSION = "0.2.3";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -4597,6 +4597,7 @@ const RENDER_SIGNATURE_ATTRS = {
     "hydric_balance_level",
     "hydric_strategy",
     "hydric_state",
+    "reserve_utile_mm",
     "reserve_actuelle_mm",
     "reserve_stock_mm",
     "reserve_stock_max_mm",
@@ -7958,7 +7959,7 @@ class GazonIntelligentCard extends HTMLElement {
     const reserveActuelle = asNumber(entity?.attributes?.reserve_actuelle_mm);
     const reserveStock = asNumber(entity?.attributes?.reserve_stock_mm);
     const reserveStockMax = asNumber(entity?.attributes?.reserve_stock_max_mm);
-    const reserveUsefulMax = asNumber(entity?.attributes?.reserve_utile_max_mm);
+    const reserveUsefulMax = asNumber(entity?.attributes?.reserve_utile_max_mm ?? entity?.attributes?.reserve_utile_mm);
     const reserveSurplus = asNumber(entity?.attributes?.reserve_surplus_mm);
     const depletionMm = asNumber(entity?.attributes?.depletion_mm);
     const depletionRatio = asNumber(entity?.attributes?.depletion_ratio);

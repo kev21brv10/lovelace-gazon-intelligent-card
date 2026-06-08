@@ -278,15 +278,6 @@ class GazonIntelligentCard extends HTMLElement {
     return isEmpty(this._config?.[entityKey]) ? null : this._config[entityKey];
   }
 
-  _serviceTargetEntityId() {
-    return (
-      this._entityId("entity_derniere_application") ||
-      this._entityId("entity_produit_intervention") ||
-      this._entityId("entity_catalogue_produits") ||
-      null
-    );
-  }
-
   _defaultActionEntityId() {
     for (const key of ["entity_weather", ...ENTITY_KEYS.map((entry) => entry.key)]) {
       const entityId = this._entityId(key);

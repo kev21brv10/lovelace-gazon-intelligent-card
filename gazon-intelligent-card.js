@@ -4275,11 +4275,10 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.2.3";
+const CARD_VERSION = "0.2.4";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
-  entity_base: "gazon_intelligent",
   show_icons: true,
   show_header: true,
   show_background: true,
@@ -4500,11 +4499,11 @@ const SECTION_FIELDS = {
 };
 
 const SECTION_ACCENTS = {
-  overview: "#8cab60",
-  watering: "#5498a3",
-  mowing: "#99af58",
-  products: "#a88a57",
-  details: "#6e95ad",
+  overview: "#58c27d",
+  watering: "#31b8d4",
+  mowing: "#97c84b",
+  products: "#58c27d",
+  details: "#7b8da0",
 };
 
 const LEGACY_ENTITY_KEYS = [
@@ -4597,7 +4596,6 @@ const RENDER_SIGNATURE_ATTRS = {
     "hydric_balance_level",
     "hydric_strategy",
     "hydric_state",
-    "reserve_utile_mm",
     "reserve_actuelle_mm",
     "reserve_stock_mm",
     "reserve_stock_max_mm",
@@ -4616,8 +4614,8 @@ const RENDER_SIGNATURE_ATTRS = {
   ],
   entity_arrosage_recommande: ["objectif_mm", "type_arrosage", "watering_cause", "watering_blocked_by_mower", "watering_block_reason_code", "watering_block_reason_label"],
   entity_arrosage_apres_application_autorise: ["application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm", "application_post_watering_status"],
-  entity_tonte: ["tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_prete", "tondeuse_batterie", "tondeuse_prochain_depart_display", "tondeuse_hauteur_coupe_mm", "tondeuse_erreur", "tondeuse_erreur_code", "mower_error", "mower_activity_code", "mower_coordination_enabled", "mower_coordination_ready", "mower_presence_state", "mower_presence_label", "mower_operation_state", "mower_operation_label", "mower_is_docked", "mower_is_outside", "mower_is_safe_for_watering", "mower_reason_code", "mower_reason_label", "mowing_blocked_by_watering", "mowing_block_reason_code", "mowing_block_reason_label", "mowing_cooldown_remaining_minutes", "mowing_post_application_active", "gazon_permet_tonte", "machine_permet_tonte", "action_possible"],
-  entity_tonte_autorisee: ["phase_active", "tonte_statut", "niveau_action", "fenetre_optimale", "risque_gazon", "hauteur_tonte_recommandee_cm", "hauteur_tonte_min_cm", "hauteur_tonte_max_cm", "tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_prete", "tondeuse_batterie", "tondeuse_prochain_depart_display", "tondeuse_hauteur_coupe_mm", "tondeuse_erreur", "tondeuse_erreur_code", "mower_error", "mower_activity_code", "mower_coordination_enabled", "mower_coordination_ready", "mower_presence_state", "mower_presence_label", "mower_operation_state", "mower_operation_label", "mower_is_docked", "mower_is_outside", "mower_is_safe_for_watering", "mower_reason_code", "mower_reason_label", "mowing_blocked_by_watering", "mowing_block_reason_code", "mowing_block_reason_label", "mowing_cooldown_remaining_minutes", "mowing_post_application_active", "gazon_permet_tonte", "machine_permet_tonte", "action_possible"],
+  entity_tonte: ["tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_prete", "tondeuse_batterie", "tondeuse_prochain_depart_display", "tondeuse_hauteur_coupe_mm", "mower_coordination_enabled", "mower_coordination_ready", "mower_presence_state", "mower_presence_label", "mower_operation_state", "mower_operation_label", "mower_is_docked", "mower_is_outside", "mower_is_safe_for_watering", "mower_reason_code", "mower_reason_label", "mowing_blocked_by_watering", "mowing_block_reason_code", "mowing_block_reason_label", "mowing_cooldown_remaining_minutes", "mowing_post_application_active", "gazon_permet_tonte", "machine_permet_tonte", "action_possible"],
+  entity_tonte_autorisee: ["phase_active", "tonte_statut", "niveau_action", "fenetre_optimale", "risque_gazon", "hauteur_tonte_recommandee_cm", "hauteur_tonte_min_cm", "hauteur_tonte_max_cm", "tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_prete", "tondeuse_batterie", "tondeuse_prochain_depart_display", "tondeuse_hauteur_coupe_mm", "mower_coordination_enabled", "mower_coordination_ready", "mower_presence_state", "mower_presence_label", "mower_operation_state", "mower_operation_label", "mower_is_docked", "mower_is_outside", "mower_is_safe_for_watering", "mower_reason_code", "mower_reason_label", "mowing_blocked_by_watering", "mowing_block_reason_code", "mowing_block_reason_label", "mowing_cooldown_remaining_minutes", "mowing_post_application_active", "gazon_permet_tonte", "machine_permet_tonte", "action_possible"],
   entity_niveau: ["niveau_action_hydrique"],
   entity_sous_phase: ["sous_phase_progression", "sous_phase_detail"],
   entity_phase: ["phase_dominante_source", "pluie_demain_source"],
@@ -4635,12 +4633,12 @@ const RENDER_SIGNATURE_ATTRS = {
 };
 
 const STATUS_COLORS = {
-  danger: "#cf7684",
-  warning: "#d0a255",
-  success: "#8cab5d",
-  neutral: "#8e998f",
-  accent: "#589ca7",
-  critical: "#c56c7d",
+  danger: "#f15f69",
+  warning: "#f3ba4b",
+  success: "#4fc38c",
+  neutral: "#7a8c9d",
+  accent: "#49cfd0",
+  critical: "#ff4d78",
 };
 
 const STATUS_LABELS = {
@@ -4684,20 +4682,6 @@ const STATUS_LABELS = {
   normal: "Normal",
   enracinement: "Enracinement",
   manuel_frequent: "Manuel fréquent",
-  idle: "Au repos",
-  docked: "À la station",
-  mowing: "Tonte en cours",
-  paused: "En pause",
-  returning: "Retour station",
-  error: "En erreur",
-  starting: "Démarrage",
-  edgecut: "Bordure en cours",
-  zoning: "Changement de zone",
-  searching_zone: "Recherche de zone",
-  escaped_digital_fence: "Sortie du périmètre",
-  rain_delayed: "Pause pluie",
-  charging: "En charge",
-  unknown: "Inconnu",
 };
 
 const WEATHER_LABELS = {
@@ -4967,39 +4951,6 @@ function sectionToAccent(section) {
   );
 }
 
-
-const DEFAULT_ENTITY_BASE = String(DEFAULT_CONFIG.entity_base || "gazon_intelligent").trim() || "gazon_intelligent";
-
-const DERIVED_ENTITY_RULES = Object.fromEntries(
-  Object.entries(DEFAULT_CONFIG)
-    .filter(([key, value]) => key.startsWith("entity_") && typeof value === "string" && value.includes("."))
-    .map(([key, value]) => {
-      const [domain, objectId] = String(value).split(".");
-      if (!domain || !objectId || domain === "weather" || !objectId.startsWith(`${DEFAULT_ENTITY_BASE}_`)) {
-        return null;
-      }
-      return [key, { domain, suffix: objectId.slice(DEFAULT_ENTITY_BASE.length + 1) }];
-    })
-    .filter(Boolean),
-);
-
-function normalizeEntityBase(value) {
-  const raw = String(value || "").trim();
-  const fallback = DEFAULT_ENTITY_BASE;
-  if (!raw) {
-    return fallback;
-  }
-  let objectId = raw.includes(".") ? raw.split(".").slice(1).join(".") : raw;
-  for (const { suffix } of Object.values(DERIVED_ENTITY_RULES)) {
-    const marker = `_${suffix}`;
-    if (objectId.endsWith(marker)) {
-      objectId = objectId.slice(0, -marker.length);
-      break;
-    }
-  }
-  return objectId || fallback;
-}
-
 function splitServiceName(service) {
   const parts = String(service ?? "").split(".");
   if (parts.length !== 2) {
@@ -5013,23 +4964,7 @@ function mergeConfig(base, update) {
 }
 
 function normalizeConfig(config) {
-  const rawConfig = config && typeof config === "object" ? config : {};
-  const normalized = { ...DEFAULT_CONFIG, ...rawConfig };
-  const entityBase = normalizeEntityBase(normalized.entity_base || normalized.entity_assistant);
-  normalized.entity_base = entityBase;
-  Object.entries(DERIVED_ENTITY_RULES).forEach(([key, rule]) => {
-    const explicitValue = rawConfig[key];
-    if (isEmpty(explicitValue)) {
-      normalized[key] = `${rule.domain}.${entityBase}_${rule.suffix}`;
-      return;
-    }
-    const explicitText = String(explicitValue).trim();
-    const isDerivableAlias = explicitText.includes(".")
-      ? explicitText.split(".").slice(1).join(".").endsWith(`_${rule.suffix}`)
-      : explicitText.endsWith(`_${rule.suffix}`);
-    normalized[key] = isDerivableAlias ? `${rule.domain}.${entityBase}_${rule.suffix}` : explicitText;
-  });
-  return normalized;
+  return { ...config };
 }
 
 function domainMatches(entity, acceptedDomains) {
@@ -5182,16 +5117,6 @@ const MOWER_REASON_LABELS = {
   mowing: "Tondeuse en cours de tonte",
   mower_returning: "Tondeuse en retour station",
   returning: "Tondeuse en retour station",
-  docked: "Tondeuse à la station",
-  idle: "Tondeuse au repos",
-  paused: "Tondeuse en pause",
-  starting: "Tondeuse en démarrage",
-  edgecut: "Tonte de bordure en cours",
-  zoning: "Changement de zone en cours",
-  searching_zone: "Recherche de zone",
-  escaped_digital_fence: "Tondeuse sortie du périmètre",
-  rain_delayed: "Pause pluie active",
-  charging: "Tondeuse en charge",
   mower_not_stowed: "Tondeuse non rangée",
   not_stowed: "Tondeuse non rangée",
   mower_unreliable: "Coordination tondeuse indisponible",
@@ -5204,44 +5129,6 @@ const MOWER_REASON_LABELS = {
   mower_configured_missing: "Tondeuse configurée introuvable",
   error: "Tondeuse en erreur",
   disconnected: "Tondeuse indisponible",
-  unknown: "État tondeuse inconnu",
-  unavailable: "Tondeuse indisponible",
-  no_error: "Aucune erreur",
-  trapped: "Tondeuse coincée",
-  lifted: "Tondeuse soulevée",
-  wire_missing: "Fil périmétrique manquant",
-  outside_wire: "Tondeuse hors périmètre",
-  rain_delay: "Pause pluie active",
-  close_door_to_mow: "Fermer le capot pour tondre",
-  close_door_to_go_home: "Fermer le capot pour retour station",
-  blade_motor_blocked: "Moteur de lame bloqué",
-  wheel_motor_blocked: "Moteur de roue bloqué",
-  trapped_timeout: "Tondeuse coincée trop longtemps",
-  upside_down: "Tondeuse retournée",
-  battery_low: "Batterie faible",
-  reverse_wire: "Fil périmétrique inversé",
-  charge_error: "Erreur de charge",
-  timeout_finding_home: "Temps dépassé pour trouver la base",
-  locked: "Tondeuse verrouillée",
-  battery_temperature_error: "Température batterie anormale",
-  battery_trunk_open_timeout: "Capot batterie ouvert trop longtemps",
-  wire_sync: "Erreur de synchronisation du fil",
-  charging_station_docking_error: "Erreur d'arrimage à la station",
-  hbi_error: "Erreur HBI",
-  ota_error: "Erreur de mise à jour",
-  map_error: "Erreur de cartographie",
-  excessive_slope: "Pente excessive",
-  unreachable_zone: "Zone inatteignable",
-  unreachable_charging_station: "Station inatteignable",
-  insufficient_sensor_data: "Données capteurs insuffisantes",
-  training_start_disallowed: "Démarrage de l'apprentissage interdit",
-  camera_error: "Erreur caméra",
-  mapping_exploration_required: "Exploration de cartographie requise",
-  mapping_exploration_failed: "Échec de l'exploration cartographique",
-  rfid_reader_error: "Erreur lecteur RFID",
-  headlight_error: "Erreur de phare",
-  missing_charging_station: "Station de charge introuvable",
-  blade_height_adjustment_blocked: "Réglage de hauteur de lame bloqué",
 };
 
 function formatMowerReasonLabel(value) {
@@ -5608,14 +5495,6 @@ const WATERING_BLOCK_REASON_LABELS = {
   weather: "Météo",
   mower_mowing: "Tondeuse en cours de tonte",
   mower_returning: "Tondeuse en retour station",
-  mower_docked: "Tondeuse à la station",
-  mower_paused: "Tondeuse en pause",
-  mower_starting: "Tondeuse en démarrage",
-  mower_edgecut: "Tonte de bordure en cours",
-  mower_zoning: "Changement de zone en cours",
-  mower_searching_zone: "Recherche de zone",
-  mower_rain_delayed: "Pause pluie active",
-  mower_escaped_digital_fence: "Tondeuse sortie du périmètre",
   mower_not_stowed: "Tondeuse non rangée",
   mower_unreliable: "Coordination tondeuse indisponible",
 };
@@ -5658,6 +5537,27 @@ function statusTone(status) {
     return "success";
   }
   return "neutral";
+}
+
+function formatHydricUxState({ depletionRatio, reserveStock, reserveStockMax, reserveActuelle, reserveUsefulMax }) {
+  const stock = asNumber(reserveStock);
+  const stockMax = asNumber(reserveStockMax);
+  const useful = asNumber(reserveActuelle);
+  const usefulMax = asNumber(reserveUsefulMax);
+  const depletion = asNumber(depletionRatio);
+  const fillRatio = stock !== null && stockMax !== null && stockMax > 0
+    ? Math.max(0, Math.min(1, stock / stockMax))
+    : useful !== null && usefulMax !== null && usefulMax > 0
+      ? Math.max(0, Math.min(1, useful / usefulMax))
+      : depletion !== null
+        ? Math.max(0, Math.min(1, 1 - depletion))
+        : null;
+  if (fillRatio === null) return { label: "Lecture hydrique", tone: "neutral", fillRatio: null };
+  if (fillRatio >= 0.9) return { label: "Plein", tone: "success", fillRatio };
+  if (fillRatio >= 0.7) return { label: "Confort", tone: "success", fillRatio };
+  if (fillRatio >= 0.45) return { label: "Surveillance", tone: "warning", fillRatio };
+  if (fillRatio >= 0.2) return { label: "Stress", tone: "danger", fillRatio };
+  return { label: "Critique", tone: "critical", fillRatio };
 }
 
 
@@ -5804,7 +5704,6 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "tap_action", selector: { action: {} } },
         { name: "hold_action", selector: { action: {} } },
         { name: "double_tap_action", selector: { action: {} } },
-        { name: "entity_base", selector: { text: {} } },
         { name: "theme_mode", selector: { select: { options: ["auto", "light", "dark"] } } },
         { name: "accent_color", selector: { text: {} } },
         { name: "icon_size", selector: { number: { min: 16, mode: "box", step: 1 } } },
@@ -5875,7 +5774,7 @@ class GazonIntelligentCard extends HTMLElement {
       throw new Error(`Invalid configuration for ${CARD_NAME}.`);
     }
     this._clearWateringProgressTimer();
-    this._config = normalizeConfig(config);
+    this._config = normalizeConfig(mergeConfig(DEFAULT_CONFIG, config));
     this._lastRenderSignature = null;
     this._activeTab = "overview";
     this._activeSection = "overview";
@@ -5959,22 +5858,6 @@ class GazonIntelligentCard extends HTMLElement {
   _entityId(entityKey) {
     return isEmpty(this._config?.[entityKey]) ? null : this._config[entityKey];
   }
-
-  _resolveMoreInfoEntityId(value) {
-    const candidate = String(value || "").trim();
-    if (!candidate) {
-      return null;
-    }
-    if (candidate.includes(".")) {
-      return this._hass?.states?.[candidate] ? candidate : null;
-    }
-    const resolvedEntityId = this._entityId(candidate);
-    if (!resolvedEntityId) {
-      return null;
-    }
-    return this._hass?.states?.[resolvedEntityId] ? resolvedEntityId : null;
-  }
-
 
   _defaultActionEntityId() {
     for (const key of ["entity_weather", ...ENTITY_KEYS.map((entry) => entry.key)]) {
@@ -7109,12 +6992,6 @@ class GazonIntelligentCard extends HTMLElement {
       || attrs.tondeuse_statut
       || "",
     ).trim().toLowerCase();
-    const errorCode = String(
-      attrs.mower_error
-      || attrs.tondeuse_erreur_code
-      || attrs.tondeuse_erreur
-      || "",
-    ).trim().toLowerCase();
     const operationLabel = normalizeOptionalDisplayValue(
       attrs.mower_operation_label
       || attrs.tondeuse_statut_libelle
@@ -7127,16 +7004,14 @@ class GazonIntelligentCard extends HTMLElement {
       || "",
     );
     const cuttingHeightMm = asNumber(attrs.tondeuse_hauteur_coupe_mm);
-    const reasonCode = String(attrs.mower_reason_code || "").trim().toLowerCase();
-    const hasMeaningfulReasonCode = !!reasonCode && !["none", "no_error", "ok", "aucune", "aucune_erreur"].includes(reasonCode);
     const reason = normalizeOptionalDisplayValue(
       attrs.mower_reason_label
-      || (hasMeaningfulReasonCode ? formatMowerReasonLabel(reasonCode) : "")
-      || (errorCode && errorCode !== "no_error" ? formatMowerReasonLabel(errorCode) : "")
+      || formatMowerReasonLabel(attrs.mower_reason_code)
       || attrs.tondeuse_raison
       || attrs.tondeuse_erreur_libelle
       || "",
     );
+    const reasonCode = String(attrs.mower_reason_code || "").trim().toLowerCase();
     const hardBlockReason = ["ambiguous", "mower_ambiguous", "missing", "mower_missing", "configured_missing", "mower_configured_missing"].includes(reasonCode);
     const name = String(attrs.tondeuse_nom || "").trim();
     const ready = attrs.tondeuse_prete;
@@ -7155,13 +7030,6 @@ class GazonIntelligentCard extends HTMLElement {
     } else if (!operationLabel && presenceLabel) {
       label = presenceLabel;
     }
-    if (ready === true && !hardBlockReason) {
-      if (presenceState === "dockee") {
-        label = "À la station";
-      } else if (!label || label === "Non disponible") {
-        label = "Prête";
-      }
-    }
 
     if (
       !status
@@ -7178,16 +7046,11 @@ class GazonIntelligentCard extends HTMLElement {
     }
 
     let tone = "neutral";
-    if (
-      hardBlockReason
-      || ["error", "erreur", "indisponible", "pluie", "unknown", "unavailable", "escaped_digital_fence"].includes(status)
-      || (errorCode && errorCode !== "no_error")
-      || coordinationReady === false
-    ) {
+    if (hardBlockReason || ["error", "erreur", "indisponible", "pluie", "unknown"].includes(status) || coordinationReady === false) {
       tone = "danger";
-    } else if (["charging", "en_charge", "retour_station", "retour", "transit", "paused", "pause", "returning", "starting", "searching_zone", "zoning", "rain_delayed"].includes(status) || presenceState === "retour") {
+    } else if (["charging", "en_charge", "retour_station", "retour", "transit", "paused", "pause"].includes(status) || presenceState === "retour") {
       tone = "warning";
-    } else if (["mowing", "tonte", "tonte_en_cours", "edgecut"].includes(status)) {
+    } else if (["mowing", "tonte", "tonte_en_cours"].includes(status)) {
       tone = "accent";
     } else if ((status === "idle" || status === "au_repos") && ready !== false) {
       tone = "success";
@@ -7205,7 +7068,6 @@ class GazonIntelligentCard extends HTMLElement {
       cuttingHeightMm,
       reason,
       reasonCode,
-      errorCode,
       ready,
       connected,
       coordinationEnabled,
@@ -7230,49 +7092,15 @@ class GazonIntelligentCard extends HTMLElement {
       || tonteAttrs.mowing_cooldown_remaining_minutes !== undefined
       ? tonteAttrs
       : fallbackAttrs;
-    const predictiveBlocked = predictiveAttrs.action_possible === false && Boolean(predictiveAttrs.block_reason);
+    const predictiveBlocked = predictiveAttrs.action_possible === false && Boolean(predictiveAttrs.block_reason || predictiveAttrs.reason || predictiveAttrs.summary);
     const blocked = predictiveBlocked || attrs.mowing_blocked_by_watering === true || Boolean(attrs.mowing_block_reason_code || attrs.mowing_block_reason_label);
     const reasonCode = String(predictiveAttrs.block_reason || attrs.mowing_block_reason_code || "").trim().toLowerCase();
-    const operationState = String(attrs.mower_operation_state || attrs.tondeuse_statut || "").trim().toLowerCase();
-    const operationLabel = String(attrs.mower_operation_label || attrs.tondeuse_statut_libelle || "").trim();
-    const presenceState = String(attrs.mower_presence_state || "").trim().toLowerCase();
-    const presenceLabel = String(attrs.mower_presence_label || "").trim();
-    const machineUnavailableLabel = (() => {
-      if (presenceState === "dockee") {
-        return "Tondeuse à la station";
-      }
-      if (operationState === "returning" || operationState === "retour_station" || operationState === "going_home" || operationState === "homing") {
-        return "Tondeuse en retour station";
-      }
-      if (operationState === "charging" || operationState === "en_charge") {
-        return "Tondeuse en charge";
-      }
-      if (operationState === "mowing" || operationState === "tonte" || operationState === "tonte_en_cours" || operationState === "edgecut") {
-        return "Tondeuse en cours de tonte";
-      }
-      if (operationLabel) {
-        return `Tondeuse ${operationLabel.charAt(0).toLowerCase()}${operationLabel.slice(1)}`;
-      }
-      if (presenceLabel) {
-        return `Tondeuse ${presenceLabel.charAt(0).toLowerCase()}${presenceLabel.slice(1)}`;
-      }
-      return "";
-    })();
-    const reasonLabel = String(
-      reasonCode === "machine_unavailable" && machineUnavailableLabel
-        ? machineUnavailableLabel
-        : formatMowingBlockReason(reasonCode),
-    ).trim();
-    const rawReasonDetail = String(
+    const reasonLabel = String(formatMowingBlockReason(reasonCode)).trim();
+    const reasonDetail = String(
       predictiveAttrs.reason
       || predictiveAttrs.summary
       || attrs.mowing_block_reason_label
       || reasonLabel,
-    ).trim();
-    const reasonDetail = String(
-      reasonCode === "machine_unavailable" && machineUnavailableLabel
-        ? machineUnavailableLabel
-        : rawReasonDetail,
     ).trim();
     const cooldownRemainingMinutes = asNumber(attrs.mowing_cooldown_remaining_minutes);
     const postApplicationActive = attrs.mowing_post_application_active === true;
@@ -7958,10 +7786,6 @@ class GazonIntelligentCard extends HTMLElement {
     const hydricBalanceLevel = String(entity?.attributes?.hydric_balance_level || "").trim();
     const reserveActuelle = asNumber(entity?.attributes?.reserve_actuelle_mm);
     const reserveStock = asNumber(entity?.attributes?.reserve_stock_mm);
-    const reserveStockMax = asNumber(entity?.attributes?.reserve_stock_max_mm);
-    const reserveUsefulMax = asNumber(entity?.attributes?.reserve_utile_max_mm ?? entity?.attributes?.reserve_utile_mm);
-    const reserveSurplus = asNumber(entity?.attributes?.reserve_surplus_mm);
-    const depletionMm = asNumber(entity?.attributes?.depletion_mm);
     const depletionRatio = asNumber(entity?.attributes?.depletion_ratio);
     const et0 = asNumber(entity?.attributes?.et0_mm);
     const etc = asNumber(entity?.attributes?.etc_mm);
@@ -7978,10 +7802,6 @@ class GazonIntelligentCard extends HTMLElement {
       hydricBalanceLevel,
       reserveActuelle,
       reserveStock,
-      reserveStockMax,
-      reserveUsefulMax,
-      reserveSurplus,
-      depletionMm,
       depletionRatio,
       et0,
       etc,
@@ -8084,10 +7904,10 @@ class GazonIntelligentCard extends HTMLElement {
       "--gazon-card-tone-color": accent,
       "--gazon-card-tone": activeTone,
       "--gazon-section-accent": sectionAccent,
-      "--gazon-lawn-color": `color-mix(in srgb, ${sectionAccent} 70%, #8cab70)`,
-      "--gazon-water-color": `color-mix(in srgb, ${accent} 62%, #78a19d)`,
-      "--gazon-moss-color": `color-mix(in srgb, ${sectionAccent} 78%, #688053)`,
-      "--gi-soil-color": `color-mix(in srgb, ${accent} 18%, #8f8276)`,
+      "--gazon-lawn-color": `color-mix(in srgb, ${sectionAccent} 62%, #80da67)`,
+      "--gazon-water-color": `color-mix(in srgb, ${accent} 42%, #44c8ea)`,
+      "--gazon-moss-color": `color-mix(in srgb, ${sectionAccent} 74%, #4d9f58)`,
+      "--gi-soil-color": `color-mix(in srgb, ${accent} 18%, #b8865d)`,
       "--gi-tab-accent": palette.accent,
       "--gi-tab-companion": palette.companion,
       "--gi-tab-glow-color": palette.glow,
@@ -8436,7 +8256,7 @@ class GazonIntelligentCard extends HTMLElement {
       {
         label: "Prochaine tonte",
         value: nextMowing.label,
-        tone: "neutral",
+        tone: nextMowing.tone,
         icon: "mdi:calendar-clock",
         secondary: nextMowing.detail,
         entityKey: "entity_prochaine_tonte",
@@ -10415,13 +10235,12 @@ ${CARD_STYLES}
   }
 
   _openEntityMoreInfo(entityId) {
-    const resolvedEntityId = this._resolveMoreInfoEntityId(entityId);
-    if (!resolvedEntityId) {
+    if (!entityId) {
       return;
     }
     this.dispatchEvent(
       new CustomEvent("hass-more-info", {
-        detail: { entityId: resolvedEntityId },
+        detail: { entityId },
         bubbles: true,
         composed: true,
       }),
@@ -10686,41 +10505,6 @@ function formatTemperatureRangeConstraint(constraint) {
     met: Boolean(constraint.met),
     blocking: Boolean(constraint.blocking),
   };
-}
-
-function formatHydricUxState({ depletionRatio, reserveStock, reserveStockMax, reserveActuelle, reserveUsefulMax }) {
-  const stock = asNumber(reserveStock);
-  const stockMax = asNumber(reserveStockMax);
-  const useful = asNumber(reserveActuelle);
-  const usefulMax = asNumber(reserveUsefulMax);
-  const depletion = asNumber(depletionRatio);
-  const fillRatio = stock !== null && stockMax !== null && stockMax > 0
-    ? Math.max(0, Math.min(1, stock / stockMax))
-    : useful !== null && usefulMax !== null && usefulMax > 0
-      ? Math.max(0, Math.min(1, useful / usefulMax))
-      : depletion !== null
-        ? Math.max(0, Math.min(1, 1 - depletion))
-        : null;
-  if (fillRatio === null) {
-    return {
-      label: "Lecture hydrique",
-      tone: "neutral",
-      fillRatio: null,
-    };
-  }
-  if (fillRatio >= 0.9) {
-    return { label: "Plein", tone: "success", fillRatio };
-  }
-  if (fillRatio >= 0.7) {
-    return { label: "Confort", tone: "success", fillRatio };
-  }
-  if (fillRatio >= 0.45) {
-    return { label: "Surveillance", tone: "warning", fillRatio };
-  }
-  if (fillRatio >= 0.2) {
-    return { label: "Stress", tone: "danger", fillRatio };
-  }
-  return { label: "Critique", tone: "critical", fillRatio };
 }
 
 function formatDebugRecommendedAction(action) {
@@ -11258,6 +11042,19 @@ function renderDebugInterventionSection(card, debug, wrapped = true) {
                 : renderStatusPill("Aucune raison détaillée", "neutral", "mdi:check-circle-outline", "debug-chip")
             }
           </div>
+          <div class="decision-plan__header" style="margin-top: 10px;">
+            <div class="decision-plan__label">Pré-requis manquants</div>
+            <div class="decision-plan__meta">${escapeHtml(String(missingRequirements.length))}</div>
+          </div>
+          <div class="decision-plan__chips">
+            ${
+              missingRequirements.length
+                ? missingRequirements
+                    .map((requirement) => renderStatusPill(requirement, "warning", "mdi:alert-circle-outline", "debug-chip"))
+                    .join("")
+                : renderStatusPill("Aucun manque déclaré", "success", "mdi:check-circle-outline", "debug-chip")
+            }
+          </div>
         </div>
     `;
 
@@ -11429,6 +11226,7 @@ function renderInterventionTechnicalSummary(card, recommendation, debug) {
             ${renderStatusPill(`Niveau ${formatStatusLabel(recommendation.scoreLevel || "neutral")}`, scoreTone, "mdi:signal", "debug-chip")}
             ${renderStatusPill(`${blockingConstraints} bloquante${blockingConstraints > 1 ? "s" : ""}`, blockingConstraints > 0 ? "danger" : "success", blockingConstraints > 0 ? "mdi:alert-circle-outline" : "mdi:check-circle-outline", "debug-chip")}
             ${renderStatusPill(`${nonBlockingConstraints} signal${nonBlockingConstraints > 1 ? "s" : ""}`, nonBlockingConstraints > 0 ? "warning" : "neutral", "mdi:shield-alert-outline", "debug-chip")}
+            ${renderStatusPill(`${missingRequirements} manquant${missingRequirements > 1 ? "s" : ""}`, missingRequirements > 0 ? "warning" : "success", missingRequirements > 0 ? "mdi:clipboard-alert-outline" : "mdi:check-circle-outline", "debug-chip")}
           </div>
         </div>
         <div class="tab-panel__section-summary-list">
@@ -11444,6 +11242,12 @@ function renderInterventionTechnicalSummary(card, recommendation, debug) {
               value: String(nonBlockingConstraints),
               note: nonBlockingConstraints > 0 ? "Signaux dégradants ou neutres pris en compte." : "Aucun signal secondaire détaillé.",
               tone: nonBlockingConstraints > 0 ? "warning" : "neutral",
+            },
+            {
+              label: "Manquants",
+              value: String(missingRequirements),
+              note: missingRequirements > 0 ? "Des étapes restent à compléter avant déclaration." : "Aucun pré-requis manquant.",
+              tone: missingRequirements > 0 ? "warning" : "success",
             },
             ...(lastUserAction.summary
               ? [{
@@ -11825,7 +11629,7 @@ function renderInterventionTab(card) {
             <span class="tab-panel__eyebrow">Analyse moteur</span>
             <span class="tab-panel__debug-foldout-meta">${escapeHtml(
               debug
-                ? `Score ${formatNumber(debug.score ?? 0, 0)} · ${debug.blockingConstraints?.length ?? 0} bloquante(s) · ${debug.nonBlockingConstraints?.length ?? 0} signal(s)`
+                ? `Score ${formatNumber(debug.score ?? 0, 0)} · ${debug.blockingConstraints?.length ?? 0} bloquante(s) · ${debug.nonBlockingConstraints?.length ?? 0} signal(s) · ${debug.missingRequirements?.length ?? 0} manquant(s)`
                 : `${declarationMeta} · Analyse moteur`,
             )}</span>
           </summary>
@@ -11971,6 +11775,7 @@ function renderWateringTab(card) {
   const planTypeLabel = formatPlanType(planState.planType);
   const wateringCauseLabel = formatWateringCauseLabel(windowState.wateringCause || irrigationSignal.wateringCause || "hydrique");
   const wateringTypeLabel = formatWateringTypeLabel(irrigationSignal.typeArrosage || context.typeArrosage);
+
   const hydricUx = formatHydricUxState({
     depletionRatio: context.depletionRatio,
     reserveStock: context.reserveStock,
@@ -11979,18 +11784,14 @@ function renderWateringTab(card) {
     reserveUsefulMax: context.reserveUsefulMax,
   });
   const reserveTotalValue = context.reserveStock !== null
-    ? (
-        context.reserveStockMax !== null && context.reserveStockMax > 0
-          ? `${formatNumber(context.reserveStock, 1)} / ${formatNumber(context.reserveStockMax, 1)} mm`
-          : `${formatNumber(context.reserveStock, 1)} mm`
-      )
+    ? (context.reserveStockMax !== null && context.reserveStockMax > 0
+        ? `${formatNumber(context.reserveStock, 1)} / ${formatNumber(context.reserveStockMax, 1)} mm`
+        : `${formatNumber(context.reserveStock, 1)} mm`)
     : "Non disponible";
   const reserveUsefulValue = context.reserveActuelle !== null
-    ? (
-        context.reserveUsefulMax !== null && context.reserveUsefulMax > 0
-          ? `${formatNumber(context.reserveActuelle, 1)} / ${formatNumber(context.reserveUsefulMax, 1)} mm`
-          : `${formatNumber(context.reserveActuelle, 1)} mm`
-      )
+    ? (context.reserveUsefulMax !== null && context.reserveUsefulMax > 0
+        ? `${formatNumber(context.reserveActuelle, 1)} / ${formatNumber(context.reserveUsefulMax, 1)} mm`
+        : `${formatNumber(context.reserveActuelle, 1)} mm`)
     : "Non disponible";
   const surplusHydriqueValue = context.reserveSurplus !== null
     ? `${formatNumber(context.reserveSurplus, 1)} mm`
@@ -12009,8 +11810,6 @@ function renderWateringTab(card) {
       : 0
   );
   const hydricFillWidth = hydricUsefulWidth + hydricSurplusWidth;
-
-  const wateringProgress = card._wateringProgressState();
   const reserveHydricFacts = [
     {
       label: "Réserve utile",
@@ -12037,6 +11836,8 @@ function renderWateringTab(card) {
       entityKey: "entity_reserve_actuelle",
     },
   ];
+
+  const wateringProgress = card._wateringProgressState();
   const decisionFacts = [
     {
       label: "Fenêtre",
@@ -12068,6 +11869,13 @@ function renderWateringTab(card) {
     },
   ];
   const contextFacts = [
+    context.hydricState ? {
+      label: "État hydrique",
+      value: formatStatusLabel(context.hydricState),
+      secondary: context.reserveActuelle !== null ? `${formatNumber(context.reserveActuelle, 1)} mm disponibles` : "",
+      tone: context.hydricState === "plein" ? "success" : "warning",
+      icon: "mdi:water-percent-alert",
+    } : null,
     context.temperature !== null ? {
       label: "Température",
       value: `${formatNumber(context.temperature, 1)} °C`,
@@ -12141,7 +11949,6 @@ function renderWateringTab(card) {
             <div class="tab-panel__eyebrow">Réserve hydrique</div>
             <div class="tab-panel__section-meta">${escapeHtml(hydricUx.label)}</div>
           </div>
-          <div class="tab-panel__section-summary">Stock réel, réserve utile et surplus restent séparés.</div>
           <div class="tab-panel__hydric-hero tab-panel__hydric-hero--${escapeHtml(hydricUx.tone)}">
             <div class="tab-panel__hydric-hero-main">
               <div class="tab-panel__hydric-hero-label">Réserve totale</div>
@@ -12153,11 +11960,9 @@ function renderWateringTab(card) {
           <div class="tab-panel__hydric-meter" aria-label="Répartition de la réserve hydrique">
             <div class="tab-panel__hydric-meter-bar">
               <span class="tab-panel__hydric-meter-bar-useful" style="width:${escapeHtml(String(hydricUsefulWidth))}%;"></span>
-              ${
-                hydricSurplusWidth > 0
-                  ? `<span class="tab-panel__hydric-meter-bar-surplus" style="left:${escapeHtml(String(hydricUsefulWidth))}%; width:${escapeHtml(String(hydricSurplusWidth))}%;"></span>`
-                  : ""
-              }
+              ${hydricSurplusWidth > 0
+                ? `<span class="tab-panel__hydric-meter-bar-surplus" style="left:${escapeHtml(String(hydricUsefulWidth))}%; width:${escapeHtml(String(hydricSurplusWidth))}%;"></span>`
+                : ""}
               <span class="tab-panel__hydric-meter-bar-cap" style="width:${escapeHtml(String(hydricFillWidth))}%;"></span>
             </div>
             <div class="tab-panel__hydric-meter-meta">${escapeHtml(`Surplus ${surplusHydriqueValue} · Déplétion ${depletionUsefulValue}`)}</div>
@@ -12271,7 +12076,7 @@ function renderGazonTab(card) {
           ${renderStatusPill(formatStatusLabel(action), computeActionTone(action), gazonStatusIcon, "tab-panel__status")}
         </div>
 
-        ${renderFactCards(card, gazonFacts, "tab-panel__facts-grid--gazon")}
+        ${renderMetricRail(card, gazonFacts, "tab-panel__metric-rail--gazon")}
 
         <div class="tab-panel__section">
           <div class="tab-panel__section-title">Progression de la sous-phase</div>
@@ -12304,7 +12109,6 @@ function renderMowingTab(card) {
     ? Boolean(tonteAttrs.action_possible)
     : gazonPermetTonte && machinePermetTonte;
   const tonteValue = tonte ? formatStatusLabel(tonte.state) : "Non disponible";
-  const tonteValueNormalized = String(tonteValue || "").trim().toLowerCase();
   const heightValue = height ? formatCm(height.state) : "Non disponible";
   const heightMin = asNumber(height?.attributes?.hauteur_tonte_min_cm);
   const heightMax = asNumber(height?.attributes?.hauteur_tonte_max_cm);
@@ -12319,19 +12123,11 @@ function renderMowingTab(card) {
       : mowerState.present
       ? mowerState.reason || "Machine non prête pour une nouvelle tonte."
       : "Tondeuse non disponible.";
-  const gazonPillValue = tonteAutorisee === "on"
-    ? "Permet la tonte"
-    : (tonteValueNormalized.includes("surveill") || tonteValueNormalized.includes("précaution") || tonteValueNormalized.includes("precaution"))
-      ? "À surveiller"
-      : "Bloque la tonte";
-  const gazonPillTone = tonteAutorisee === "on"
-    ? "success"
-    : (gazonPillValue === "À surveiller" ? "warning" : "danger");
   const mowingDecisionPills = [
     {
       label: "Gazon",
-      value: gazonPillValue,
-      tone: gazonPillTone,
+      value: tonteAutorisee === "on" ? "Permet la tonte" : "Bloque la tonte",
+      tone: tonteAutorisee === "on" ? "success" : "danger",
       icon: "mdi:grass",
     },
     {
@@ -12356,28 +12152,14 @@ function renderMowingTab(card) {
     },
     {
       label: "Machine",
-      value: mowerState.present
-        ? (machinePermetTonte
-            ? "Prête"
-            : compactDecisionText(mowerState.label || mowerState.reason || "Machine indisponible", { maxLength: 52 }))
-        : "Absente",
-      note: mowerState.present
-        ? (machinePermetTonte ? mowerState.label || mowerState.reason || "" : mowerState.reason || "")
-        : "Tondeuse non disponible",
+      value: mowerState.present ? (machinePermetTonte ? "Prête" : "Indisponible") : "Absente",
+      note: mowerState.present ? mowerState.reason || "" : "Tondeuse non disponible",
       tone: machinePermetTonte ? "success" : mowerState.present ? "danger" : "neutral",
     },
     {
       label: "Blocage",
-      value: mowingBlock.blocked
-        ? compactDecisionText(mowingBlock.reasonDetail || mowingBlock.detail || mowingBlock.reasonLabel || "Blocage actif", { maxLength: 56 })
-        : "Aucun",
-      note: mowingBlock.blocked
-        ? (
-            mowingBlock.reasonLabel && mowingBlock.reasonLabel !== (mowingBlock.reasonDetail || "")
-              ? mowingBlock.reasonLabel
-              : ""
-          )
-        : "Aucun frein hydrique ou post-produit.",
+      value: mowingBlock.blocked ? mowingBlock.reasonLabel || "Actif" : "Aucun",
+      note: mowingBlock.blocked ? compactDecisionText(mowingBlock.reasonDetail || mowingBlock.detail || "", { maxLength: 118 }) : "Aucun frein hydrique ou post-produit.",
       tone: mowingBlock.blocked ? "danger" : "success",
     },
     {
@@ -12390,7 +12172,7 @@ function renderMowingTab(card) {
       label: "Prochaine tonte",
       value: nextMowing.label,
       note: compactDecisionText(nextMowing.detail || "Aucune date de reprise calculée.", { maxLength: 118 }),
-      tone: "neutral",
+      tone: nextMowing.tone,
     },
     {
       label: "Hauteur conseillée",
@@ -12443,32 +12225,32 @@ function renderMowingTab(card) {
             <div class="tab-panel__eyebrow">Lecture rapide</div>
             <div class="tab-panel__section-meta">${escapeHtml(mowingBlock.blocked ? mowingBlock.reasonLabel || "Blocage actif" : "Aucun blocage")}</div>
           </div>
-          ${renderFactCards(
+          ${renderMetricRail(
             card,
             mowingSummaryItems.map((item) => ({
               label: item.label,
               value: item.value,
-              note: item.note,
+              secondary: item.note,
               tone: item.tone,
               entityKey:
                 item.label === "État de tonte" ? "entity_tonte"
                   : item.label === "Fenêtre" ? "entity_fenetre_optimale"
                     : item.label === "Prochaine tonte" ? "entity_prochaine_tonte"
-                      : item.label === "Hauteur conseillée" ? "entity_hauteur"
-                        : item.label === "Hauteur réglée" ? "entity_hauteur_coupe_tondeuse"
-                          : item.label === "Machine" ? "entity_tonte_autorisee"
-                            : null,
+                    : item.label === "Hauteur conseillée" ? "entity_hauteur"
+                      : item.label === "Hauteur réglée" ? "entity_hauteur_coupe_tondeuse"
+                        : item.label === "Machine" ? "entity_tonte_autorisee"
+                          : null,
               icon:
                 item.label === "État de tonte" ? "mdi:content-cut"
                   : item.label === "Machine" ? "mdi:robot-mower"
                     : item.label === "Blocage" ? "mdi:alert-circle-outline"
                       : item.label === "Fenêtre" ? "mdi:clock-outline"
                         : item.label === "Prochaine tonte" ? "mdi:calendar-clock"
-                          : item.label === "Hauteur conseillée" ? "mdi:ruler-square"
-                            : item.label === "Hauteur réglée" ? "mdi:tune-vertical"
-                              : "mdi:battery"
+                        : item.label === "Hauteur conseillée" ? "mdi:ruler-square"
+                          : item.label === "Hauteur réglée" ? "mdi:tune-vertical"
+                            : "mdi:battery"
             })),
-            "tab-panel__facts-grid--mowing",
+            "tab-panel__metric-rail--mowing",
           )}
         </section>
       </section>
@@ -12594,7 +12376,7 @@ class GazonIntelligentCardEditor extends HTMLElement {
   }
 
   setConfig(config) {
-    this._config = normalizeConfig(config || {});
+    this._config = normalizeConfig(mergeConfig(DEFAULT_CONFIG, config || {}));
     this._render();
   }
 
@@ -12702,7 +12484,7 @@ class GazonIntelligentCardEditor extends HTMLElement {
 
     const shouldDelete = value === "" && !["title"].includes(key);
     const next = this._setConfigValue(this._config, key, shouldDelete ? undefined : value);
-    this._config = normalizeConfig(next);
+    this._config = normalizeConfig(mergeConfig(DEFAULT_CONFIG, next));
     this.dispatchEvent(
       new CustomEvent("config-changed", {
         detail: { config: this._config },
@@ -12855,11 +12637,6 @@ ${EDITOR_STYLES}
           <h3>Carte</h3>
           <div class="grid">
             ${this._renderTextInput("title", "Titre", "Gazon Intelligent")}
-            ${this._renderTextInput(
-              "entity_base",
-              "Base des entités",
-              "gazon_intelligent",
-            )}
             ${this._renderSelect("background_style", "Mode de fond", [
               { value: "solid", label: "solid" },
               { value: "glass", label: "glass" },
@@ -12890,7 +12667,7 @@ ${EDITOR_STYLES}
             ${this._renderTextInput("manual_action_service", "Service du bouton manuel", "gazon_intelligent.start_manual_irrigation")}
             ${this._renderTextInput("manual_action_label", "Libellé du bouton manuel", "Irrigation manuelle")}
           </div>
-          <div class="hint">Renseigne une base comme <code>gazon_intelligent</code> ou <code>gazon_intelligent_gazon_potager</code> pour dériver automatiquement toutes les entités standard. Les champs unitaires restent disponibles si tu dois en surcharger une.</div>
+          <div class="hint">L’éditeur filtre les entités par domaine quand la carte connaît le type attendu.</div>
         </section>
 
         <section class="section">

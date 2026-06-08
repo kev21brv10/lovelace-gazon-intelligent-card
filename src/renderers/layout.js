@@ -28,6 +28,7 @@ import {
   isEmpty,
   isUnavailableState,
   phaseTone,
+  formatHydricUxState,
 } from "../utils/formatters.js";
 
 export function renderTabNav(card) {
@@ -1402,6 +1403,67 @@ export function renderWateringTab(card) {
   const wateringCauseLabel = formatWateringCauseLabel(windowState.wateringCause || irrigationSignal.wateringCause || "hydrique");
   const wateringTypeLabel = formatWateringTypeLabel(irrigationSignal.typeArrosage || context.typeArrosage);
 
+  const hydricUx = formatHydricUxState({
+    depletionRatio: context.depletionRatio,
+    reserveStock: context.reserveStock,
+    reserveStockMax: context.reserveStockMax,
+    reserveActuelle: context.reserveActuelle,
+    reserveUsefulMax: context.reserveUsefulMax,
+  });
+  const reserveTotalValue = context.reserveStock !== null
+    ? (context.reserveStockMax !== null && context.reserveStockMax > 0
+        ? `${formatNumber(context.reserveStock, 1)} / ${formatNumber(context.reserveStockMax, 1)} mm`
+        : `${formatNumber(context.reserveStock, 1)} mm`)
+    : "Non disponible";
+  const reserveUsefulValue = context.reserveActuelle !== null
+    ? (context.reserveUsefulMax !== null && context.reserveUsefulMax > 0
+        ? `${formatNumber(context.reserveActuelle, 1)} / ${formatNumber(context.reserveUsefulMax, 1)} mm`
+        : `${formatNumber(context.reserveActuelle, 1)} mm`)
+    : "Non disponible";
+  const surplusHydriqueValue = context.reserveSurplus !== null
+    ? `${formatNumber(context.reserveSurplus, 1)} mm`
+    : "Non disponible";
+  const depletionUsefulValue = context.depletionRatio !== null
+    ? `${formatNumber(Math.max(0, context.depletionRatio) * 100, 0)} %`
+    : "Non disponible";
+  const hydricUsefulWidth = (
+    context.reserveStockMax !== null && context.reserveStockMax > 0 && context.reserveActuelle !== null
+      ? Math.max(0, Math.min(100, (context.reserveActuelle / context.reserveStockMax) * 100))
+      : 0
+  );
+  const hydricSurplusWidth = (
+    context.reserveStockMax !== null && context.reserveStockMax > 0 && context.reserveSurplus !== null
+      ? Math.max(0, Math.min(100, (context.reserveSurplus / context.reserveStockMax) * 100))
+      : 0
+  );
+  const hydricFillWidth = hydricUsefulWidth + hydricSurplusWidth;
+  const reserveHydricFacts = [
+    {
+      label: "Réserve utile",
+      value: reserveUsefulValue,
+      secondary: "Part exploitable par le gazon",
+      tone: hydricUx.tone,
+      icon: "mdi:water-percent",
+      entityKey: "entity_reserve_actuelle",
+    },
+    {
+      label: "Surplus",
+      value: surplusHydriqueValue,
+      secondary: "Au-dessus de la réserve utile",
+      tone: context.reserveSurplus !== null && context.reserveSurplus > 0 ? "success" : "neutral",
+      icon: "mdi:water-plus",
+      entityKey: "entity_reserve_actuelle",
+    },
+    {
+      label: "Déplétion",
+      value: depletionUsefulValue,
+      secondary: context.depletionMm !== null ? `${formatNumber(context.depletionMm, 1)} mm consommés` : "Part consommée de la réserve utile",
+      tone: context.depletionRatio !== null && context.depletionRatio > 0 ? "warning" : "success",
+      icon: "mdi:water-minus",
+      entityKey: "entity_reserve_actuelle",
+    },
+  ];
+
   const wateringProgress = card._wateringProgressState();
   const decisionFacts = [
     {
@@ -1505,6 +1567,38 @@ export function renderWateringTab(card) {
         </div>
 
         ${renderWateringProgressSection(card, wateringProgress)}
+
+        ${
+          card._config?.show_secondary_info
+            ? `
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--hydric">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Réserve hydrique</div>
+            <div class="tab-panel__section-meta">${escapeHtml(hydricUx.label)}</div>
+          </div>
+          <div class="tab-panel__hydric-hero tab-panel__hydric-hero--${escapeHtml(hydricUx.tone)}">
+            <div class="tab-panel__hydric-hero-main">
+              <div class="tab-panel__hydric-hero-label">Réserve totale</div>
+              <div class="tab-panel__hydric-hero-value">${escapeHtml(reserveTotalValue)}</div>
+              <div class="tab-panel__hydric-hero-note">Réserve utile: ${escapeHtml(reserveUsefulValue)}</div>
+            </div>
+            <div class="tab-panel__hydric-hero-badge">${escapeHtml(hydricUx.label)}</div>
+          </div>
+          <div class="tab-panel__hydric-meter" aria-label="Répartition de la réserve hydrique">
+            <div class="tab-panel__hydric-meter-bar">
+              <span class="tab-panel__hydric-meter-bar-useful" style="width:${escapeHtml(String(hydricUsefulWidth))}%;"></span>
+              ${hydricSurplusWidth > 0
+                ? `<span class="tab-panel__hydric-meter-bar-surplus" style="left:${escapeHtml(String(hydricUsefulWidth))}%; width:${escapeHtml(String(hydricSurplusWidth))}%;"></span>`
+                : ""}
+              <span class="tab-panel__hydric-meter-bar-cap" style="width:${escapeHtml(String(hydricFillWidth))}%;"></span>
+            </div>
+            <div class="tab-panel__hydric-meter-meta">${escapeHtml(`Surplus ${surplusHydriqueValue} · Déplétion ${depletionUsefulValue}`)}</div>
+          </div>
+          ${renderMetricRail(card, reserveHydricFacts, "tab-panel__metric-rail--watering-hydric")}
+        </section>
+            `
+            : ""
+        }
 
         <section class="gi-info gi-info--main tab-panel__section">
           <div class="tab-panel__section-head">

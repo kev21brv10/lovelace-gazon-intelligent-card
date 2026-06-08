@@ -834,3 +834,24 @@ export function statusTone(status) {
   }
   return "neutral";
 }
+
+export function formatHydricUxState({ depletionRatio, reserveStock, reserveStockMax, reserveActuelle, reserveUsefulMax }) {
+  const stock = asNumber(reserveStock);
+  const stockMax = asNumber(reserveStockMax);
+  const useful = asNumber(reserveActuelle);
+  const usefulMax = asNumber(reserveUsefulMax);
+  const depletion = asNumber(depletionRatio);
+  const fillRatio = stock !== null && stockMax !== null && stockMax > 0
+    ? Math.max(0, Math.min(1, stock / stockMax))
+    : useful !== null && usefulMax !== null && usefulMax > 0
+      ? Math.max(0, Math.min(1, useful / usefulMax))
+      : depletion !== null
+        ? Math.max(0, Math.min(1, 1 - depletion))
+        : null;
+  if (fillRatio === null) return { label: "Lecture hydrique", tone: "neutral", fillRatio: null };
+  if (fillRatio >= 0.9) return { label: "Plein", tone: "success", fillRatio };
+  if (fillRatio >= 0.7) return { label: "Confort", tone: "success", fillRatio };
+  if (fillRatio >= 0.45) return { label: "Surveillance", tone: "warning", fillRatio };
+  if (fillRatio >= 0.2) return { label: "Stress", tone: "danger", fillRatio };
+  return { label: "Critique", tone: "critical", fillRatio };
+}

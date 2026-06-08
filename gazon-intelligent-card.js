@@ -60,19 +60,19 @@ const CARD_STYLES = String.raw`
           --gi-card-core-icon-size: 22px;
           --gi-card-core-icon-glyph-size: 13px;
           --gi-card-core-secondary-size: 0.74rem;
-          --gi-surface-border: color-mix(in srgb, var(--gazon-section-accent) 16%, rgba(255, 255, 255, 0.08));
-          --gi-surface-border-strong: color-mix(in srgb, var(--gazon-section-accent) 30%, rgba(255, 255, 255, 0.16));
+          --gi-surface-border: color-mix(in srgb, var(--gazon-section-accent) 26%, rgba(255, 255, 255, 0.08));
+          --gi-surface-border-strong: color-mix(in srgb, var(--gazon-section-accent) 46%, rgba(255, 255, 255, 0.16));
           --gi-surface-fill:
-            linear-gradient(180deg, color-mix(in srgb, #1a2028 96%, var(--gazon-section-accent) 4%) 0%, color-mix(in srgb, #0f1217 98%, black) 100%);
+            linear-gradient(180deg, color-mix(in srgb, #1a2028 89%, var(--gazon-section-accent) 11%) 0%, color-mix(in srgb, #0f1217 98%, black) 100%);
           --gi-surface-fill-accent:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 18%, #1a2028) 0%, color-mix(in srgb, #0f1217 98%, black) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 30%, #1a2028) 0%, color-mix(in srgb, #0f1217 98%, black) 100%);
           --gi-surface-shadow: 0 12px 26px rgba(0, 0, 0, 0.28);
           --gi-surface-shadow-strong: 0 22px 46px rgba(0, 0, 0, 0.42);
           --gi-tab-accent: var(--gazon-section-accent);
-          --gi-tab-companion: var(--gazon-water-color, #44c8ea);
+          --gi-tab-companion: var(--gazon-water-color, #5f97a3);
           --gi-tab-glow-color: var(--gazon-section-accent);
-          --gi-tab-mist-color: var(--gazon-lawn-color, #80da67);
-          --gi-tab-shadow: 0 18px 36px color-mix(in srgb, var(--gi-tab-glow-color) 14%, transparent);
+          --gi-tab-mist-color: var(--gazon-lawn-color, #8aa06d);
+          --gi-tab-shadow: 0 14px 28px color-mix(in srgb, var(--gi-tab-glow-color) 14%, transparent);
         }
 
         @keyframes gazonPulseSoft {
@@ -255,7 +255,7 @@ const CARD_STYLES = String.raw`
           min-width: 0;
           border: 1px solid var(--gi-surface-border);
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 12%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, white) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 20%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
           color: var(--secondary-text-color);
           border-radius: 12px;
           padding: var(--gi-nav-item-padding);
@@ -283,8 +283,8 @@ const CARD_STYLES = String.raw`
           position: absolute;
           inset: 0;
           background:
-            radial-gradient(circle at 18% 20%, color-mix(in srgb, var(--gi-tab-companion) 16%, transparent) 0%, transparent 28%),
-            linear-gradient(135deg, color-mix(in srgb, var(--gi-tab-accent) 10%, transparent) 0%, transparent 100%);
+            radial-gradient(circle at 18% 20%, color-mix(in srgb, var(--gi-tab-companion) 22%, transparent) 0%, transparent 28%),
+            linear-gradient(135deg, color-mix(in srgb, var(--gi-tab-accent) 16%, transparent) 0%, transparent 100%);
           opacity: 0;
           transition: opacity var(--gi-motion-fast) var(--gi-ease-standard);
           pointer-events: none;
@@ -293,7 +293,7 @@ const CARD_STYLES = String.raw`
         .gi-tab:hover,
         .tab-nav__item:hover,
         .section-nav__item:hover {
-          background: color-mix(in srgb, var(--secondary-background-color) 62%, var(--gi-tab-accent) 38%);
+          background: color-mix(in srgb, var(--secondary-background-color) 52%, var(--gi-tab-accent) 48%);
           border-color: var(--gi-surface-border-strong);
           box-shadow: var(--gi-surface-shadow-strong);
           transform: translateY(-1px);
@@ -319,12 +319,12 @@ const CARD_STYLES = String.raw`
           border-color: var(--gi-surface-border-strong);
           background:
             radial-gradient(circle at 16% 18%, color-mix(in srgb, var(--gi-tab-companion) 18%, transparent) 0%, transparent 24%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 34%, transparent) 0%, transparent 100%),
-            color-mix(in srgb, var(--secondary-background-color) 96%, white);
+            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 48%, transparent) 0%, transparent 100%),
+            color-mix(in srgb, var(--secondary-background-color) 94%, white);
           box-shadow:
             0 12px 30px rgba(0, 0, 0, 0.16),
-            0 0 0 1px color-mix(in srgb, var(--gi-tab-glow-color) 22%, transparent),
-            0 0 34px color-mix(in srgb, var(--gi-tab-glow-color) 16%, transparent),
+            0 0 0 1px color-mix(in srgb, var(--gi-tab-glow-color) 28%, transparent),
+            0 0 34px color-mix(in srgb, var(--gi-tab-glow-color) 20%, transparent),
             inset 0 1px 0 rgba(255, 255, 255, 0.06);
           transform: translateY(-1px) scale(1.01);
           font-weight: 700;
@@ -381,15 +381,15 @@ const CARD_STYLES = String.raw`
           gap: 10px;
           border-color: var(--gi-surface-border-strong);
           background:
-            radial-gradient(circle at 82% 0%, color-mix(in srgb, var(--gi-tab-companion) 14%, transparent) 0%, transparent 28%),
-            radial-gradient(circle at 12% 88%, color-mix(in srgb, var(--gi-tab-mist-color) 16%, transparent) 0%, transparent 32%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 10%, transparent) 0%, transparent 100%),
+            radial-gradient(circle at 82% 0%, color-mix(in srgb, var(--gi-tab-companion) 24%, transparent) 0%, transparent 28%),
+            radial-gradient(circle at 12% 88%, color-mix(in srgb, var(--gi-tab-mist-color) 28%, transparent) 0%, transparent 32%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 20%, transparent) 0%, transparent 100%),
             var(--gi-surface-fill-accent);
           box-shadow:
-            inset 4px 0 0 color-mix(in srgb, var(--gazon-section-accent) 34%, transparent),
+            inset 4px 0 0 color-mix(in srgb, var(--gazon-section-accent) 46%, transparent),
             var(--gi-surface-shadow-strong),
-            0 0 0 1px color-mix(in srgb, var(--gi-tab-glow-color) 12%, transparent),
-            0 14px 34px color-mix(in srgb, var(--gi-tab-glow-color) 10%, transparent);
+            0 0 0 1px color-mix(in srgb, var(--gi-tab-glow-color) 18%, transparent),
+            0 14px 34px color-mix(in srgb, var(--gi-tab-glow-color) 14%, transparent);
         }
 
         .tab-panel--intervention .tab-panel__hero {
@@ -521,6 +521,19 @@ const CARD_STYLES = String.raw`
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
         }
 
+        .tab-panel--overview .tab-panel__summary-row--action:hover {
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
+          border-color: color-mix(in srgb, var(--gi-surface-border) 86%, transparent);
+        }
+
+        .tab-panel--overview .tab-panel__summary-row--action:focus-visible {
+          border-color: color-mix(in srgb, var(--gi-surface-border) 86%, transparent);
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.04),
+            0 0 0 1px color-mix(in srgb, var(--gazon-section-accent) 18%, transparent);
+        }
+
         .tab-panel--overview .tab-panel__summary-row:first-child {
           padding-top: 12px;
         }
@@ -646,8 +659,8 @@ const CARD_STYLES = String.raw`
 
         .tab-panel__decision-strip--overview {
           margin-top: 6px;
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+          display: grid !important;
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
           gap: 8px;
         }
 
@@ -834,8 +847,8 @@ const CARD_STYLES = String.raw`
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 10%, var(--gi-surface-border));
           border-radius: 14px;
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 12%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, black) 100%);
-          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.10);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 7%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, black) 100%);
+          box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
           color: var(--secondary-text-color);
           font-size: 0.64rem;
           font-weight: 700;
@@ -852,7 +865,7 @@ const CARD_STYLES = String.raw`
           color: var(--primary-text-color);
           border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 30%, var(--gi-surface-border-strong));
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 15%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 95%, black) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 9%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, black) 100%);
         }
 
         .tab-panel__workflow-index {
@@ -861,7 +874,7 @@ const CARD_STYLES = String.raw`
           width: 18px;
           height: 18px;
           border-radius: 999px;
-          background: color-mix(in srgb, var(--gazon-section-accent) 18%, transparent);
+          background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
           color: var(--primary-text-color);
           font-size: 10px;
           font-weight: 900;
@@ -872,7 +885,7 @@ const CARD_STYLES = String.raw`
           flex: 1 1 auto;
           height: 1px;
           border-radius: 999px;
-          background: linear-gradient(90deg, color-mix(in srgb, var(--gazon-section-accent) 38%, transparent), color-mix(in srgb, var(--gazon-section-accent) 8%, transparent));
+          background: linear-gradient(90deg, color-mix(in srgb, var(--gazon-section-accent) 22%, transparent), color-mix(in srgb, var(--gazon-section-accent) 6%, transparent));
           min-width: 12px;
         }
 
@@ -909,23 +922,23 @@ const CARD_STYLES = String.raw`
           background:
             linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 96%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
           box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.05),
-            0 12px 26px rgba(0, 0, 0, 0.12);
+            inset 0 1px 0 rgba(255, 255, 255, 0.04),
+            0 8px 18px rgba(0, 0, 0, 0.10);
         }
 
         .tab-panel__intervention-card--picker {
           border-color: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 18%, var(--divider-color));
           background:
-            radial-gradient(circle at 10% 12%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 12%, transparent) 0%, transparent 26%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
+            radial-gradient(circle at 10% 12%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 7%, transparent) 0%, transparent 24%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 4%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
         }
 
         .tab-panel__intervention-card--action {
           justify-content: center;
           border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 18%, var(--divider-color));
           background:
-            radial-gradient(circle at 8% 12%, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 10%, transparent) 0%, transparent 26%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 5%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 91%, black) 100%);
+            radial-gradient(circle at 8% 12%, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 6%, transparent) 0%, transparent 24%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 3%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 93%, black) 100%);
         }
 
         .tab-panel__intervention-card .tab-panel__section-head {
@@ -974,22 +987,22 @@ const CARD_STYLES = String.raw`
         .tab-panel__temperature-constraint--success {
           border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 18%, var(--divider-color));
           background:
-            radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 10%, transparent) 0%, transparent 22%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+            radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 6%, transparent) 0%, transparent 20%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 4%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 95%, black) 100%);
         }
 
         .tab-panel__temperature-constraint--warning {
           border-color: color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 18%, var(--divider-color));
           background:
-            radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 10%, transparent) 0%, transparent 22%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+            radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 6%, transparent) 0%, transparent 20%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 4%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 95%, black) 100%);
         }
 
         .tab-panel__temperature-constraint--danger {
           border-color: color-mix(in srgb, var(--gazon-danger-color, #e16b73) 18%, var(--divider-color));
           background:
-            radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--gazon-danger-color, #e16b73) 10%, transparent) 0%, transparent 22%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-danger-color, #e16b73) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+            radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--gazon-danger-color, #e16b73) 6%, transparent) 0%, transparent 20%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-danger-color, #e16b73) 4%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 95%, black) 100%);
         }
 
         .tab-panel__temperature-copy {
@@ -1029,9 +1042,9 @@ const CARD_STYLES = String.raw`
           border-radius: 16px;
           padding: 7px 12px 7px 10px;
           background:
-            radial-gradient(circle at 18% 50%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 12%, transparent) 0%, transparent 18%),
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 97%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 90%, black) 100%);
-          box-shadow: var(--gi-surface-shadow-strong);
+            radial-gradient(circle at 18% 50%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 7%, transparent) 0%, transparent 16%),
+            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 97%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
+          box-shadow: var(--gi-surface-shadow);
           gap: 10px;
           min-height: 52px;
         }
@@ -1258,6 +1271,57 @@ const CARD_STYLES = String.raw`
           border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 24%, var(--gi-surface-border));
         }
 
+        .tab-panel__metric-rail--mowing .tab-panel__metric-row,
+        .tab-panel__metric-rail--gazon .tab-panel__metric-row {
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 28%, var(--gi-surface-border));
+          background:
+            radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--gazon-section-accent) 10%, transparent) 0%, transparent 22%),
+            radial-gradient(circle at 10% 82%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 8%, transparent) 0%, transparent 22%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 7%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+        }
+
+        .tab-panel__metric-rail--mowing .tab-panel__metric-row--success,
+        .tab-panel__metric-rail--gazon .tab-panel__metric-row--success {
+          background:
+            radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 16%, transparent) 0%, transparent 22%),
+            radial-gradient(circle at 10% 82%, color-mix(in srgb, var(--gazon-section-accent) 10%, transparent) 0%, transparent 22%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 9%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+        }
+
+        .tab-panel__metric-rail--mowing .tab-panel__metric-row--warning,
+        .tab-panel__metric-rail--gazon .tab-panel__metric-row--warning {
+          background:
+            radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 16%, transparent) 0%, transparent 22%),
+            radial-gradient(circle at 10% 82%, color-mix(in srgb, var(--gazon-section-accent) 10%, transparent) 0%, transparent 22%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 9%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+        }
+
+        .tab-panel__metric-rail--mowing .tab-panel__metric-row--danger,
+        .tab-panel__metric-rail--gazon .tab-panel__metric-row--danger,
+        .tab-panel__metric-rail--mowing .tab-panel__metric-row--critical,
+        .tab-panel__metric-rail--gazon .tab-panel__metric-row--critical {
+          background:
+            radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--gazon-danger-color, #f15f69) 14%, transparent) 0%, transparent 22%),
+            radial-gradient(circle at 10% 82%, color-mix(in srgb, var(--gazon-section-accent) 8%, transparent) 0%, transparent 22%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-danger-color, #f15f69) 8%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+        }
+
+        .tab-panel__metric-rail--mowing .tab-panel__metric-row--accent,
+        .tab-panel__metric-rail--gazon .tab-panel__metric-row--accent {
+          background:
+            radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--gazon-accent-tone-color, #44c8ea) 16%, transparent) 0%, transparent 22%),
+            radial-gradient(circle at 10% 82%, color-mix(in srgb, var(--gazon-section-accent) 10%, transparent) 0%, transparent 22%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-accent-tone-color, #44c8ea) 9%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+        }
+
+        .tab-panel__metric-rail--mowing .tab-panel__metric-row--neutral,
+        .tab-panel__metric-rail--gazon .tab-panel__metric-row--neutral {
+          background:
+            radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--gazon-section-accent) 14%, transparent) 0%, transparent 22%),
+            radial-gradient(circle at 10% 82%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 10%, transparent) 0%, transparent 22%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 8%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
+        }
+
         .tab-panel__metric-main {
           min-width: 0;
           display: flex;
@@ -1365,7 +1429,25 @@ const CARD_STYLES = String.raw`
         }
 
         .tab-panel__card-slider--config .tab-panel__card-slider-track {
-          grid-auto-columns: minmax(220px, 260px);
+          grid-auto-columns: minmax(260px, 320px);
+        }
+
+        .tab-panel__card-slider--config .gi-card-core--stat {
+          min-height: 96px;
+          padding: 12px 14px;
+        }
+
+        .tab-panel__card-slider--config .gi-card-core__label {
+          -webkit-line-clamp: 1;
+        }
+
+        .tab-panel__card-slider--config .gi-card-core__value {
+          font-size: var(--gi-font-lg);
+          -webkit-line-clamp: 3;
+        }
+
+        .tab-panel__card-slider--config .gi-card-core__secondary {
+          -webkit-line-clamp: 2;
         }
 
         .tab-panel__products-layout {
@@ -1458,6 +1540,24 @@ const CARD_STYLES = String.raw`
           gap: 10px;
         }
 
+        .tab-panel--config .tab-panel__section {
+          background:
+            radial-gradient(circle at 84% 6%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 0%, transparent 26%),
+            radial-gradient(circle at 10% 88%, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 8%, transparent) 0%, transparent 24%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, transparent) 0%, transparent 100%),
+            var(--gi-surface-fill);
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 28%, var(--divider-color));
+        }
+
+        .tab-panel--config .tab-panel__section-head,
+        .tab-panel--config .tab-panel__header {
+          border-bottom-color: color-mix(in srgb, var(--gazon-section-accent) 18%, transparent);
+        }
+
+        .tab-panel--config .tab-panel__section-title {
+          color: color-mix(in srgb, var(--primary-text-color) 84%, var(--gazon-section-accent));
+        }
+
         .tab-panel__section--products {
           gap: 6px;
         }
@@ -1505,7 +1605,7 @@ const CARD_STYLES = String.raw`
           inset-inline: 0;
           inset-block-end: 0;
           height: 1px;
-          background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 42%, transparent), transparent);
+          background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 24%, transparent), transparent);
           pointer-events: none;
         }
 
@@ -1522,7 +1622,7 @@ const CARD_STYLES = String.raw`
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 10%, var(--divider-color));
           border-radius: 18px;
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 4%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, white) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 2%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, white) 100%);
         }
 
         .tab-panel--intervention .tab-panel__intervention-layout {
@@ -1540,8 +1640,8 @@ const CARD_STYLES = String.raw`
         .tab-panel__intervention-card--proposed {
           border-color: color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 18%, var(--divider-color));
           background:
-            radial-gradient(circle at 8% 14%, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 10%, transparent) 0%, transparent 26%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 5%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
+            radial-gradient(circle at 8% 14%, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 6%, transparent) 0%, transparent 24%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 3%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
         }
 
         .tab-panel__intervention-card--proposed .tab-panel__section-summary,
@@ -1607,6 +1707,27 @@ const CARD_STYLES = String.raw`
           box-shadow: 0 0 12px color-mix(in srgb, var(--gazon-water-color, #44c8ea) 18%, transparent);
         }
 
+        .tab-panel--gazon .tab-progress {
+          padding: 8px 10px 10px;
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 26%, var(--gi-surface-border));
+          border-radius: 18px;
+          background:
+            radial-gradient(circle at 88% 14%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 10%, transparent) 0%, transparent 24%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 5%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, black) 100%);
+        }
+
+        .tab-panel--gazon .tab-progress__bar,
+        .tab-panel--gazon .gi-progress {
+          background:
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 7%, #f7f9f3) 0%, color-mix(in srgb, #f1f5ea 92%, var(--gazon-lawn-color, #80da67) 8%) 100%);
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 16%, transparent);
+          box-shadow: inset 0 1px 2px rgba(80, 104, 62, 0.05);
+        }
+
+        .tab-panel--gazon .tab-progress__meta {
+          color: color-mix(in srgb, #000000 64%, var(--secondary-text-color));
+        }
+
         .gi-progress__bar--critical {
           background: linear-gradient(90deg, color-mix(in srgb, #ff5a5f 70%, white), #ff5a5f);
           box-shadow: 0 0 12px rgba(255, 90, 95, 0.28);
@@ -1615,6 +1736,145 @@ const CARD_STYLES = String.raw`
         .tab-progress__meta {
           font-size: var(--gi-font-xs);
           color: var(--secondary-text-color);
+        }
+
+        .tab-panel__section--hydric {
+          gap: 12px;
+        }
+
+        .tab-panel__hydric-hero {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 14px 16px;
+          border-radius: 18px;
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 22%, var(--gi-surface-border));
+          background:
+            radial-gradient(circle at 84% 10%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 10%, transparent) 0%, transparent 28%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 7%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, black) 100%);
+          box-shadow: inset 0 1px 0 color-mix(in srgb, white 28%, transparent);
+        }
+
+        .tab-panel__hydric-hero--success {
+          border-color: color-mix(in srgb, var(--gazon-success-color, #8fb56b) 28%, var(--gi-surface-border));
+        }
+
+        .tab-panel__hydric-hero--warning {
+          border-color: color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 28%, var(--gi-surface-border));
+        }
+
+        .tab-panel__hydric-hero--danger {
+          border-color: color-mix(in srgb, var(--gazon-danger-color, #d76b73) 28%, var(--gi-surface-border));
+        }
+
+        .tab-panel__hydric-hero--critical {
+          border-color: color-mix(in srgb, var(--gazon-critical-color, #d94f57) 34%, var(--gi-surface-border));
+        }
+
+        .tab-panel__hydric-hero-main {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+
+        .tab-panel__hydric-hero-label {
+          font-size: var(--gi-font-xs);
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          color: color-mix(in srgb, var(--secondary-text-color) 78%, var(--primary-text-color));
+        }
+
+        .tab-panel__hydric-hero-value {
+          font-size: clamp(1.38rem, 4.3vw, 2.18rem);
+          line-height: 1.02;
+          font-weight: 800;
+          letter-spacing: -0.02em;
+          color: var(--primary-text-color);
+          word-break: break-word;
+        }
+
+        .tab-panel__hydric-hero-note {
+          font-size: var(--gi-font-xs);
+          line-height: 1.32;
+          color: var(--secondary-text-color);
+        }
+
+        .tab-panel__hydric-hero-badge {
+          flex: 0 0 auto;
+          align-self: flex-start;
+          padding: 7px 12px;
+          border-radius: 999px;
+          font-size: var(--gi-font-xs);
+          font-weight: 800;
+          line-height: 1;
+          color: color-mix(in srgb, var(--primary-text-color) 90%, var(--gazon-section-accent));
+          background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 20%, transparent);
+        }
+
+        .tab-panel__hydric-meter {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          padding-inline: 2px;
+        }
+
+        .tab-panel__hydric-meter-bar {
+          position: relative;
+          height: 12px;
+          overflow: hidden;
+          border-radius: 999px;
+          background: color-mix(in srgb, var(--secondary-text-color) 11%, transparent);
+          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 16%, transparent);
+          box-shadow: inset 0 1px 2px rgba(80, 104, 62, 0.05);
+        }
+
+        .tab-panel__hydric-meter-bar-useful,
+        .tab-panel__hydric-meter-bar-surplus,
+        .tab-panel__hydric-meter-bar-cap {
+          position: absolute;
+          inset-block: 0;
+          display: block;
+          border-radius: inherit;
+        }
+
+        .tab-panel__hydric-meter-bar-useful {
+          inset-inline-start: 0;
+          background: linear-gradient(90deg, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 68%, white), color-mix(in srgb, var(--gazon-section-accent) 82%, white));
+          box-shadow: 0 0 10px color-mix(in srgb, var(--gazon-water-color, #44c8ea) 18%, transparent);
+        }
+
+        .tab-panel__hydric-meter-bar-surplus {
+          background: linear-gradient(90deg, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 84%, white), color-mix(in srgb, var(--gazon-lawn-color, #80da67) 58%, var(--gazon-water-color, #44c8ea)));
+          opacity: 0.82;
+        }
+
+        .tab-panel__hydric-meter-bar-cap {
+          inset-inline-start: 0;
+          background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 100%);
+          pointer-events: none;
+          mix-blend-mode: screen;
+        }
+
+        .tab-panel__hydric-meter-meta {
+          font-size: var(--gi-font-xs);
+          line-height: 1.25;
+          color: var(--secondary-text-color);
+        }
+
+        .tab-panel__metric-rail--watering-hydric .tab-panel__metric-row {
+          min-height: 76px;
+        }
+
+        .tab-panel__metric-rail--watering-hydric .tab-panel__metric-value {
+          font-size: calc(var(--gi-font-sm) * 1.05);
+        }
+
+        .tab-panel__metric-rail--watering-hydric .tab-panel__metric-note {
+          font-size: var(--gi-font-xs);
         }
 
         .gi-action--primary {
@@ -1779,6 +2039,11 @@ const CARD_STYLES = String.raw`
 
         .gi-config-action .gi-card-core {
           width: 100%;
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 24%, var(--divider-color));
+          background:
+            radial-gradient(circle at 85% 10%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 9%, transparent) 0%, transparent 22%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 9%, transparent) 0%, transparent 100%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 5%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
         }
 
         @media (hover: hover) {
@@ -2045,7 +2310,7 @@ const CARD_STYLES = String.raw`
           min-height: 32px;
           padding: 4px 12px 4px 8px;
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 18%, transparent) 0%, color-mix(in srgb, var(--gazon-card-accent) 8%, transparent) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 15%, transparent) 0%, color-mix(in srgb, var(--gazon-card-accent) 7%, transparent) 100%);
           color: var(--primary-text-color);
         }
 
@@ -2054,7 +2319,7 @@ const CARD_STYLES = String.raw`
           min-height: 32px;
           padding: 4px 12px 4px 8px;
           background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 18%, transparent) 0%, color-mix(in srgb, var(--gazon-card-accent) 8%, transparent) 100%);
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-card-accent) 15%, transparent) 0%, color-mix(in srgb, var(--gazon-card-accent) 7%, transparent) 100%);
           color: var(--primary-text-color);
         }
 
@@ -2295,7 +2560,7 @@ const CARD_STYLES = String.raw`
           color: var(--primary-text-color);
           background:
             radial-gradient(circle at 10% 8%, color-mix(in srgb, var(--gi-tab-companion) 10%, transparent) 0%, transparent 24%),
-            radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--gi-tab-mist-color) 12%, transparent) 0%, transparent 28%),
+            radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--gi-tab-mist-color) 10%, transparent) 0%, transparent 26%),
             var(--gi-theme-base, var(--secondary-background-color));
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 18%, var(--divider-color));
           box-shadow:
@@ -2334,9 +2599,9 @@ const CARD_STYLES = String.raw`
           inset: 0 0 auto 0;
           height: 4px;
           background:
-            linear-gradient(90deg, transparent 0%, var(--gi-tab-companion) 10%, var(--gi-tab-mist-color) 42%, var(--gi-tab-accent) 68%, transparent 100%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-lawn-color) 18%, transparent) 0%, transparent 100%);
-          opacity: 0.9;
+            linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--gazon-section-accent) 36%, transparent) 18%, color-mix(in srgb, var(--gazon-section-accent) 52%, transparent) 52%, color-mix(in srgb, var(--gazon-section-accent) 36%, transparent) 82%, transparent 100%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 10%, transparent) 0%, transparent 100%);
+          opacity: 0.84;
           z-index: 0;
         }
 
@@ -2349,10 +2614,10 @@ const CARD_STYLES = String.raw`
           border-radius: 999px;
           pointer-events: none;
           background:
-            radial-gradient(circle at 28% 28%, color-mix(in srgb, var(--gi-tab-companion) 20%, transparent) 0%, transparent 36%),
-            radial-gradient(circle at 72% 24%, color-mix(in srgb, var(--gi-tab-mist-color) 16%, transparent) 0%, transparent 30%),
-            radial-gradient(circle at 56% 64%, color-mix(in srgb, var(--gi-tab-accent) 12%, transparent) 0%, transparent 48%);
-          opacity: 0.72;
+            radial-gradient(circle at 28% 28%, color-mix(in srgb, var(--gi-tab-companion) 14%, transparent) 0%, transparent 36%),
+            radial-gradient(circle at 72% 24%, color-mix(in srgb, var(--gi-tab-mist-color) 12%, transparent) 0%, transparent 30%),
+            radial-gradient(circle at 56% 64%, color-mix(in srgb, var(--gi-tab-accent) 10%, transparent) 0%, transparent 46%);
+          opacity: 0.58;
           z-index: 0;
           filter: blur(16px);
           animation: gi-card-ambient 12s ease-in-out infinite;
@@ -2504,13 +2769,13 @@ const CARD_STYLES = String.raw`
           min-height: 30px;
           padding: 4px 11px;
           border-radius: 999px;
-          border: 1px solid #1e8f55;
+          border: 1px solid color-mix(in srgb, var(--gazon-success-color) 26%, var(--divider-color));
           background:
-            linear-gradient(135deg, #2ec86f 0%, #19a3ff 100%) !important;
-          color: #ffffff !important;
+            linear-gradient(135deg, color-mix(in srgb, var(--gazon-success-color) 18%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--gazon-water-color) 12%, var(--secondary-background-color)) 100%) !important;
+          color: var(--primary-text-color) !important;
           box-shadow:
-            0 12px 24px rgba(30, 143, 85, 0.28),
-            0 0 0 1px rgba(30, 143, 85, 0.18);
+            0 6px 14px rgba(0, 0, 0, 0.10),
+            0 0 0 1px color-mix(in srgb, var(--gazon-success-color) 8%, transparent);
           font-size: var(--gi-font-xxs);
           font-weight: 800;
           cursor: pointer;
@@ -2527,7 +2792,7 @@ const CARD_STYLES = String.raw`
           width: 11px;
           height: 11px;
           flex: none;
-          background: rgba(255, 255, 255, 0.20);
+          background: color-mix(in srgb, var(--gazon-success-color) 10%, transparent);
         }
 
         .header__action::after {
@@ -2542,21 +2807,21 @@ const CARD_STYLES = String.raw`
 
         .card--theme-light .header__action {
           background:
-            linear-gradient(135deg, color-mix(in srgb, var(--gazon-success-color) 88%, white) 0%, color-mix(in srgb, var(--gazon-water-color) 84%, white) 100%) !important;
-          border-color: color-mix(in srgb, var(--gazon-success-color) 56%, var(--divider-color)) !important;
+            linear-gradient(135deg, color-mix(in srgb, var(--gazon-success-color) 14%, white) 0%, color-mix(in srgb, var(--gazon-water-color) 10%, white) 100%) !important;
+          border-color: color-mix(in srgb, var(--gazon-success-color) 24%, var(--divider-color)) !important;
           box-shadow:
-            0 12px 24px color-mix(in srgb, var(--gazon-success-color) 22%, transparent),
-            0 0 0 1px color-mix(in srgb, var(--gazon-success-color) 16%, transparent);
+            0 6px 14px rgba(0, 0, 0, 0.06),
+            0 0 0 1px color-mix(in srgb, var(--gazon-success-color) 10%, transparent);
           color: var(--primary-text-color) !important;
         }
 
         .card--theme-dark .header__action {
           background:
-            linear-gradient(135deg, color-mix(in srgb, var(--gazon-success-color) 72%, black) 0%, color-mix(in srgb, var(--gazon-water-color) 72%, black) 100%) !important;
-          border-color: color-mix(in srgb, var(--gazon-success-color) 44%, rgba(255, 255, 255, 0.10)) !important;
+            linear-gradient(135deg, color-mix(in srgb, var(--gazon-success-color) 18%, #141b1a) 0%, color-mix(in srgb, var(--gazon-water-color) 10%, #141b1a) 100%) !important;
+          border-color: color-mix(in srgb, var(--gazon-success-color) 20%, rgba(255, 255, 255, 0.10)) !important;
           box-shadow:
-            0 12px 24px rgba(0, 0, 0, 0.24),
-            0 0 0 1px color-mix(in srgb, var(--gazon-success-color) 20%, transparent);
+            0 6px 14px rgba(0, 0, 0, 0.18),
+            0 0 0 1px color-mix(in srgb, var(--gazon-success-color) 10%, transparent);
           color: #f7fff7 !important;
         }
 
@@ -2587,10 +2852,10 @@ const CARD_STYLES = String.raw`
           display: grid;
           place-items: center;
           color: white;
-          background: linear-gradient(145deg, color-mix(in srgb, var(--gi-tab-accent) 84%, white), color-mix(in srgb, var(--gi-tab-companion) 88%, var(--gi-tab-mist-color)));
+          background: linear-gradient(145deg, color-mix(in srgb, var(--gi-tab-accent) 68%, white), color-mix(in srgb, var(--gi-tab-companion) 72%, var(--gi-tab-mist-color)));
           box-shadow:
-            0 10px 24px color-mix(in srgb, var(--gi-tab-glow-color) 28%, transparent),
-            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+            0 8px 18px color-mix(in srgb, var(--gi-tab-glow-color) 18%, transparent),
+            inset 0 1px 0 rgba(255, 255, 255, 0.16);
           flex: none;
         }
 
@@ -2650,12 +2915,12 @@ const CARD_STYLES = String.raw`
           padding: var(--gi-hero-lead-padding);
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 26%, var(--divider-color));
           background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gi-tab-companion) 12%, transparent) 0%, transparent 30%),
-            linear-gradient(135deg, color-mix(in srgb, var(--gi-tab-accent) 14%, transparent) 0%, color-mix(in srgb, var(--gi-tab-companion) 10%, transparent) 100%),
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gi-tab-companion) 7%, transparent) 0%, transparent 26%),
+            linear-gradient(135deg, color-mix(in srgb, var(--gi-tab-accent) 8%, transparent) 0%, color-mix(in srgb, var(--gi-tab-companion) 6%, transparent) 100%),
             color-mix(in srgb, var(--secondary-background-color) 76%, transparent);
           box-shadow:
-            0 14px 30px rgba(0, 0, 0, 0.18),
-            0 0 0 1px color-mix(in srgb, var(--gi-tab-accent) 10%, transparent);
+            0 8px 18px rgba(0, 0, 0, 0.12),
+            0 0 0 1px color-mix(in srgb, var(--gi-tab-accent) 6%, transparent);
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -2797,12 +3062,12 @@ const CARD_STYLES = String.raw`
           position: relative;
           border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 14%, var(--divider-color));
           background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 10%, transparent) 0%, transparent 24%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 5%, transparent) 0%, transparent 100%),
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 5%, transparent) 0%, transparent 20%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 3%, transparent) 0%, transparent 100%),
             var(--gi-surface-fill);
           box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.04),
-            0 10px 22px rgba(0, 0, 0, 0.14);
+            0 7px 16px rgba(0, 0, 0, 0.11);
           transition:
             transform var(--gi-motion-fast) var(--gi-ease-standard),
             border-color var(--gi-motion-fast) var(--gi-ease-standard),
@@ -2828,9 +3093,9 @@ const CARD_STYLES = String.raw`
         .gi-card-core--tile {
           border: 1px solid color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 26%, transparent);
           background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 6%, transparent) 0%, transparent 22%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 12%, transparent) 0%, transparent 100%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 10%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 95%, white) 100%);
+            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 4%, transparent) 0%, transparent 18%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 8%, transparent) 0%, transparent 100%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
         }
 
         .gi-card-core__icon {
@@ -2844,7 +3109,7 @@ const CARD_STYLES = String.raw`
           flex: none;
           overflow: visible;
           line-height: 0;
-          background: color-mix(in srgb, var(--gazon-section-accent) 18%, transparent);
+          background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
           color: var(--gazon-section-accent);
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
@@ -3042,7 +3307,7 @@ const CARD_STYLES = String.raw`
 
         .card--editor-preview {
           box-shadow:
-            0 14px 28px rgba(0, 0, 0, 0.20),
+            0 10px 20px rgba(0, 0, 0, 0.16),
             0 0 0 1px color-mix(in srgb, var(--gazon-section-accent) 16%, transparent),
             var(--ha-card-box-shadow, none);
         }
@@ -3050,26 +3315,26 @@ const CARD_STYLES = String.raw`
         .card--theme-light {
           --gi-theme-base: #ffffff;
           --gi-theme-base-strong: #ffffff;
-          --gi-theme-base-soft: #ffffff;
-          --gi-theme-border-override: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(0, 0, 0, 0.10));
-          --gi-theme-shadow-override: 0 12px 24px rgba(0, 0, 0, 0.08);
+          --gi-theme-base-soft: #fbfcf8;
+          --gi-theme-border-override: color-mix(in srgb, var(--gazon-section-accent) 20%, rgba(0, 0, 0, 0.10));
+          --gi-theme-shadow-override: 0 10px 24px rgba(28, 38, 28, 0.08);
         }
 
         .card--theme-dark {
           --gi-theme-base: #0f1418;
           --gi-theme-base-strong: #0b1014;
           --gi-theme-base-soft: #151c21;
-          --gi-warning-ink: #dbe7a4;
-          --gi-warning-border: color-mix(in srgb, #b8ca69 34%, rgba(255, 255, 255, 0.14));
-          --gi-warning-surface: #182017;
+          --gi-warning-ink: #c7d0d7;
+          --gi-warning-border: color-mix(in srgb, var(--gi-uniform-tone) 24%, rgba(255, 255, 255, 0.14));
+          --gi-warning-surface: #171c20;
           --gi-theme-border-override: color-mix(in srgb, var(--gazon-section-accent) 24%, rgba(255, 255, 255, 0.12));
-          --gi-theme-shadow-override: 0 22px 40px rgba(0, 0, 0, 0.42);
+          --gi-theme-shadow-override: 0 16px 28px rgba(0, 0, 0, 0.34);
           --gi-surface-fill: #12181d;
           --gi-surface-fill-accent: #151d23;
           --gi-surface-border: color-mix(in srgb, var(--gazon-section-accent) 22%, rgba(255, 255, 255, 0.09));
           --gi-surface-border-strong: color-mix(in srgb, var(--gazon-section-accent) 34%, rgba(255, 255, 255, 0.16));
-          --gi-surface-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
-          --gi-surface-shadow-strong: 0 24px 46px rgba(0, 0, 0, 0.48);
+          --gi-surface-shadow: 0 10px 20px rgba(0, 0, 0, 0.28);
+          --gi-surface-shadow-strong: 0 16px 30px rgba(0, 0, 0, 0.38);
         }
 
         .card.card--theme-light {
@@ -3110,11 +3375,10 @@ const CARD_STYLES = String.raw`
 
         .card--theme-light :is(.tab-panel__hero, .tab-panel__section, .tab-panel__block, .gi-info, .gi-info--main, .gi-info--secondary, .decision-hero, .decision-plan, .decision-context, .decision-block, .decision-footer, .gi-card-core, .gi-tab, .tab-nav__item, .hero__lead, .decision) {
           background:
-            radial-gradient(circle at 84% 0%, color-mix(in srgb, var(--gi-tab-companion) 10%, transparent) 0%, transparent 24%),
-            radial-gradient(circle at 8% 94%, color-mix(in srgb, var(--gi-tab-mist-color) 12%, transparent) 0%, transparent 26%),
-            repeating-linear-gradient(135deg, color-mix(in srgb, var(--gazon-lawn-color) 3%, transparent) 0 2px, transparent 2px 14px),
-            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 4%, #ffffff) 0%, color-mix(in srgb, #ffffff 96%, var(--gazon-lawn-color) 4%) 100%);
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 16%, rgba(0, 0, 0, 0.08));
+            radial-gradient(circle at 84% 0%, color-mix(in srgb, var(--gi-tab-companion) 12%, transparent) 0%, transparent 20%),
+            radial-gradient(circle at 8% 94%, color-mix(in srgb, var(--gi-tab-mist-color) 14%, transparent) 0%, transparent 22%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 6%, #ffffff) 0%, color-mix(in srgb, #ffffff 92%, var(--gazon-lawn-color) 8%) 100%);
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 22%, rgba(0, 0, 0, 0.08));
           box-shadow: var(--gi-theme-shadow-override);
         }
 
@@ -3125,11 +3389,13 @@ const CARD_STYLES = String.raw`
           border-color: color-mix(in srgb, var(--gazon-section-accent) 24%, rgba(255, 255, 255, 0.12));
           box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.03),
-            0 20px 36px rgba(0, 0, 0, 0.40);
+            0 14px 24px rgba(0, 0, 0, 0.32);
         }
 
         .card--theme-light :is(.gi-card-core--tile, .gi-card-core--metric, .gi-card-core--stat) {
-          background: #ffffff;
+          background:
+            radial-gradient(circle at 88% 16%, color-mix(in srgb, var(--gazon-section-accent) 6%, transparent) 0%, transparent 18%),
+            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 3%, #ffffff) 0%, color-mix(in srgb, #ffffff 96%, var(--gazon-lawn-color) 4%) 100%);
         }
 
         .card--theme-dark :is(.gi-card-core--tile, .gi-card-core--metric, .gi-card-core--stat) {
@@ -3158,12 +3424,12 @@ const CARD_STYLES = String.raw`
         .card--theme-light .gi-card-core__secondary,
         .card--theme-light .header__subtitle,
         .card--theme-light .footer {
-          color: color-mix(in srgb, #000000 55%, var(--secondary-text-color));
+          color: color-mix(in srgb, #000000 68%, var(--secondary-text-color));
         }
 
         .card--theme-light :is(.gi-pill--neutral) {
-          background: #ffffff;
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(0, 0, 0, 0.08));
+          background: color-mix(in srgb, #ffffff 94%, var(--gazon-section-accent) 6%);
+          border-color: color-mix(in srgb, var(--gazon-section-accent) 20%, rgba(0, 0, 0, 0.08));
         }
 
         .card--theme-light .header__icon--warning { background: color-mix(in srgb, var(--gazon-warning-color) 74%, white); }
@@ -3525,7 +3791,7 @@ const CARD_STYLES = String.raw`
           }
 
           .tab-panel__decision-strip--overview {
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr !important;
           }
         }
 
@@ -3552,6 +3818,10 @@ const CARD_STYLES = String.raw`
           .header__title-wrap {
             width: 100%;
             gap: 8px;
+          }
+
+          .tab-panel__decision-strip--overview {
+            grid-template-columns: 1fr;
           }
 
           .header__meta {
@@ -3693,11 +3963,34 @@ const CARD_STYLES = String.raw`
           }
 
           .tab-panel__decision-strip--overview {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
           }
 
           .tab-panel__facts-grid {
             grid-template-columns: 1fr;
+          }
+
+          .tab-panel__hydric-hero {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+            padding: 12px 13px;
+          }
+
+          .tab-panel__hydric-hero-value {
+            font-size: clamp(1.5rem, 7.2vw, 2rem);
+          }
+
+          .tab-panel__hydric-hero-badge {
+            width: fit-content;
+          }
+
+          .tab-panel__hydric-meter-bar {
+            height: 10px;
+          }
+
+          .tab-panel__metric-rail--watering-hydric .tab-panel__metric-row {
+            min-height: 70px;
           }
 
           .tab-panel__metric-head {
@@ -3719,7 +4012,7 @@ const CARD_STYLES = String.raw`
           }
 
           .tab-panel__card-slider--config .tab-panel__card-slider-track {
-            grid-auto-columns: min(84vw, 240px);
+            grid-auto-columns: min(88vw, 300px);
           }
 
           .tab-panel__card-slider-item {
@@ -3982,10 +4275,11 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.2.1";
+const CARD_VERSION = "0.2.2";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
+  entity_base: "gazon_intelligent",
   show_icons: true,
   show_header: true,
   show_background: true,
@@ -4206,11 +4500,11 @@ const SECTION_FIELDS = {
 };
 
 const SECTION_ACCENTS = {
-  overview: "#58c27d",
-  watering: "#31b8d4",
-  mowing: "#97c84b",
-  products: "#58c27d",
-  details: "#7b8da0",
+  overview: "#8cab60",
+  watering: "#5498a3",
+  mowing: "#99af58",
+  products: "#a88a57",
+  details: "#6e95ad",
 };
 
 const LEGACY_ENTITY_KEYS = [
@@ -4321,8 +4615,8 @@ const RENDER_SIGNATURE_ATTRS = {
   ],
   entity_arrosage_recommande: ["objectif_mm", "type_arrosage", "watering_cause", "watering_blocked_by_mower", "watering_block_reason_code", "watering_block_reason_label"],
   entity_arrosage_apres_application_autorise: ["application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm", "application_post_watering_status"],
-  entity_tonte: ["tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_prete", "tondeuse_batterie", "tondeuse_prochain_depart_display", "tondeuse_hauteur_coupe_mm", "mower_coordination_enabled", "mower_coordination_ready", "mower_presence_state", "mower_presence_label", "mower_operation_state", "mower_operation_label", "mower_is_docked", "mower_is_outside", "mower_is_safe_for_watering", "mower_reason_code", "mower_reason_label", "mowing_blocked_by_watering", "mowing_block_reason_code", "mowing_block_reason_label", "mowing_cooldown_remaining_minutes", "mowing_post_application_active", "gazon_permet_tonte", "machine_permet_tonte", "action_possible"],
-  entity_tonte_autorisee: ["phase_active", "tonte_statut", "niveau_action", "fenetre_optimale", "risque_gazon", "hauteur_tonte_recommandee_cm", "hauteur_tonte_min_cm", "hauteur_tonte_max_cm", "tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_prete", "tondeuse_batterie", "tondeuse_prochain_depart_display", "tondeuse_hauteur_coupe_mm", "mower_coordination_enabled", "mower_coordination_ready", "mower_presence_state", "mower_presence_label", "mower_operation_state", "mower_operation_label", "mower_is_docked", "mower_is_outside", "mower_is_safe_for_watering", "mower_reason_code", "mower_reason_label", "mowing_blocked_by_watering", "mowing_block_reason_code", "mowing_block_reason_label", "mowing_cooldown_remaining_minutes", "mowing_post_application_active", "gazon_permet_tonte", "machine_permet_tonte", "action_possible"],
+  entity_tonte: ["tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_prete", "tondeuse_batterie", "tondeuse_prochain_depart_display", "tondeuse_hauteur_coupe_mm", "tondeuse_erreur", "tondeuse_erreur_code", "mower_error", "mower_activity_code", "mower_coordination_enabled", "mower_coordination_ready", "mower_presence_state", "mower_presence_label", "mower_operation_state", "mower_operation_label", "mower_is_docked", "mower_is_outside", "mower_is_safe_for_watering", "mower_reason_code", "mower_reason_label", "mowing_blocked_by_watering", "mowing_block_reason_code", "mowing_block_reason_label", "mowing_cooldown_remaining_minutes", "mowing_post_application_active", "gazon_permet_tonte", "machine_permet_tonte", "action_possible"],
+  entity_tonte_autorisee: ["phase_active", "tonte_statut", "niveau_action", "fenetre_optimale", "risque_gazon", "hauteur_tonte_recommandee_cm", "hauteur_tonte_min_cm", "hauteur_tonte_max_cm", "tondeuse_statut", "tondeuse_statut_libelle", "tondeuse_prete", "tondeuse_batterie", "tondeuse_prochain_depart_display", "tondeuse_hauteur_coupe_mm", "tondeuse_erreur", "tondeuse_erreur_code", "mower_error", "mower_activity_code", "mower_coordination_enabled", "mower_coordination_ready", "mower_presence_state", "mower_presence_label", "mower_operation_state", "mower_operation_label", "mower_is_docked", "mower_is_outside", "mower_is_safe_for_watering", "mower_reason_code", "mower_reason_label", "mowing_blocked_by_watering", "mowing_block_reason_code", "mowing_block_reason_label", "mowing_cooldown_remaining_minutes", "mowing_post_application_active", "gazon_permet_tonte", "machine_permet_tonte", "action_possible"],
   entity_niveau: ["niveau_action_hydrique"],
   entity_sous_phase: ["sous_phase_progression", "sous_phase_detail"],
   entity_phase: ["phase_dominante_source", "pluie_demain_source"],
@@ -4340,12 +4634,12 @@ const RENDER_SIGNATURE_ATTRS = {
 };
 
 const STATUS_COLORS = {
-  danger: "#f15f69",
-  warning: "#f3ba4b",
-  success: "#4fc38c",
-  neutral: "#7a8c9d",
-  accent: "#49cfd0",
-  critical: "#ff4d78",
+  danger: "#cf7684",
+  warning: "#d0a255",
+  success: "#8cab5d",
+  neutral: "#8e998f",
+  accent: "#589ca7",
+  critical: "#c56c7d",
 };
 
 const STATUS_LABELS = {
@@ -4389,6 +4683,20 @@ const STATUS_LABELS = {
   normal: "Normal",
   enracinement: "Enracinement",
   manuel_frequent: "Manuel fréquent",
+  idle: "Au repos",
+  docked: "À la station",
+  mowing: "Tonte en cours",
+  paused: "En pause",
+  returning: "Retour station",
+  error: "En erreur",
+  starting: "Démarrage",
+  edgecut: "Bordure en cours",
+  zoning: "Changement de zone",
+  searching_zone: "Recherche de zone",
+  escaped_digital_fence: "Sortie du périmètre",
+  rain_delayed: "Pause pluie",
+  charging: "En charge",
+  unknown: "Inconnu",
 };
 
 const WEATHER_LABELS = {
@@ -4658,6 +4966,39 @@ function sectionToAccent(section) {
   );
 }
 
+
+const DEFAULT_ENTITY_BASE = String(DEFAULT_CONFIG.entity_base || "gazon_intelligent").trim() || "gazon_intelligent";
+
+const DERIVED_ENTITY_RULES = Object.fromEntries(
+  Object.entries(DEFAULT_CONFIG)
+    .filter(([key, value]) => key.startsWith("entity_") && typeof value === "string" && value.includes("."))
+    .map(([key, value]) => {
+      const [domain, objectId] = String(value).split(".");
+      if (!domain || !objectId || domain === "weather" || !objectId.startsWith(`${DEFAULT_ENTITY_BASE}_`)) {
+        return null;
+      }
+      return [key, { domain, suffix: objectId.slice(DEFAULT_ENTITY_BASE.length + 1) }];
+    })
+    .filter(Boolean),
+);
+
+function normalizeEntityBase(value) {
+  const raw = String(value || "").trim();
+  const fallback = DEFAULT_ENTITY_BASE;
+  if (!raw) {
+    return fallback;
+  }
+  let objectId = raw.includes(".") ? raw.split(".").slice(1).join(".") : raw;
+  for (const { suffix } of Object.values(DERIVED_ENTITY_RULES)) {
+    const marker = `_${suffix}`;
+    if (objectId.endsWith(marker)) {
+      objectId = objectId.slice(0, -marker.length);
+      break;
+    }
+  }
+  return objectId || fallback;
+}
+
 function splitServiceName(service) {
   const parts = String(service ?? "").split(".");
   if (parts.length !== 2) {
@@ -4671,7 +5012,23 @@ function mergeConfig(base, update) {
 }
 
 function normalizeConfig(config) {
-  return { ...config };
+  const rawConfig = config && typeof config === "object" ? config : {};
+  const normalized = { ...DEFAULT_CONFIG, ...rawConfig };
+  const entityBase = normalizeEntityBase(normalized.entity_base || normalized.entity_assistant);
+  normalized.entity_base = entityBase;
+  Object.entries(DERIVED_ENTITY_RULES).forEach(([key, rule]) => {
+    const explicitValue = rawConfig[key];
+    if (isEmpty(explicitValue)) {
+      normalized[key] = `${rule.domain}.${entityBase}_${rule.suffix}`;
+      return;
+    }
+    const explicitText = String(explicitValue).trim();
+    const isDerivableAlias = explicitText.includes(".")
+      ? explicitText.split(".").slice(1).join(".").endsWith(`_${rule.suffix}`)
+      : explicitText.endsWith(`_${rule.suffix}`);
+    normalized[key] = isDerivableAlias ? `${rule.domain}.${entityBase}_${rule.suffix}` : explicitText;
+  });
+  return normalized;
 }
 
 function domainMatches(entity, acceptedDomains) {
@@ -4824,6 +5181,16 @@ const MOWER_REASON_LABELS = {
   mowing: "Tondeuse en cours de tonte",
   mower_returning: "Tondeuse en retour station",
   returning: "Tondeuse en retour station",
+  docked: "Tondeuse à la station",
+  idle: "Tondeuse au repos",
+  paused: "Tondeuse en pause",
+  starting: "Tondeuse en démarrage",
+  edgecut: "Tonte de bordure en cours",
+  zoning: "Changement de zone en cours",
+  searching_zone: "Recherche de zone",
+  escaped_digital_fence: "Tondeuse sortie du périmètre",
+  rain_delayed: "Pause pluie active",
+  charging: "Tondeuse en charge",
   mower_not_stowed: "Tondeuse non rangée",
   not_stowed: "Tondeuse non rangée",
   mower_unreliable: "Coordination tondeuse indisponible",
@@ -4836,6 +5203,44 @@ const MOWER_REASON_LABELS = {
   mower_configured_missing: "Tondeuse configurée introuvable",
   error: "Tondeuse en erreur",
   disconnected: "Tondeuse indisponible",
+  unknown: "État tondeuse inconnu",
+  unavailable: "Tondeuse indisponible",
+  no_error: "Aucune erreur",
+  trapped: "Tondeuse coincée",
+  lifted: "Tondeuse soulevée",
+  wire_missing: "Fil périmétrique manquant",
+  outside_wire: "Tondeuse hors périmètre",
+  rain_delay: "Pause pluie active",
+  close_door_to_mow: "Fermer le capot pour tondre",
+  close_door_to_go_home: "Fermer le capot pour retour station",
+  blade_motor_blocked: "Moteur de lame bloqué",
+  wheel_motor_blocked: "Moteur de roue bloqué",
+  trapped_timeout: "Tondeuse coincée trop longtemps",
+  upside_down: "Tondeuse retournée",
+  battery_low: "Batterie faible",
+  reverse_wire: "Fil périmétrique inversé",
+  charge_error: "Erreur de charge",
+  timeout_finding_home: "Temps dépassé pour trouver la base",
+  locked: "Tondeuse verrouillée",
+  battery_temperature_error: "Température batterie anormale",
+  battery_trunk_open_timeout: "Capot batterie ouvert trop longtemps",
+  wire_sync: "Erreur de synchronisation du fil",
+  charging_station_docking_error: "Erreur d'arrimage à la station",
+  hbi_error: "Erreur HBI",
+  ota_error: "Erreur de mise à jour",
+  map_error: "Erreur de cartographie",
+  excessive_slope: "Pente excessive",
+  unreachable_zone: "Zone inatteignable",
+  unreachable_charging_station: "Station inatteignable",
+  insufficient_sensor_data: "Données capteurs insuffisantes",
+  training_start_disallowed: "Démarrage de l'apprentissage interdit",
+  camera_error: "Erreur caméra",
+  mapping_exploration_required: "Exploration de cartographie requise",
+  mapping_exploration_failed: "Échec de l'exploration cartographique",
+  rfid_reader_error: "Erreur lecteur RFID",
+  headlight_error: "Erreur de phare",
+  missing_charging_station: "Station de charge introuvable",
+  blade_height_adjustment_blocked: "Réglage de hauteur de lame bloqué",
 };
 
 function formatMowerReasonLabel(value) {
@@ -5202,6 +5607,14 @@ const WATERING_BLOCK_REASON_LABELS = {
   weather: "Météo",
   mower_mowing: "Tondeuse en cours de tonte",
   mower_returning: "Tondeuse en retour station",
+  mower_docked: "Tondeuse à la station",
+  mower_paused: "Tondeuse en pause",
+  mower_starting: "Tondeuse en démarrage",
+  mower_edgecut: "Tonte de bordure en cours",
+  mower_zoning: "Changement de zone en cours",
+  mower_searching_zone: "Recherche de zone",
+  mower_rain_delayed: "Pause pluie active",
+  mower_escaped_digital_fence: "Tondeuse sortie du périmètre",
   mower_not_stowed: "Tondeuse non rangée",
   mower_unreliable: "Coordination tondeuse indisponible",
 };
@@ -5390,6 +5803,7 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "tap_action", selector: { action: {} } },
         { name: "hold_action", selector: { action: {} } },
         { name: "double_tap_action", selector: { action: {} } },
+        { name: "entity_base", selector: { text: {} } },
         { name: "theme_mode", selector: { select: { options: ["auto", "light", "dark"] } } },
         { name: "accent_color", selector: { text: {} } },
         { name: "icon_size", selector: { number: { min: 16, mode: "box", step: 1 } } },
@@ -5460,7 +5874,7 @@ class GazonIntelligentCard extends HTMLElement {
       throw new Error(`Invalid configuration for ${CARD_NAME}.`);
     }
     this._clearWateringProgressTimer();
-    this._config = normalizeConfig(mergeConfig(DEFAULT_CONFIG, config));
+    this._config = normalizeConfig(config);
     this._lastRenderSignature = null;
     this._activeTab = "overview";
     this._activeSection = "overview";
@@ -5544,6 +5958,22 @@ class GazonIntelligentCard extends HTMLElement {
   _entityId(entityKey) {
     return isEmpty(this._config?.[entityKey]) ? null : this._config[entityKey];
   }
+
+  _resolveMoreInfoEntityId(value) {
+    const candidate = String(value || "").trim();
+    if (!candidate) {
+      return null;
+    }
+    if (candidate.includes(".")) {
+      return this._hass?.states?.[candidate] ? candidate : null;
+    }
+    const resolvedEntityId = this._entityId(candidate);
+    if (!resolvedEntityId) {
+      return null;
+    }
+    return this._hass?.states?.[resolvedEntityId] ? resolvedEntityId : null;
+  }
+
 
   _defaultActionEntityId() {
     for (const key of ["entity_weather", ...ENTITY_KEYS.map((entry) => entry.key)]) {
@@ -6678,6 +7108,12 @@ class GazonIntelligentCard extends HTMLElement {
       || attrs.tondeuse_statut
       || "",
     ).trim().toLowerCase();
+    const errorCode = String(
+      attrs.mower_error
+      || attrs.tondeuse_erreur_code
+      || attrs.tondeuse_erreur
+      || "",
+    ).trim().toLowerCase();
     const operationLabel = normalizeOptionalDisplayValue(
       attrs.mower_operation_label
       || attrs.tondeuse_statut_libelle
@@ -6690,14 +7126,16 @@ class GazonIntelligentCard extends HTMLElement {
       || "",
     );
     const cuttingHeightMm = asNumber(attrs.tondeuse_hauteur_coupe_mm);
+    const reasonCode = String(attrs.mower_reason_code || "").trim().toLowerCase();
+    const hasMeaningfulReasonCode = !!reasonCode && !["none", "no_error", "ok", "aucune", "aucune_erreur"].includes(reasonCode);
     const reason = normalizeOptionalDisplayValue(
       attrs.mower_reason_label
-      || formatMowerReasonLabel(attrs.mower_reason_code)
+      || (hasMeaningfulReasonCode ? formatMowerReasonLabel(reasonCode) : "")
+      || (errorCode && errorCode !== "no_error" ? formatMowerReasonLabel(errorCode) : "")
       || attrs.tondeuse_raison
       || attrs.tondeuse_erreur_libelle
       || "",
     );
-    const reasonCode = String(attrs.mower_reason_code || "").trim().toLowerCase();
     const hardBlockReason = ["ambiguous", "mower_ambiguous", "missing", "mower_missing", "configured_missing", "mower_configured_missing"].includes(reasonCode);
     const name = String(attrs.tondeuse_nom || "").trim();
     const ready = attrs.tondeuse_prete;
@@ -6716,6 +7154,13 @@ class GazonIntelligentCard extends HTMLElement {
     } else if (!operationLabel && presenceLabel) {
       label = presenceLabel;
     }
+    if (ready === true && !hardBlockReason) {
+      if (presenceState === "dockee") {
+        label = "À la station";
+      } else if (!label || label === "Non disponible") {
+        label = "Prête";
+      }
+    }
 
     if (
       !status
@@ -6732,11 +7177,16 @@ class GazonIntelligentCard extends HTMLElement {
     }
 
     let tone = "neutral";
-    if (hardBlockReason || ["error", "erreur", "indisponible", "pluie", "unknown"].includes(status) || coordinationReady === false) {
+    if (
+      hardBlockReason
+      || ["error", "erreur", "indisponible", "pluie", "unknown", "unavailable", "escaped_digital_fence"].includes(status)
+      || (errorCode && errorCode !== "no_error")
+      || coordinationReady === false
+    ) {
       tone = "danger";
-    } else if (["charging", "en_charge", "retour_station", "retour", "transit", "paused", "pause"].includes(status) || presenceState === "retour") {
+    } else if (["charging", "en_charge", "retour_station", "retour", "transit", "paused", "pause", "returning", "starting", "searching_zone", "zoning", "rain_delayed"].includes(status) || presenceState === "retour") {
       tone = "warning";
-    } else if (["mowing", "tonte", "tonte_en_cours"].includes(status)) {
+    } else if (["mowing", "tonte", "tonte_en_cours", "edgecut"].includes(status)) {
       tone = "accent";
     } else if ((status === "idle" || status === "au_repos") && ready !== false) {
       tone = "success";
@@ -6754,6 +7204,7 @@ class GazonIntelligentCard extends HTMLElement {
       cuttingHeightMm,
       reason,
       reasonCode,
+      errorCode,
       ready,
       connected,
       coordinationEnabled,
@@ -6778,15 +7229,49 @@ class GazonIntelligentCard extends HTMLElement {
       || tonteAttrs.mowing_cooldown_remaining_minutes !== undefined
       ? tonteAttrs
       : fallbackAttrs;
-    const predictiveBlocked = predictiveAttrs.action_possible === false && Boolean(predictiveAttrs.block_reason || predictiveAttrs.reason || predictiveAttrs.summary);
+    const predictiveBlocked = predictiveAttrs.action_possible === false && Boolean(predictiveAttrs.block_reason);
     const blocked = predictiveBlocked || attrs.mowing_blocked_by_watering === true || Boolean(attrs.mowing_block_reason_code || attrs.mowing_block_reason_label);
     const reasonCode = String(predictiveAttrs.block_reason || attrs.mowing_block_reason_code || "").trim().toLowerCase();
-    const reasonLabel = String(formatMowingBlockReason(reasonCode)).trim();
-    const reasonDetail = String(
+    const operationState = String(attrs.mower_operation_state || attrs.tondeuse_statut || "").trim().toLowerCase();
+    const operationLabel = String(attrs.mower_operation_label || attrs.tondeuse_statut_libelle || "").trim();
+    const presenceState = String(attrs.mower_presence_state || "").trim().toLowerCase();
+    const presenceLabel = String(attrs.mower_presence_label || "").trim();
+    const machineUnavailableLabel = (() => {
+      if (presenceState === "dockee") {
+        return "Tondeuse à la station";
+      }
+      if (operationState === "returning" || operationState === "retour_station" || operationState === "going_home" || operationState === "homing") {
+        return "Tondeuse en retour station";
+      }
+      if (operationState === "charging" || operationState === "en_charge") {
+        return "Tondeuse en charge";
+      }
+      if (operationState === "mowing" || operationState === "tonte" || operationState === "tonte_en_cours" || operationState === "edgecut") {
+        return "Tondeuse en cours de tonte";
+      }
+      if (operationLabel) {
+        return `Tondeuse ${operationLabel.charAt(0).toLowerCase()}${operationLabel.slice(1)}`;
+      }
+      if (presenceLabel) {
+        return `Tondeuse ${presenceLabel.charAt(0).toLowerCase()}${presenceLabel.slice(1)}`;
+      }
+      return "";
+    })();
+    const reasonLabel = String(
+      reasonCode === "machine_unavailable" && machineUnavailableLabel
+        ? machineUnavailableLabel
+        : formatMowingBlockReason(reasonCode),
+    ).trim();
+    const rawReasonDetail = String(
       predictiveAttrs.reason
       || predictiveAttrs.summary
       || attrs.mowing_block_reason_label
       || reasonLabel,
+    ).trim();
+    const reasonDetail = String(
+      reasonCode === "machine_unavailable" && machineUnavailableLabel
+        ? machineUnavailableLabel
+        : rawReasonDetail,
     ).trim();
     const cooldownRemainingMinutes = asNumber(attrs.mowing_cooldown_remaining_minutes);
     const postApplicationActive = attrs.mowing_post_application_active === true;
@@ -7472,6 +7957,10 @@ class GazonIntelligentCard extends HTMLElement {
     const hydricBalanceLevel = String(entity?.attributes?.hydric_balance_level || "").trim();
     const reserveActuelle = asNumber(entity?.attributes?.reserve_actuelle_mm);
     const reserveStock = asNumber(entity?.attributes?.reserve_stock_mm);
+    const reserveStockMax = asNumber(entity?.attributes?.reserve_stock_max_mm);
+    const reserveUsefulMax = asNumber(entity?.attributes?.reserve_utile_max_mm);
+    const reserveSurplus = asNumber(entity?.attributes?.reserve_surplus_mm);
+    const depletionMm = asNumber(entity?.attributes?.depletion_mm);
     const depletionRatio = asNumber(entity?.attributes?.depletion_ratio);
     const et0 = asNumber(entity?.attributes?.et0_mm);
     const etc = asNumber(entity?.attributes?.etc_mm);
@@ -7488,6 +7977,10 @@ class GazonIntelligentCard extends HTMLElement {
       hydricBalanceLevel,
       reserveActuelle,
       reserveStock,
+      reserveStockMax,
+      reserveUsefulMax,
+      reserveSurplus,
+      depletionMm,
       depletionRatio,
       et0,
       etc,
@@ -7590,10 +8083,10 @@ class GazonIntelligentCard extends HTMLElement {
       "--gazon-card-tone-color": accent,
       "--gazon-card-tone": activeTone,
       "--gazon-section-accent": sectionAccent,
-      "--gazon-lawn-color": `color-mix(in srgb, ${sectionAccent} 62%, #80da67)`,
-      "--gazon-water-color": `color-mix(in srgb, ${accent} 42%, #44c8ea)`,
-      "--gazon-moss-color": `color-mix(in srgb, ${sectionAccent} 74%, #4d9f58)`,
-      "--gi-soil-color": `color-mix(in srgb, ${accent} 18%, #b8865d)`,
+      "--gazon-lawn-color": `color-mix(in srgb, ${sectionAccent} 70%, #8cab70)`,
+      "--gazon-water-color": `color-mix(in srgb, ${accent} 62%, #78a19d)`,
+      "--gazon-moss-color": `color-mix(in srgb, ${sectionAccent} 78%, #688053)`,
+      "--gi-soil-color": `color-mix(in srgb, ${accent} 18%, #8f8276)`,
       "--gi-tab-accent": palette.accent,
       "--gi-tab-companion": palette.companion,
       "--gi-tab-glow-color": palette.glow,
@@ -7942,7 +8435,7 @@ class GazonIntelligentCard extends HTMLElement {
       {
         label: "Prochaine tonte",
         value: nextMowing.label,
-        tone: nextMowing.tone,
+        tone: "neutral",
         icon: "mdi:calendar-clock",
         secondary: nextMowing.detail,
         entityKey: "entity_prochaine_tonte",
@@ -9921,12 +10414,13 @@ ${CARD_STYLES}
   }
 
   _openEntityMoreInfo(entityId) {
-    if (!entityId) {
+    const resolvedEntityId = this._resolveMoreInfoEntityId(entityId);
+    if (!resolvedEntityId) {
       return;
     }
     this.dispatchEvent(
       new CustomEvent("hass-more-info", {
-        detail: { entityId },
+        detail: { entityId: resolvedEntityId },
         bubbles: true,
         composed: true,
       }),
@@ -10191,6 +10685,41 @@ function formatTemperatureRangeConstraint(constraint) {
     met: Boolean(constraint.met),
     blocking: Boolean(constraint.blocking),
   };
+}
+
+function formatHydricUxState({ depletionRatio, reserveStock, reserveStockMax, reserveActuelle, reserveUsefulMax }) {
+  const stock = asNumber(reserveStock);
+  const stockMax = asNumber(reserveStockMax);
+  const useful = asNumber(reserveActuelle);
+  const usefulMax = asNumber(reserveUsefulMax);
+  const depletion = asNumber(depletionRatio);
+  const fillRatio = stock !== null && stockMax !== null && stockMax > 0
+    ? Math.max(0, Math.min(1, stock / stockMax))
+    : useful !== null && usefulMax !== null && usefulMax > 0
+      ? Math.max(0, Math.min(1, useful / usefulMax))
+      : depletion !== null
+        ? Math.max(0, Math.min(1, 1 - depletion))
+        : null;
+  if (fillRatio === null) {
+    return {
+      label: "Lecture hydrique",
+      tone: "neutral",
+      fillRatio: null,
+    };
+  }
+  if (fillRatio >= 0.9) {
+    return { label: "Plein", tone: "success", fillRatio };
+  }
+  if (fillRatio >= 0.7) {
+    return { label: "Confort", tone: "success", fillRatio };
+  }
+  if (fillRatio >= 0.45) {
+    return { label: "Surveillance", tone: "warning", fillRatio };
+  }
+  if (fillRatio >= 0.2) {
+    return { label: "Stress", tone: "danger", fillRatio };
+  }
+  return { label: "Critique", tone: "critical", fillRatio };
 }
 
 function formatDebugRecommendedAction(action) {
@@ -10728,19 +11257,6 @@ function renderDebugInterventionSection(card, debug, wrapped = true) {
                 : renderStatusPill("Aucune raison détaillée", "neutral", "mdi:check-circle-outline", "debug-chip")
             }
           </div>
-          <div class="decision-plan__header" style="margin-top: 10px;">
-            <div class="decision-plan__label">Pré-requis manquants</div>
-            <div class="decision-plan__meta">${escapeHtml(String(missingRequirements.length))}</div>
-          </div>
-          <div class="decision-plan__chips">
-            ${
-              missingRequirements.length
-                ? missingRequirements
-                    .map((requirement) => renderStatusPill(requirement, "warning", "mdi:alert-circle-outline", "debug-chip"))
-                    .join("")
-                : renderStatusPill("Aucun manque déclaré", "success", "mdi:check-circle-outline", "debug-chip")
-            }
-          </div>
         </div>
     `;
 
@@ -10912,7 +11428,6 @@ function renderInterventionTechnicalSummary(card, recommendation, debug) {
             ${renderStatusPill(`Niveau ${formatStatusLabel(recommendation.scoreLevel || "neutral")}`, scoreTone, "mdi:signal", "debug-chip")}
             ${renderStatusPill(`${blockingConstraints} bloquante${blockingConstraints > 1 ? "s" : ""}`, blockingConstraints > 0 ? "danger" : "success", blockingConstraints > 0 ? "mdi:alert-circle-outline" : "mdi:check-circle-outline", "debug-chip")}
             ${renderStatusPill(`${nonBlockingConstraints} signal${nonBlockingConstraints > 1 ? "s" : ""}`, nonBlockingConstraints > 0 ? "warning" : "neutral", "mdi:shield-alert-outline", "debug-chip")}
-            ${renderStatusPill(`${missingRequirements} manquant${missingRequirements > 1 ? "s" : ""}`, missingRequirements > 0 ? "warning" : "success", missingRequirements > 0 ? "mdi:clipboard-alert-outline" : "mdi:check-circle-outline", "debug-chip")}
           </div>
         </div>
         <div class="tab-panel__section-summary-list">
@@ -10928,12 +11443,6 @@ function renderInterventionTechnicalSummary(card, recommendation, debug) {
               value: String(nonBlockingConstraints),
               note: nonBlockingConstraints > 0 ? "Signaux dégradants ou neutres pris en compte." : "Aucun signal secondaire détaillé.",
               tone: nonBlockingConstraints > 0 ? "warning" : "neutral",
-            },
-            {
-              label: "Manquants",
-              value: String(missingRequirements),
-              note: missingRequirements > 0 ? "Des étapes restent à compléter avant déclaration." : "Aucun pré-requis manquant.",
-              tone: missingRequirements > 0 ? "warning" : "success",
             },
             ...(lastUserAction.summary
               ? [{
@@ -11315,7 +11824,7 @@ function renderInterventionTab(card) {
             <span class="tab-panel__eyebrow">Analyse moteur</span>
             <span class="tab-panel__debug-foldout-meta">${escapeHtml(
               debug
-                ? `Score ${formatNumber(debug.score ?? 0, 0)} · ${debug.blockingConstraints?.length ?? 0} bloquante(s) · ${debug.nonBlockingConstraints?.length ?? 0} signal(s) · ${debug.missingRequirements?.length ?? 0} manquant(s)`
+                ? `Score ${formatNumber(debug.score ?? 0, 0)} · ${debug.blockingConstraints?.length ?? 0} bloquante(s) · ${debug.nonBlockingConstraints?.length ?? 0} signal(s)`
                 : `${declarationMeta} · Analyse moteur`,
             )}</span>
           </summary>
@@ -11461,8 +11970,72 @@ function renderWateringTab(card) {
   const planTypeLabel = formatPlanType(planState.planType);
   const wateringCauseLabel = formatWateringCauseLabel(windowState.wateringCause || irrigationSignal.wateringCause || "hydrique");
   const wateringTypeLabel = formatWateringTypeLabel(irrigationSignal.typeArrosage || context.typeArrosage);
+  const hydricUx = formatHydricUxState({
+    depletionRatio: context.depletionRatio,
+    reserveStock: context.reserveStock,
+    reserveStockMax: context.reserveStockMax,
+    reserveActuelle: context.reserveActuelle,
+    reserveUsefulMax: context.reserveUsefulMax,
+  });
+  const reserveTotalValue = context.reserveStock !== null
+    ? (
+        context.reserveStockMax !== null && context.reserveStockMax > 0
+          ? `${formatNumber(context.reserveStock, 1)} / ${formatNumber(context.reserveStockMax, 1)} mm`
+          : `${formatNumber(context.reserveStock, 1)} mm`
+      )
+    : "Non disponible";
+  const reserveUsefulValue = context.reserveActuelle !== null
+    ? (
+        context.reserveUsefulMax !== null && context.reserveUsefulMax > 0
+          ? `${formatNumber(context.reserveActuelle, 1)} / ${formatNumber(context.reserveUsefulMax, 1)} mm`
+          : `${formatNumber(context.reserveActuelle, 1)} mm`
+      )
+    : "Non disponible";
+  const surplusHydriqueValue = context.reserveSurplus !== null
+    ? `${formatNumber(context.reserveSurplus, 1)} mm`
+    : "Non disponible";
+  const depletionUsefulValue = context.depletionRatio !== null
+    ? `${formatNumber(Math.max(0, context.depletionRatio) * 100, 0)} %`
+    : "Non disponible";
+  const hydricUsefulWidth = (
+    context.reserveStockMax !== null && context.reserveStockMax > 0 && context.reserveActuelle !== null
+      ? Math.max(0, Math.min(100, (context.reserveActuelle / context.reserveStockMax) * 100))
+      : 0
+  );
+  const hydricSurplusWidth = (
+    context.reserveStockMax !== null && context.reserveStockMax > 0 && context.reserveSurplus !== null
+      ? Math.max(0, Math.min(100, (context.reserveSurplus / context.reserveStockMax) * 100))
+      : 0
+  );
+  const hydricFillWidth = hydricUsefulWidth + hydricSurplusWidth;
 
   const wateringProgress = card._wateringProgressState();
+  const reserveHydricFacts = [
+    {
+      label: "Réserve utile",
+      value: reserveUsefulValue,
+      secondary: "Part exploitable par le gazon",
+      tone: hydricUx.tone,
+      icon: "mdi:water-percent",
+      entityKey: "entity_reserve_actuelle",
+    },
+    {
+      label: "Surplus",
+      value: surplusHydriqueValue,
+      secondary: "Au-dessus de la réserve utile",
+      tone: context.reserveSurplus !== null && context.reserveSurplus > 0 ? "success" : "neutral",
+      icon: "mdi:water-plus",
+      entityKey: "entity_reserve_actuelle",
+    },
+    {
+      label: "Déplétion",
+      value: depletionUsefulValue,
+      secondary: context.depletionMm !== null ? `${formatNumber(context.depletionMm, 1)} mm consommés` : "Part consommée de la réserve utile",
+      tone: context.depletionRatio !== null && context.depletionRatio > 0 ? "warning" : "success",
+      icon: "mdi:water-minus",
+      entityKey: "entity_reserve_actuelle",
+    },
+  ];
   const decisionFacts = [
     {
       label: "Fenêtre",
@@ -11494,13 +12067,6 @@ function renderWateringTab(card) {
     },
   ];
   const contextFacts = [
-    context.hydricState ? {
-      label: "État hydrique",
-      value: formatStatusLabel(context.hydricState),
-      secondary: context.reserveActuelle !== null ? `${formatNumber(context.reserveActuelle, 1)} mm disponibles` : "",
-      tone: context.hydricState === "plein" ? "success" : "warning",
-      icon: "mdi:water-percent-alert",
-    } : null,
     context.temperature !== null ? {
       label: "Température",
       value: `${formatNumber(context.temperature, 1)} °C`,
@@ -11565,6 +12131,41 @@ function renderWateringTab(card) {
         </div>
 
         ${renderWateringProgressSection(card, wateringProgress)}
+
+        ${
+          card._config?.show_secondary_info
+            ? `
+        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--hydric">
+          <div class="tab-panel__section-head">
+            <div class="tab-panel__eyebrow">Réserve hydrique</div>
+            <div class="tab-panel__section-meta">${escapeHtml(hydricUx.label)}</div>
+          </div>
+          <div class="tab-panel__section-summary">Stock réel, réserve utile et surplus restent séparés.</div>
+          <div class="tab-panel__hydric-hero tab-panel__hydric-hero--${escapeHtml(hydricUx.tone)}">
+            <div class="tab-panel__hydric-hero-main">
+              <div class="tab-panel__hydric-hero-label">Réserve totale</div>
+              <div class="tab-panel__hydric-hero-value">${escapeHtml(reserveTotalValue)}</div>
+              <div class="tab-panel__hydric-hero-note">Réserve utile: ${escapeHtml(reserveUsefulValue)}</div>
+            </div>
+            <div class="tab-panel__hydric-hero-badge">${escapeHtml(hydricUx.label)}</div>
+          </div>
+          <div class="tab-panel__hydric-meter" aria-label="Répartition de la réserve hydrique">
+            <div class="tab-panel__hydric-meter-bar">
+              <span class="tab-panel__hydric-meter-bar-useful" style="width:${escapeHtml(String(hydricUsefulWidth))}%;"></span>
+              ${
+                hydricSurplusWidth > 0
+                  ? `<span class="tab-panel__hydric-meter-bar-surplus" style="left:${escapeHtml(String(hydricUsefulWidth))}%; width:${escapeHtml(String(hydricSurplusWidth))}%;"></span>`
+                  : ""
+              }
+              <span class="tab-panel__hydric-meter-bar-cap" style="width:${escapeHtml(String(hydricFillWidth))}%;"></span>
+            </div>
+            <div class="tab-panel__hydric-meter-meta">${escapeHtml(`Surplus ${surplusHydriqueValue} · Déplétion ${depletionUsefulValue}`)}</div>
+          </div>
+          ${renderMetricRail(card, reserveHydricFacts, "tab-panel__metric-rail--watering-hydric")}
+        </section>
+            `
+            : ""
+        }
 
         <section class="gi-info gi-info--main tab-panel__section">
           <div class="tab-panel__section-head">
@@ -11669,7 +12270,7 @@ function renderGazonTab(card) {
           ${renderStatusPill(formatStatusLabel(action), computeActionTone(action), gazonStatusIcon, "tab-panel__status")}
         </div>
 
-        ${renderMetricRail(card, gazonFacts, "tab-panel__metric-rail--gazon")}
+        ${renderFactCards(card, gazonFacts, "tab-panel__facts-grid--gazon")}
 
         <div class="tab-panel__section">
           <div class="tab-panel__section-title">Progression de la sous-phase</div>
@@ -11702,6 +12303,7 @@ function renderMowingTab(card) {
     ? Boolean(tonteAttrs.action_possible)
     : gazonPermetTonte && machinePermetTonte;
   const tonteValue = tonte ? formatStatusLabel(tonte.state) : "Non disponible";
+  const tonteValueNormalized = String(tonteValue || "").trim().toLowerCase();
   const heightValue = height ? formatCm(height.state) : "Non disponible";
   const heightMin = asNumber(height?.attributes?.hauteur_tonte_min_cm);
   const heightMax = asNumber(height?.attributes?.hauteur_tonte_max_cm);
@@ -11716,11 +12318,19 @@ function renderMowingTab(card) {
       : mowerState.present
       ? mowerState.reason || "Machine non prête pour une nouvelle tonte."
       : "Tondeuse non disponible.";
+  const gazonPillValue = tonteAutorisee === "on"
+    ? "Permet la tonte"
+    : (tonteValueNormalized.includes("surveill") || tonteValueNormalized.includes("précaution") || tonteValueNormalized.includes("precaution"))
+      ? "À surveiller"
+      : "Bloque la tonte";
+  const gazonPillTone = tonteAutorisee === "on"
+    ? "success"
+    : (gazonPillValue === "À surveiller" ? "warning" : "danger");
   const mowingDecisionPills = [
     {
       label: "Gazon",
-      value: tonteAutorisee === "on" ? "Permet la tonte" : "Bloque la tonte",
-      tone: tonteAutorisee === "on" ? "success" : "danger",
+      value: gazonPillValue,
+      tone: gazonPillTone,
       icon: "mdi:grass",
     },
     {
@@ -11745,14 +12355,28 @@ function renderMowingTab(card) {
     },
     {
       label: "Machine",
-      value: mowerState.present ? (machinePermetTonte ? "Prête" : "Indisponible") : "Absente",
-      note: mowerState.present ? mowerState.reason || "" : "Tondeuse non disponible",
+      value: mowerState.present
+        ? (machinePermetTonte
+            ? "Prête"
+            : compactDecisionText(mowerState.label || mowerState.reason || "Machine indisponible", { maxLength: 52 }))
+        : "Absente",
+      note: mowerState.present
+        ? (machinePermetTonte ? mowerState.label || mowerState.reason || "" : mowerState.reason || "")
+        : "Tondeuse non disponible",
       tone: machinePermetTonte ? "success" : mowerState.present ? "danger" : "neutral",
     },
     {
       label: "Blocage",
-      value: mowingBlock.blocked ? mowingBlock.reasonLabel || "Actif" : "Aucun",
-      note: mowingBlock.blocked ? compactDecisionText(mowingBlock.reasonDetail || mowingBlock.detail || "", { maxLength: 118 }) : "Aucun frein hydrique ou post-produit.",
+      value: mowingBlock.blocked
+        ? compactDecisionText(mowingBlock.reasonDetail || mowingBlock.detail || mowingBlock.reasonLabel || "Blocage actif", { maxLength: 56 })
+        : "Aucun",
+      note: mowingBlock.blocked
+        ? (
+            mowingBlock.reasonLabel && mowingBlock.reasonLabel !== (mowingBlock.reasonDetail || "")
+              ? mowingBlock.reasonLabel
+              : ""
+          )
+        : "Aucun frein hydrique ou post-produit.",
       tone: mowingBlock.blocked ? "danger" : "success",
     },
     {
@@ -11765,7 +12389,7 @@ function renderMowingTab(card) {
       label: "Prochaine tonte",
       value: nextMowing.label,
       note: compactDecisionText(nextMowing.detail || "Aucune date de reprise calculée.", { maxLength: 118 }),
-      tone: nextMowing.tone,
+      tone: "neutral",
     },
     {
       label: "Hauteur conseillée",
@@ -11818,32 +12442,32 @@ function renderMowingTab(card) {
             <div class="tab-panel__eyebrow">Lecture rapide</div>
             <div class="tab-panel__section-meta">${escapeHtml(mowingBlock.blocked ? mowingBlock.reasonLabel || "Blocage actif" : "Aucun blocage")}</div>
           </div>
-          ${renderMetricRail(
+          ${renderFactCards(
             card,
             mowingSummaryItems.map((item) => ({
               label: item.label,
               value: item.value,
-              secondary: item.note,
+              note: item.note,
               tone: item.tone,
               entityKey:
                 item.label === "État de tonte" ? "entity_tonte"
                   : item.label === "Fenêtre" ? "entity_fenetre_optimale"
                     : item.label === "Prochaine tonte" ? "entity_prochaine_tonte"
-                    : item.label === "Hauteur conseillée" ? "entity_hauteur"
-                      : item.label === "Hauteur réglée" ? "entity_hauteur_coupe_tondeuse"
-                        : item.label === "Machine" ? "entity_tonte_autorisee"
-                          : null,
+                      : item.label === "Hauteur conseillée" ? "entity_hauteur"
+                        : item.label === "Hauteur réglée" ? "entity_hauteur_coupe_tondeuse"
+                          : item.label === "Machine" ? "entity_tonte_autorisee"
+                            : null,
               icon:
                 item.label === "État de tonte" ? "mdi:content-cut"
                   : item.label === "Machine" ? "mdi:robot-mower"
                     : item.label === "Blocage" ? "mdi:alert-circle-outline"
                       : item.label === "Fenêtre" ? "mdi:clock-outline"
                         : item.label === "Prochaine tonte" ? "mdi:calendar-clock"
-                        : item.label === "Hauteur conseillée" ? "mdi:ruler-square"
-                          : item.label === "Hauteur réglée" ? "mdi:tune-vertical"
-                            : "mdi:battery"
+                          : item.label === "Hauteur conseillée" ? "mdi:ruler-square"
+                            : item.label === "Hauteur réglée" ? "mdi:tune-vertical"
+                              : "mdi:battery"
             })),
-            "tab-panel__metric-rail--mowing",
+            "tab-panel__facts-grid--mowing",
           )}
         </section>
       </section>
@@ -11969,7 +12593,7 @@ class GazonIntelligentCardEditor extends HTMLElement {
   }
 
   setConfig(config) {
-    this._config = normalizeConfig(mergeConfig(DEFAULT_CONFIG, config || {}));
+    this._config = normalizeConfig(config || {});
     this._render();
   }
 
@@ -12077,7 +12701,7 @@ class GazonIntelligentCardEditor extends HTMLElement {
 
     const shouldDelete = value === "" && !["title"].includes(key);
     const next = this._setConfigValue(this._config, key, shouldDelete ? undefined : value);
-    this._config = normalizeConfig(mergeConfig(DEFAULT_CONFIG, next));
+    this._config = normalizeConfig(next);
     this.dispatchEvent(
       new CustomEvent("config-changed", {
         detail: { config: this._config },
@@ -12230,6 +12854,11 @@ ${EDITOR_STYLES}
           <h3>Carte</h3>
           <div class="grid">
             ${this._renderTextInput("title", "Titre", "Gazon Intelligent")}
+            ${this._renderTextInput(
+              "entity_base",
+              "Base des entités",
+              "gazon_intelligent",
+            )}
             ${this._renderSelect("background_style", "Mode de fond", [
               { value: "solid", label: "solid" },
               { value: "glass", label: "glass" },
@@ -12260,7 +12889,7 @@ ${EDITOR_STYLES}
             ${this._renderTextInput("manual_action_service", "Service du bouton manuel", "gazon_intelligent.start_manual_irrigation")}
             ${this._renderTextInput("manual_action_label", "Libellé du bouton manuel", "Irrigation manuelle")}
           </div>
-          <div class="hint">L’éditeur filtre les entités par domaine quand la carte connaît le type attendu.</div>
+          <div class="hint">Renseigne une base comme <code>gazon_intelligent</code> ou <code>gazon_intelligent_gazon_potager</code> pour dériver automatiquement toutes les entités standard. Les champs unitaires restent disponibles si tu dois en surcharger une.</div>
         </section>
 
         <section class="section">

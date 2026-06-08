@@ -3982,7 +3982,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.2.0";
+const CARD_VERSION = "0.2.1";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -4366,7 +4366,6 @@ const STATUS_LABELS = {
   apres_pluie: "Après la pluie",
   no_need: "Aucun besoin",
   waiting: "Attendre",
-  blocked: "Bloqué",
   post_application: "Post-produit",
   application_technique: "Arrosage post-produit",
   application_technique_auto: "Arrosage post-produit auto",
@@ -4389,8 +4388,6 @@ const STATUS_LABELS = {
   faible: "Faible",
   normal: "Normal",
   enracinement: "Enracinement",
-  demain_matin: "Demain matin",
-  apres_pluie: "Après pluie",
   manuel_frequent: "Manuel fréquent",
 };
 
@@ -5546,15 +5543,6 @@ class GazonIntelligentCard extends HTMLElement {
 
   _entityId(entityKey) {
     return isEmpty(this._config?.[entityKey]) ? null : this._config[entityKey];
-  }
-
-  _serviceTargetEntityId() {
-    return (
-      this._entityId("entity_derniere_application") ||
-      this._entityId("entity_produit_intervention") ||
-      this._entityId("entity_catalogue_produits") ||
-      null
-    );
   }
 
   _defaultActionEntityId() {

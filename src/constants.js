@@ -384,7 +384,6 @@ export const STATUS_LABELS = {
   apres_pluie: "Après la pluie",
   no_need: "Aucun besoin",
   waiting: "Attendre",
-  blocked: "Bloqué",
   post_application: "Post-produit",
   application_technique: "Arrosage post-produit",
   application_technique_auto: "Arrosage post-produit auto",
@@ -407,8 +406,6 @@ export const STATUS_LABELS = {
   faible: "Faible",
   normal: "Normal",
   enracinement: "Enracinement",
-  demain_matin: "Demain matin",
-  apres_pluie: "Après pluie",
   manuel_frequent: "Manuel fréquent",
 };
 

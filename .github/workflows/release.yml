@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Tag name for the release (e.g. v0.2.1)"
+        required: true
 
 permissions:
   contents: write
@@ -29,7 +34,7 @@ jobs:
       - name: Publish or update GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG_NAME: ${{ github.ref_name }}
+          TAG_NAME: ${{ inputs.tag_name || github.ref_name }}
         run: |
           set -euo pipefail
 

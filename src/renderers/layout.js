@@ -33,21 +33,10 @@ import {
 
 export function renderTabNav(card) {
   return `
-      <nav class="gi-tabs tab-nav" aria-label="Domaines de la carte">
+      <nav class="gz2-nav" aria-label="Domaines de la carte">
         ${TAB_DEFS.map((tab) => {
           const active = tab.key === card._activeTab;
-          const iconHtml = card._config?.show_icons ? renderIconBox(tab.icon, "sm") : "";
-          return `
-            <button
-              type="button"
-              class="gi-row gi-action tab-nav__item ${active ? "tab-nav__item--active" : ""}"
-              data-tab="${escapeHtml(tab.key)}"
-              aria-pressed="${active ? "true" : "false"}"
-            >
-              ${iconHtml}
-              <span>${escapeHtml(tab.label)}</span>
-            </button>
-          `;
+          return `<button type="button" class="gz2-nav__item ${active ? "gz2-nav__item--active" : ""}" data-tab="${escapeHtml(tab.key)}" aria-pressed="${active ? "true" : "false"}">${escapeHtml(tab.label)}</button>`;
         }).join("")}
       </nav>
     `;
@@ -1281,82 +1270,90 @@ export function renderHeader(card) {
   const weather = card._weatherState();
   const manualActionLabel = card._manualActionLabel();
   const tone = card._cardTone();
+  const dotToneMap = { success: "success", warning: "warning", danger: "danger", critical: "danger", accent: "success", neutral: "neutral" };
+  const dotTone = dotToneMap[tone] || "neutral";
   return `
-      <header class="gi-row header">
-        <div class="gi-row header__title-wrap">
-          <div class="header__icon header__icon--${tone}">
-            ${card._config.show_icons ? renderIconBox("mdi:grass", "md") : ""}
-          </div>
-          <div class="header__titles">
-            <div class="header__title">${escapeHtml(card._config.title || "Gazon Intelligent")}</div>
-            <div class="header__subtitle">${subtitleParts.join(" · ")}</div>
+      <header class="gz2-header">
+        <div class="gz2-header__id">
+          <div class="gz2-header__icon">${card._config.show_icons ? renderIconBox("mdi:grass", "md") : ""}</div>
+          <div>
+            <div class="gz2-header__title">${escapeHtml(card._config.title || "Gazon Intelligent")}</div>
+            <div class="gz2-header__sub"><span class="gz2-dot" style="background: var(--gi-status-${dotTone});"></span>${subtitleParts.join(" · ")}</div>
           </div>
         </div>
-        <div class="header__meta">
-          ${
-            weather
-              ? `${renderStatusPill(weather.summary, "neutral", weather.icon, "header__weather")}`
-              : ""
-          }
+        <div class="gz2-header__meta">
+          ${weather ? `<span class="gz2-weather">${weather.icon ? renderIconBox(weather.icon, "sm") : ""}${escapeHtml(weather.summary)}</span>` : ""}
           <button
             type="button"
-            class="header__action gi-action"
+            class="gz2-btn"
             data-gazon-action="manual-irrigation"
             style="${card._manualActionStyle()}"
             aria-label="${escapeHtml(manualActionLabel)}"
           >
-            ${card._config?.show_icons ? renderIconBox("mdi:water-pump", "sm") : ""}
-            <span>${escapeHtml(manualActionLabel)}</span>
+            ${card._config?.show_icons ? renderIconBox("mdi:water-pump", "sm") : ""}<span>${escapeHtml(manualActionLabel)}</span>
           </button>
         </div>
-
       </header>
     `;
 }
 
 export function renderOverviewTab(card) {
   const windowState = card._windowState();
-  const planState = card._planState();
   const proposal = card._overviewProposal();
   const overviewTone = proposal.tone;
-  const overviewIcon = card._config?.show_icons ? proposal.icon : null;
   const facts = card._overviewFacts();
-  const wateringProgress = card._wateringProgressState();
   const nextWatering = card._nextWateringState();
   const nextMowing = card._nextMowingState();
   const lastWatering = card._lastWateringState();
-  const overviewStrip = [
-    card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
-    card._renderTabPill("Prochain arrosage", nextWatering.label, nextWatering.tone, "mdi:clock-water-outline"),
-    card._renderTabPill("Prochaine tonte", nextMowing.label, nextMowing.tone, "mdi:calendar-clock"),
-    card._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
+  const chipTone = ["success", "warning", "danger", "critical", "accent", "neutral"].includes(overviewTone) ? overviewTone : "neutral";
+  const titleText = proposal.hint || "Vue d’ensemble du gazon.";
+  let heroSub = compactDecisionText(card._entityState("entity_conseil", "") || "", { maxLength: 130 });
+  if (!heroSub || heroSub === titleText) {
+    heroSub = "";
+  }
+  const reperes = [
+    { label: "Fenêtre", value: windowState.statusLabel },
+    { label: "Prochain arrosage", value: nextWatering.label },
+    { label: "Prochaine tonte", value: nextMowing.label },
+    { label: "Dernier arrosage", value: lastWatering.label },
   ];
 
   return `
-      <section class="tab-panel gi-panel tab-panel--overview">
-        <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${overviewTone}">
-          <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">Vue prioritaire</div>
-            ${renderStatusPill(proposal.title, overviewTone, overviewIcon, `tab-panel__status tab-panel__status--${overviewTone}`)}
+      <section class="gz2-overview" aria-label="Synthèse">
+        <div class="gz2-hero">
+          <div class="gz2-hero__top">
+            <div>
+              <div class="gz2-eyebrow">Conseil du jour</div>
+              <div class="gz2-hero__title">${escapeHtml(titleText)}</div>
+            </div>
+            ${proposal.title ? `<span class="gz2-chip gz2-chip--${chipTone}">${escapeHtml(proposal.title)}</span>` : ""}
           </div>
-          <div class="tab-panel__hero-next">${escapeHtml(proposal.hint || "Vue d’ensemble de la carte.")}</div>
-          <div class="tab-panel__hero-hint">${escapeHtml("Le résumé remonte d’abord la décision utile, puis les repères importants.")}</div>
+          ${heroSub ? `<div class="gz2-hero__sub">${escapeHtml(heroSub)}</div>` : ""}
         </div>
 
-        ${renderWateringProgressSection(card, wateringProgress)}
-
-        <div class="tab-panel__decision-strip tab-panel__decision-strip--overview" aria-label="Repères synthèse">
-          ${overviewStrip.join("")}
+        <div class="gz2-reperes" aria-label="Repères">
+          ${reperes.map((r) => `
+            <div class="gz2-rep">
+              <div class="gz2-rep__label">${escapeHtml(r.label)}</div>
+              <div class="gz2-rep__value">${escapeHtml(r.value || "—")}</div>
+            </div>
+          `).join("")}
         </div>
 
-        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--overview-facts">
-          <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Essentiel</div>
-            <div class="tab-panel__section-meta">${escapeHtml(`${facts.length} repère${facts.length > 1 ? "s" : ""}`)}</div>
-          </div>
-          ${renderFactCards(card, facts, "tab-panel__facts-grid--overview")}
-        </section>
-
+        <div class="gz2-eyebrow">Essentiel</div>
+        <div class="gz2-cards">
+          ${facts.map((f) => {
+            const eid = card._entityId(f.entityKey);
+            const vTone = ["success", "warning", "danger", "critical"].includes(f.tone) ? ` gz2-card__value--${f.tone}` : "";
+            return `
+              <button type="button" class="gz2-card"${eid ? ` data-more-info-entity="${escapeHtml(eid)}"` : ""}>
+                <div class="gz2-card__label">${escapeHtml(f.label)}</div>
+                <div class="gz2-card__value${vTone}">${escapeHtml(f.value)}</div>
+                ${f.secondary ? `<div class="gz2-card__sub">${escapeHtml(f.secondary)}</div>` : ""}
+              </button>
+            `;
+          }).join("")}
+        </div>
       </section>
     `;
 }

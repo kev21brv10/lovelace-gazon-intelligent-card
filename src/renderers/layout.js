@@ -1688,22 +1688,30 @@ export function renderConfigTab(card) {
 }
 
 export function renderActiveTab(card) {
-  switch (card._activeTab) {
-    case "overview":
-      return renderOverviewTab(card);
-    case "mowing":
-      return renderMowingTab(card);
-    case "gazon":
-      return renderGazonTab(card);
-    case "products":
-      return renderProductsTab(card);
-    case "intervention":
-      return renderInterventionTab(card);
-    case "config":
-      return renderConfigTab(card);
-    case "watering":
-    default:
-      return renderWateringTab(card);
+  // Isolation par onglet : si le rendu d'un onglet échoue (ex. entité
+  // momentanément indisponible), on affiche un repli pour CET onglet au lieu
+  // de faire tomber toute la carte. Le reste (header, nav) reste fonctionnel.
+  try {
+    switch (card._activeTab) {
+      case "overview":
+        return renderOverviewTab(card);
+      case "mowing":
+        return renderMowingTab(card);
+      case "gazon":
+        return renderGazonTab(card);
+      case "products":
+        return renderProductsTab(card);
+      case "intervention":
+        return renderInterventionTab(card);
+      case "config":
+        return renderConfigTab(card);
+      case "watering":
+      default:
+        return renderWateringTab(card);
+    }
+  } catch (error) {
+    console.error("[gazon-intelligent-card] tab render failed", card._activeTab, error);
+    return `<section class="gz2-overview" aria-label="Onglet indisponible"><div class="gz2-empty">Cet onglet est momentanément indisponible. Il se rechargera à la prochaine mise à jour.</div></section>`;
   }
 }
 

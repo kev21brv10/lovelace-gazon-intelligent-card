@@ -3822,6 +3822,33 @@ class GazonIntelligentCard extends HTMLElement {
     return `<footer class="gi-info gi-info--secondary footer">${parts.map((part) => `<span>${escapeHtml(part)}</span>`).join(" · ")}</footer>`;
   }
 
+  _ensureStyles() {
+    // Injecte la feuille de style UNE seule fois (adoptedStyleSheets) au lieu de
+    // la ré-injecter à chaque rendu → plus de re-parse CSS = plus de clignotement.
+    if (!this.shadowRoot) {
+      return false;
+    }
+    try {
+      const supportsAdopted =
+        typeof CSSStyleSheet === "function"
+        && typeof CSSStyleSheet.prototype.replaceSync === "function"
+        && "adoptedStyleSheets" in this.shadowRoot;
+      if (!supportsAdopted) {
+        return false;
+      }
+      if (!this._styleSheet) {
+        this._styleSheet = new CSSStyleSheet();
+        this._styleSheet.replaceSync(CARD_STYLES);
+      }
+      if (!this.shadowRoot.adoptedStyleSheets.includes(this._styleSheet)) {
+        this.shadowRoot.adoptedStyleSheets = [this._styleSheet];
+      }
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
   _render() {
     if (!this.shadowRoot) {
       return;
@@ -3840,7 +3867,6 @@ class GazonIntelligentCard extends HTMLElement {
       if (renderSignature === this._lastRenderSignature) {
         return;
       }
-      this._lastRenderSignature = renderSignature;
 
       const activeTone = this._cardTone();
       const accent = this._config.accent_color || this._accentColorFromTone(activeTone);
@@ -3875,10 +3901,10 @@ class GazonIntelligentCard extends HTMLElement {
         .filter(Boolean)
         .join(" ");
 
+      const stylesAdopted = this._ensureStyles();
+      const styleBlock = stylesAdopted ? "" : `<style>\n${CARD_STYLES}\n        </style>`;
       this.shadowRoot.innerHTML = `
-        <style>
-${CARD_STYLES}
-        </style>
+        ${styleBlock}
 
           <ha-card
             class="gi-card ${rootClass}"
@@ -3922,8 +3948,15 @@ ${CARD_STYLES}
       this.shadowRoot.addEventListener("dblclick", this._onDoubleClick);
       this.shadowRoot.addEventListener("keydown", this._onKeyDown);
       this._syncWateringProgressTimer();
+      // Ne valider la signature qu'APRÈS un rendu réussi : si le rendu échoue,
+      // la prochaine mise à jour HA réessaiera au lieu de rester bloquée.
+      this._lastRenderSignature = renderSignature;
     } catch (error) {
       console.error("[gazon-intelligent-card] render failed", error);
+      // Erreur (souvent transitoire, entité momentanément indisponible) : on
+      // réinitialise la signature pour forcer un nouveau rendu à la prochaine
+      // mise à jour (auto-réparation, plus besoin de recharger).
+      this._lastRenderSignature = null;
       this.shadowRoot.innerHTML = `
         <div class="empty">
           <strong>Carte indisponible.</strong>

@@ -4134,6 +4134,131 @@ const CARD_STYLES = String.raw`
             border-radius: 12px;
           }
         }
+
+        /* ===== Refonte v0.4 (gz2) — header + nav + Synthèse, à plat & aéré ===== */
+        .gz2-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+          margin-bottom: 20px;
+        }
+        .gz2-header__id { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .gz2-header__icon {
+          width: 40px; height: 40px; flex: 0 0 auto;
+          border-radius: 12px;
+          background: var(--gi-accent-soft);
+          color: var(--gi-accent);
+          display: flex; align-items: center; justify-content: center;
+        }
+        .gz2-header__title {
+          font-size: var(--gi-font-lg);
+          font-weight: var(--gi-weight-medium);
+          color: var(--gi-text);
+          line-height: 1.2;
+        }
+        .gz2-header__sub {
+          display: flex; align-items: center; gap: 6px;
+          font-size: var(--gi-font-sm);
+          color: var(--gi-text-muted);
+        }
+        .gz2-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
+        .gz2-header__meta { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+        .gz2-weather {
+          display: flex; align-items: center; gap: 6px;
+          font-size: var(--gi-font-sm); color: var(--gi-text-muted); white-space: nowrap;
+        }
+        .gz2-btn {
+          display: inline-flex; align-items: center; gap: 7px;
+          border: 1px solid var(--gi-border);
+          background: transparent;
+          color: var(--gi-text);
+          border-radius: 999px;
+          padding: 8px 14px;
+          font: inherit;
+          font-size: var(--gi-font-sm);
+          font-weight: var(--gi-weight-medium);
+          cursor: pointer; white-space: nowrap;
+          transition: background-color var(--gi-motion-fast) var(--gi-ease-standard);
+        }
+        .gz2-btn:hover { background: var(--gi-surface-2); }
+
+        .gz2-nav {
+          display: flex; gap: 22px;
+          border-bottom: 1px solid var(--gi-border);
+          margin-bottom: 24px;
+          overflow-x: auto;
+          scrollbar-width: none;
+        }
+        .gz2-nav::-webkit-scrollbar { display: none; }
+        .gz2-nav__item {
+          appearance: none; -webkit-appearance: none;
+          background: none; border: none;
+          border-bottom: 2px solid transparent;
+          color: var(--gi-text-muted);
+          padding: 10px 1px;
+          margin-bottom: -1px;
+          font: inherit;
+          font-size: var(--gi-font-sm);
+          font-weight: var(--gi-weight-medium);
+          cursor: pointer; white-space: nowrap; flex: 0 0 auto;
+          transition: color var(--gi-motion-fast) var(--gi-ease-standard), border-color var(--gi-motion-fast) var(--gi-ease-standard);
+        }
+        .gz2-nav__item:hover { color: var(--gi-text); }
+        .gz2-nav__item--active { color: var(--gi-text); border-bottom-color: var(--gi-accent); }
+
+        .gz2-overview { display: flex; flex-direction: column; }
+        .gz2-eyebrow {
+          font-size: var(--gi-font-xs);
+          text-transform: uppercase; letter-spacing: 0.06em;
+          color: var(--gi-text-faint);
+          margin-bottom: 12px;
+        }
+        .gz2-hero { margin-bottom: 28px; }
+        .gz2-hero__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+        .gz2-hero__title {
+          font-size: var(--gi-font-2xl);
+          font-weight: var(--gi-weight-medium);
+          color: var(--gi-text);
+          line-height: 1.25; margin-top: 2px;
+        }
+        .gz2-hero__sub { font-size: var(--gi-font-sm); color: var(--gi-text-muted); line-height: 1.5; margin-top: 10px; }
+
+        .gz2-chip {
+          display: inline-flex; align-items: center; gap: 6px;
+          font-size: var(--gi-font-xs); font-weight: var(--gi-weight-medium);
+          padding: 5px 11px; border-radius: 999px; white-space: nowrap; flex: 0 0 auto;
+        }
+        .gz2-chip--success { background: color-mix(in srgb, var(--gi-status-success) 14%, transparent); color: var(--gi-status-success); }
+        .gz2-chip--warning { background: color-mix(in srgb, var(--gi-status-warning) 14%, transparent); color: var(--gi-status-warning); }
+        .gz2-chip--danger  { background: color-mix(in srgb, var(--gi-status-danger) 14%, transparent); color: var(--gi-status-danger); }
+        .gz2-chip--critical{ background: color-mix(in srgb, var(--gi-status-danger) 18%, transparent); color: var(--gi-status-danger); }
+        .gz2-chip--accent  { background: var(--gi-accent-soft); color: var(--gi-accent); }
+        .gz2-chip--neutral { background: var(--gi-surface-2); color: var(--gi-text-muted); }
+
+        .gz2-reperes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 28px; margin-bottom: 30px; }
+        .gz2-rep__label { font-size: var(--gi-font-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--gi-text-faint); margin-bottom: 7px; }
+        .gz2-rep__value { font-size: var(--gi-font-lg); font-weight: var(--gi-weight-medium); color: var(--gi-text); overflow-wrap: anywhere; }
+
+        .gz2-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .gz2-card {
+          appearance: none; -webkit-appearance: none;
+          text-align: left; font: inherit; color: inherit;
+          background: var(--gi-surface);
+          border: 1px solid transparent;
+          border-radius: 14px;
+          padding: 16px 18px;
+          cursor: pointer; min-width: 0;
+          transition: border-color var(--gi-motion-fast) var(--gi-ease-standard), background-color var(--gi-motion-fast) var(--gi-ease-standard);
+        }
+        .gz2-card:hover { border-color: var(--gi-border); background: var(--gi-surface-2); }
+        .gz2-card__label { font-size: var(--gi-font-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--gi-text-faint); margin-bottom: 8px; }
+        .gz2-card__value { font-size: var(--gi-font-md); font-weight: var(--gi-weight-medium); color: var(--gi-text); line-height: 1.2; overflow-wrap: anywhere; }
+        .gz2-card__value--success { color: var(--gi-status-success); }
+        .gz2-card__value--warning { color: var(--gi-status-warning); }
+        .gz2-card__value--danger  { color: var(--gi-status-danger); }
+        .gz2-card__value--critical{ color: var(--gi-status-danger); }
+        .gz2-card__sub { font-size: var(--gi-font-xs); color: var(--gi-text-muted); margin-top: 6px; line-height: 1.4; }
 `;
 const EDITOR_STYLES = String.raw`
         :host {
@@ -4327,7 +4452,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.3.4";
+const CARD_VERSION = "0.4.0";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -10469,21 +10594,10 @@ if (!window.customCards.some((card) => card.type === CARD_TYPE)) {
 
 function renderTabNav(card) {
   return `
-      <nav class="gi-tabs tab-nav" aria-label="Domaines de la carte">
+      <nav class="gz2-nav" aria-label="Domaines de la carte">
         ${TAB_DEFS.map((tab) => {
           const active = tab.key === card._activeTab;
-          const iconHtml = card._config?.show_icons ? renderIconBox(tab.icon, "sm") : "";
-          return `
-            <button
-              type="button"
-              class="gi-row gi-action tab-nav__item ${active ? "tab-nav__item--active" : ""}"
-              data-tab="${escapeHtml(tab.key)}"
-              aria-pressed="${active ? "true" : "false"}"
-            >
-              ${iconHtml}
-              <span>${escapeHtml(tab.label)}</span>
-            </button>
-          `;
+          return `<button type="button" class="gz2-nav__item ${active ? "gz2-nav__item--active" : ""}" data-tab="${escapeHtml(tab.key)}" aria-pressed="${active ? "true" : "false"}">${escapeHtml(tab.label)}</button>`;
         }).join("")}
       </nav>
     `;
@@ -11717,82 +11831,90 @@ function renderHeader(card) {
   const weather = card._weatherState();
   const manualActionLabel = card._manualActionLabel();
   const tone = card._cardTone();
+  const dotToneMap = { success: "success", warning: "warning", danger: "danger", critical: "danger", accent: "success", neutral: "neutral" };
+  const dotTone = dotToneMap[tone] || "neutral";
   return `
-      <header class="gi-row header">
-        <div class="gi-row header__title-wrap">
-          <div class="header__icon header__icon--${tone}">
-            ${card._config.show_icons ? renderIconBox("mdi:grass", "md") : ""}
-          </div>
-          <div class="header__titles">
-            <div class="header__title">${escapeHtml(card._config.title || "Gazon Intelligent")}</div>
-            <div class="header__subtitle">${subtitleParts.join(" · ")}</div>
+      <header class="gz2-header">
+        <div class="gz2-header__id">
+          <div class="gz2-header__icon">${card._config.show_icons ? renderIconBox("mdi:grass", "md") : ""}</div>
+          <div>
+            <div class="gz2-header__title">${escapeHtml(card._config.title || "Gazon Intelligent")}</div>
+            <div class="gz2-header__sub"><span class="gz2-dot" style="background: var(--gi-status-${dotTone});"></span>${subtitleParts.join(" · ")}</div>
           </div>
         </div>
-        <div class="header__meta">
-          ${
-            weather
-              ? `${renderStatusPill(weather.summary, "neutral", weather.icon, "header__weather")}`
-              : ""
-          }
+        <div class="gz2-header__meta">
+          ${weather ? `<span class="gz2-weather">${weather.icon ? renderIconBox(weather.icon, "sm") : ""}${escapeHtml(weather.summary)}</span>` : ""}
           <button
             type="button"
-            class="header__action gi-action"
+            class="gz2-btn"
             data-gazon-action="manual-irrigation"
             style="${card._manualActionStyle()}"
             aria-label="${escapeHtml(manualActionLabel)}"
           >
-            ${card._config?.show_icons ? renderIconBox("mdi:water-pump", "sm") : ""}
-            <span>${escapeHtml(manualActionLabel)}</span>
+            ${card._config?.show_icons ? renderIconBox("mdi:water-pump", "sm") : ""}<span>${escapeHtml(manualActionLabel)}</span>
           </button>
         </div>
-
       </header>
     `;
 }
 
 function renderOverviewTab(card) {
   const windowState = card._windowState();
-  const planState = card._planState();
   const proposal = card._overviewProposal();
   const overviewTone = proposal.tone;
-  const overviewIcon = card._config?.show_icons ? proposal.icon : null;
   const facts = card._overviewFacts();
-  const wateringProgress = card._wateringProgressState();
   const nextWatering = card._nextWateringState();
   const nextMowing = card._nextMowingState();
   const lastWatering = card._lastWateringState();
-  const overviewStrip = [
-    card._renderTabPill("Fenêtre", windowState.statusLabel, windowState.tone, "mdi:clock-outline"),
-    card._renderTabPill("Prochain arrosage", nextWatering.label, nextWatering.tone, "mdi:clock-water-outline"),
-    card._renderTabPill("Prochaine tonte", nextMowing.label, nextMowing.tone, "mdi:calendar-clock"),
-    card._renderTabPill("Dernier arrosage", lastWatering.label, lastWatering.value !== null ? "success" : "neutral", "mdi:water-check"),
+  const chipTone = ["success", "warning", "danger", "critical", "accent", "neutral"].includes(overviewTone) ? overviewTone : "neutral";
+  const titleText = proposal.hint || "Vue d’ensemble du gazon.";
+  let heroSub = compactDecisionText(card._entityState("entity_conseil", "") || "", { maxLength: 130 });
+  if (!heroSub || heroSub === titleText) {
+    heroSub = "";
+  }
+  const reperes = [
+    { label: "Fenêtre", value: windowState.statusLabel },
+    { label: "Prochain arrosage", value: nextWatering.label },
+    { label: "Prochaine tonte", value: nextMowing.label },
+    { label: "Dernier arrosage", value: lastWatering.label },
   ];
 
   return `
-      <section class="tab-panel gi-panel tab-panel--overview">
-        <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${overviewTone}">
-          <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">Vue prioritaire</div>
-            ${renderStatusPill(proposal.title, overviewTone, overviewIcon, `tab-panel__status tab-panel__status--${overviewTone}`)}
+      <section class="gz2-overview" aria-label="Synthèse">
+        <div class="gz2-hero">
+          <div class="gz2-hero__top">
+            <div>
+              <div class="gz2-eyebrow">Conseil du jour</div>
+              <div class="gz2-hero__title">${escapeHtml(titleText)}</div>
+            </div>
+            ${proposal.title ? `<span class="gz2-chip gz2-chip--${chipTone}">${escapeHtml(proposal.title)}</span>` : ""}
           </div>
-          <div class="tab-panel__hero-next">${escapeHtml(proposal.hint || "Vue d’ensemble de la carte.")}</div>
-          <div class="tab-panel__hero-hint">${escapeHtml("Le résumé remonte d’abord la décision utile, puis les repères importants.")}</div>
+          ${heroSub ? `<div class="gz2-hero__sub">${escapeHtml(heroSub)}</div>` : ""}
         </div>
 
-        ${renderWateringProgressSection(card, wateringProgress)}
-
-        <div class="tab-panel__decision-strip tab-panel__decision-strip--overview" aria-label="Repères synthèse">
-          ${overviewStrip.join("")}
+        <div class="gz2-reperes" aria-label="Repères">
+          ${reperes.map((r) => `
+            <div class="gz2-rep">
+              <div class="gz2-rep__label">${escapeHtml(r.label)}</div>
+              <div class="gz2-rep__value">${escapeHtml(r.value || "—")}</div>
+            </div>
+          `).join("")}
         </div>
 
-        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--overview-facts">
-          <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Essentiel</div>
-            <div class="tab-panel__section-meta">${escapeHtml(`${facts.length} repère${facts.length > 1 ? "s" : ""}`)}</div>
-          </div>
-          ${renderFactCards(card, facts, "tab-panel__facts-grid--overview")}
-        </section>
-
+        <div class="gz2-eyebrow">Essentiel</div>
+        <div class="gz2-cards">
+          ${facts.map((f) => {
+            const eid = card._entityId(f.entityKey);
+            const vTone = ["success", "warning", "danger", "critical"].includes(f.tone) ? ` gz2-card__value--${f.tone}` : "";
+            return `
+              <button type="button" class="gz2-card"${eid ? ` data-more-info-entity="${escapeHtml(eid)}"` : ""}>
+                <div class="gz2-card__label">${escapeHtml(f.label)}</div>
+                <div class="gz2-card__value${vTone}">${escapeHtml(f.value)}</div>
+                ${f.secondary ? `<div class="gz2-card__sub">${escapeHtml(f.secondary)}</div>` : ""}
+              </button>
+            `;
+          }).join("")}
+        </div>
       </section>
     `;
 }

@@ -4144,6 +4144,8 @@ export const CARD_STYLES = String.raw`
           margin-bottom: 16px;
         }
         .gz2-header__id { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .gz2-header__titles { min-width: 0; }
+        .gz2-header__title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .gz2-header__icon {
           width: 40px; height: 40px; flex: 0 0 auto;
           border-radius: 12px;
@@ -4259,4 +4261,9 @@ export const CARD_STYLES = String.raw`
         .gz2-card__value--danger  { color: var(--gi-status-danger); }
         .gz2-card__value--critical{ color: var(--gi-status-danger); }
         .gz2-card__sub { font-size: var(--gi-font-xs); color: var(--gi-text-muted); margin-top: 6px; line-height: 1.4; }
+
+        @media (max-width: 600px) {
+          .gz2-header { flex-wrap: wrap; }
+          .gz2-header__meta { width: 100%; justify-content: space-between; }
+        }
 `;

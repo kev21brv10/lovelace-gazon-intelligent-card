@@ -4144,6 +4144,8 @@ const CARD_STYLES = String.raw`
           margin-bottom: 16px;
         }
         .gz2-header__id { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .gz2-header__titles { min-width: 0; }
+        .gz2-header__title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .gz2-header__icon {
           width: 40px; height: 40px; flex: 0 0 auto;
           border-radius: 12px;
@@ -4259,6 +4261,11 @@ const CARD_STYLES = String.raw`
         .gz2-card__value--danger  { color: var(--gi-status-danger); }
         .gz2-card__value--critical{ color: var(--gi-status-danger); }
         .gz2-card__sub { font-size: var(--gi-font-xs); color: var(--gi-text-muted); margin-top: 6px; line-height: 1.4; }
+
+        @media (max-width: 600px) {
+          .gz2-header { flex-wrap: wrap; }
+          .gz2-header__meta { width: 100%; justify-content: space-between; }
+        }
 `;
 const EDITOR_STYLES = String.raw`
         :host {
@@ -4452,7 +4459,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.4.1";
+const CARD_VERSION = "0.4.2";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -11837,7 +11844,7 @@ function renderHeader(card) {
       <header class="gz2-header">
         <div class="gz2-header__id">
           <div class="gz2-header__icon">${card._config.show_icons ? renderIconBox("mdi:grass", "md") : ""}</div>
-          <div>
+          <div class="gz2-header__titles">
             <div class="gz2-header__title">${escapeHtml(card._config.title || "Gazon Intelligent")}</div>
             <div class="gz2-header__sub"><span class="gz2-dot" style="background: var(--gi-status-${dotTone});"></span>${subtitleParts.join(" · ")}</div>
           </div>

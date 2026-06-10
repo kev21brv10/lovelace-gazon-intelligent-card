@@ -4264,6 +4264,20 @@ export const CARD_STYLES = String.raw`
 
         .gz2-eyebrow--section { margin-top: 24px; }
         .gz2-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+        .gz2-card--static { cursor: default; }
+        .gz2-empty { font-size: var(--gi-font-sm); color: var(--gi-text-muted); padding: 8px 0; }
+        .gz2-field { margin-bottom: 16px; }
+        .gz2-field__label { display: block; font-size: var(--gi-font-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--gi-text-faint); margin-bottom: 7px; }
+        .gz2-select {
+          appearance: none; -webkit-appearance: none;
+          width: 100%;
+          background: var(--gi-surface); color: var(--gi-text);
+          border: 1px solid var(--gi-border); border-radius: var(--gi-radius-sm);
+          padding: 10px 12px; font: inherit; font-size: var(--gi-font-sm); cursor: pointer;
+        }
+        .gz2-select:hover { border-color: var(--gi-border-strong); }
+        .gz2-btn--block { width: 100%; justify-content: center; }
+        .gz2-btn:disabled { opacity: 0.5; cursor: default; }
         .gz2-meter { margin-bottom: 18px; }
         .gz2-meter__top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
         .gz2-meter__value { font-size: var(--gi-font-lg); font-weight: var(--gi-weight-medium); color: var(--gi-text); }

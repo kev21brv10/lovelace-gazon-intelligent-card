@@ -3115,19 +3115,24 @@ export const CARD_STYLES = String.raw`
           height: 100%;
           padding: var(--gi-card-core-padding);
           position: relative;
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 14%, var(--divider-color));
-          background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 5%, transparent) 0%, transparent 20%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 3%, transparent) 0%, transparent 100%),
-            var(--gi-surface-fill);
-          box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.04),
-            0 7px 16px rgba(0, 0, 0, 0.11);
+          border: 1px solid var(--gi-border);
+          background: var(--gi-surface);
+          box-shadow: none;
           transition:
             transform var(--gi-motion-fast) var(--gi-ease-standard),
             border-color var(--gi-motion-fast) var(--gi-ease-standard),
             background-color var(--gi-motion-fast) var(--gi-ease-standard),
             box-shadow var(--gi-motion-fast) var(--gi-ease-standard);
+        }
+
+        /* Synthèse : pas de boîtes imbriquées — hero & sections coulent sur la carte */
+        .tab-panel--overview .tab-panel__hero,
+        .tab-panel--overview .tab-panel__section,
+        .tab-panel--overview .tab-panel__block {
+          background: transparent;
+          border: none;
+          box-shadow: none;
+          padding: 0;
         }
 
         .gi-card-core--stat,

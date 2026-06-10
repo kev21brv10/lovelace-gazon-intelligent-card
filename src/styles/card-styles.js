@@ -4146,7 +4146,9 @@ export const CARD_STYLES = String.raw`
         }
         .gz2-header__id { display: flex; align-items: center; gap: 12px; min-width: 0; }
         .gz2-header__titles { min-width: 0; }
-        .gz2-header__title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .gz2-header__name { display: flex; align-items: center; gap: 8px; min-width: 0; }
+        .gz2-title-dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+        .gz2-header__title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
         .gz2-header__icon {
           width: 40px; height: 40px; flex: 0 0 auto;
           border-radius: 12px;

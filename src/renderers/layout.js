@@ -1090,8 +1090,11 @@ export function renderHeader(card) {
         <div class="gz2-header__id">
           <div class="gz2-header__icon">${card._config.show_icons ? renderIconBox("mdi:grass", "md") : ""}</div>
           <div class="gz2-header__titles">
-            <div class="gz2-header__title">${escapeHtml(card._config.title || "Gazon Intelligent")}</div>
-            <div class="gz2-header__sub"><span class="gz2-dot" style="background: var(--gi-status-${dotTone});"></span>${subtitleParts.join(" · ")}</div>
+            <div class="gz2-header__name">
+              <div class="gz2-header__title">${escapeHtml(card._config.title || "Gazon Intelligent")}</div>
+              <span class="gz2-title-dot" style="background: var(--gi-status-${dotTone});" title="État global de la carte" aria-hidden="true"></span>
+            </div>
+            <div class="gz2-header__sub">${subtitleParts.join(" · ")}</div>
           </div>
         </div>
         <div class="gz2-header__meta">

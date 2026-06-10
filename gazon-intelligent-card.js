@@ -4484,7 +4484,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.5.1";
+const CARD_VERSION = "0.5.2";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -9609,25 +9609,30 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _renderAdvancedGroup(title, meta, keys, eyebrow = "Détail") {
-    const tiles = keys
+    const fields = keys
       .map((key) => ENTITY_KEYS.find((field) => field.key === key))
       .filter(Boolean)
-      .map((field) => this._renderTile(field))
-      .filter(Boolean);
-    if (!tiles.length) {
+      .filter((field) => this._entityId(field.key));
+    if (!fields.length) {
       return "";
     }
+    const cards = fields.map((field) => {
+      const entity = this._entity(field.key);
+      const value = this._formatFieldValue(field, entity);
+      const tone = this._toneForField(field, entity);
+      const secondary = this._config?.show_secondary_info ? this._secondaryFieldText(field, entity) : "";
+      const eid = this._entityId(field.key);
+      const vTone = ["success", "warning", "danger", "critical"].includes(tone) ? ` gz2-card__value--${tone}` : "";
+      return `
+        <button type="button" class="gz2-card" data-more-info-entity="${escapeHtml(eid)}">
+          <div class="gz2-card__label">${escapeHtml(field.label)}</div>
+          <div class="gz2-card__value${vTone}">${escapeHtml(value)}</div>
+          ${secondary ? `<div class="gz2-card__sub">${escapeHtml(secondary)}</div>` : ""}
+        </button>`;
+    }).join("");
     return `
-      <section class="gi-info gi-info--secondary advanced-group">
-        <div class="advanced-group__head">
-          <div class="advanced-group__eyebrow">${escapeHtml(eyebrow)}</div>
-          <div class="advanced-group__title">${escapeHtml(title)}</div>
-          <div class="advanced-group__meta">${escapeHtml(meta)}</div>
-        </div>
-        <div class="advanced-group__grid">
-          ${tiles.join("")}
-        </div>
-      </section>
+      <div class="gz2-eyebrow gz2-eyebrow--section">${escapeHtml(title)}</div>
+      <div class="gz2-cards">${cards}</div>
     `;
   }
 
@@ -10124,24 +10129,11 @@ class GazonIntelligentCard extends HTMLElement {
       return "";
     }
     return `
-      <section class="decision-grid">
-        ${
-          action
-              ? `<div class="gi-info gi-info--secondary decision decision--action">
-                <div class="decision__label">Action recommandée</div>
-                <div class="decision__value">${escapeHtml(action)}</div>
-              </div>`
-            : ""
-        }
-        ${
-          avoid
-            ? `<div class="gi-info gi-info--secondary decision decision--avoid">
-                <div class="decision__label">Action à éviter</div>
-                <div class="decision__value">${escapeHtml(avoid)}</div>
-              </div>`
-            : ""
-        }
-      </section>
+      <div class="gz2-eyebrow gz2-eyebrow--section">Décision</div>
+      <div class="gz2-cards">
+        ${action ? `<div class="gz2-card gz2-card--static"><div class="gz2-card__label">À faire</div><div class="gz2-card__value">${escapeHtml(action)}</div></div>` : ""}
+        ${avoid ? `<div class="gz2-card gz2-card--static"><div class="gz2-card__label">À éviter</div><div class="gz2-card__value">${escapeHtml(avoid)}</div></div>` : ""}
+      </div>
     `;
   }
 

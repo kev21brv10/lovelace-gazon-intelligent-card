@@ -2646,6 +2646,7 @@ const CARD_STYLES = String.raw`
           padding: var(--gazon-card-padding);
           position: relative;
           isolation: isolate;
+          container-type: inline-size;
         }
 
         ha-card {
@@ -4287,7 +4288,9 @@ const CARD_STYLES = String.raw`
         .gz2-meter__surplus { position: absolute; top: 0; height: 100%; border-radius: 999px; background: color-mix(in srgb, var(--gi-status-success) 55%, transparent); }
         .gz2-meter__meta { font-size: var(--gi-font-xs); color: var(--gi-text-muted); margin-top: 9px; line-height: 1.4; }
 
-        @media (max-width: 600px) {
+        /* Basé sur la largeur de la CARTE (pas du navigateur) : header lisible
+           même quand la carte est étroite dans un dashboard large. */
+        @container (max-width: 560px) {
           .gz2-header { flex-wrap: wrap; }
           .gz2-header__meta { width: 100%; justify-content: space-between; }
         }
@@ -4484,7 +4487,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.5.4";
+const CARD_VERSION = "0.5.5";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

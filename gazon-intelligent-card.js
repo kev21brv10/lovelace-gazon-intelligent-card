@@ -371,6 +371,54 @@ const CARD_STYLES = String.raw`
           opacity: 1;
         }
 
+        /* Onglets façon texte souligné (cible maquette) — scopé à la nav d'onglets */
+        .tab-nav {
+          gap: 22px;
+          border-bottom: 1px solid var(--gi-border);
+          padding-inline: 2px;
+          padding-bottom: 0;
+          margin: 2px 0 18px;
+          align-items: stretch;
+        }
+
+        .tab-nav .tab-nav__item {
+          border: none;
+          border-bottom: 2px solid transparent;
+          border-radius: 0;
+          background: none;
+          box-shadow: none;
+          color: var(--gi-text-muted);
+          padding: 9px 1px;
+          margin-bottom: -1px;
+          font-weight: var(--gi-weight-medium);
+          font-size: var(--gi-font-sm);
+          transform: none;
+          overflow: visible;
+        }
+
+        .tab-nav .tab-nav__item::before {
+          content: none;
+        }
+
+        .tab-nav .tab-nav__item .gi-icon {
+          display: none;
+        }
+
+        .tab-nav .tab-nav__item:hover {
+          background: none;
+          box-shadow: none;
+          transform: none;
+          color: var(--gi-text);
+        }
+
+        .tab-nav .tab-nav__item--active {
+          background: none;
+          box-shadow: none;
+          transform: none;
+          color: var(--gi-text);
+          border-bottom-color: var(--gi-accent);
+        }
+
         .tab-panel,
         .gi-panel {
           display: flex;
@@ -4274,7 +4322,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.3.2";
+const CARD_VERSION = "0.3.3";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

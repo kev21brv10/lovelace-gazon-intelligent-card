@@ -60,14 +60,49 @@ const CARD_STYLES = String.raw`
           --gi-card-core-icon-size: 22px;
           --gi-card-core-icon-glyph-size: 13px;
           --gi-card-core-secondary-size: 0.74rem;
-          --gi-surface-border: color-mix(in srgb, var(--gazon-section-accent) 26%, rgba(255, 255, 255, 0.08));
-          --gi-surface-border-strong: color-mix(in srgb, var(--gazon-section-accent) 46%, rgba(255, 255, 255, 0.16));
-          --gi-surface-fill:
-            linear-gradient(180deg, color-mix(in srgb, #1a2028 89%, var(--gazon-section-accent) 11%) 0%, color-mix(in srgb, #0f1217 98%, black) 100%);
-          --gi-surface-fill-accent:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 30%, #1a2028) 0%, color-mix(in srgb, #0f1217 98%, black) 100%);
-          --gi-surface-shadow: 0 12px 26px rgba(0, 0, 0, 0.28);
-          --gi-surface-shadow-strong: 0 22px 46px rgba(0, 0, 0, 0.42);
+          /* ── Design tokens v2 (modernisation : à plat, 1 accent, plus d'air) ── */
+          /* Échelle d'espacement, base 4px */
+          --gi-space-1: 4px;
+          --gi-space-2: 8px;
+          --gi-space-3: 12px;
+          --gi-space-4: 16px;
+          --gi-space-5: 24px;
+          --gi-space-6: 32px;
+          /* Rayons normalisés */
+          --gi-radius-sm: 10px;
+          --gi-radius-md: 14px;
+          --gi-radius-lg: 18px;
+          /* Poids typographiques (deux seulement) */
+          --gi-weight-regular: 400;
+          --gi-weight-medium: 500;
+          /* Accent unique, surchargeable (config accent_color → --gazon-brand-accent) */
+          --gi-accent: var(--gazon-brand-accent, var(--gazon-section-accent, #58c27d));
+          --gi-accent-text: var(--gi-accent);
+          --gi-accent-soft: color-mix(in srgb, var(--gi-accent) 14%, transparent);
+          /* Surfaces neutres branchées sur le thème HA (clair/sombre automatique) */
+          --gi-bg: var(--ha-card-background, var(--card-background-color, var(--secondary-background-color)));
+          --gi-surface: color-mix(in srgb, var(--primary-text-color) 4%, var(--gi-bg));
+          --gi-surface-2: color-mix(in srgb, var(--primary-text-color) 8%, var(--gi-bg));
+          --gi-border: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+          --gi-border-strong: color-mix(in srgb, var(--primary-text-color) 22%, transparent);
+          /* Texte : alias du thème HA */
+          --gi-text: var(--primary-text-color);
+          --gi-text-muted: var(--secondary-text-color);
+          --gi-text-faint: color-mix(in srgb, var(--secondary-text-color) 70%, transparent);
+          /* Statuts : la couleur ne porte que le sens */
+          --gi-status-success: var(--success-color, #4caf50);
+          --gi-status-warning: var(--warning-color, #ff9800);
+          --gi-status-danger: var(--error-color, #f44336);
+          --gi-status-neutral: var(--secondary-text-color);
+          /* Élévation : une seule ombre douce */
+          --gi-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 1px rgba(0, 0, 0, 0.04);
+          /* ── Tokens hérités, ré-câblés à plat sur la base v2 ── */
+          --gi-surface-border: var(--gi-border);
+          --gi-surface-border-strong: var(--gi-border-strong);
+          --gi-surface-fill: var(--gi-surface);
+          --gi-surface-fill-accent: var(--gi-surface-2);
+          --gi-surface-shadow: var(--gi-shadow-sm);
+          --gi-surface-shadow-strong: var(--gi-shadow-sm);
           --gi-tab-accent: var(--gazon-section-accent);
           --gi-tab-companion: var(--gazon-water-color, #5f97a3);
           --gi-tab-glow-color: var(--gazon-section-accent);
@@ -2295,12 +2330,8 @@ const CARD_STYLES = String.raw`
           min-height: 28px;
           padding: 2px 10px;
           border-radius: 999px;
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 96%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
-          box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.05),
-            0 5px 12px rgba(0, 0, 0, 0.05);
+          border: 1px solid var(--gi-border);
+          background: var(--gi-surface-2);
           min-width: 0;
           box-sizing: border-box;
         }
@@ -2333,8 +2364,7 @@ const CARD_STYLES = String.raw`
           overflow: visible;
           line-height: 0;
           border-radius: 999px;
-          background: color-mix(in srgb, var(--gazon-card-accent) 14%, transparent);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+          background: transparent;
         }
 
         .gi-pill__icon .gi-icon--pill {
@@ -2387,7 +2417,7 @@ const CARD_STYLES = String.raw`
 
         .gi-pill__value {
           font-size: var(--gi-font-xs);
-          font-weight: 700;
+          font-weight: var(--gi-weight-medium);
           line-height: 1.12;
           overflow-wrap: anywhere;
           min-width: 0;
@@ -2397,39 +2427,39 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-pill--danger {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-danger-color) 16%, transparent) 0%, color-mix(in srgb, var(--gazon-danger-color) 8%, transparent) 100%);
-          border-color: color-mix(in srgb, var(--gazon-danger-color) 24%, transparent);
+          background: color-mix(in srgb, var(--gi-status-danger) 14%, transparent);
+          border-color: color-mix(in srgb, var(--gi-status-danger) 30%, transparent);
+          color: var(--gi-status-danger);
         }
 
         .gi-pill--critical {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-critical-color) 18%, transparent) 0%, color-mix(in srgb, var(--gazon-critical-color) 10%, transparent) 100%);
-          border-color: color-mix(in srgb, var(--gazon-critical-color) 28%, transparent);
+          background: color-mix(in srgb, var(--gi-status-danger) 18%, transparent);
+          border-color: color-mix(in srgb, var(--gi-status-danger) 38%, transparent);
+          color: var(--gi-status-danger);
         }
 
         .gi-pill--warning {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-warning-color) 16%, transparent) 0%, color-mix(in srgb, var(--gazon-warning-color) 8%, transparent) 100%);
-          border-color: color-mix(in srgb, var(--gazon-warning-color) 24%, transparent);
+          background: color-mix(in srgb, var(--gi-status-warning) 14%, transparent);
+          border-color: color-mix(in srgb, var(--gi-status-warning) 30%, transparent);
+          color: var(--gi-status-warning);
         }
 
         .gi-pill--success {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color) 16%, transparent) 0%, color-mix(in srgb, var(--gazon-success-color) 8%, transparent) 100%);
-          border-color: color-mix(in srgb, var(--gazon-success-color) 24%, transparent);
+          background: color-mix(in srgb, var(--gi-status-success) 14%, transparent);
+          border-color: color-mix(in srgb, var(--gi-status-success) 30%, transparent);
+          color: var(--gi-status-success);
         }
 
         .gi-pill--accent {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-accent-tone-color) 14%, transparent) 0%, color-mix(in srgb, var(--gazon-accent-tone-color) 7%, transparent) 100%);
-          border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 24%, transparent);
+          background: var(--gi-accent-soft);
+          border-color: color-mix(in srgb, var(--gi-accent) 30%, transparent);
+          color: var(--gi-accent);
         }
 
         .gi-pill--neutral {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
-          border-color: color-mix(in srgb, var(--divider-color) 70%, var(--gazon-section-accent) 10%);
+          background: var(--gi-surface-2);
+          border-color: var(--gi-border);
+          color: var(--gi-text-muted);
         }
 
         .decision-context {
@@ -3091,11 +3121,8 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-card-core--tile {
-          border: 1px solid color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 26%, transparent);
-          background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 4%, transparent) 0%, transparent 18%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 8%, transparent) 0%, transparent 100%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
+          border: 1px solid var(--gi-border);
+          background: var(--gi-surface);
         }
 
         .gi-card-core__icon {
@@ -3109,9 +3136,8 @@ const CARD_STYLES = String.raw`
           flex: none;
           overflow: visible;
           line-height: 0;
-          background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
-          color: var(--gazon-section-accent);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+          background: var(--gi-accent-soft);
+          color: var(--gi-accent);
         }
 
         .gi-card-core--tile .gi-card-core__icon {
@@ -3188,7 +3214,7 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-card-core__value {
-          font-weight: 700;
+          font-weight: var(--gi-weight-medium);
           min-width: 0;
           overflow-wrap: break-word;
           word-break: normal;
@@ -3205,7 +3231,7 @@ const CARD_STYLES = String.raw`
           order: 1;
           font-size: clamp(1.18rem, 1.08rem + 0.44vw, 1.42rem);
           line-height: 1.02;
-          font-weight: 900;
+          font-weight: var(--gi-weight-medium);
         }
 
         .gi-card-core--metric .gi-card-core__label {
@@ -4275,7 +4301,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.2.8";
+const CARD_VERSION = "0.3.0";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -4498,12 +4524,15 @@ const SECTION_FIELDS = {
   details: ENTITY_KEYS.map((field) => field.key),
 };
 
+// Accent unique de marque : un seul vert pour tous les onglets (fini l'arc-en-ciel).
+// Surchargeable côté thème/config via --gazon-brand-accent.
+const BRAND_ACCENT = "#58c27d";
 const SECTION_ACCENTS = {
-  overview: "#58c27d",
-  watering: "#31b8d4",
-  mowing: "#97c84b",
-  products: "#58c27d",
-  details: "#7b8da0",
+  overview: BRAND_ACCENT,
+  watering: BRAND_ACCENT,
+  mowing: BRAND_ACCENT,
+  products: BRAND_ACCENT,
+  details: BRAND_ACCENT,
 };
 
 const LEGACY_ENTITY_KEYS = [

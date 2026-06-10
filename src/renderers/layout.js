@@ -41,13 +41,14 @@ function renderGz2Hero(eyebrow, title, sub = "") {
 }
 
 function renderGz2Cards(card, items) {
+  const showSub = card._config?.show_secondary_info !== false;
   return items.map((f) => {
     const eid = f.entityKey ? card._entityId(f.entityKey) : null;
     const vTone = ["success", "warning", "danger", "critical"].includes(f.tone) ? ` gz2-card__value--${f.tone}` : "";
     const inner = `
         <div class="gz2-card__label">${escapeHtml(f.label)}</div>
         <div class="gz2-card__value${vTone}">${escapeHtml(f.value)}</div>
-        ${f.secondary ? `<div class="gz2-card__sub">${escapeHtml(f.secondary)}</div>` : ""}`;
+        ${showSub && f.secondary ? `<div class="gz2-card__sub">${escapeHtml(f.secondary)}</div>` : ""}`;
     return eid
       ? `<button type="button" class="gz2-card" data-more-info-entity="${escapeHtml(eid)}">${inner}</button>`
       : `<div class="gz2-card gz2-card--static">${inner}</div>`;

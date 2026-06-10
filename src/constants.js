@@ -223,12 +223,15 @@ export const SECTION_FIELDS = {
   details: ENTITY_KEYS.map((field) => field.key),
 };
 
+// Accent unique de marque : un seul vert pour tous les onglets (fini l'arc-en-ciel).
+// Surchargeable côté thème/config via --gazon-brand-accent.
+const BRAND_ACCENT = "#58c27d";
 export const SECTION_ACCENTS = {
-  overview: "#58c27d",
-  watering: "#31b8d4",
-  mowing: "#97c84b",
-  products: "#58c27d",
-  details: "#7b8da0",
+  overview: BRAND_ACCENT,
+  watering: BRAND_ACCENT,
+  mowing: BRAND_ACCENT,
+  products: BRAND_ACCENT,
+  details: BRAND_ACCENT,
 };
 
 export const LEGACY_ENTITY_KEYS = [

@@ -60,14 +60,49 @@ const CARD_STYLES = String.raw`
           --gi-card-core-icon-size: 22px;
           --gi-card-core-icon-glyph-size: 13px;
           --gi-card-core-secondary-size: 0.74rem;
-          --gi-surface-border: color-mix(in srgb, var(--gazon-section-accent) 26%, rgba(255, 255, 255, 0.08));
-          --gi-surface-border-strong: color-mix(in srgb, var(--gazon-section-accent) 46%, rgba(255, 255, 255, 0.16));
-          --gi-surface-fill:
-            linear-gradient(180deg, color-mix(in srgb, #1a2028 89%, var(--gazon-section-accent) 11%) 0%, color-mix(in srgb, #0f1217 98%, black) 100%);
-          --gi-surface-fill-accent:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 30%, #1a2028) 0%, color-mix(in srgb, #0f1217 98%, black) 100%);
-          --gi-surface-shadow: 0 12px 26px rgba(0, 0, 0, 0.28);
-          --gi-surface-shadow-strong: 0 22px 46px rgba(0, 0, 0, 0.42);
+          /* ── Design tokens v2 (modernisation : à plat, 1 accent, plus d'air) ── */
+          /* Échelle d'espacement, base 4px */
+          --gi-space-1: 4px;
+          --gi-space-2: 8px;
+          --gi-space-3: 12px;
+          --gi-space-4: 16px;
+          --gi-space-5: 24px;
+          --gi-space-6: 32px;
+          /* Rayons normalisés */
+          --gi-radius-sm: 10px;
+          --gi-radius-md: 14px;
+          --gi-radius-lg: 18px;
+          /* Poids typographiques (deux seulement) */
+          --gi-weight-regular: 400;
+          --gi-weight-medium: 500;
+          /* Accent unique, surchargeable (config accent_color → --gazon-brand-accent) */
+          --gi-accent: var(--gazon-brand-accent, var(--gazon-section-accent, #58c27d));
+          --gi-accent-text: var(--gi-accent);
+          --gi-accent-soft: color-mix(in srgb, var(--gi-accent) 14%, transparent);
+          /* Surfaces neutres branchées sur le thème HA (clair/sombre automatique) */
+          --gi-bg: var(--ha-card-background, var(--card-background-color, var(--secondary-background-color)));
+          --gi-surface: color-mix(in srgb, var(--primary-text-color) 4%, var(--gi-bg));
+          --gi-surface-2: color-mix(in srgb, var(--primary-text-color) 8%, var(--gi-bg));
+          --gi-border: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+          --gi-border-strong: color-mix(in srgb, var(--primary-text-color) 22%, transparent);
+          /* Texte : alias du thème HA */
+          --gi-text: var(--primary-text-color);
+          --gi-text-muted: var(--secondary-text-color);
+          --gi-text-faint: color-mix(in srgb, var(--secondary-text-color) 70%, transparent);
+          /* Statuts : la couleur ne porte que le sens */
+          --gi-status-success: var(--success-color, #4caf50);
+          --gi-status-warning: var(--warning-color, #ff9800);
+          --gi-status-danger: var(--error-color, #f44336);
+          --gi-status-neutral: var(--secondary-text-color);
+          /* Élévation : une seule ombre douce */
+          --gi-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 1px rgba(0, 0, 0, 0.04);
+          /* ── Tokens hérités, ré-câblés à plat sur la base v2 ── */
+          --gi-surface-border: var(--gi-border);
+          --gi-surface-border-strong: var(--gi-border-strong);
+          --gi-surface-fill: var(--gi-surface);
+          --gi-surface-fill-accent: var(--gi-surface-2);
+          --gi-surface-shadow: var(--gi-shadow-sm);
+          --gi-surface-shadow-strong: var(--gi-shadow-sm);
           --gi-tab-accent: var(--gazon-section-accent);
           --gi-tab-companion: var(--gazon-water-color, #5f97a3);
           --gi-tab-glow-color: var(--gazon-section-accent);
@@ -4498,12 +4533,15 @@ const SECTION_FIELDS = {
   details: ENTITY_KEYS.map((field) => field.key),
 };
 
+// Accent unique de marque : un seul vert pour tous les onglets (fini l'arc-en-ciel).
+// Surchargeable côté thème/config via --gazon-brand-accent.
+const BRAND_ACCENT = "#58c27d";
 const SECTION_ACCENTS = {
-  overview: "#58c27d",
-  watering: "#31b8d4",
-  mowing: "#97c84b",
-  products: "#58c27d",
-  details: "#7b8da0",
+  overview: BRAND_ACCENT,
+  watering: BRAND_ACCENT,
+  mowing: BRAND_ACCENT,
+  products: BRAND_ACCENT,
+  details: BRAND_ACCENT,
 };
 
 const LEGACY_ENTITY_KEYS = [

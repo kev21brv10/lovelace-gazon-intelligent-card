@@ -5,3 +5,6 @@ dist/*.map
 .vscode/
 coverage/
 *.log
+
+# Notes de projet personnelles (hors dépôt)
+CLAUDE.md

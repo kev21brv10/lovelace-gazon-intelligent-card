@@ -4275,7 +4275,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.2.7";
+const CARD_VERSION = "0.2.8";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -12021,6 +12021,9 @@ function renderGazonTab(card) {
   const progressDetail = card._entity("entity_sous_phase")?.attributes?.sous_phase_detail || "";
   const progressLabel = progress === null ? "Progression non disponible" : `${formatNumber(progress, 0)} %`;
   const progressWidth = progress === null ? 0 : Math.max(0, Math.min(100, progress));
+  // Sans sous-phase réelle, le backend renvoie "Normal" : il n'y a alors rien à
+  // suivre, on masque la section de progression plutôt que d'afficher une barre.
+  const hasSubPhase = !isEmpty(subPhase) && String(subPhase).trim().toLowerCase() !== "normal";
   const gazonStatusIcon = card._config?.show_icons ? "mdi:grass" : null;
   const gazonSummary = [
     phase ? `Phase ${formatStatusLabel(phase)}` : "",
@@ -12047,14 +12050,14 @@ function renderGazonTab(card) {
       secondary: "",
       entityKey: "entity_phase",
     },
-    {
+    ...(hasSubPhase ? [{
       label: "Sous-phase",
       value: formatStatusLabel(subPhase),
       tone: phaseTone(phase),
       icon: "mdi:sprout",
       secondary: progressDetail || "",
       entityKey: "entity_sous_phase",
-    },
+    }] : []),
     {
       label: "Risque gazon",
       value: formatStatusLabel(risk),
@@ -12086,6 +12089,7 @@ function renderGazonTab(card) {
 
         ${renderMetricRail(card, gazonFacts, "tab-panel__metric-rail--gazon")}
 
+        ${hasSubPhase ? `
         <div class="tab-panel__section">
           <div class="tab-panel__section-title">Progression de la sous-phase</div>
           <div class="tab-progress" aria-label="${escapeHtml(progressLabel)}">
@@ -12095,6 +12099,7 @@ function renderGazonTab(card) {
             <div class="tab-progress__meta">${escapeHtml(progressLabel)}</div>
           </div>
         </div>
+        ` : ""}
       </section>
     `;
 }

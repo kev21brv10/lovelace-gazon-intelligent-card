@@ -2330,12 +2330,8 @@ export const CARD_STYLES = String.raw`
           min-height: 28px;
           padding: 2px 10px;
           border-radius: 999px;
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 96%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
-          box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.05),
-            0 5px 12px rgba(0, 0, 0, 0.05);
+          border: 1px solid var(--gi-border);
+          background: var(--gi-surface-2);
           min-width: 0;
           box-sizing: border-box;
         }
@@ -2368,8 +2364,7 @@ export const CARD_STYLES = String.raw`
           overflow: visible;
           line-height: 0;
           border-radius: 999px;
-          background: color-mix(in srgb, var(--gazon-card-accent) 14%, transparent);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+          background: transparent;
         }
 
         .gi-pill__icon .gi-icon--pill {
@@ -2422,7 +2417,7 @@ export const CARD_STYLES = String.raw`
 
         .gi-pill__value {
           font-size: var(--gi-font-xs);
-          font-weight: 700;
+          font-weight: var(--gi-weight-medium);
           line-height: 1.12;
           overflow-wrap: anywhere;
           min-width: 0;
@@ -2432,39 +2427,39 @@ export const CARD_STYLES = String.raw`
         }
 
         .gi-pill--danger {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-danger-color) 16%, transparent) 0%, color-mix(in srgb, var(--gazon-danger-color) 8%, transparent) 100%);
-          border-color: color-mix(in srgb, var(--gazon-danger-color) 24%, transparent);
+          background: color-mix(in srgb, var(--gi-status-danger) 14%, transparent);
+          border-color: color-mix(in srgb, var(--gi-status-danger) 30%, transparent);
+          color: var(--gi-status-danger);
         }
 
         .gi-pill--critical {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-critical-color) 18%, transparent) 0%, color-mix(in srgb, var(--gazon-critical-color) 10%, transparent) 100%);
-          border-color: color-mix(in srgb, var(--gazon-critical-color) 28%, transparent);
+          background: color-mix(in srgb, var(--gi-status-danger) 18%, transparent);
+          border-color: color-mix(in srgb, var(--gi-status-danger) 38%, transparent);
+          color: var(--gi-status-danger);
         }
 
         .gi-pill--warning {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-warning-color) 16%, transparent) 0%, color-mix(in srgb, var(--gazon-warning-color) 8%, transparent) 100%);
-          border-color: color-mix(in srgb, var(--gazon-warning-color) 24%, transparent);
+          background: color-mix(in srgb, var(--gi-status-warning) 14%, transparent);
+          border-color: color-mix(in srgb, var(--gi-status-warning) 30%, transparent);
+          color: var(--gi-status-warning);
         }
 
         .gi-pill--success {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color) 16%, transparent) 0%, color-mix(in srgb, var(--gazon-success-color) 8%, transparent) 100%);
-          border-color: color-mix(in srgb, var(--gazon-success-color) 24%, transparent);
+          background: color-mix(in srgb, var(--gi-status-success) 14%, transparent);
+          border-color: color-mix(in srgb, var(--gi-status-success) 30%, transparent);
+          color: var(--gi-status-success);
         }
 
         .gi-pill--accent {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-accent-tone-color) 14%, transparent) 0%, color-mix(in srgb, var(--gazon-accent-tone-color) 7%, transparent) 100%);
-          border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 24%, transparent);
+          background: var(--gi-accent-soft);
+          border-color: color-mix(in srgb, var(--gi-accent) 30%, transparent);
+          color: var(--gi-accent);
         }
 
         .gi-pill--neutral {
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
-          border-color: color-mix(in srgb, var(--divider-color) 70%, var(--gazon-section-accent) 10%);
+          background: var(--gi-surface-2);
+          border-color: var(--gi-border);
+          color: var(--gi-text-muted);
         }
 
         .decision-context {

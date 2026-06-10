@@ -4262,6 +4262,16 @@ export const CARD_STYLES = String.raw`
         .gz2-card__value--critical{ color: var(--gi-status-danger); }
         .gz2-card__sub { font-size: var(--gi-font-xs); color: var(--gi-text-muted); margin-top: 6px; line-height: 1.4; }
 
+        .gz2-eyebrow--section { margin-top: 24px; }
+        .gz2-meter { margin-bottom: 18px; }
+        .gz2-meter__top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
+        .gz2-meter__value { font-size: var(--gi-font-lg); font-weight: var(--gi-weight-medium); color: var(--gi-text); }
+        .gz2-meter__badge { font-size: var(--gi-font-xs); color: var(--gi-text-muted); white-space: nowrap; }
+        .gz2-meter__track { position: relative; height: 8px; border-radius: 999px; background: var(--gi-surface-2); overflow: hidden; }
+        .gz2-meter__fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 999px; background: var(--gi-accent); }
+        .gz2-meter__surplus { position: absolute; top: 0; height: 100%; border-radius: 999px; background: color-mix(in srgb, var(--gi-status-success) 55%, transparent); }
+        .gz2-meter__meta { font-size: var(--gi-font-xs); color: var(--gi-text-muted); margin-top: 9px; line-height: 1.4; }
+
         @media (max-width: 600px) {
           .gz2-header { flex-wrap: wrap; }
           .gz2-header__meta { width: 100%; justify-content: space-between; }

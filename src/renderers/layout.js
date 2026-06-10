@@ -1536,84 +1536,71 @@ export function renderWateringTab(card) {
     } : null,
   ].filter(Boolean);
 
+  const reperes = [
+    { label: "Objectif", value: objectiveLabel },
+    { label: "Type", value: wateringTypeLabel },
+    { label: "Prochain arrosage", value: nextWatering.label },
+    { label: "Dernier arrosage", value: lastWatering.label },
+  ];
+  const heroTitle = heroNextText || irrigationSignal.summary || windowState.summary || "Irrigation";
+  const heroSub = shouldShowHeroHint ? heroHintText : "";
+  const renderGz2Cards = (items) => items.map((f) => {
+    const eid = card._entityId(f.entityKey);
+    const vTone = ["success", "warning", "danger", "critical"].includes(f.tone) ? ` gz2-card__value--${f.tone}` : "";
+    return `
+      <button type="button" class="gz2-card"${eid ? ` data-more-info-entity="${escapeHtml(eid)}"` : ""}>
+        <div class="gz2-card__label">${escapeHtml(f.label)}</div>
+        <div class="gz2-card__value${vTone}">${escapeHtml(f.value)}</div>
+        ${f.secondary ? `<div class="gz2-card__sub">${escapeHtml(f.secondary)}</div>` : ""}
+      </button>`;
+  }).join("");
+
   return `
-      <section class="tab-panel gi-panel tab-panel--watering">
-        <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${tone}">
-          <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">${escapeHtml(irrigationSignal.summary || windowState.displaySummary || windowState.summary || "Irrigation")}</div>
-            ${renderStatusPill(irrigationSignal.actionLabel || windowState.statusLabel, tone, windowStatusIcon, `tab-panel__hero-status tab-panel__hero-status--${tone}`)}
-          </div>
-          ${
-            heroNextText
-              ? `<div class="tab-panel__hero-next">${escapeHtml(heroNextText)}</div>`
-              : ""
-          }
-          ${
-            shouldShowHeroHint
-              ? `<div class="tab-panel__hero-hint">${escapeHtml(heroHintText)}</div>`
-              : ""
-          }
+      <section class="gz2-overview" aria-label="Irrigation">
+        <div class="gz2-hero">
+          <div class="gz2-eyebrow">Décision eau</div>
+          <div class="gz2-hero__title">${escapeHtml(heroTitle)}</div>
+          ${heroSub ? `<div class="gz2-hero__sub">${escapeHtml(heroSub)}</div>` : ""}
         </div>
 
         ${renderWateringProgressSection(card, wateringProgress)}
 
+        <div class="gz2-reperes" aria-label="Repères">
+          ${reperes.map((r) => `
+            <div class="gz2-rep">
+              <div class="gz2-rep__label">${escapeHtml(r.label)}</div>
+              <div class="gz2-rep__value">${escapeHtml(r.value || "—")}</div>
+            </div>
+          `).join("")}
+        </div>
+
         ${
           card._config?.show_secondary_info
             ? `
-        <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--hydric">
-          <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Réserve hydrique</div>
-            <div class="tab-panel__section-meta">${escapeHtml(hydricUx.label)}</div>
+        <div class="gz2-eyebrow gz2-eyebrow--section">Réserve hydrique</div>
+        <div class="gz2-meter">
+          <div class="gz2-meter__top">
+            <div class="gz2-meter__value">${escapeHtml(reserveTotalValue)}</div>
+            <div class="gz2-meter__badge">${escapeHtml(hydricUx.label)}</div>
           </div>
-          <div class="tab-panel__hydric-hero tab-panel__hydric-hero--${escapeHtml(hydricUx.tone)}">
-            <div class="tab-panel__hydric-hero-main">
-              <div class="tab-panel__hydric-hero-label">Réserve totale</div>
-              <div class="tab-panel__hydric-hero-value">${escapeHtml(reserveTotalValue)}</div>
-              <div class="tab-panel__hydric-hero-note">Réserve utile: ${escapeHtml(reserveUsefulValue)}</div>
-            </div>
-            <div class="tab-panel__hydric-hero-badge">${escapeHtml(hydricUx.label)}</div>
+          <div class="gz2-meter__track" aria-label="Répartition de la réserve hydrique">
+            <span class="gz2-meter__fill" style="width:${escapeHtml(String(hydricUsefulWidth))}%;"></span>
+            ${hydricSurplusWidth > 0
+              ? `<span class="gz2-meter__surplus" style="left:${escapeHtml(String(hydricUsefulWidth))}%; width:${escapeHtml(String(hydricSurplusWidth))}%;"></span>`
+              : ""}
           </div>
-          <div class="tab-panel__hydric-meter" aria-label="Répartition de la réserve hydrique">
-            <div class="tab-panel__hydric-meter-bar">
-              <span class="tab-panel__hydric-meter-bar-useful" style="width:${escapeHtml(String(hydricUsefulWidth))}%;"></span>
-              ${hydricSurplusWidth > 0
-                ? `<span class="tab-panel__hydric-meter-bar-surplus" style="left:${escapeHtml(String(hydricUsefulWidth))}%; width:${escapeHtml(String(hydricSurplusWidth))}%;"></span>`
-                : ""}
-              <span class="tab-panel__hydric-meter-bar-cap" style="width:${escapeHtml(String(hydricFillWidth))}%;"></span>
-            </div>
-            <div class="tab-panel__hydric-meter-meta">${escapeHtml(`Surplus ${surplusHydriqueValue} · Déplétion ${depletionUsefulValue}`)}</div>
-          </div>
-          ${renderMetricRail(card, reserveHydricFacts, "tab-panel__metric-rail--watering-hydric")}
-        </section>
+          <div class="gz2-meter__meta">${escapeHtml(`Réserve utile ${reserveUsefulValue} · Surplus ${surplusHydriqueValue} · Déplétion ${depletionUsefulValue}`)}</div>
+        </div>
+        <div class="gz2-cards">${renderGz2Cards(reserveHydricFacts)}</div>
+
+        <div class="gz2-eyebrow gz2-eyebrow--section">Décision</div>
+        <div class="gz2-cards">${renderGz2Cards(decisionFacts)}</div>
+
+        <div class="gz2-eyebrow gz2-eyebrow--section">Contexte terrain</div>
+        <div class="gz2-cards">${renderGz2Cards(contextFacts)}</div>
             `
             : ""
         }
-
-        <section class="gi-info gi-info--main tab-panel__section">
-          <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Décision eau</div>
-            <div class="tab-panel__section-meta">${escapeHtml(planState.durationHuman)} · ${escapeHtml(planTypeLabel)}</div>
-          </div>
-          <div class="tab-panel__section-summary">${escapeHtml(windowState.summary || planState.summary || "Aucune irrigation à lancer.")}</div>
-          ${
-            card._config?.show_secondary_info
-              ? renderMetricRail(card, decisionFacts, "tab-panel__metric-rail--watering")
-              : ""
-          }
-        </section>
-
-        <section class="gi-info gi-info--secondary tab-panel__section">
-          <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Contexte terrain</div>
-            <div class="tab-panel__section-meta">${escapeHtml(windowState.displayNextAction || windowState.nextAction || "Lecture hydrique")}</div>
-          </div>
-          <div class="tab-panel__section-summary">${escapeHtml(planState.summary || "Le plan s’adapte au contexte réel.")}</div>
-          ${
-            card._config?.show_secondary_info
-              ? renderMetricRail(card, contextFacts, "tab-panel__metric-rail--watering")
-              : ""
-          }
-        </section>
       </section>
     `;
 }

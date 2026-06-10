@@ -4264,6 +4264,20 @@ const CARD_STYLES = String.raw`
 
         .gz2-eyebrow--section { margin-top: 24px; }
         .gz2-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+        .gz2-card--static { cursor: default; }
+        .gz2-empty { font-size: var(--gi-font-sm); color: var(--gi-text-muted); padding: 8px 0; }
+        .gz2-field { margin-bottom: 16px; }
+        .gz2-field__label { display: block; font-size: var(--gi-font-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--gi-text-faint); margin-bottom: 7px; }
+        .gz2-select {
+          appearance: none; -webkit-appearance: none;
+          width: 100%;
+          background: var(--gi-surface); color: var(--gi-text);
+          border: 1px solid var(--gi-border); border-radius: var(--gi-radius-sm);
+          padding: 10px 12px; font: inherit; font-size: var(--gi-font-sm); cursor: pointer;
+        }
+        .gz2-select:hover { border-color: var(--gi-border-strong); }
+        .gz2-btn--block { width: 100%; justify-content: center; }
+        .gz2-btn:disabled { opacity: 0.5; cursor: default; }
         .gz2-meter { margin-bottom: 18px; }
         .gz2-meter__top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
         .gz2-meter__value { font-size: var(--gi-font-lg); font-weight: var(--gi-weight-medium); color: var(--gi-text); }
@@ -4470,7 +4484,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.5.0";
+const CARD_VERSION = "0.5.1";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -10623,12 +10637,13 @@ function renderGz2Cards(card, items) {
   return items.map((f) => {
     const eid = f.entityKey ? card._entityId(f.entityKey) : null;
     const vTone = ["success", "warning", "danger", "critical"].includes(f.tone) ? ` gz2-card__value--${f.tone}` : "";
-    return `
-      <button type="button" class="gz2-card"${eid ? ` data-more-info-entity="${escapeHtml(eid)}"` : ""}>
+    const inner = `
         <div class="gz2-card__label">${escapeHtml(f.label)}</div>
         <div class="gz2-card__value${vTone}">${escapeHtml(f.value)}</div>
-        ${f.secondary ? `<div class="gz2-card__sub">${escapeHtml(f.secondary)}</div>` : ""}
-      </button>`;
+        ${f.secondary ? `<div class="gz2-card__sub">${escapeHtml(f.secondary)}</div>` : ""}`;
+    return eid
+      ? `<button type="button" class="gz2-card" data-more-info-entity="${escapeHtml(eid)}">${inner}</button>`
+      : `<div class="gz2-card gz2-card--static">${inner}</div>`;
   }).join("");
 }
 
@@ -11334,82 +11349,42 @@ function renderInterventionOverviewSection(
       ? `Score ${formatNumber(recommendation.score, 0)}/100`
       : "",
   ].filter(Boolean).join(" · ");
+  const chips = [
+    { label: "Recommandation", value: ui.badge || "Non disponible", tone: recommendationTone },
+    { label: "Sélection", value: quickAction.record ? "Active" : selectionMeta, tone: quickAction.record ? "success" : hasProductOptions ? "warning" : "neutral" },
+    { label: "Déclaration", value: canDeclare ? "Possible" : declarationMeta, tone: canDeclare ? "success" : recommendationTone },
+  ];
   return `
-      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-overview">
-        <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Pilotage intervention</div>
-          <div class="tab-panel__section-meta">${escapeHtml(ui.badge || "Analyse active")}</div>
-        </div>
-        <div class="tab-panel__decision-strip" aria-hidden="true">
-          ${card._renderTabPill("Recommandation", ui.badge || "Non disponible", recommendationTone, recommendationIcon)}
-          ${card._renderTabPill("Sélection", quickAction.record ? "Active" : selectionMeta, quickAction.record ? "success" : hasProductOptions ? "warning" : "neutral", "mdi:package-variant")}
-          ${card._renderTabPill("Déclaration", canDeclare ? "Possible" : declarationMeta, canDeclare ? "success" : recommendationTone, recommendationIcon)}
-        </div>
-        <div class="tab-panel__intervention-layout tab-panel__intervention-layout--workflow">
-          <div class="tab-panel__intervention-card tab-panel__intervention-card--proposed">
-            <div class="tab-panel__section-head">
-              <div class="tab-panel__eyebrow">Produit proposé</div>
-              <div class="tab-panel__section-meta">${escapeHtml(ui.actionLabel || "Choisir le produit")}</div>
-            </div>
-            <div class="tab-panel__section-summary">${escapeHtml(proposedProductValue)}</div>
-            <div class="tab-panel__section-hint">${escapeHtml(productSecondary || ui.hint || "Aucun détail complémentaire.")}</div>
-          </div>
-
-          <div class="tab-panel__intervention-card tab-panel__intervention-card--picker">
-            <div class="tab-panel__section-head">
-              <div class="tab-panel__eyebrow">Sélection</div>
-              <div class="tab-panel__section-meta">${escapeHtml(selectionMeta)}</div>
-            </div>
-            <label class="tab-panel__field">
-              <span class="tab-panel__field-label">Produit à déclarer</span>
-              <div class="tab-panel__select-shell">
-                <span class="tab-panel__select-prefix" aria-hidden="true">
-                  ${renderIconBox("mdi:package-variant-closed", "sm")}
-                </span>
-                <select
-                  class="tab-panel__select"
-                  data-gazon-action="select-intervention-product"
-                  aria-label="Choisir le produit d'intervention"
-                  ${hasProductOptions ? "" : "disabled"}
-                >
-                  <option value="">${escapeHtml(hasProductOptions ? "Choisir un produit" : "Aucun produit disponible")}</option>
-                  ${productOptions
-                    .map(
-                      (option) => `
-                        <option value="${escapeHtml(option.label)}" ${option.label === selectedProductOptionLabel ? "selected" : ""}>
-                          ${escapeHtml(option.label)}
-                        </option>
-                      `,
-                    )
-                    .join("")}
-                </select>
-                <span class="tab-panel__select-chevron" aria-hidden="true">${renderIconBox("mdi:chevron-down", "sm")}</span>
-              </div>
-            </label>
-            <div class="tab-panel__section-summary">${escapeHtml(selectionValue)}</div>
-            <div class="tab-panel__section-hint">${escapeHtml(selectionSecondary || "La sélection prépare la déclaration.")}</div>
-          </div>
-
-          <div class="tab-panel__intervention-card tab-panel__intervention-card--action">
-            <div class="tab-panel__section-head">
-              <div class="tab-panel__eyebrow">Déclaration</div>
-              <div class="tab-panel__section-meta">${escapeHtml(declarationMeta)}</div>
-            </div>
-            <button
-              type="button"
-              class="gi-action gi-action--primary tab-panel__cta"
-              data-gazon-action="declare-product-intervention"
-              ${canDeclare ? "" : "disabled"}
-              aria-label="${escapeHtml(canDeclare ? (quickAction.actionLabel || "Déclarer le produit") : (ui.actionLabel || "Choisir le produit"))}"
-            >
-              ${renderIconBox("mdi:spray-bottle", "sm")}
-              <span>${escapeHtml(declarationActionLabel)}</span>
-            </button>
-            <div class="tab-panel__section-summary">${escapeHtml(declarationValue)}</div>
-            <div class="tab-panel__section-hint">${escapeHtml(declarationSecondary || "La déclaration suit le produit sélectionné.")}</div>
-          </div>
-        </div>
-      </section>
+      <div class="gz2-eyebrow gz2-eyebrow--section">Pilotage intervention</div>
+      <div class="gz2-chips">${renderGz2Chips(chips)}</div>
+      <div class="gz2-cards" style="grid-template-columns: 1fr;">
+        ${renderGz2Cards(card, [{ label: "Produit proposé", value: proposedProductValue, tone: "neutral", secondary: productSecondary || ui.hint || "" }])}
+      </div>
+      <div class="gz2-field">
+        <span class="gz2-field__label">Produit à déclarer</span>
+        <select
+          class="gz2-select"
+          data-gazon-action="select-intervention-product"
+          aria-label="Choisir le produit d'intervention"
+          ${hasProductOptions ? "" : "disabled"}
+        >
+          <option value="">${escapeHtml(hasProductOptions ? "Choisir un produit" : "Aucun produit disponible")}</option>
+          ${productOptions
+            .map((option) => `<option value="${escapeHtml(option.label)}" ${option.label === selectedProductOptionLabel ? "selected" : ""}>${escapeHtml(option.label)}</option>`)
+            .join("")}
+        </select>
+        ${selectionSecondary ? `<div class="gz2-card__sub" style="margin-top: 7px;">${escapeHtml(selectionSecondary)}</div>` : ""}
+      </div>
+      <button
+        type="button"
+        class="gz2-btn gz2-btn--block"
+        data-gazon-action="declare-product-intervention"
+        ${canDeclare ? "" : "disabled"}
+        aria-label="${escapeHtml(canDeclare ? (quickAction.actionLabel || "Déclarer le produit") : (ui.actionLabel || "Choisir le produit"))}"
+      >
+        ${renderIconBox("mdi:spray-bottle", "sm")}<span>${escapeHtml(declarationActionLabel)}</span>
+      </button>
+      ${declarationSecondary ? `<div class="gz2-card__sub" style="margin-top: 8px;">${escapeHtml(declarationSecondary)}</div>` : ""}
     `;
 }
 
@@ -11434,56 +11409,18 @@ function renderInterventionTechnicalSummary(card, recommendation, debug) {
       ? recommendation.missingRequirements.length
       : 0;
   const scoreTone = recommendation.scoreHigh ? "success" : recommendation.status === "blocked" ? "danger" : "warning";
+  const techCards = [
+    { label: "Score", value: scoreValue, tone: scoreTone, secondary: `Niveau ${formatStatusLabel(recommendation.scoreLevel || "neutral")}` },
+    { label: "Bloquantes", value: String(blockingConstraints), tone: blockingConstraints > 0 ? "danger" : "success", secondary: blockingConstraints > 0 ? "Une ou plusieurs contraintes bloquent la déclaration." : "Aucune contrainte bloquante." },
+    { label: "Non bloquantes", value: String(nonBlockingConstraints), tone: nonBlockingConstraints > 0 ? "warning" : "neutral", secondary: nonBlockingConstraints > 0 ? "Signaux dégradants ou neutres pris en compte." : "Aucun signal secondaire détaillé." },
+    { label: "Manquants", value: String(missingRequirements), tone: missingRequirements > 0 ? "warning" : "success", secondary: missingRequirements > 0 ? "Des étapes restent à compléter avant déclaration." : "Aucun pré-requis manquant." },
+    ...(lastUserAction.summary
+      ? [{ label: "Dernière exécution", value: lastUserAction.action || lastUserAction.state || "Exécution", tone: "neutral", secondary: [lastUserAction.when, lastUserAction.reason].filter(Boolean).join(" · ") || lastUserAction.summary }]
+      : []),
+  ];
   return `
-      <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--intervention-technical">
-        <div class="tab-panel__section-head">
-          <div class="tab-panel__eyebrow">Repères techniques</div>
-          <div class="tab-panel__section-meta">${escapeHtml(debug?.statusLabel || "Analyse moteur")}</div>
-        </div>
-        <div class="decision-plan tab-panel__decision-plan tab-panel__decision-plan--technical">
-          <div class="decision-plan__header">
-            <div class="decision-plan__label">Score</div>
-            <div class="decision-plan__meta">${escapeHtml(scoreValue)}</div>
-          </div>
-          <div class="decision-plan__summary">${escapeHtml(recommendation.ui?.summary || debug?.summary || "Analyse moteur")}</div>
-          <div class="decision-plan__chips">
-            ${renderStatusPill(`Niveau ${formatStatusLabel(recommendation.scoreLevel || "neutral")}`, scoreTone, "mdi:signal", "debug-chip")}
-            ${renderStatusPill(`${blockingConstraints} bloquante${blockingConstraints > 1 ? "s" : ""}`, blockingConstraints > 0 ? "danger" : "success", blockingConstraints > 0 ? "mdi:alert-circle-outline" : "mdi:check-circle-outline", "debug-chip")}
-            ${renderStatusPill(`${nonBlockingConstraints} signal${nonBlockingConstraints > 1 ? "s" : ""}`, nonBlockingConstraints > 0 ? "warning" : "neutral", "mdi:shield-alert-outline", "debug-chip")}
-            ${renderStatusPill(`${missingRequirements} manquant${missingRequirements > 1 ? "s" : ""}`, missingRequirements > 0 ? "warning" : "success", missingRequirements > 0 ? "mdi:clipboard-alert-outline" : "mdi:check-circle-outline", "debug-chip")}
-          </div>
-        </div>
-        <div class="tab-panel__section-summary-list">
-          ${renderCompactSummaryList([
-            {
-              label: "Bloquantes",
-              value: String(blockingConstraints),
-              note: blockingConstraints > 0 ? "Une ou plusieurs contraintes bloquent la déclaration." : "Aucune contrainte bloquante.",
-              tone: blockingConstraints > 0 ? "danger" : "success",
-            },
-            {
-              label: "Non bloquantes",
-              value: String(nonBlockingConstraints),
-              note: nonBlockingConstraints > 0 ? "Signaux dégradants ou neutres pris en compte." : "Aucun signal secondaire détaillé.",
-              tone: nonBlockingConstraints > 0 ? "warning" : "neutral",
-            },
-            {
-              label: "Manquants",
-              value: String(missingRequirements),
-              note: missingRequirements > 0 ? "Des étapes restent à compléter avant déclaration." : "Aucun pré-requis manquant.",
-              tone: missingRequirements > 0 ? "warning" : "success",
-            },
-            ...(lastUserAction.summary
-              ? [{
-                  label: "Dernière exécution",
-                  value: lastUserAction.action || lastUserAction.state || "Exécution",
-                  note: [lastUserAction.when, lastUserAction.reason].filter(Boolean).join(" · ") || lastUserAction.summary,
-                  tone: "neutral",
-                }]
-              : []),
-          ])}
-        </div>
-      </section>
+      <div class="gz2-eyebrow gz2-eyebrow--section">Repères techniques</div>
+      <div class="gz2-cards">${renderGz2Cards(card, techCards)}</div>
     `;
 }
 
@@ -11553,32 +11490,29 @@ function renderCatalogueProductCards(card) {
   const selection = card._productSelectionState();
   const selectedProductId = String(selection.selectedProductId || "").trim().toLowerCase();
   if (!products.length) {
-    return `<div class="tab-panel__empty">Aucun produit enregistré.</div>`;
+    return `<div class="gz2-empty">Aucun produit enregistré.</div>`;
   }
-  return renderCardSlider(
-    products.map((product) => {
-      const productId = String(product.id || "").trim();
-      const productName = String(product.nom || productId || "").trim() || "Produit";
-      const productType = String(product.type || "").trim();
-      const usageMode = String(product.usage_mode || "").trim();
-      const monthsLabel = String(product.application_months_label || "").trim();
-      const requiresWateringAfter = Boolean(product.application_requires_watering_after);
-      const isSelected = selectedProductId && productId.toLowerCase() === selectedProductId;
-      const secondaryParts = [
-        usageMode ? `Mode ${formatProductUsageMode(usageMode)}` : "",
-        monthsLabel,
-        requiresWateringAfter ? "Arrosage après application" : "",
-      ].filter(Boolean);
-      return card._renderStatCard(
-        productType ? formatStatusLabel(productType) : "Produit",
-        productName,
-        isSelected ? "success" : "accent",
-        "mdi:package-variant-closed",
-        secondaryParts.join(" · "),
-      );
-    }),
-    "tab-panel__card-slider--catalogue",
-  );
+  const items = products.map((product) => {
+    const productId = String(product.id || "").trim();
+    const productName = String(product.nom || productId || "").trim() || "Produit";
+    const productType = String(product.type || "").trim();
+    const usageMode = String(product.usage_mode || "").trim();
+    const monthsLabel = String(product.application_months_label || "").trim();
+    const requiresWateringAfter = Boolean(product.application_requires_watering_after);
+    const isSelected = selectedProductId && productId.toLowerCase() === selectedProductId;
+    const secondaryParts = [
+      usageMode ? `Mode ${formatProductUsageMode(usageMode)}` : "",
+      monthsLabel,
+      requiresWateringAfter ? "Arrosage après application" : "",
+    ].filter(Boolean);
+    return {
+      label: productType ? formatStatusLabel(productType) : "Produit",
+      value: productName,
+      tone: isSelected ? "success" : "neutral",
+      secondary: secondaryParts.join(" · "),
+    };
+  });
+  return `<div class="gz2-cards">${renderGz2Cards(card, items)}</div>`;
 }
 
 function buildApplicationHistoryRows(items) {

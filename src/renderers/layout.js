@@ -1735,6 +1735,9 @@ export function renderMowingTab(card) {
   const actionPossible = tonteAttrs.action_possible !== undefined
     ? Boolean(tonteAttrs.action_possible)
     : gazonPermetTonte && machinePermetTonte;
+  // Coordination tondeuse désactivée : la machine n'est pas surveillée. À distinguer
+  // d'une vraie indisponibilité (coordination active mais machine non prête).
+  const coordinationDisabled = mowerState.coordinationEnabled === false;
   const tonteValue = tonte ? formatStatusLabel(tonte.state) : "Non disponible";
   const heightValue = height ? formatCm(height.state) : "Non disponible";
   const heightMin = asNumber(height?.attributes?.hauteur_tonte_min_cm);
@@ -1759,8 +1762,8 @@ export function renderMowingTab(card) {
     },
     {
       label: "Machine",
-      value: machinePermetTonte ? "Prête" : "Non prête",
-      tone: machinePermetTonte ? "success" : mowerState.present ? "danger" : "neutral",
+      value: coordinationDisabled ? "Coordination désactivée" : machinePermetTonte ? "Prête" : "Non prête",
+      tone: coordinationDisabled ? "neutral" : machinePermetTonte ? "success" : mowerState.present ? "danger" : "neutral",
       icon: mowerState.present ? "mdi:robot-mower" : "mdi:robot-mower-off",
     },
     {
@@ -1779,9 +1782,16 @@ export function renderMowingTab(card) {
     },
     {
       label: "Machine",
-      value: mowerState.present ? (machinePermetTonte ? "Prête" : "Indisponible") : "Absente",
-      note: mowerState.present ? mowerState.reason || "" : "Tondeuse non disponible",
-      tone: machinePermetTonte ? "success" : mowerState.present ? "danger" : "neutral",
+      value: !mowerState.present
+        ? "Absente"
+        : coordinationDisabled
+        ? "Coordination désactivée"
+        : machinePermetTonte
+        ? "Prête"
+        : "Indisponible",
+      // Note vide quand la coordination est désactivée : la valeur le dit déjà.
+      note: !mowerState.present ? "Tondeuse non disponible" : coordinationDisabled ? "" : mowerState.reason || "",
+      tone: !mowerState.present ? "neutral" : coordinationDisabled ? "neutral" : machinePermetTonte ? "success" : "danger",
     },
     {
       label: "Blocage",

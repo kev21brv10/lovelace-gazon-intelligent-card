@@ -73,31 +73,6 @@ export function renderTabNav(card) {
     `;
 }
 
-export function renderSectionNav(card) {
-  if (card._isMinimalMode() || card._canShowLegacyDetails()) {
-    return "";
-  }
-  return `
-      <nav class="gi-tabs section-nav" aria-label="Sections de la carte">
-        ${SECTION_DEFS.map((section) => {
-          const active = section.key === card._activeSection;
-          const iconHtml = card._config?.show_icons ? renderIconBox(section.icon, "sm") : "";
-          return `
-            <button
-              type="button"
-              class="gi-row gi-action gi-tab section-nav__item ${active ? "section-nav__item--active gi-tab--active" : ""}"
-              data-section="${escapeHtml(section.key)}"
-              aria-pressed="${active ? "true" : "false"}"
-            >
-              ${iconHtml}
-              <span>${escapeHtml(section.label)}</span>
-            </button>
-          `;
-        }).join("")}
-      </nav>
-  `;
-}
-
 function formatTemperatureRangeConstraint(constraint) {
   if (!constraint || typeof constraint !== "object") {
     return null;
@@ -386,89 +361,6 @@ function renderCompactSummaryList(items, emptyText = "Aucune information supplé
           `,
         )
         .join("")}
-    </div>
-  `;
-}
-
-function renderCardSlider(items, extraClass = "") {
-  const cards = Array.isArray(items) ? items.filter(Boolean) : [];
-  if (!cards.length) {
-    return "";
-  }
-  return `
-    <div class="tab-panel__card-slider ${escapeHtml(extraClass)}">
-      <div class="tab-panel__card-slider-track">
-        ${cards.map((cardHtml) => `<div class="tab-panel__card-slider-item">${cardHtml}</div>`).join("")}
-      </div>
-    </div>
-  `;
-}
-
-function renderFactCards(card, items, extraClass = "") {
-  const facts = Array.isArray(items) ? items.filter(Boolean) : [];
-  if (!facts.length) {
-    return `<div class="tab-panel__empty">Aucune information supplémentaire.</div>`;
-  }
-  return `
-    <div class="tab-panel__facts-grid ${escapeHtml(extraClass)}">
-      ${facts.map((fact) => card._renderLinkedStatCard({
-        label: fact.label,
-        value: fact.value,
-        tone: fact.tone || "neutral",
-        icon: fact.icon || null,
-        secondary: fact.secondary || fact.note || "",
-        entityKey: fact.entityKey || null,
-      })).join("")}
-    </div>
-  `;
-}
-
-function renderMetricRail(card, items, extraClass = "") {
-  const rows = Array.isArray(items)
-    ? items.filter(Boolean).map((item) => ({
-        label: String(item.label || "").trim(),
-        value: String(item.value || "").trim() || "Non disponible",
-        secondary: String(item.secondary || item.note || "").trim(),
-        tone: String(item.tone || "neutral").trim().toLowerCase() || "neutral",
-        icon: item.icon || null,
-        entityKey: String(item.entityKey || "").trim() || null,
-      }))
-    : [];
-  if (!rows.length) {
-    return `<div class="tab-panel__empty">Aucune information supplémentaire.</div>`;
-  }
-  return `
-    <div class="tab-panel__metric-rail ${escapeHtml(extraClass)}">
-      ${rows.map((row) => {
-        const iconHtml = row.icon ? renderIconBox(row.icon, "sm") : "";
-        const inner = `
-          <div class="tab-panel__metric-main">
-            <div class="tab-panel__metric-head">
-              ${row.label ? `<div class="tab-panel__metric-label">${escapeHtml(row.label)}</div>` : ""}
-              <div class="tab-panel__metric-value">${escapeHtml(row.value)}</div>
-            </div>
-            ${row.secondary ? `<div class="tab-panel__metric-note">${escapeHtml(row.secondary)}</div>` : ""}
-          </div>
-          ${iconHtml ? `<div class="tab-panel__metric-icon">${iconHtml}</div>` : ""}
-        `;
-        if (row.entityKey) {
-          return `
-            <button
-              type="button"
-              class="tab-panel__metric-row tab-panel__metric-row--${escapeHtml(row.tone)}"
-              data-more-info-entity="${escapeHtml(row.entityKey)}"
-              aria-label="${escapeHtml(row.label ? `Ouvrir ${row.label}` : row.value)}"
-            >
-              ${inner}
-            </button>
-          `;
-        }
-        return `
-          <div class="tab-panel__metric-row tab-panel__metric-row--${escapeHtml(row.tone)}">
-            ${inner}
-          </div>
-        `;
-      }).join("")}
     </div>
   `;
 }

@@ -80,9 +80,10 @@ class CardContractTests(unittest.TestCase):
         self.assertIn("gazon_permet_tonte", MAIN_SRC)
         self.assertIn("machine_permet_tonte", MAIN_SRC)
         self.assertIn("action_possible", MAIN_SRC)
-        self.assertIn("Gazon permet la tonte", MAIN_SRC)
-        self.assertIn('label: "Machine"', MAIN_SRC)
-        self.assertIn("Action possible", MAIN_SRC)
+        # Le rendu de l'onglet Tonte (gz2) vit dans layout.js.
+        self.assertIn("Gazon permet la tonte", LAYOUT_SRC)
+        self.assertIn('label: "Machine"', LAYOUT_SRC)
+        self.assertIn('label: "Action"', LAYOUT_SRC)
 
     def test_products_tab_exposes_application_history(self):
         self.assertIn("application_history", MAIN_SRC)
@@ -95,19 +96,14 @@ class CardContractTests(unittest.TestCase):
         self.assertIn('title = "Tonte en cours";', body)
         self.assertIn('title = "Tonte possible";', body)
 
-    def test_mowing_tab_header_reflects_busy_mower(self):
-        body = extract_function_body(MAIN_SRC, "_renderMowingTab")
-        self.assertIn('const assistant = this._assistantState();', body)
-        self.assertIn('const mowingBusy = assistant.status === "blocked" && assistant.action === "tonte"', body)
-        self.assertIn('const mowingImpossibleReason = assistant.status === "blocked" && assistant.action === "tonte"', body)
-        self.assertIn('const mowingHeaderValue = mowingBusy', body)
-        self.assertIn('"Tonte en cours"', body)
-        self.assertIn('const mowerIsMowing = ["mowing", "tonte", "tonte_en_cours"]', body)
-        self.assertIn('mowingBusy || mowerIsMowing', body)
-        self.assertIn('const machineStateLabel = mowingBusy || mowerIsMowing', body)
-        self.assertIn('const mowerReasonLabel = normalizeOptionalDisplayValue(mowerState.reason);', body)
-        self.assertIn('const mowerNextDeparture = normalizeOptionalDisplayValue(mowerState.nextDeparture);', body)
-        self.assertIn('secondary: mowerNextDeparture', body)
+    def test_mowing_tab_exposes_decision_and_machine_state(self):
+        # Onglet Tonte réécrit en gz2 (layout.js) : doit exposer la décision,
+        # l'état machine et la distinction « Coordination désactivée ».
+        body = extract_function_body(LAYOUT_SRC, "renderMowingTab")
+        self.assertIn("mowingDecisionPills", body)
+        self.assertIn("mowingSummaryItems", body)
+        self.assertIn("coordinationDisabled", body)
+        self.assertIn("Coordination désactivée", body)
 
     def test_mowing_tab_summary_prefers_hard_block_reason(self):
         body = extract_function_body(LAYOUT_SRC, "renderMowingTab")

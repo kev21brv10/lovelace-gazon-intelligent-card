@@ -4263,6 +4263,7 @@ export const CARD_STYLES = String.raw`
         .gz2-card__sub { font-size: var(--gi-font-xs); color: var(--gi-text-muted); margin-top: 6px; line-height: 1.4; }
 
         .gz2-eyebrow--section { margin-top: 24px; }
+        .gz2-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
         .gz2-meter { margin-bottom: 18px; }
         .gz2-meter__top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
         .gz2-meter__value { font-size: var(--gi-font-lg); font-weight: var(--gi-weight-medium); color: var(--gi-text); }

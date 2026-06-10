@@ -4263,6 +4263,7 @@ const CARD_STYLES = String.raw`
         .gz2-card__sub { font-size: var(--gi-font-xs); color: var(--gi-text-muted); margin-top: 6px; line-height: 1.4; }
 
         .gz2-eyebrow--section { margin-top: 24px; }
+        .gz2-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
         .gz2-meter { margin-bottom: 18px; }
         .gz2-meter__top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
         .gz2-meter__value { font-size: var(--gi-font-lg); font-weight: var(--gi-weight-medium); color: var(--gi-text); }
@@ -4469,7 +4470,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.4.3";
+const CARD_VERSION = "0.5.0";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -10609,6 +10610,35 @@ if (!window.customCards.some((card) => card.type === CARD_TYPE)) {
 
 
 
+function renderGz2Hero(eyebrow, title, sub = "") {
+  return `
+        <div class="gz2-hero">
+          <div class="gz2-eyebrow">${escapeHtml(eyebrow)}</div>
+          <div class="gz2-hero__title">${escapeHtml(title)}</div>
+          ${sub ? `<div class="gz2-hero__sub">${escapeHtml(sub)}</div>` : ""}
+        </div>`;
+}
+
+function renderGz2Cards(card, items) {
+  return items.map((f) => {
+    const eid = f.entityKey ? card._entityId(f.entityKey) : null;
+    const vTone = ["success", "warning", "danger", "critical"].includes(f.tone) ? ` gz2-card__value--${f.tone}` : "";
+    return `
+      <button type="button" class="gz2-card"${eid ? ` data-more-info-entity="${escapeHtml(eid)}"` : ""}>
+        <div class="gz2-card__label">${escapeHtml(f.label)}</div>
+        <div class="gz2-card__value${vTone}">${escapeHtml(f.value)}</div>
+        ${f.secondary ? `<div class="gz2-card__sub">${escapeHtml(f.secondary)}</div>` : ""}
+      </button>`;
+  }).join("");
+}
+
+function renderGz2Chips(items) {
+  return items.map((c) => {
+    const tone = ["success", "warning", "danger", "critical", "accent", "neutral"].includes(c.tone) ? c.tone : "neutral";
+    return `<span class="gz2-chip gz2-chip--${tone}">${escapeHtml(c.value)}</span>`;
+  }).join("");
+}
+
 function renderTabNav(card) {
   return `
       <nav class="gz2-nav" aria-label="Domaines de la carte">
@@ -11718,36 +11748,14 @@ function renderProductsTab(card) {
     : "Aucune application enregistrée";
 
   return `
-      <section class="tab-panel gi-panel tab-panel--products">
-        <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${productsTone}">
-          <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">Référentiel produit</div>
-            ${renderStatusPill(hasProductData ? catalogue.summary : emptyStateMessage, productsTone, "mdi:package-variant-closed", `tab-panel__status tab-panel__status--${productsTone}`)}
-          </div>
-          <div class="tab-panel__hero-next">${escapeHtml(productsSummary)}</div>
-          <div class="tab-panel__hero-hint">${escapeHtml(productsHint || "Le référentiel produit sert de base à la recommandation et à la déclaration.")} · ${escapeHtml("L’analyse détaillée reste dans Intervention.")}</div>
-        </div>
-        <div class="tab-panel__products-layout">
-          <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--catalogue-reference">
-            <div class="tab-panel__section-head">
-              <div class="tab-panel__eyebrow">Catalogue</div>
-              <div class="tab-panel__section-meta">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
-            </div>
-            <div class="tab-panel__section-summary">Produits disponibles dans le référentiel local</div>
-            <div class="tab-panel__section-hint">Le catalogue sert au choix du produit et à l’historique, sans reprendre l’analyse métier détaillée.</div>
-            ${renderCatalogueProductCards(card)}
-          </section>
-
-          <section class="gi-info gi-info--secondary tab-panel__section tab-panel__section--application-history">
-            <div class="tab-panel__section-head">
-              <div class="tab-panel__eyebrow">Dernière application</div>
-              <div class="tab-panel__section-meta">${escapeHtml(hasApplication ? applicationHistorySummary : "Aucune application")}</div>
-            </div>
-            <div class="tab-panel__section-summary">${escapeHtml(lastApplicationSummary)}</div>
-            <div class="tab-panel__section-hint">${escapeHtml(lastApplicationHint)}</div>
-            ${renderApplicationHistoryInline(applicationHistory)}
-          </section>
-        </div>
+      <section class="gz2-overview" aria-label="Produits">
+        ${renderGz2Hero("Référentiel produit", productsSummary, productsHint)}
+        <div class="gz2-eyebrow gz2-eyebrow--section">Catalogue</div>
+        <div class="gz2-card__sub" style="margin:0 0 12px;">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
+        ${renderCatalogueProductCards(card)}
+        <div class="gz2-eyebrow gz2-eyebrow--section">Dernière application</div>
+        <div class="gz2-card__sub" style="margin:0 0 12px;">${escapeHtml(hasApplication ? lastApplicationSummary : lastApplicationHint)}</div>
+        ${renderApplicationHistoryInline(applicationHistory)}
       </section>
     `;
 }
@@ -11775,37 +11783,30 @@ function renderInterventionTab(card) {
   const temperatureConstraintState = formatTemperatureRangeConstraint(temperatureConstraint);
 
   return `
-      <section class="tab-panel gi-panel tab-panel--intervention">
-        <div class="gi-info gi-info--main tab-panel__hero tab-panel__hero--${recommendationTone}">
-          <div class="tab-panel__hero-top">
-            <div class="tab-panel__hero-summary">${escapeHtml(ui.title || "Non disponible")}</div>
-            ${renderStatusPill(recommendationLabel || ui.badge || "Non disponible", recommendationTone, recommendationIcon, `tab-panel__status tab-panel__status--${recommendationTone}`)}
-          </div>
-          <div class="tab-panel__hero-next">${escapeHtml(ui.summary || "Non disponible")}</div>
-          <div class="tab-panel__hero-hint">${escapeHtml(ui.hint || "Aucune recommandation disponible.")}</div>
-          ${
-            temperatureConstraintState
-              ? `
-                <div class="tab-panel__temperature-constraint tab-panel__temperature-constraint--${temperatureConstraintState.tone}">
-                  ${renderStatusPill(
-                    temperatureConstraintState.title,
-                    temperatureConstraintState.tone,
-                    temperatureConstraintState.icon,
-                    `tab-panel__status tab-panel__status--${temperatureConstraintState.tone}`,
-                  )}
-                  <div class="tab-panel__temperature-copy">
-                    <div class="tab-panel__temperature-detail">${escapeHtml(temperatureConstraintState.detail)}</div>
-                    ${
-                      temperatureConstraintState.hint
-                        ? `<div class="tab-panel__temperature-hint">${escapeHtml(temperatureConstraintState.hint)}</div>`
-                        : ""
-                    }
-                  </div>
+      <section class="gz2-overview" aria-label="Intervention">
+        ${renderGz2Hero(ui.title || "Intervention", ui.summary || "Non disponible", ui.hint || "")}
+        ${
+          temperatureConstraintState
+            ? `
+              <div class="tab-panel__temperature-constraint tab-panel__temperature-constraint--${temperatureConstraintState.tone}">
+                ${renderStatusPill(
+                  temperatureConstraintState.title,
+                  temperatureConstraintState.tone,
+                  temperatureConstraintState.icon,
+                  `tab-panel__status tab-panel__status--${temperatureConstraintState.tone}`,
+                )}
+                <div class="tab-panel__temperature-copy">
+                  <div class="tab-panel__temperature-detail">${escapeHtml(temperatureConstraintState.detail)}</div>
+                  ${
+                    temperatureConstraintState.hint
+                      ? `<div class="tab-panel__temperature-hint">${escapeHtml(temperatureConstraintState.hint)}</div>`
+                      : ""
+                  }
                 </div>
-              `
-              : ""
-          }
-        </div>
+              </div>
+            `
+            : ""
+        }
 
         ${renderInterventionOverviewSection(card, recommendation, {
           quickAction,
@@ -12250,27 +12251,15 @@ function renderGazonTab(card) {
   ];
 
   return `
-      <section class="tab-panel gi-panel tab-panel--gazon">
-        <div class="tab-panel__header">
-          <div>
-            <div class="tab-panel__eyebrow">Gazon</div>
-            <div class="tab-panel__title">Phase, sous-phase et pilotage métier</div>
-            <div class="tab-panel__header-hint">${escapeHtml(gazonSummary)}${gazonHint ? ` · ${escapeHtml(gazonHint)}` : ""}</div>
-          </div>
-          ${renderStatusPill(formatStatusLabel(action), computeActionTone(action), gazonStatusIcon, "tab-panel__status")}
-        </div>
-
-        ${renderMetricRail(card, gazonFacts, "tab-panel__metric-rail--gazon")}
-
+      <section class="gz2-overview" aria-label="Gazon">
+        ${renderGz2Hero("Gazon", formatStatusLabel(phase) || "Gazon", gazonHint)}
+        <div class="gz2-cards">${renderGz2Cards(card, gazonFacts)}</div>
         ${hasSubPhase ? `
-        <div class="tab-panel__section">
-          <div class="tab-panel__section-title">Progression de la sous-phase</div>
-          <div class="tab-progress" aria-label="${escapeHtml(progressLabel)}">
-            <div class="tab-progress__bar gi-progress">
-              <span class="gi-progress__bar ${computeActionTone(action) === "critical" ? "gi-progress__bar--critical" : ""}" style="width:${escapeHtml(String(progressWidth))}%;"></span>
-            </div>
-            <div class="tab-progress__meta">${escapeHtml(progressLabel)}</div>
-          </div>
+        <div class="gz2-eyebrow gz2-eyebrow--section">Progression de la sous-phase</div>
+        <div class="gz2-meter">
+          <div class="gz2-meter__top"><div class="gz2-meter__value">${escapeHtml(progressLabel)}</div></div>
+          <div class="gz2-meter__track" aria-label="${escapeHtml(progressLabel)}"><span class="gz2-meter__fill" style="width:${escapeHtml(String(progressWidth))}%;"></span></div>
+          ${progressDetail ? `<div class="gz2-meter__meta">${escapeHtml(progressDetail)}</div>` : ""}
         </div>
         ` : ""}
       </section>
@@ -12394,61 +12383,27 @@ function renderMowingTab(card) {
     });
   }
 
+  const mowingCards = mowingSummaryItems.map((item) => ({
+    label: item.label,
+    value: item.value,
+    secondary: item.note,
+    tone: item.tone,
+    entityKey:
+      item.label === "État de tonte" ? "entity_tonte"
+        : item.label === "Fenêtre" ? "entity_fenetre_optimale"
+          : item.label === "Prochaine tonte" ? "entity_prochaine_tonte"
+            : item.label === "Hauteur conseillée" ? "entity_hauteur"
+              : item.label === "Hauteur réglée" ? "entity_hauteur_coupe_tondeuse"
+                : item.label === "Machine" ? "entity_tonte_autorisee"
+                  : null,
+  }));
+
   return `
-      <section class="tab-panel gi-panel tab-panel--mowing">
-        <div class="tab-panel__header">
-          <div>
-            <div class="tab-panel__eyebrow">Tonte</div>
-            <div class="tab-panel__title">Décision robot, hauteur et fenêtre</div>
-          </div>
-          ${renderStatusPill(tonteValue, computeTonteTone(tonteValue), mowingStatusIcon, "tab-panel__status")}
-        </div>
-
-        <div class="decision-plan tab-panel__decision-plan tab-panel__decision-plan--mowing">
-          <div class="decision-plan__header">
-            <div class="decision-plan__label">Lecture rapide</div>
-            <div class="decision-plan__meta">${escapeHtml(mowingDecisionSummary)}</div>
-          </div>
-          <div class="decision-plan__chips">
-            ${renderStatusPill(mowingDecisionPills[0].value, mowingDecisionPills[0].tone, mowingDecisionPills[0].icon, "debug-chip")}
-            ${renderStatusPill(mowingDecisionPills[1].value, mowingDecisionPills[1].tone, mowingDecisionPills[1].icon, "debug-chip")}
-            ${renderStatusPill(mowingDecisionPills[2].value, mowingDecisionPills[2].tone, mowingDecisionPills[2].icon, "debug-chip")}
-          </div>
-        </div>
-
-        <section class="tab-panel__section tab-panel__section--mowing-summary">
-          <div class="tab-panel__section-head">
-            <div class="tab-panel__eyebrow">Lecture rapide</div>
-            <div class="tab-panel__section-meta">${escapeHtml(mowingBlock.blocked ? mowingBlock.reasonLabel || "Blocage actif" : "Aucun blocage")}</div>
-          </div>
-          ${renderMetricRail(
-            card,
-            mowingSummaryItems.map((item) => ({
-              label: item.label,
-              value: item.value,
-              secondary: item.note,
-              tone: item.tone,
-              entityKey:
-                item.label === "État de tonte" ? "entity_tonte"
-                  : item.label === "Fenêtre" ? "entity_fenetre_optimale"
-                    : item.label === "Prochaine tonte" ? "entity_prochaine_tonte"
-                    : item.label === "Hauteur conseillée" ? "entity_hauteur"
-                      : item.label === "Hauteur réglée" ? "entity_hauteur_coupe_tondeuse"
-                        : item.label === "Machine" ? "entity_tonte_autorisee"
-                          : null,
-              icon:
-                item.label === "État de tonte" ? "mdi:content-cut"
-                  : item.label === "Machine" ? "mdi:robot-mower"
-                    : item.label === "Blocage" ? "mdi:alert-circle-outline"
-                      : item.label === "Fenêtre" ? "mdi:clock-outline"
-                        : item.label === "Prochaine tonte" ? "mdi:calendar-clock"
-                        : item.label === "Hauteur conseillée" ? "mdi:ruler-square"
-                          : item.label === "Hauteur réglée" ? "mdi:tune-vertical"
-                            : "mdi:battery"
-            })),
-            "tab-panel__metric-rail--mowing",
-          )}
-        </section>
+      <section class="gz2-overview" aria-label="Tonte">
+        ${renderGz2Hero("Tonte", tonteValue, mowingDecisionSummary)}
+        <div class="gz2-chips">${renderGz2Chips(mowingDecisionPills)}</div>
+        <div class="gz2-eyebrow gz2-eyebrow--section">Lecture rapide</div>
+        <div class="gz2-cards">${renderGz2Cards(card, mowingCards)}</div>
       </section>
     `;
 }
@@ -12461,46 +12416,36 @@ function renderConfigTab(card) {
   const tonteAutorisee = card._entityState("entity_tonte_autorisee", null);
   const mode = card._entityState("entity_mode", null);
   const modeTone = phaseTone(mode);
-  const switchIcon = card._config?.show_icons ? "mdi:switch" : null;
-  const zoneCards = card._zoneDebitEntries()
-    .map((entry) => {
-      const config = card._renderConfigValue(entry.key, "mm/h");
-      return card._renderConfigActionCard(entry.label, entry.key, config.value, config.tone, "mdi:sprinkler");
-    });
   const heightMin = card._renderConfigValue("entity_hauteur_min_tondeuse", "cm");
   const heightMax = card._renderConfigValue("entity_hauteur_max_tondeuse", "cm");
   const mowingCooldown = card._renderConfigValue("entity_delai_reprise_tonte_apres_arrosage", "min");
-  const heightCards = [
-    card._renderConfigActionCard("Hauteur min tondeuse", "entity_hauteur_min_tondeuse", heightMin.value, heightMin.tone, "mdi:ruler-square"),
-    card._renderConfigActionCard("Hauteur max tondeuse", "entity_hauteur_max_tondeuse", heightMax.value, heightMax.tone, "mdi:ruler-square"),
+  const controlItems = [
+    { label: "Irrigation automatique", value: switchState.label, tone: switchState.tone, entityKey: "entity_switch_arrosage_automatique" },
+    { label: "Coordination tondeuse", value: mowerCoordinationState.label, tone: mowerCoordinationState.tone, entityKey: "entity_switch_coordination_tondeuse" },
+    { label: "Post-application", value: afterApplicationInfo.label, tone: afterApplicationInfo.tone, entityKey: "entity_arrosage_apres_application_autorise" },
+    { label: "Gazon permet la tonte", value: formatAuthorizationState(tonteAutorisee), tone: tonteAutorisee === "on" ? "success" : "danger", entityKey: "entity_tonte_autorisee" },
+    { label: "Mode du gazon", value: formatApplicationMode(mode), tone: modeTone, entityKey: "entity_mode" },
+    { label: "Cooldown tonte après arrosage", value: mowingCooldown.value, tone: mowingCooldown.tone, entityKey: "entity_delai_reprise_tonte_apres_arrosage" },
+  ];
+  const zoneItems = card._zoneDebitEntries().map((entry) => {
+    const config = card._renderConfigValue(entry.key, "mm/h");
+    return { label: entry.label, value: config.value, tone: config.tone, entityKey: entry.key };
+  });
+  const heightItems = [
+    { label: "Hauteur min tondeuse", value: heightMin.value, tone: heightMin.tone, entityKey: "entity_hauteur_min_tondeuse" },
+    { label: "Hauteur max tondeuse", value: heightMax.value, tone: heightMax.tone, entityKey: "entity_hauteur_max_tondeuse" },
   ];
 
   return `
-      <section class="tab-panel gi-panel tab-panel--config">
-        <div class="tab-panel__header">
-          <div>
-            <div class="tab-panel__eyebrow">Réglages</div>
-            <div class="tab-panel__title">Autorisations, coordination, débits et hauteurs</div>
-            <div class="tab-panel__header-hint">Touchez une tuile pour ouvrir le contrôle Home Assistant correspondant.</div>
-          </div>
-          ${renderStatusPill(switchState.label, switchState.tone, switchIcon, "tab-panel__status")}
-        </div>
-
-        <div class="tab-panel__grid tab-panel__grid--config tab-panel__grid--config-top">
-          ${card._renderConfigActionCard("Irrigation automatique", "entity_switch_arrosage_automatique", switchState.label, switchState.tone, "mdi:switch")}
-          ${card._renderConfigActionCard("Coordination tondeuse", "entity_switch_coordination_tondeuse", mowerCoordinationState.label, mowerCoordinationState.tone, "mdi:robot-mower")}
-          ${card._renderConfigActionCard("Post-application", "entity_arrosage_apres_application_autorise", afterApplicationInfo.label, afterApplicationInfo.tone, "mdi:water-off")}
-          ${card._renderConfigActionCard("Gazon permet la tonte", "entity_tonte_autorisee", formatAuthorizationState(tonteAutorisee), tonteAutorisee === "on" ? "success" : "danger", "mdi:content-cut")}
-          ${card._renderConfigActionCard("Mode du gazon", "entity_mode", formatApplicationMode(mode), modeTone, "mdi:grass")}
-          ${card._renderConfigActionCard("Cooldown tonte après arrosage", "entity_delai_reprise_tonte_apres_arrosage", mowingCooldown.value, mowingCooldown.tone, "mdi:timer-cog-outline")}
-        </div>
-
-        <div class="tab-panel__section tab-panel__section--config-debits">
-          <div class="tab-panel__section-title">Débits des zones</div>
-          ${zoneCards.length ? renderCardSlider(zoneCards, "tab-panel__card-slider--config") : `<div class="tab-panel__empty">Débits non configurés.</div>`}
-          <div class="tab-panel__section-title">Hauteurs de tondeuse</div>
-          ${renderCardSlider(heightCards, "tab-panel__card-slider--config")}
-        </div>
+      <section class="gz2-overview" aria-label="Réglages">
+        ${renderGz2Hero("Réglages", "Autorisations & contrôles", "Touchez une tuile pour ouvrir le contrôle Home Assistant.")}
+        <div class="gz2-eyebrow gz2-eyebrow--section">Autorisations & coordination</div>
+        <div class="gz2-cards">${renderGz2Cards(card, controlItems)}</div>
+        ${zoneItems.length ? `
+        <div class="gz2-eyebrow gz2-eyebrow--section">Débits des zones</div>
+        <div class="gz2-cards">${renderGz2Cards(card, zoneItems)}</div>` : ""}
+        <div class="gz2-eyebrow gz2-eyebrow--section">Hauteurs de tondeuse</div>
+        <div class="gz2-cards">${renderGz2Cards(card, heightItems)}</div>
       </section>
     `;
 }

@@ -375,7 +375,7 @@ const CARD_STYLES = String.raw`
         .gi-panel {
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          gap: var(--gi-space-4);
           animation: gi-fade-up var(--gi-motion-fast) var(--gi-ease-soft);
           will-change: transform, opacity;
         }
@@ -398,7 +398,7 @@ const CARD_STYLES = String.raw`
           border: 1px solid var(--gi-surface-border);
           border-radius: 24px;
           background: var(--gi-surface-fill);
-          padding: 15px 16px;
+          padding: 20px 22px;
           box-shadow: none;
           transition:
             transform var(--gi-motion-fast) var(--gi-ease-standard),
@@ -474,7 +474,7 @@ const CARD_STYLES = String.raw`
           font-size: var(--gi-label-size);
           text-transform: uppercase;
           letter-spacing: var(--gi-label-spacing);
-          font-weight: 800;
+          font-weight: var(--gi-weight-medium);
           line-height: 1.2;
           color: var(--secondary-text-color);
         }
@@ -503,8 +503,8 @@ const CARD_STYLES = String.raw`
         }
 
         .tab-panel__hero-next {
-          font-size: var(--gi-font-xl);
-          font-weight: 900;
+          font-size: var(--gi-font-2xl);
+          font-weight: var(--gi-weight-medium);
           line-height: var(--gi-tight-line);
           color: var(--primary-text-color);
           letter-spacing: -0.01em;
@@ -678,15 +678,33 @@ const CARD_STYLES = String.raw`
         }
 
         .tab-panel__decision-strip--overview {
-          margin-top: 6px;
+          margin-top: 2px;
           display: grid !important;
           grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-          gap: 8px;
+          gap: 22px 28px;
+          padding: 4px 4px 8px;
         }
 
         .tab-panel__decision-strip--overview .gi-pill {
           width: 100%;
           min-width: 0;
+          background: transparent;
+          border: none;
+          padding: 0;
+          min-height: 0;
+        }
+
+        .tab-panel__decision-strip--overview .gi-pill__icon {
+          display: none;
+        }
+
+        .tab-panel__decision-strip--overview .gi-pill__label {
+          margin-bottom: 5px;
+        }
+
+        .tab-panel__decision-strip--overview .gi-pill__value {
+          font-size: var(--gi-font-lg);
+          color: var(--primary-text-color);
         }
 
         .tab-panel__history-foldout-preview {
@@ -1208,7 +1226,7 @@ const CARD_STYLES = String.raw`
         .tab-panel__facts-grid {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px;
+          gap: var(--gi-space-3);
           align-items: stretch;
         }
 
@@ -4256,7 +4274,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.3.1";
+const CARD_VERSION = "0.3.2";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

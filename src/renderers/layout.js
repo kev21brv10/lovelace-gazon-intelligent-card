@@ -1287,7 +1287,6 @@ export function renderHeader(card) {
             type="button"
             class="gz2-btn"
             data-gazon-action="manual-irrigation"
-            style="${card._manualActionStyle()}"
             aria-label="${escapeHtml(manualActionLabel)}"
           >
             ${card._config?.show_icons ? renderIconBox("mdi:water-pump", "sm") : ""}<span>${escapeHtml(manualActionLabel)}</span>
@@ -1300,12 +1299,10 @@ export function renderHeader(card) {
 export function renderOverviewTab(card) {
   const windowState = card._windowState();
   const proposal = card._overviewProposal();
-  const overviewTone = proposal.tone;
   const facts = card._overviewFacts();
   const nextWatering = card._nextWateringState();
   const nextMowing = card._nextMowingState();
   const lastWatering = card._lastWateringState();
-  const chipTone = ["success", "warning", "danger", "critical", "accent", "neutral"].includes(overviewTone) ? overviewTone : "neutral";
   const titleText = proposal.hint || "Vue d’ensemble du gazon.";
   let heroSub = compactDecisionText(card._entityState("entity_conseil", "") || "", { maxLength: 130 });
   if (!heroSub || heroSub === titleText) {
@@ -1321,13 +1318,8 @@ export function renderOverviewTab(card) {
   return `
       <section class="gz2-overview" aria-label="Synthèse">
         <div class="gz2-hero">
-          <div class="gz2-hero__top">
-            <div>
-              <div class="gz2-eyebrow">Conseil du jour</div>
-              <div class="gz2-hero__title">${escapeHtml(titleText)}</div>
-            </div>
-            ${proposal.title ? `<span class="gz2-chip gz2-chip--${chipTone}">${escapeHtml(proposal.title)}</span>` : ""}
-          </div>
+          <div class="gz2-eyebrow">Conseil du jour</div>
+          <div class="gz2-hero__title">${escapeHtml(titleText)}</div>
           ${heroSub ? `<div class="gz2-hero__sub">${escapeHtml(heroSub)}</div>` : ""}
         </div>
 

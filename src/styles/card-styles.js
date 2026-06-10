@@ -4141,7 +4141,7 @@ export const CARD_STYLES = String.raw`
           align-items: center;
           justify-content: space-between;
           gap: 14px;
-          margin-bottom: 20px;
+          margin-bottom: 16px;
         }
         .gz2-header__id { display: flex; align-items: center; gap: 12px; min-width: 0; }
         .gz2-header__icon {
@@ -4170,9 +4170,9 @@ export const CARD_STYLES = String.raw`
         }
         .gz2-btn {
           display: inline-flex; align-items: center; gap: 7px;
-          border: 1px solid var(--gi-border);
-          background: transparent;
-          color: var(--gi-text);
+          border: 1px solid transparent;
+          background: var(--gi-accent-soft);
+          color: var(--gi-accent);
           border-radius: 999px;
           padding: 8px 14px;
           font: inherit;
@@ -4181,12 +4181,12 @@ export const CARD_STYLES = String.raw`
           cursor: pointer; white-space: nowrap;
           transition: background-color var(--gi-motion-fast) var(--gi-ease-standard);
         }
-        .gz2-btn:hover { background: var(--gi-surface-2); }
+        .gz2-btn:hover { background: color-mix(in srgb, var(--gi-accent) 24%, transparent); }
 
         .gz2-nav {
           display: flex; gap: 22px;
           border-bottom: 1px solid var(--gi-border);
-          margin-bottom: 24px;
+          margin-bottom: 18px;
           overflow-x: auto;
           scrollbar-width: none;
         }
@@ -4214,7 +4214,7 @@ export const CARD_STYLES = String.raw`
           color: var(--gi-text-faint);
           margin-bottom: 12px;
         }
-        .gz2-hero { margin-bottom: 28px; }
+        .gz2-hero { margin-bottom: 20px; }
         .gz2-hero__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
         .gz2-hero__title {
           font-size: var(--gi-font-2xl);
@@ -4236,18 +4236,18 @@ export const CARD_STYLES = String.raw`
         .gz2-chip--accent  { background: var(--gi-accent-soft); color: var(--gi-accent); }
         .gz2-chip--neutral { background: var(--gi-surface-2); color: var(--gi-text-muted); }
 
-        .gz2-reperes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 28px; margin-bottom: 30px; }
+        .gz2-reperes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 22px; margin-bottom: 22px; }
         .gz2-rep__label { font-size: var(--gi-font-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--gi-text-faint); margin-bottom: 7px; }
         .gz2-rep__value { font-size: var(--gi-font-lg); font-weight: var(--gi-weight-medium); color: var(--gi-text); overflow-wrap: anywhere; }
 
-        .gz2-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .gz2-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .gz2-card {
           appearance: none; -webkit-appearance: none;
           text-align: left; font: inherit; color: inherit;
           background: var(--gi-surface);
           border: 1px solid transparent;
           border-radius: 14px;
-          padding: 16px 18px;
+          padding: 14px 16px;
           cursor: pointer; min-width: 0;
           transition: border-color var(--gi-motion-fast) var(--gi-ease-standard), background-color var(--gi-motion-fast) var(--gi-ease-standard);
         }

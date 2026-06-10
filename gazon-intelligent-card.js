@@ -4275,7 +4275,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.2.7";
+const CARD_VERSION = "0.2.8";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",

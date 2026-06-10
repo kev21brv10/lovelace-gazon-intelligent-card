@@ -1511,7 +1511,22 @@ class GazonIntelligentCard extends HTMLElement {
     const predictiveBlocked = predictiveAttrs.action_possible === false && Boolean(predictiveAttrs.block_reason || predictiveAttrs.reason || predictiveAttrs.summary);
     const blocked = predictiveBlocked || attrs.mowing_blocked_by_watering === true || Boolean(attrs.mowing_block_reason_code || attrs.mowing_block_reason_label);
     const reasonCode = String(predictiveAttrs.block_reason || attrs.mowing_block_reason_code || "").trim().toLowerCase();
-    const reasonLabel = String(formatMowingBlockReason(reasonCode)).trim();
+    let reasonLabel = String(formatMowingBlockReason(reasonCode)).trim();
+    // Pour « machine indisponible », le composant a déjà résolu un libellé précis
+    // (« Robot déjà en tonte… », « Robot en charge… »). On le préfère au générique.
+    // Les autres motifs (pluie, sol humide, post-produit, nuit, phase…) gardent
+    // leur libellé court inchangé.
+    if (reasonCode === "machine_unavailable") {
+      const machineLabel = String(
+        predictiveAttrs.machine_unavailable_label
+        || attrs.machine_unavailable_label
+        || predictiveAttrs.reason
+        || "",
+      ).trim();
+      if (machineLabel) {
+        reasonLabel = machineLabel;
+      }
+    }
     const reasonDetail = String(
       predictiveAttrs.reason
       || predictiveAttrs.summary

@@ -4489,7 +4489,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.5.7";
+const CARD_VERSION = "0.5.8";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -4772,7 +4772,7 @@ const RENDER_SIGNATURE_ATTRS = {
   entity_niveau_pertinence: ["score", "score_level", "summary", "tone", "source_entity"],
   entity_prochaine_fenetre_optimale: ["source_entity", "source_state", "block_reason", "confidence_score", "phase", "month", "temperature", "summary"],
   entity_prochain_arrosage: ["target_date", "target_display", "target_datetime", "optimal_target_datetime", "target_window", "target_window_label", "next_action", "summary", "objective_mm", "type_arrosage", "watering_cause", "block_reason", "block_reason_label", "confidence_score", "confidence_reasons", "forecast_pluie_j2", "forecast_pluie_3j", "forecast_probabilite_max_3j", "watering_window_display", "optimal_window_display"],
-  entity_prochaine_tonte: ["target_date", "target_display", "target_datetime", "target_datetime_display", "action_possible", "tonte_statut", "block_reason", "reason", "summary"],
+  entity_prochaine_tonte: ["target_date", "target_display", "target_datetime", "target_datetime_display", "action_possible", "tonte_statut", "block_reason", "reason", "summary", "machine_unavailable_label", "machine_unavailable_detail"],
   entity_prochain_blocage_attendu: ["source_entity", "source_status", "block_reason", "block_label", "confidence_score", "phase", "month", "temperature", "summary"],
   entity_plan_arrosage: ["summary", "duration_human", "zone_count", "objective_mm", "plan_type", "passages", "fractionation", "total_duration_min"],
   entity_arrosage_en_cours: ["active", "started_at_utc", "last_activity_at_utc", "active_zone_count", "zone_count", "progress_percent", "active_zones", "active_zone_labels", "current_passage", "passage_count", "source", "watering_cause"],
@@ -7308,7 +7308,22 @@ class GazonIntelligentCard extends HTMLElement {
     const predictiveBlocked = predictiveAttrs.action_possible === false && Boolean(predictiveAttrs.block_reason || predictiveAttrs.reason || predictiveAttrs.summary);
     const blocked = predictiveBlocked || attrs.mowing_blocked_by_watering === true || Boolean(attrs.mowing_block_reason_code || attrs.mowing_block_reason_label);
     const reasonCode = String(predictiveAttrs.block_reason || attrs.mowing_block_reason_code || "").trim().toLowerCase();
-    const reasonLabel = String(formatMowingBlockReason(reasonCode)).trim();
+    let reasonLabel = String(formatMowingBlockReason(reasonCode)).trim();
+    // Pour « machine indisponible », le composant a déjà résolu un libellé précis
+    // (« Robot déjà en tonte… », « Robot en charge… »). On le préfère au générique.
+    // Les autres motifs (pluie, sol humide, post-produit, nuit, phase…) gardent
+    // leur libellé court inchangé.
+    if (reasonCode === "machine_unavailable") {
+      const machineLabel = String(
+        predictiveAttrs.machine_unavailable_label
+        || attrs.machine_unavailable_label
+        || predictiveAttrs.reason
+        || "",
+      ).trim();
+      if (machineLabel) {
+        reasonLabel = machineLabel;
+      }
+    }
     const reasonDetail = String(
       predictiveAttrs.reason
       || predictiveAttrs.summary

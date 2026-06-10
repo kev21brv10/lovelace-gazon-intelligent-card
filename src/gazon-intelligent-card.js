@@ -116,7 +116,6 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "show_header", selector: { boolean: {} } },
         { name: "show_icons", selector: { boolean: {} } },
         { name: "show_background", selector: { boolean: {} } },
-        { name: "compact", selector: { boolean: {} } },
         { name: "minimal_mode", selector: { boolean: {} } },
         { name: "show_secondary_info", selector: { boolean: {} } },
         { name: "show_advanced_details", selector: { boolean: {} } },
@@ -128,7 +127,6 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "icon_size", selector: { number: { min: 16, mode: "box", step: 1 } } },
         { name: "border_radius", selector: { number: { min: 0, mode: "box", step: 1 } } },
         { name: "background_style", selector: { select: { options: ["solid", "glass", "minimal"] } } },
-        { name: "use_gradient", selector: { boolean: {} } },
         { name: "entity_assistant", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_fenetre_optimale", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_weather", selector: { entity: { domain: ["weather"] } } },
@@ -213,7 +211,7 @@ class GazonIntelligentCard extends HTMLElement {
     if (this._isMinimalMode()) {
       return this._config.show_header ? 4 : 3;
     }
-    let size = this._config.compact ? 7 : 8;
+    let size = 8;
     if (!this._config.show_header) {
       size -= 1;
     }
@@ -2480,7 +2478,6 @@ class GazonIntelligentCard extends HTMLElement {
         show_icons: Boolean(this._config.show_icons),
         show_header: Boolean(this._config.show_header),
         show_background: Boolean(this._config.show_background),
-        compact: Boolean(this._config.compact),
         minimal_mode: Boolean(this._config.minimal_mode),
         show_secondary_info: Boolean(this._config.show_secondary_info),
         show_advanced_details: Boolean(this._config.show_advanced_details),
@@ -2489,7 +2486,6 @@ class GazonIntelligentCard extends HTMLElement {
         icon_size: this._config.icon_size,
         border_radius: this._config.border_radius,
         background_style: this._config.background_style,
-        use_gradient: Boolean(this._config.use_gradient),
       },
       entities: {},
     };
@@ -4354,7 +4350,7 @@ class GazonIntelligentCard extends HTMLElement {
       return "";
     }
     return `
-      <section class="tiles tiles--${section} ${this._config.compact ? "tiles--compact" : ""} ${this._isMinimalMode() ? "tiles--minimal" : ""}">
+      <section class="tiles tiles--${section} ${this._isMinimalMode() ? "tiles--minimal" : ""}">
         ${tiles.join("")}
       </section>
     `;
@@ -4427,10 +4423,8 @@ class GazonIntelligentCard extends HTMLElement {
 
       const rootClass = [
         "card",
-        this._config.compact ? "card--compact" : "",
         backgroundStyle ? `card--${backgroundStyle}` : "",
         resolvedThemeMode ? `card--theme-${resolvedThemeMode}` : "",
-        this._config.use_gradient ? "card--gradient" : "",
         actionCritical ? "card--pulse-critical" : "",
         isPreview ? "card--editor-preview" : "",
       ]

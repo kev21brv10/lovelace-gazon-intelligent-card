@@ -201,7 +201,6 @@ title: Gazon Principal
 show_icons: true
 show_header: true
 show_background: true
-compact: false
 minimal_mode: false
 show_advanced_details: false
 theme_mode: auto
@@ -209,7 +208,6 @@ accent_color: ""
 icon_size: 24
 border_radius: 24
 background_style: glass
-use_gradient: true
 show_secondary_info: false
 manual_action_service: gazon_intelligent.start_manual_irrigation
 manual_action_label: Irrigation manuelle
@@ -284,7 +282,6 @@ Toutes les clés de configuration supportées par la card:
 - `show_icons`
 - `show_header`
 - `show_background`
-- `compact`
 - `minimal_mode`
 - `show_advanced_details`
 - `theme_mode`
@@ -292,7 +289,6 @@ Toutes les clés de configuration supportées par la card:
 - `icon_size`
 - `border_radius`
 - `background_style`
-- `use_gradient`
 - `show_secondary_info`
 - `entity_assistant`
 - `entity_fenetre_optimale`

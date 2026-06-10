@@ -311,10 +311,8 @@ ${EDITOR_STYLES}
             ${this._renderCheckbox("show_header", "Afficher l'en-tête")}
             ${this._renderCheckbox("show_icons", "Afficher les icônes")}
             ${this._renderCheckbox("show_background", "Afficher le fond")}
-            ${this._renderCheckbox("compact", "Mode compact")}
             ${this._renderCheckbox("minimal_mode", "Mode minimal")}
             ${this._renderCheckbox("show_secondary_info", "Afficher les infos secondaires")}
-            ${this._renderCheckbox("use_gradient", "Utiliser un dégradé")}
             ${this._renderCheckbox("show_advanced_details", "Afficher les détails avancés")}
           </div>
           <div class="row">

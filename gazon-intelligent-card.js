@@ -4484,14 +4484,13 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.5.2";
+const CARD_VERSION = "0.5.3";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
   show_icons: true,
   show_header: true,
   show_background: true,
-  compact: false,
   minimal_mode: false,
   show_advanced_details: false,
   theme_mode: "auto",
@@ -4499,7 +4498,6 @@ const DEFAULT_CONFIG = {
   icon_size: 24,
   border_radius: 24,
   background_style: "solid",
-  use_gradient: true,
   show_secondary_info: true,
   entity_assistant: "sensor.gazon_intelligent_assistant",
   entity_fenetre_optimale: "sensor.gazon_intelligent_fenetre_optimale",
@@ -5909,7 +5907,6 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "show_header", selector: { boolean: {} } },
         { name: "show_icons", selector: { boolean: {} } },
         { name: "show_background", selector: { boolean: {} } },
-        { name: "compact", selector: { boolean: {} } },
         { name: "minimal_mode", selector: { boolean: {} } },
         { name: "show_secondary_info", selector: { boolean: {} } },
         { name: "show_advanced_details", selector: { boolean: {} } },
@@ -5921,7 +5918,6 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "icon_size", selector: { number: { min: 16, mode: "box", step: 1 } } },
         { name: "border_radius", selector: { number: { min: 0, mode: "box", step: 1 } } },
         { name: "background_style", selector: { select: { options: ["solid", "glass", "minimal"] } } },
-        { name: "use_gradient", selector: { boolean: {} } },
         { name: "entity_assistant", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_fenetre_optimale", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_weather", selector: { entity: { domain: ["weather"] } } },
@@ -6006,7 +6002,7 @@ class GazonIntelligentCard extends HTMLElement {
     if (this._isMinimalMode()) {
       return this._config.show_header ? 4 : 3;
     }
-    let size = this._config.compact ? 7 : 8;
+    let size = 8;
     if (!this._config.show_header) {
       size -= 1;
     }
@@ -8273,7 +8269,6 @@ class GazonIntelligentCard extends HTMLElement {
         show_icons: Boolean(this._config.show_icons),
         show_header: Boolean(this._config.show_header),
         show_background: Boolean(this._config.show_background),
-        compact: Boolean(this._config.compact),
         minimal_mode: Boolean(this._config.minimal_mode),
         show_secondary_info: Boolean(this._config.show_secondary_info),
         show_advanced_details: Boolean(this._config.show_advanced_details),
@@ -8282,7 +8277,6 @@ class GazonIntelligentCard extends HTMLElement {
         icon_size: this._config.icon_size,
         border_radius: this._config.border_radius,
         background_style: this._config.background_style,
-        use_gradient: Boolean(this._config.use_gradient),
       },
       entities: {},
     };
@@ -10147,7 +10141,7 @@ class GazonIntelligentCard extends HTMLElement {
       return "";
     }
     return `
-      <section class="tiles tiles--${section} ${this._config.compact ? "tiles--compact" : ""} ${this._isMinimalMode() ? "tiles--minimal" : ""}">
+      <section class="tiles tiles--${section} ${this._isMinimalMode() ? "tiles--minimal" : ""}">
         ${tiles.join("")}
       </section>
     `;
@@ -10220,10 +10214,8 @@ class GazonIntelligentCard extends HTMLElement {
 
       const rootClass = [
         "card",
-        this._config.compact ? "card--compact" : "",
         backgroundStyle ? `card--${backgroundStyle}` : "",
         resolvedThemeMode ? `card--theme-${resolvedThemeMode}` : "",
-        this._config.use_gradient ? "card--gradient" : "",
         actionCritical ? "card--pulse-critical" : "",
         isPreview ? "card--editor-preview" : "",
       ]
@@ -10626,13 +10618,14 @@ function renderGz2Hero(eyebrow, title, sub = "") {
 }
 
 function renderGz2Cards(card, items) {
+  const showSub = card._config?.show_secondary_info !== false;
   return items.map((f) => {
     const eid = f.entityKey ? card._entityId(f.entityKey) : null;
     const vTone = ["success", "warning", "danger", "critical"].includes(f.tone) ? ` gz2-card__value--${f.tone}` : "";
     const inner = `
         <div class="gz2-card__label">${escapeHtml(f.label)}</div>
         <div class="gz2-card__value${vTone}">${escapeHtml(f.value)}</div>
-        ${f.secondary ? `<div class="gz2-card__sub">${escapeHtml(f.secondary)}</div>` : ""}`;
+        ${showSub && f.secondary ? `<div class="gz2-card__sub">${escapeHtml(f.secondary)}</div>` : ""}`;
     return eid
       ? `<button type="button" class="gz2-card" data-more-info-entity="${escapeHtml(eid)}">${inner}</button>`
       : `<div class="gz2-card gz2-card--static">${inner}</div>`;
@@ -12720,10 +12713,8 @@ ${EDITOR_STYLES}
             ${this._renderCheckbox("show_header", "Afficher l'en-tête")}
             ${this._renderCheckbox("show_icons", "Afficher les icônes")}
             ${this._renderCheckbox("show_background", "Afficher le fond")}
-            ${this._renderCheckbox("compact", "Mode compact")}
             ${this._renderCheckbox("minimal_mode", "Mode minimal")}
             ${this._renderCheckbox("show_secondary_info", "Afficher les infos secondaires")}
-            ${this._renderCheckbox("use_gradient", "Utiliser un dégradé")}
             ${this._renderCheckbox("show_advanced_details", "Afficher les détails avancés")}
           </div>
           <div class="row">

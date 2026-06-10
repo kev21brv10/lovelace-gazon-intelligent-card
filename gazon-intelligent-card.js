@@ -3126,11 +3126,8 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-card-core--tile {
-          border: 1px solid color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 26%, transparent);
-          background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 4%, transparent) 0%, transparent 18%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 8%, transparent) 0%, transparent 100%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-tile-accent, var(--gazon-section-accent)) 6%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
+          border: 1px solid var(--gi-border);
+          background: var(--gi-surface);
         }
 
         .gi-card-core__icon {
@@ -3144,9 +3141,8 @@ const CARD_STYLES = String.raw`
           flex: none;
           overflow: visible;
           line-height: 0;
-          background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
-          color: var(--gazon-section-accent);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+          background: var(--gi-accent-soft);
+          color: var(--gi-accent);
         }
 
         .gi-card-core--tile .gi-card-core__icon {
@@ -3223,7 +3219,7 @@ const CARD_STYLES = String.raw`
         }
 
         .gi-card-core__value {
-          font-weight: 700;
+          font-weight: var(--gi-weight-medium);
           min-width: 0;
           overflow-wrap: break-word;
           word-break: normal;
@@ -3240,7 +3236,7 @@ const CARD_STYLES = String.raw`
           order: 1;
           font-size: clamp(1.18rem, 1.08rem + 0.44vw, 1.42rem);
           line-height: 1.02;
-          font-weight: 900;
+          font-weight: var(--gi-weight-medium);
         }
 
         .gi-card-core--metric .gi-card-core__label {

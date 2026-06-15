@@ -4489,7 +4489,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.5.8";
+const CARD_VERSION = "0.5.9";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -7599,8 +7599,12 @@ class GazonIntelligentCard extends HTMLElement {
     }
     const passages = Math.max(1, asNumber(attrs.passages) ?? 1);
     const pauseMinutes = Math.max(0, asNumber(attrs.pause_between_passages_minutes) ?? 0);
+    // total_duration_min / la somme des durées de zone correspondent DÉJÀ au temps
+    // d'arrosage total sur l'ensemble des passages — on n'ajoute donc QUE les pauses
+    // inter-passages. (Avant : on multipliait le flux par `passages`, d'où un « restant »
+    // ~2-3× trop élevé, ex. 166 min au lieu de ~82.)
     if (totalSeconds > 0 && passages > 1) {
-      totalSeconds = (totalSeconds * passages) + (pauseMinutes * 60.0 * (passages - 1));
+      totalSeconds = totalSeconds + (pauseMinutes * 60.0 * (passages - 1));
     }
     return totalSeconds > 0 ? totalSeconds : 0;
   }
@@ -7620,7 +7624,12 @@ class GazonIntelligentCard extends HTMLElement {
 
     const startedAtRaw = String(attrs.started_at_utc || "").trim();
     const startedAt = startedAtRaw ? Date.parse(startedAtRaw) : NaN;
-    const totalSeconds = this._estimatedWateringTotalSeconds();
+    // Total de référence = celui calculé par l'intégration (inclut les pauses) s'il est
+    // disponible ; sinon repli sur l'estimation à partir du plan.
+    const plannedTotalFromAttrs = asNumber(attrs.planned_total_seconds);
+    const totalSeconds = plannedTotalFromAttrs !== null && plannedTotalFromAttrs > 0
+      ? plannedTotalFromAttrs
+      : this._estimatedWateringTotalSeconds();
     const elapsedSeconds = Number.isFinite(startedAt)
       ? Math.max(0, (Date.now() - startedAt) / 1000)
       : asNumber(attrs.elapsed_seconds) ?? 0;

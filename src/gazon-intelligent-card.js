@@ -952,8 +952,26 @@ class GazonIntelligentCard extends HTMLElement {
   _interventionRecommendationState() {
     const entity = this._interventionRecommendationEntity();
     const attrs = entity?.attributes || {};
-    const payload = attrs.payload && typeof attrs.payload === "object" ? attrs.payload : attrs;
+    // L'entité publique « prochaine_intervention » n'expose qu'un payload plat ; le
+    // détail riche (product / selection / constraints / context) vit sur l'entité de
+    // debug. On l'utilise comme source du payload quand elle est disponible.
+    const debugEntity = this._entity("entity_debug_intervention");
+    const debugAttrs = debugEntity?.attributes && typeof debugEntity.attributes === "object"
+      ? debugEntity.attributes
+      : null;
+    const richDebug = debugAttrs
+      && (debugAttrs.product || debugAttrs.selection || debugAttrs.constraints || debugAttrs.context)
+      ? debugAttrs
+      : null;
+    const payload = attrs.payload && typeof attrs.payload === "object"
+      ? attrs.payload
+      : richDebug
+        ? { ...attrs, ...richDebug }
+        : attrs;
     const catalogue = this._catalogueState();
+    // Détails de la sélection (mode d'usage / max par an) absents du payload
+    // d'intervention : on les complète depuis l'entité select.
+    const productSelection = this._productSelectionState();
     const pertinenceEntity = this._entity("entity_niveau_pertinence");
     const product = payload.product && typeof payload.product === "object" ? payload.product : {};
     const selection = payload.selection && typeof payload.selection === "object" ? payload.selection : {};
@@ -1070,15 +1088,28 @@ class GazonIntelligentCard extends HTMLElement {
       : [];
     const selectedProductId = String(selection.id || attrs.selected_product_id || "").trim() || null;
     const selectedProductName = String(selection.name || attrs.selected_product_name || "").trim() || null;
-    const selectedProductMonths = Array.isArray(selection.months) ? selection.months : [];
-    const selectedProductMonthsLabel = String(selection.months_label || attrs.selected_product_months_label || "").trim() || null;
-    const selectedProductUsageMode = String(selection.usage_mode || attrs.selected_product_usage_mode || "").trim() || null;
-    const selectedProductUsageModeLabel = String(selection.usage_mode_label || attrs.selected_product_usage_mode_label || "").trim() || null;
+    const selectedProductMonths = Array.isArray(selection.months) && selection.months.length
+      ? selection.months
+      : (Array.isArray(productSelection.selectedProductMonths) ? productSelection.selectedProductMonths : []);
+    const selectedProductMonthsLabel = String(
+      selection.months_label || attrs.selected_product_months_label || productSelection.selectedProductMonthsLabel || "",
+    ).trim() || null;
+    const selectedProductUsageMode = String(
+      selection.usage_mode || attrs.selected_product_usage_mode || productSelection.selectedProductUsageMode || "",
+    ).trim() || null;
+    const selectedProductUsageModeLabel = String(
+      selection.usage_mode_label || attrs.selected_product_usage_mode_label || productSelection.selectedProductUsageModeLabel || "",
+    ).trim() || null;
     const selectedProductMaxApplicationsPerYear = asNumber(
-      selection.max_applications_per_year ?? attrs.selected_product_max_applications_per_year,
+      selection.max_applications_per_year
+        ?? attrs.selected_product_max_applications_per_year
+        ?? productSelection.selectedProductMaxApplicationsPerYear,
     );
     const selectedProductMaxApplicationsPerYearLabel = String(
-      selection.max_applications_per_year_label || attrs.selected_product_max_applications_per_year_label || "",
+      selection.max_applications_per_year_label
+        || attrs.selected_product_max_applications_per_year_label
+        || productSelection.selectedProductMaxApplicationsPerYearLabel
+        || "",
     ).trim() || null;
     const recommendedProductMonths = Array.isArray(product.months) ? product.months : [];
     const recommendedProductMonthsLabel = String(product.months_label || attrs.recommended_product_months_label || "").trim() || null;
@@ -1358,8 +1389,9 @@ class GazonIntelligentCard extends HTMLElement {
     } else if (action.includes("surveil")) {
       tone = "warning";
     }
-    const isPassiveState = action === "aucune_action" && moment === "attendre";
-    const isBlockedByConditions = action === "aucune_action" && status === "blocked_due_to_conditions";
+    // L'intégration émet action="none" (pas "aucune_action") au repos.
+    const isPassiveState = action === "none" && moment === "attendre";
+    const isBlockedByConditions = action === "none" && status === "blocked_due_to_conditions";
     const isBlockedMowing = status === "blocked" && action === "tonte" && (
       normalizedReason.includes("déjà en cours")
       || normalizedReason.includes("en cours")
@@ -1462,9 +1494,12 @@ class GazonIntelligentCard extends HTMLElement {
     }
 
     let tone = "neutral";
-    if (hardBlockReason || ["error", "erreur", "indisponible", "pluie", "unknown"].includes(status) || coordinationReady === false) {
+    // Vocabulaire réel de mower_operation_state (mower_coordination.py) :
+    // unknown/charging/starting/tonte/transit/zoning/searching_zone/
+    // escaped_digital_fence/rain_delayed/paused/error/idle.
+    if (hardBlockReason || ["error", "erreur", "indisponible", "pluie", "unknown", "escaped_digital_fence"].includes(status) || coordinationReady === false) {
       tone = "danger";
-    } else if (["charging", "en_charge", "retour_station", "retour", "transit", "paused", "pause"].includes(status) || presenceState === "retour") {
+    } else if (["charging", "en_charge", "retour_station", "retour", "transit", "starting", "zoning", "searching_zone", "rain_delayed", "paused", "pause"].includes(status) || presenceState === "retour") {
       tone = "warning";
     } else if (["mowing", "tonte", "tonte_en_cours"].includes(status)) {
       tone = "accent";
@@ -1568,7 +1603,10 @@ class GazonIntelligentCard extends HTMLElement {
     const nextActionDisplay = String(attrs.next_action_display || "").trim();
     const nextActionDate = String(attrs.next_action_date || "").trim();
     const blockReason = String(attrs.block_reason || "").trim();
-    const blockReasonLabel = formatWateringBlockReason(blockReason);
+    // Libellé fourni par l'intégration en priorité (couvre tous les motifs émis,
+    // ex. « pluie prévue suffisante ») ; repli sur le formatage local.
+    const blockReasonLabel = String(attrs.block_reason_label || "").trim()
+      || formatWateringBlockReason(blockReason);
     const objective = this._objectiveMm() ?? 0;
     const typeArrosage = String(this._entityState("entity_type_arrosage", "") || "").trim();
     const wateringCause = this._inferWateringCause({ entity, attrs, typeArrosage });

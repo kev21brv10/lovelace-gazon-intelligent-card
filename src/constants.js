@@ -1,6 +1,6 @@
 export const CARD_TYPE = "gazon-intelligent-card";
 export const CARD_NAME = "Gazon Intelligent Card";
-export const CARD_VERSION = "0.5.9";
+export const CARD_VERSION = "0.5.10";
 
 export const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -389,6 +389,7 @@ export const STATUS_LABELS = {
   application_technique: "Arrosage post-produit",
   application_technique_auto: "Arrosage post-produit auto",
   aucune_action: "Aucune action",
+  none: "Aucune action",
   hydric_need: "Besoin hydrique",
   plein: "Plein",
   excédentaire: "Excédentaire",

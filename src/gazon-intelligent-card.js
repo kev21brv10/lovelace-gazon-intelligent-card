@@ -2414,6 +2414,9 @@ class GazonIntelligentCard extends HTMLElement {
     const palette = tabPalette || this._tabPalette(this._activeTab);
     const vars = {
       "--gazon-accent-color": accent,
+      // Pilote l'accent du look moderne (pastilles, onglets, héro). Vide → repli sur
+      // le vert de marque. Mettre `var(--primary-color)` pour suivre le thème HA.
+      "--gazon-brand-accent": this._config?.accent_color || undefined,
       "--gazon-card-accent": accent,
       "--gazon-card-tone-color": accent,
       "--gazon-card-tone": activeTone,

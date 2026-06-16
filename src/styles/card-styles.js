@@ -4239,6 +4239,20 @@ export const CARD_STYLES = String.raw`
           letter-spacing: -0.01em;
         }
         .gz2-hero__sub { font-size: var(--gi-font-sm); color: var(--gi-text-muted); line-height: 1.5; margin-top: 10px; }
+        /* Héro avec pastille d'icône d'état à gauche. */
+        .gz2-hero--withicon { display: flex; align-items: flex-start; gap: 14px; }
+        .gz2-hero__body { flex: 1; min-width: 0; }
+        .gz2-hero__badge {
+          flex: 0 0 auto; width: 42px; height: 42px; margin-top: 2px;
+          display: flex; align-items: center; justify-content: center;
+          border-radius: var(--gi-radius-md);
+          color: var(--gi-accent); background: var(--gi-accent-soft);
+        }
+        .gz2-hero__badge--success { color: var(--gi-status-success); background: color-mix(in srgb, var(--gi-status-success) 14%, transparent); }
+        .gz2-hero__badge--warning { color: var(--gi-status-warning); background: color-mix(in srgb, var(--gi-status-warning) 14%, transparent); }
+        .gz2-hero__badge--danger,
+        .gz2-hero__badge--critical { color: var(--gi-status-danger); background: color-mix(in srgb, var(--gi-status-danger) 16%, transparent); }
+        .gz2-hero__badge--neutral { color: var(--gi-text-muted); background: var(--gi-surface-2); }
 
         .gz2-chip {
           display: inline-flex; align-items: center; gap: 6px;

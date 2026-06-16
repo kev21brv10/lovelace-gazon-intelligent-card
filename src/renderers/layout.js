@@ -31,12 +31,20 @@ import {
   formatHydricUxState,
 } from "../utils/formatters.js";
 
-function renderGz2Hero(eyebrow, title, sub = "") {
+function renderGz2Hero(eyebrow, title, sub = "", opts = {}) {
+  const icon = opts.icon || null;
+  const tone = opts.tone || "accent";
+  const badge = icon
+    ? `<div class="gz2-hero__badge gz2-hero__badge--${escapeHtml(tone)}">${renderIconBox(icon, "md")}</div>`
+    : "";
   return `
-        <div class="gz2-hero">
-          <div class="gz2-eyebrow">${escapeHtml(eyebrow)}</div>
-          <div class="gz2-hero__title">${escapeHtml(title)}</div>
-          ${sub ? `<div class="gz2-hero__sub">${escapeHtml(sub)}</div>` : ""}
+        <div class="gz2-hero${icon ? " gz2-hero--withicon" : ""}">
+          ${badge}
+          <div class="gz2-hero__body">
+            <div class="gz2-eyebrow">${escapeHtml(eyebrow)}</div>
+            <div class="gz2-hero__title">${escapeHtml(title)}</div>
+            ${sub ? `<div class="gz2-hero__sub">${escapeHtml(sub)}</div>` : ""}
+          </div>
         </div>`;
 }
 
@@ -983,7 +991,7 @@ export function renderProductsTab(card) {
 
   return `
       <section class="gz2-overview" aria-label="Produits">
-        ${renderGz2Hero("Référentiel produit", productsSummary, productsHint)}
+        ${renderGz2Hero("Référentiel produit", productsSummary, productsHint, { icon: "mdi:package-variant", tone: "accent" })}
         <div class="gz2-eyebrow gz2-eyebrow--section">Catalogue</div>
         <div class="gz2-card__sub" style="margin:0 0 12px;">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
         ${renderCatalogueProductCards(card)}
@@ -1018,7 +1026,7 @@ export function renderInterventionTab(card) {
 
   return `
       <section class="gz2-overview" aria-label="Intervention">
-        ${renderGz2Hero(ui.title || "Intervention", ui.summary || "Non disponible", ui.hint || "")}
+        ${renderGz2Hero(ui.title || "Intervention", ui.summary || "Non disponible", ui.hint || "", { icon: "mdi:spray-bottle", tone: "accent" })}
         ${
           temperatureConstraintState
             ? `
@@ -1133,11 +1141,7 @@ export function renderOverviewTab(card) {
 
   return `
       <section class="gz2-overview" aria-label="Synthèse">
-        <div class="gz2-hero">
-          <div class="gz2-eyebrow">Conseil du jour</div>
-          <div class="gz2-hero__title">${escapeHtml(titleText)}</div>
-          ${heroSub ? `<div class="gz2-hero__sub">${escapeHtml(heroSub)}</div>` : ""}
-        </div>
+        ${renderGz2Hero("Conseil du jour", titleText, heroSub, { icon: "mdi:lightbulb-on-outline", tone: "accent" })}
 
         <div class="gz2-reperes" aria-label="Repères">
           ${reperes.map((r) => `
@@ -1150,17 +1154,28 @@ export function renderOverviewTab(card) {
 
         <div class="gz2-eyebrow">Essentiel</div>
         <div class="gz2-cards">
-          ${facts.map((f) => {
-            const eid = card._entityId(f.entityKey);
-            const vTone = ["success", "warning", "danger", "critical"].includes(f.tone) ? ` gz2-card__value--${f.tone}` : "";
-            return `
+          ${(() => {
+            // Déduplication : on n'affiche pas en sous-texte une phrase déjà dite dans
+            // le héro ou dans une carte précédente (évite la répétition du motif de blocage).
+            const _norm = (s) => String(s || "").trim().toLowerCase().replace(/[. \s]+$/g, "");
+            const seenSubs = new Set([_norm(titleText), _norm(heroSub)].filter(Boolean));
+            return facts.map((f) => {
+              const eid = card._entityId(f.entityKey);
+              const vTone = ["success", "warning", "danger", "critical"].includes(f.tone) ? ` gz2-card__value--${f.tone}` : "";
+              const subNorm = _norm(f.secondary);
+              const showSub = Boolean(f.secondary) && subNorm.length > 0 && !seenSubs.has(subNorm);
+              if (showSub) {
+                seenSubs.add(subNorm);
+              }
+              return `
               <button type="button" class="gz2-card"${eid ? ` data-more-info-entity="${escapeHtml(eid)}"` : ""}>
                 <div class="gz2-card__label">${escapeHtml(f.label)}</div>
                 <div class="gz2-card__value${vTone}">${escapeHtml(f.value)}</div>
-                ${f.secondary ? `<div class="gz2-card__sub">${escapeHtml(f.secondary)}</div>` : ""}
+                ${showSub ? `<div class="gz2-card__sub">${escapeHtml(f.secondary)}</div>` : ""}
               </button>
             `;
-          }).join("")}
+            }).join("");
+          })()}
         </div>
       </section>
     `;
@@ -1404,11 +1419,7 @@ export function renderWateringTab(card) {
 
   return `
       <section class="gz2-overview" aria-label="Irrigation">
-        <div class="gz2-hero">
-          <div class="gz2-eyebrow">Décision eau</div>
-          <div class="gz2-hero__title">${escapeHtml(heroTitle)}</div>
-          ${heroSub ? `<div class="gz2-hero__sub">${escapeHtml(heroSub)}</div>` : ""}
-        </div>
+        ${renderGz2Hero("Décision eau", heroTitle, heroSub, { icon: card._statusIcon(windowState.status) || "mdi:water", tone: windowState.tone || "accent" })}
 
         ${blockageHtml}
 
@@ -1534,7 +1545,7 @@ export function renderGazonTab(card) {
 
   return `
       <section class="gz2-overview" aria-label="Gazon">
-        ${renderGz2Hero("Gazon", formatStatusLabel(phase) || "Gazon", gazonHint)}
+        ${renderGz2Hero("Gazon", formatStatusLabel(phase) || "Gazon", gazonHint, { icon: "mdi:grass", tone: "accent" })}
         <div class="gz2-cards">${renderGz2Cards(card, gazonFacts)}</div>
         ${hasSubPhase ? `
         <div class="gz2-eyebrow gz2-eyebrow--section">Progression de la sous-phase</div>
@@ -1682,7 +1693,7 @@ export function renderMowingTab(card) {
 
   return `
       <section class="gz2-overview" aria-label="Tonte">
-        ${renderGz2Hero("Tonte", tonteValue, mowingDecisionSummary)}
+        ${renderGz2Hero("Tonte", tonteValue, mowingDecisionSummary, { icon: "mdi:content-cut", tone: "accent" })}
         <div class="gz2-chips">${renderGz2Chips(mowingDecisionPills)}</div>
         <div class="gz2-eyebrow gz2-eyebrow--section">Lecture rapide</div>
         <div class="gz2-cards">${renderGz2Cards(card, mowingCards)}</div>
@@ -1720,7 +1731,7 @@ export function renderConfigTab(card) {
 
   return `
       <section class="gz2-overview" aria-label="Réglages">
-        ${renderGz2Hero("Réglages", "Autorisations & contrôles", "Touchez une tuile pour ouvrir le contrôle Home Assistant.")}
+        ${renderGz2Hero("Réglages", "Autorisations & contrôles", "Touchez une tuile pour ouvrir le contrôle Home Assistant.", { icon: "mdi:cog-outline", tone: "neutral" })}
         <div class="gz2-eyebrow gz2-eyebrow--section">Autorisations & coordination</div>
         <div class="gz2-cards">${renderGz2Cards(card, controlItems)}</div>
         ${zoneItems.length ? `

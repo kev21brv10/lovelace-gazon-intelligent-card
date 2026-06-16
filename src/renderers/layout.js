@@ -1430,7 +1430,7 @@ export function renderWateringTab(card) {
         <div class="gz2-meter">
           <div class="gz2-meter__top">
             <div class="gz2-meter__value">${escapeHtml(reserveTotalValue)}</div>
-            <div class="gz2-meter__badge">${escapeHtml(hydricUx.label)}</div>
+            <div class="gz2-meter__badge gz2-chip gz2-chip--${escapeHtml(hydricUx.tone || "neutral")}">${escapeHtml(hydricUx.label)}</div>
           </div>
           <div class="gz2-meter__track" aria-label="Répartition de la réserve hydrique">
             <span class="gz2-meter__fill" style="width:${escapeHtml(String(hydricUsefulWidth))}%;"></span>

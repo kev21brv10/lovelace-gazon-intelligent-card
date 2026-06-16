@@ -4188,34 +4188,39 @@ export const CARD_STYLES = String.raw`
         }
         .gz2-btn:hover { background: color-mix(in srgb, var(--gi-accent) 24%, transparent); }
 
+        /* Navigation en contrôle segmenté (pilules) : look moderne. */
         .gz2-nav {
-          display: flex; gap: 22px;
-          border-bottom: 1px solid var(--gi-border);
-          margin-bottom: 18px;
+          display: flex; gap: 4px;
+          margin-bottom: 20px;
+          padding: 5px;
+          background: var(--gi-surface);
+          border: 1px solid var(--gi-border);
+          border-radius: 999px;
           overflow-x: auto;
           scrollbar-width: none;
         }
         .gz2-nav::-webkit-scrollbar { display: none; }
         .gz2-nav__item {
           appearance: none; -webkit-appearance: none;
-          background: none; border: none;
-          border-bottom: 2px solid transparent;
+          background: transparent; border: none;
           color: var(--gi-text-muted);
-          padding: 10px 1px;
-          margin-bottom: -1px;
+          padding: 8px 15px;
+          border-radius: 999px;
           font: inherit;
           font-size: var(--gi-font-sm);
           font-weight: var(--gi-weight-medium);
           cursor: pointer; white-space: nowrap; flex: 0 0 auto;
-          transition: color var(--gi-motion-fast) var(--gi-ease-standard), border-color var(--gi-motion-fast) var(--gi-ease-standard);
+          transition: color var(--gi-motion-fast) var(--gi-ease-standard), background-color var(--gi-motion-fast) var(--gi-ease-standard);
         }
-        .gz2-nav__item:hover { color: var(--gi-text); }
-        .gz2-nav__item--active { color: var(--gi-text); border-bottom-color: var(--gi-accent); }
+        .gz2-nav__item:hover { color: var(--gi-text); background: var(--gi-surface-2); }
+        .gz2-nav__item--active,
+        .gz2-nav__item--active:hover { color: var(--gi-accent); background: var(--gi-accent-soft); }
 
         .gz2-overview { display: flex; flex-direction: column; }
         /* Amorces de section en pastille d'accent : repère visuel fort et moderne. */
         .gz2-eyebrow {
           display: inline-flex; align-items: center;
+          align-self: flex-start; width: fit-content;
           font-size: var(--gi-font-xxs);
           text-transform: uppercase; letter-spacing: 0.1em;
           font-weight: var(--gi-weight-medium);
@@ -4257,8 +4262,8 @@ export const CARD_STYLES = String.raw`
           text-align: left; font: inherit; color: inherit;
           background: var(--gi-surface-2);
           border: 1px solid var(--gi-border);
-          border-radius: var(--gi-radius-md);
-          padding: 14px 16px;
+          border-radius: var(--gi-radius-lg);
+          padding: 16px 18px;
           cursor: pointer; min-width: 0;
           transition: border-color var(--gi-motion-fast) var(--gi-ease-standard), background-color var(--gi-motion-fast) var(--gi-ease-standard), transform var(--gi-motion-fast) var(--gi-ease-soft), box-shadow var(--gi-motion-fast) var(--gi-ease-standard);
         }

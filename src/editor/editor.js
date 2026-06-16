@@ -346,6 +346,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_niveau_pertinence", "Niveau de pertinence")}
             ${this._renderEntityInput("entity_prochaine_fenetre_optimale", "Prochaine fenêtre optimale")}
             ${this._renderEntityInput("entity_prochain_blocage_attendu", "Prochain blocage attendu")}
+            ${this._renderEntityInput("entity_arrosage_auto_blocage", "Blocage arrosage auto")}
             ${this._renderEntityInput("entity_arrosage_recommande", "Irrigation")}
             ${this._renderEntityInput("entity_arrosage_apres_application_autorise", "Post-application")}
             ${this._renderEntityInput("entity_signal_irrigation", "Signal irrigation")}

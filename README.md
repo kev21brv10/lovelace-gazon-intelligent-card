@@ -232,6 +232,7 @@ entity_debug_intervention: sensor.gazon_intelligent_debug_intervention
 entity_niveau_pertinence: sensor.gazon_intelligent_niveau_de_pertinence
 entity_prochaine_fenetre_optimale: sensor.gazon_intelligent_prochaine_fenetre_optimale
 entity_prochain_blocage_attendu: sensor.gazon_intelligent_prochain_blocage_attendu
+entity_arrosage_auto_blocage: sensor.gazon_intelligent_arrosage_auto_blocage
 entity_mode: select.gazon_intelligent_mode_du_gazon
 entity_switch_arrosage_automatique: switch.gazon_intelligent_arrosage_automatique_autorise
 entity_arrosage_recommande: binary_sensor.gazon_intelligent_arrosage_recommande
@@ -306,6 +307,7 @@ Toutes les clés de configuration supportées par la card:
 - `entity_niveau_pertinence`
 - `entity_prochaine_fenetre_optimale`
 - `entity_prochain_blocage_attendu`
+- `entity_arrosage_auto_blocage`
 - `entity_signal_intervention`
 - `entity_signal_irrigation`
 - `entity_prochaine_intervention`

@@ -4289,6 +4289,21 @@ export const CARD_STYLES = String.raw`
         .gz2-meter__fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 999px; background: var(--gi-accent); }
         .gz2-meter__surplus { position: absolute; top: 0; height: 100%; border-radius: 999px; background: color-mix(in srgb, var(--gi-status-success) 55%, transparent); }
         .gz2-meter__meta { font-size: var(--gi-font-xs); color: var(--gi-text-muted); margin-top: 9px; line-height: 1.4; }
+        /* Repère MAD : niveau de réserve sous lequel l'arrosage se déclenche. */
+        .gz2-meter__mad { position: absolute; top: 0; height: 100%; width: 2px; transform: translateX(-1px); background: var(--gi-text); opacity: 0.72; pointer-events: none; }
+        .gz2-meter__legend { display: flex; align-items: center; gap: var(--gi-space-2); font-size: var(--gi-font-xxs); color: var(--gi-text-muted); margin-top: 6px; }
+        .gz2-meter__legend-mark { display: inline-block; width: 2px; height: 11px; background: var(--gi-text); opacity: 0.72; border-radius: 999px; flex: 0 0 auto; }
+
+        /* Actions secondaires (ex. recaler la réserve). */
+        .gz2-actions { display: flex; flex-wrap: wrap; gap: var(--gi-space-2); margin-top: var(--gi-space-3); }
+
+        /* Bandeau « pourquoi l'arrosage est bloqué ». */
+        .gz2-blockage { display: flex; flex-direction: column; gap: var(--gi-space-1); margin: var(--gi-space-3) 0; padding: var(--gi-space-3); border-radius: var(--gi-radius-md); border: 1px solid color-mix(in srgb, var(--gi-status-warning) 30%, transparent); background: color-mix(in srgb, var(--gi-status-warning) 12%, transparent); }
+        .gz2-blockage--danger { border-color: color-mix(in srgb, var(--gi-status-danger) 32%, transparent); background: color-mix(in srgb, var(--gi-status-danger) 13%, transparent); }
+        .gz2-blockage--success { border-color: color-mix(in srgb, var(--gi-status-success) 30%, transparent); background: color-mix(in srgb, var(--gi-status-success) 12%, transparent); }
+        .gz2-blockage__head { display: flex; align-items: center; gap: var(--gi-space-2); font-weight: 600; font-size: var(--gi-font-sm); color: var(--gi-text); }
+        .gz2-blockage__why { font-size: var(--gi-font-xs); color: var(--gi-text); line-height: 1.45; }
+        .gz2-blockage__how { display: flex; align-items: flex-start; gap: var(--gi-space-2); font-size: var(--gi-font-xs); color: var(--gi-text-muted); line-height: 1.45; }
 
         /* Basé sur la largeur de la CARTE (pas du navigateur) : header lisible
            même quand la carte est étroite dans un dashboard large. */

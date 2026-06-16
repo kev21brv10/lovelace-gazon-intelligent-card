@@ -4213,15 +4213,17 @@ export const CARD_STYLES = String.raw`
         .gz2-nav__item--active { color: var(--gi-text); border-bottom-color: var(--gi-accent); }
 
         .gz2-overview { display: flex; flex-direction: column; }
+        /* Amorces de section en pastille d'accent : repère visuel fort et moderne. */
         .gz2-eyebrow {
-          font-size: var(--gi-font-xs);
-          text-transform: uppercase; letter-spacing: 0.08em;
+          display: inline-flex; align-items: center;
+          font-size: var(--gi-font-xxs);
+          text-transform: uppercase; letter-spacing: 0.1em;
           font-weight: var(--gi-weight-medium);
-          color: var(--gi-text-faint);
+          color: var(--gi-accent);
+          background: var(--gi-accent-soft);
+          padding: 4px 11px; border-radius: 999px;
           margin-bottom: 12px;
         }
-        /* Accent de marque sur l'amorce du héro pour donner du peps. */
-        .gz2-hero .gz2-eyebrow { color: var(--gi-accent); }
         .gz2-hero { margin-bottom: 22px; }
         .gz2-hero__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
         .gz2-hero__title {
@@ -4253,7 +4255,7 @@ export const CARD_STYLES = String.raw`
         .gz2-card {
           appearance: none; -webkit-appearance: none;
           text-align: left; font: inherit; color: inherit;
-          background: var(--gi-surface);
+          background: var(--gi-surface-2);
           border: 1px solid var(--gi-border);
           border-radius: var(--gi-radius-md);
           padding: 14px 16px;
@@ -4270,9 +4272,7 @@ export const CARD_STYLES = String.raw`
         .gz2-card__value--critical{ color: var(--gi-status-danger); }
         .gz2-card__sub { font-size: var(--gi-font-xs); color: var(--gi-text-muted); margin-top: 6px; line-height: 1.4; }
 
-        .gz2-eyebrow--section { margin-top: 26px; display: flex; align-items: center; gap: 9px; }
-        /* Petit trait d'accent en tête de section (langage « sections cartes »). */
-        .gz2-eyebrow--section::before { content: ""; width: 16px; height: 2px; border-radius: 999px; background: var(--gi-accent); flex: 0 0 auto; }
+        .gz2-eyebrow--section { margin-top: 26px; }
         .gz2-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
         .gz2-card--static { cursor: default; }
         .gz2-empty { font-size: var(--gi-font-sm); color: var(--gi-text-muted); padding: 8px 0; }

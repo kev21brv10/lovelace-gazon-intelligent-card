@@ -1067,7 +1067,7 @@ export function renderInterventionTab(card) {
             <span class="tab-panel__debug-foldout-meta">${escapeHtml(
               debug
                 ? `Score ${formatNumber(debug.score ?? 0, 0)} · ${debug.blockingConstraints?.length ?? 0} bloquante(s) · ${debug.nonBlockingConstraints?.length ?? 0} signal(s) · ${debug.missingRequirements?.length ?? 0} manquant(s)`
-                : `${declarationMeta} · Analyse moteur`,
+                : `${ui.badge || formatStatusLabel(recommendation.status) || "Recommandation"} · Analyse moteur`,
             )}</span>
           </summary>
           ${renderDebugInterventionSection(card, debug, false)}
@@ -1338,13 +1338,6 @@ export function renderWateringTab(card) {
       tone: windowState.isPostApplication ? "accent" : "neutral",
       icon: "mdi:source-branch",
     },
-    {
-      label: "Type",
-      value: wateringTypeLabel,
-      secondary: planState.summary || "",
-      tone: isEmpty(irrigationSignal.typeArrosage || context.typeArrosage) ? "neutral" : "accent",
-      icon: "mdi:water-sync",
-    },
   ];
   const contextFacts = [
     context.hydricState ? {
@@ -1374,20 +1367,6 @@ export function renderWateringTab(card) {
       secondary: planState.durationHuman,
       tone: "accent",
       icon: "mdi:timer-outline",
-    },
-    {
-      label: "Prochain arrosage",
-      value: nextWatering.label,
-      secondary: nextWatering.detail,
-      tone: nextWatering.tone,
-      icon: "mdi:clock-water-outline",
-    },
-    {
-      label: "Dernier arrosage",
-      value: lastWatering.label,
-      secondary: lastWatering.detail,
-      tone: lastWatering.value !== null ? "success" : "neutral",
-      icon: "mdi:water-check",
     },
     lastWateringTotal.value !== null ? {
       label: "Arrosage cumulé",
@@ -1620,19 +1599,6 @@ export function renderMowingTab(card) {
       value: tonteValue,
       note: mowerState.present ? mowerState.label : "",
       tone: computeTonteTone(tonteValue),
-    },
-    {
-      label: "Machine",
-      value: !mowerState.present
-        ? "Absente"
-        : coordinationDisabled
-        ? "Coordination désactivée"
-        : machinePermetTonte
-        ? "Prête"
-        : "Indisponible",
-      // Note vide quand la coordination est désactivée : la valeur le dit déjà.
-      note: !mowerState.present ? "Tondeuse non disponible" : coordinationDisabled ? "" : mowerState.reason || "",
-      tone: !mowerState.present ? "neutral" : coordinationDisabled ? "neutral" : machinePermetTonte ? "success" : "danger",
     },
     {
       label: "Blocage",

@@ -4530,7 +4530,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.9.0";
+const CARD_VERSION = "0.10.0";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -9264,118 +9264,24 @@ class GazonIntelligentCard extends HTMLElement {
   }
 
   _buildAdvancedContent(tab = this._activeTab) {
+    // Mode « Détails avancés » = uniquement du diagnostic introuvable dans la façade.
+    // Tout le reste (pilotage, état gazon, décision tonte, réglages, catalogue…) est
+    // déjà affiché par les onglets : on ne le ré-affiche plus pour éviter les doublons.
     const groupsByTab = {
-      overview: [
-        {
-          title: "Pilotage global",
-          meta: "Les signaux les plus utiles pour comprendre la priorité du moment.",
-          eyebrow: "Synthèse",
-          keys: ["entity_assistant", "entity_conseil", "entity_niveau", "entity_risque", "entity_phase", "entity_sous_phase"],
-        },
-        {
-          title: "Priorités dérivées",
-          meta: "Ce qui fait évoluer la recommandation globale.",
-          eyebrow: "Priorité",
-          keys: ["entity_niveau_pertinence", "entity_prochaine_fenetre_optimale", "entity_prochain_blocage_attendu", "entity_prochaine_intervention"],
-        },
-      ],
       watering: [
         {
-          title: "Conduite d'irrigation",
-          meta: "Besoin hydrique, fenêtre et plan à exécuter.",
-          eyebrow: "Hydrique",
-          keys: [
-            "entity_fenetre_optimale",
-            "entity_objectif_arrosage",
-            "entity_type_arrosage",
-            "entity_plan_arrosage",
-            "entity_arrosage_recommande",
-            "entity_arrosage_apres_application_autorise",
-            "entity_signal_irrigation",
-            "entity_arrosage_en_cours",
-            "entity_dernier_arrosage",
-          ],
-        },
-        {
           title: "Observabilité hydrique",
-          meta: "Suivi avancé du contexte hydrique sans alourdir la façade publique.",
+          meta: "Suivi diagnostic, non affiché dans la façade.",
           eyebrow: "Diagnostic",
           keys: [
-            "entity_etat_hydrique",
-            "entity_reserve_actuelle",
-            "entity_depletion_ratio",
             "entity_et0",
             "entity_etc",
             "entity_objectif_legacy",
             "entity_objectif_depletion",
           ],
         },
-        {
-          title: "Réglages irrigation",
-          meta: "Paramètres qui influencent directement les cycles.",
-          eyebrow: "Configuration",
-          keys: [
-            "entity_switch_arrosage_automatique",
-            "entity_debit_zone_1",
-            "entity_debit_zone_2",
-            "entity_debit_zone_3",
-            "entity_debit_zone_4",
-            "entity_debit_zone_5",
-          ],
-        },
-      ],
-      mowing: [
-        {
-          title: "Décision tonte",
-          meta: "Statut courant, autorisation et hauteur conseillée.",
-          eyebrow: "Tonte",
-          keys: ["entity_tonte", "entity_tonte_autorisee", "entity_hauteur", "entity_phase", "entity_sous_phase", "entity_risque"],
-        },
-        {
-          title: "Réglages tonte",
-          meta: "Bornes de coupe et délai de reprise après arrosage.",
-          eyebrow: "Configuration",
-          keys: ["entity_hauteur_min_tondeuse", "entity_hauteur_max_tondeuse", "entity_delai_reprise_tonte_apres_arrosage"],
-        },
-      ],
-      gazon: [
-        {
-          title: "État du gazon",
-          meta: "Lecture métier de la phase, du niveau d'action et du risque.",
-          eyebrow: "Gazon",
-          keys: ["entity_assistant", "entity_conseil", "entity_niveau", "entity_risque", "entity_phase", "entity_sous_phase", "entity_action", "entity_avoid"],
-        },
-        {
-          title: "Contexte hydrique",
-          meta: "Ce qui nourrit l'analyse sans surcharger le résumé principal.",
-          eyebrow: "Contexte",
-          keys: ["entity_objectif_arrosage", "entity_type_arrosage", "entity_fenetre_optimale", "entity_etat_hydrique", "entity_reserve_actuelle"],
-        },
-      ],
-      products: [
-        {
-          title: "Catalogue",
-          meta: "Référentiel local disponible pour la saison.",
-          eyebrow: "Produits",
-          keys: ["entity_catalogue_produits", "entity_produit_intervention", "entity_derniere_application"],
-        },
       ],
       intervention: [
-        {
-          title: "Recommandation intervention",
-          meta: "Produit ciblé, statut et préparation de déclaration.",
-          eyebrow: "Intervention",
-          keys: [
-            "entity_prochaine_intervention",
-            "entity_signal_intervention",
-            "entity_produit_intervention",
-            "entity_catalogue_produits",
-            "entity_derniere_application",
-            "entity_niveau_pertinence",
-            "entity_prochaine_fenetre_optimale",
-            "entity_prochain_blocage_attendu",
-          ],
-        },
         {
           title: "Debug métier",
           meta: "Lecture détaillée du moteur quand il faut investiguer.",
@@ -9383,28 +9289,8 @@ class GazonIntelligentCard extends HTMLElement {
           keys: ["entity_debug_intervention"],
         },
       ],
-      config: [
-        {
-          title: "Paramètres actifs",
-          meta: "Configuration effectivement utilisée par le moteur.",
-          eyebrow: "Réglages",
-          keys: [
-            "entity_mode",
-            "entity_switch_arrosage_automatique",
-            "entity_switch_coordination_tondeuse",
-            "entity_delai_reprise_tonte_apres_arrosage",
-            "entity_debit_zone_1",
-            "entity_debit_zone_2",
-            "entity_debit_zone_3",
-            "entity_debit_zone_4",
-            "entity_debit_zone_5",
-            "entity_hauteur_min_tondeuse",
-            "entity_hauteur_max_tondeuse",
-          ],
-        },
-      ],
     };
-    const groups = groupsByTab[tab] || groupsByTab.overview;
+    const groups = groupsByTab[tab] || [];
     return groups
       .map((group) => this._renderAdvancedGroup(group.title, group.meta, group.keys, group.eyebrow))
       .filter(Boolean)
@@ -11306,7 +11192,7 @@ function renderInterventionTab(card) {
             <span class="tab-panel__debug-foldout-meta">${escapeHtml(
               debug
                 ? `Score ${formatNumber(debug.score ?? 0, 0)} · ${debug.blockingConstraints?.length ?? 0} bloquante(s) · ${debug.nonBlockingConstraints?.length ?? 0} signal(s) · ${debug.missingRequirements?.length ?? 0} manquant(s)`
-                : `${declarationMeta} · Analyse moteur`,
+                : `${ui.badge || formatStatusLabel(recommendation.status) || "Recommandation"} · Analyse moteur`,
             )}</span>
           </summary>
           ${renderDebugInterventionSection(card, debug, false)}
@@ -11577,13 +11463,6 @@ function renderWateringTab(card) {
       tone: windowState.isPostApplication ? "accent" : "neutral",
       icon: "mdi:source-branch",
     },
-    {
-      label: "Type",
-      value: wateringTypeLabel,
-      secondary: planState.summary || "",
-      tone: isEmpty(irrigationSignal.typeArrosage || context.typeArrosage) ? "neutral" : "accent",
-      icon: "mdi:water-sync",
-    },
   ];
   const contextFacts = [
     context.hydricState ? {
@@ -11613,20 +11492,6 @@ function renderWateringTab(card) {
       secondary: planState.durationHuman,
       tone: "accent",
       icon: "mdi:timer-outline",
-    },
-    {
-      label: "Prochain arrosage",
-      value: nextWatering.label,
-      secondary: nextWatering.detail,
-      tone: nextWatering.tone,
-      icon: "mdi:clock-water-outline",
-    },
-    {
-      label: "Dernier arrosage",
-      value: lastWatering.label,
-      secondary: lastWatering.detail,
-      tone: lastWatering.value !== null ? "success" : "neutral",
-      icon: "mdi:water-check",
     },
     lastWateringTotal.value !== null ? {
       label: "Arrosage cumulé",
@@ -11859,19 +11724,6 @@ function renderMowingTab(card) {
       value: tonteValue,
       note: mowerState.present ? mowerState.label : "",
       tone: computeTonteTone(tonteValue),
-    },
-    {
-      label: "Machine",
-      value: !mowerState.present
-        ? "Absente"
-        : coordinationDisabled
-        ? "Coordination désactivée"
-        : machinePermetTonte
-        ? "Prête"
-        : "Indisponible",
-      // Note vide quand la coordination est désactivée : la valeur le dit déjà.
-      note: !mowerState.present ? "Tondeuse non disponible" : coordinationDisabled ? "" : mowerState.reason || "",
-      tone: !mowerState.present ? "neutral" : coordinationDisabled ? "neutral" : machinePermetTonte ? "success" : "danger",
     },
     {
       label: "Blocage",

@@ -145,6 +145,7 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_niveau_pertinence", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_prochaine_fenetre_optimale", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_prochain_blocage_attendu", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_arrosage_auto_blocage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_mode", selector: { entity: { domain: ["select"] } } },
         { name: "entity_switch_arrosage_automatique", selector: { entity: { domain: ["switch"] } } },
         { name: "entity_switch_coordination_tondeuse", selector: { entity: { domain: ["switch"] } } },
@@ -2269,6 +2270,7 @@ class GazonIntelligentCard extends HTMLElement {
     const reserveSurplus = asNumber(entity?.attributes?.reserve_surplus_mm);
     const depletionMm = asNumber(entity?.attributes?.depletion_mm);
     const depletionRatio = asNumber(entity?.attributes?.depletion_ratio);
+    const madRatio = asNumber(entity?.attributes?.mad_ratio);
     const et0 = asNumber(entity?.attributes?.et0_mm);
     const etc = asNumber(entity?.attributes?.etc_mm);
     const kc = asNumber(entity?.attributes?.kc_gazon);
@@ -2289,9 +2291,35 @@ class GazonIntelligentCard extends HTMLElement {
       reserveSurplus,
       depletionMm,
       depletionRatio,
+      madRatio,
       et0,
       etc,
       kc,
+    };
+  }
+
+  _autoBlockageState() {
+    const entity = this._entity("entity_arrosage_auto_blocage");
+    if (!entity) {
+      return { present: false };
+    }
+    const attrs = entity.attributes || {};
+    const blocked = attrs.bloque === true;
+    const safetyLock = attrs.safety_lock_actif === true;
+    const code = String(attrs.code || "").trim();
+    const reason = String(entity.state || "").trim();
+    const why = String(attrs.pourquoi || "").trim();
+    const howToUnblock = String(attrs.comment_debloquer || "").trim();
+    return {
+      present: true,
+      entity,
+      blocked,
+      safetyLock,
+      code,
+      reason: reason && reason.toLowerCase() !== "unknown" ? reason : "",
+      why,
+      howToUnblock,
+      tone: safetyLock ? "danger" : blocked ? "warning" : "success",
     };
   }
 
@@ -4083,6 +4111,14 @@ class GazonIntelligentCard extends HTMLElement {
       this._triggerRemoveLastApplication();
       return;
     }
+    const recalibrateReserveTarget = event.target.closest("[data-gazon-action='recalibrate-reserve']");
+    if (recalibrateReserveTarget) {
+      this._clearCardActionTimer();
+      event.preventDefault();
+      event.stopPropagation();
+      this._triggerRecalibrateReserve();
+      return;
+    }
     const tabTarget = event.target.closest("[data-tab]");
     if (tabTarget) {
       this._clearCardActionTimer();
@@ -4334,6 +4370,37 @@ class GazonIntelligentCard extends HTMLElement {
     }
     this._hass.callService(service.domain, service.service, {
       entity_id: targetEntityId,
+    });
+  }
+
+  _triggerRecalibrateReserve() {
+    if (!this._hass) {
+      return;
+    }
+    const service = splitServiceName("gazon_intelligent.recalibrate_reserve");
+    if (!service) {
+      return;
+    }
+    const targetEntityId = this._serviceTargetEntityId();
+    if (!targetEntityId) {
+      return;
+    }
+    const current = this._entityNumber("entity_reserve_actuelle");
+    const input = window.prompt(
+      "Recaler la réserve hydrique du sol (mm).\n\nLa valeur est figée pour le reste de la journée puis évolue normalement dès demain. À utiliser de préférence le soir, hors pluie ou arrosage important.",
+      current !== null ? String(current) : "",
+    );
+    if (input === null) {
+      return;
+    }
+    const value = Number(String(input).replace(",", ".").trim());
+    if (!Number.isFinite(value) || value < 0) {
+      window.alert("Valeur invalide : saisis un nombre de millimètres positif.");
+      return;
+    }
+    this._hass.callService(service.domain, service.service, {
+      entity_id: targetEntityId,
+      reserve_mm: Math.round(value * 10) / 10,
     });
   }
 

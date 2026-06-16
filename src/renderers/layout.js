@@ -1242,6 +1242,37 @@ export function renderWateringTab(card) {
       : 0
   );
   const hydricFillWidth = hydricUsefulWidth + hydricSurplusWidth;
+  // Repère MAD : niveau de réserve utile sous lequel l'arrosage se déclenche
+  // (déplétion ≥ seuil MAD). Position sur la piste (échelle = réserve totale du sol).
+  const madRatio = context.madRatio != null && context.madRatio > 0 && context.madRatio < 1
+    ? context.madRatio
+    : 0.5;
+  const madThresholdMm = context.reserveUsefulMax != null
+    ? context.reserveUsefulMax * (1 - madRatio)
+    : null;
+  const madMarkerPct = (madThresholdMm != null && context.reserveStockMax != null && context.reserveStockMax > 0)
+    ? Math.max(0, Math.min(100, (madThresholdMm / context.reserveStockMax) * 100))
+    : null;
+  const autoBlockage = card._autoBlockageState();
+  const showBlockage = autoBlockage.present
+    && (windowState.isBlocked
+      || windowState.isAwaiting
+      || autoBlockage.blocked
+      || autoBlockage.safetyLock
+      || (objective <= 0 && Boolean(autoBlockage.why)));
+  const blockageHtml = showBlockage
+    ? `
+        <div class="gz2-blockage gz2-blockage--${autoBlockage.tone}">
+          <div class="gz2-blockage__head">
+            ${renderIconBox(autoBlockage.safetyLock ? "mdi:lock-alert" : "mdi:water-alert", "sm")}
+            <span class="gz2-blockage__title">${escapeHtml(autoBlockage.reason || "Arrosage bloqué")}</span>
+          </div>
+          ${autoBlockage.why ? `<div class="gz2-blockage__why">${escapeHtml(autoBlockage.why)}</div>` : ""}
+          ${autoBlockage.howToUnblock
+            ? `<div class="gz2-blockage__how">${renderIconBox("mdi:lightbulb-on-outline", "sm")}<span>${escapeHtml(autoBlockage.howToUnblock)}</span></div>`
+            : ""}
+        </div>`
+    : "";
   const reserveHydricFacts = [
     {
       label: "Réserve utile",
@@ -1379,6 +1410,8 @@ export function renderWateringTab(card) {
           ${heroSub ? `<div class="gz2-hero__sub">${escapeHtml(heroSub)}</div>` : ""}
         </div>
 
+        ${blockageHtml}
+
         ${renderWateringProgressSection(card, wateringProgress)}
 
         <div class="gz2-reperes" aria-label="Repères">
@@ -1404,10 +1437,22 @@ export function renderWateringTab(card) {
             ${hydricSurplusWidth > 0
               ? `<span class="gz2-meter__surplus" style="left:${escapeHtml(String(hydricUsefulWidth))}%; width:${escapeHtml(String(hydricSurplusWidth))}%;"></span>`
               : ""}
+            ${madMarkerPct != null
+              ? `<span class="gz2-meter__mad" style="left:${escapeHtml(String(madMarkerPct))}%;" title="Seuil d'arrosage (MAD)" aria-label="Seuil d'arrosage (MAD)"></span>`
+              : ""}
           </div>
-          <div class="gz2-meter__meta">${escapeHtml(`Réserve utile ${reserveUsefulValue} · Surplus ${surplusHydriqueValue} · Déplétion ${depletionUsefulValue}`)}</div>
+          <div class="gz2-meter__meta">${escapeHtml(
+            `Réserve utile ${reserveUsefulValue} · Surplus ${surplusHydriqueValue} · Déplétion ${depletionUsefulValue}`
+            + (madThresholdMm != null ? ` · Seuil MAD ${formatNumber(madThresholdMm, 1)} mm` : "")
+          )}</div>
+          ${madMarkerPct != null ? `<div class="gz2-meter__legend"><span class="gz2-meter__legend-mark"></span>Sous ce repère, un arrosage se déclenche</div>` : ""}
         </div>
         <div class="gz2-cards">${renderGz2Cards(reserveHydricFacts)}</div>
+        <div class="gz2-actions">
+          <button type="button" class="gz2-btn gz2-btn--ghost" data-gazon-action="recalibrate-reserve" title="Recaler la réserve hydrique du sol">
+            ${renderIconBox("mdi:target", "sm")}<span>Recaler la réserve</span>
+          </button>
+        </div>
 
         <div class="gz2-eyebrow gz2-eyebrow--section">Décision</div>
         <div class="gz2-cards">${renderGz2Cards(decisionFacts)}</div>

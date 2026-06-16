@@ -1,6 +1,6 @@
 export const CARD_TYPE = "gazon-intelligent-card";
 export const CARD_NAME = "Gazon Intelligent Card";
-export const CARD_VERSION = "0.5.10";
+export const CARD_VERSION = "0.5.11";
 
 export const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -31,6 +31,7 @@ export const DEFAULT_CONFIG = {
   entity_niveau_pertinence: "sensor.gazon_intelligent_niveau_de_pertinence",
   entity_prochaine_fenetre_optimale: "sensor.gazon_intelligent_prochaine_fenetre_optimale",
   entity_prochain_blocage_attendu: "sensor.gazon_intelligent_prochain_blocage_attendu",
+  entity_arrosage_auto_blocage: "sensor.gazon_intelligent_arrosage_auto_blocage",
   entity_signal_intervention: "binary_sensor.gazon_intelligent_signal_intervention",
   entity_signal_irrigation: "binary_sensor.gazon_intelligent_signal_irrigation",
   entity_prochaine_intervention: "sensor.gazon_intelligent_prochaine_intervention",
@@ -130,6 +131,7 @@ export const ENTITY_KEYS = [
   { key: "entity_niveau_pertinence", label: "Niveau de pertinence", icon: "mdi:signal", domain: ["sensor"] },
   { key: "entity_prochaine_fenetre_optimale", label: "Prochaine fenêtre optimale", icon: "mdi:clock-outline", domain: ["sensor"] },
   { key: "entity_prochain_blocage_attendu", label: "Prochain blocage attendu", icon: "mdi:alert-circle-outline", domain: ["sensor"] },
+  { key: "entity_arrosage_auto_blocage", label: "Blocage arrosage auto", icon: "mdi:water-alert", domain: ["sensor"] },
   { key: "entity_prochaine_intervention", label: "À préparer", icon: "mdi:spray-bottle", domain: ["sensor"] },
   { key: "entity_conseil", label: "Conseil principal", icon: "mdi:message-text-outline", domain: ["sensor"] },
   { key: "entity_action", label: "Action recommandée", icon: "mdi:check-circle-outline", domain: ["sensor"] },
@@ -205,10 +207,12 @@ export const SECTION_FIELDS = {
   watering: [
     "entity_fenetre_optimale",
     "entity_prochain_arrosage",
+    "entity_arrosage_auto_blocage",
     "entity_dernier_arrosage",
     "entity_arrosage_recommande",
     "entity_objectif_arrosage",
     "entity_type_arrosage",
+    "entity_reserve_actuelle",
     "entity_arrosage_apres_application_autorise",
     "entity_signal_irrigation",
   ],
@@ -264,6 +268,7 @@ export const OVERVIEW_ENTITY_KEYS = new Set([
 
 export const RENDER_SIGNATURE_ATTRS = {
   entity_assistant: ["action", "moment", "quantity_mm", "status", "reason"],
+  entity_arrosage_auto_blocage: ["bloque", "code", "pourquoi", "comment_debloquer", "safety_lock_actif"],
   entity_fenetre_optimale: [
     "status",
     "summary",

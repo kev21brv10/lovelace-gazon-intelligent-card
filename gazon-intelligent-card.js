@@ -4289,6 +4289,21 @@ const CARD_STYLES = String.raw`
         .gz2-meter__fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 999px; background: var(--gi-accent); }
         .gz2-meter__surplus { position: absolute; top: 0; height: 100%; border-radius: 999px; background: color-mix(in srgb, var(--gi-status-success) 55%, transparent); }
         .gz2-meter__meta { font-size: var(--gi-font-xs); color: var(--gi-text-muted); margin-top: 9px; line-height: 1.4; }
+        /* Repère MAD : niveau de réserve sous lequel l'arrosage se déclenche. */
+        .gz2-meter__mad { position: absolute; top: 0; height: 100%; width: 2px; transform: translateX(-1px); background: var(--gi-text); opacity: 0.72; pointer-events: none; }
+        .gz2-meter__legend { display: flex; align-items: center; gap: var(--gi-space-2); font-size: var(--gi-font-xxs); color: var(--gi-text-muted); margin-top: 6px; }
+        .gz2-meter__legend-mark { display: inline-block; width: 2px; height: 11px; background: var(--gi-text); opacity: 0.72; border-radius: 999px; flex: 0 0 auto; }
+
+        /* Actions secondaires (ex. recaler la réserve). */
+        .gz2-actions { display: flex; flex-wrap: wrap; gap: var(--gi-space-2); margin-top: var(--gi-space-3); }
+
+        /* Bandeau « pourquoi l'arrosage est bloqué ». */
+        .gz2-blockage { display: flex; flex-direction: column; gap: var(--gi-space-1); margin: var(--gi-space-3) 0; padding: var(--gi-space-3); border-radius: var(--gi-radius-md); border: 1px solid color-mix(in srgb, var(--gi-status-warning) 30%, transparent); background: color-mix(in srgb, var(--gi-status-warning) 12%, transparent); }
+        .gz2-blockage--danger { border-color: color-mix(in srgb, var(--gi-status-danger) 32%, transparent); background: color-mix(in srgb, var(--gi-status-danger) 13%, transparent); }
+        .gz2-blockage--success { border-color: color-mix(in srgb, var(--gi-status-success) 30%, transparent); background: color-mix(in srgb, var(--gi-status-success) 12%, transparent); }
+        .gz2-blockage__head { display: flex; align-items: center; gap: var(--gi-space-2); font-weight: 600; font-size: var(--gi-font-sm); color: var(--gi-text); }
+        .gz2-blockage__why { font-size: var(--gi-font-xs); color: var(--gi-text); line-height: 1.45; }
+        .gz2-blockage__how { display: flex; align-items: flex-start; gap: var(--gi-space-2); font-size: var(--gi-font-xs); color: var(--gi-text-muted); line-height: 1.45; }
 
         /* Basé sur la largeur de la CARTE (pas du navigateur) : header lisible
            même quand la carte est étroite dans un dashboard large. */
@@ -4489,7 +4504,7 @@ const EDITOR_STYLES = String.raw`
 
 const CARD_TYPE = "gazon-intelligent-card";
 const CARD_NAME = "Gazon Intelligent Card";
-const CARD_VERSION = "0.5.10";
+const CARD_VERSION = "0.5.11";
 
 const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -4520,6 +4535,7 @@ const DEFAULT_CONFIG = {
   entity_niveau_pertinence: "sensor.gazon_intelligent_niveau_de_pertinence",
   entity_prochaine_fenetre_optimale: "sensor.gazon_intelligent_prochaine_fenetre_optimale",
   entity_prochain_blocage_attendu: "sensor.gazon_intelligent_prochain_blocage_attendu",
+  entity_arrosage_auto_blocage: "sensor.gazon_intelligent_arrosage_auto_blocage",
   entity_signal_intervention: "binary_sensor.gazon_intelligent_signal_intervention",
   entity_signal_irrigation: "binary_sensor.gazon_intelligent_signal_irrigation",
   entity_prochaine_intervention: "sensor.gazon_intelligent_prochaine_intervention",
@@ -4619,6 +4635,7 @@ const ENTITY_KEYS = [
   { key: "entity_niveau_pertinence", label: "Niveau de pertinence", icon: "mdi:signal", domain: ["sensor"] },
   { key: "entity_prochaine_fenetre_optimale", label: "Prochaine fenêtre optimale", icon: "mdi:clock-outline", domain: ["sensor"] },
   { key: "entity_prochain_blocage_attendu", label: "Prochain blocage attendu", icon: "mdi:alert-circle-outline", domain: ["sensor"] },
+  { key: "entity_arrosage_auto_blocage", label: "Blocage arrosage auto", icon: "mdi:water-alert", domain: ["sensor"] },
   { key: "entity_prochaine_intervention", label: "À préparer", icon: "mdi:spray-bottle", domain: ["sensor"] },
   { key: "entity_conseil", label: "Conseil principal", icon: "mdi:message-text-outline", domain: ["sensor"] },
   { key: "entity_action", label: "Action recommandée", icon: "mdi:check-circle-outline", domain: ["sensor"] },
@@ -4694,10 +4711,12 @@ const SECTION_FIELDS = {
   watering: [
     "entity_fenetre_optimale",
     "entity_prochain_arrosage",
+    "entity_arrosage_auto_blocage",
     "entity_dernier_arrosage",
     "entity_arrosage_recommande",
     "entity_objectif_arrosage",
     "entity_type_arrosage",
+    "entity_reserve_actuelle",
     "entity_arrosage_apres_application_autorise",
     "entity_signal_irrigation",
   ],
@@ -4753,6 +4772,7 @@ const OVERVIEW_ENTITY_KEYS = new Set([
 
 const RENDER_SIGNATURE_ATTRS = {
   entity_assistant: ["action", "moment", "quantity_mm", "status", "reason"],
+  entity_arrosage_auto_blocage: ["bloque", "code", "pourquoi", "comment_debloquer", "safety_lock_actif"],
   entity_fenetre_optimale: [
     "status",
     "summary",
@@ -5943,6 +5963,7 @@ class GazonIntelligentCard extends HTMLElement {
         { name: "entity_niveau_pertinence", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_prochaine_fenetre_optimale", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_prochain_blocage_attendu", selector: { entity: { domain: ["sensor"] } } },
+        { name: "entity_arrosage_auto_blocage", selector: { entity: { domain: ["sensor"] } } },
         { name: "entity_mode", selector: { entity: { domain: ["select"] } } },
         { name: "entity_switch_arrosage_automatique", selector: { entity: { domain: ["switch"] } } },
         { name: "entity_switch_coordination_tondeuse", selector: { entity: { domain: ["switch"] } } },
@@ -8067,6 +8088,7 @@ class GazonIntelligentCard extends HTMLElement {
     const reserveSurplus = asNumber(entity?.attributes?.reserve_surplus_mm);
     const depletionMm = asNumber(entity?.attributes?.depletion_mm);
     const depletionRatio = asNumber(entity?.attributes?.depletion_ratio);
+    const madRatio = asNumber(entity?.attributes?.mad_ratio);
     const et0 = asNumber(entity?.attributes?.et0_mm);
     const etc = asNumber(entity?.attributes?.etc_mm);
     const kc = asNumber(entity?.attributes?.kc_gazon);
@@ -8087,9 +8109,35 @@ class GazonIntelligentCard extends HTMLElement {
       reserveSurplus,
       depletionMm,
       depletionRatio,
+      madRatio,
       et0,
       etc,
       kc,
+    };
+  }
+
+  _autoBlockageState() {
+    const entity = this._entity("entity_arrosage_auto_blocage");
+    if (!entity) {
+      return { present: false };
+    }
+    const attrs = entity.attributes || {};
+    const blocked = attrs.bloque === true;
+    const safetyLock = attrs.safety_lock_actif === true;
+    const code = String(attrs.code || "").trim();
+    const reason = String(entity.state || "").trim();
+    const why = String(attrs.pourquoi || "").trim();
+    const howToUnblock = String(attrs.comment_debloquer || "").trim();
+    return {
+      present: true,
+      entity,
+      blocked,
+      safetyLock,
+      code,
+      reason: reason && reason.toLowerCase() !== "unknown" ? reason : "",
+      why,
+      howToUnblock,
+      tone: safetyLock ? "danger" : blocked ? "warning" : "success",
     };
   }
 
@@ -9881,6 +9929,14 @@ class GazonIntelligentCard extends HTMLElement {
       this._triggerRemoveLastApplication();
       return;
     }
+    const recalibrateReserveTarget = event.target.closest("[data-gazon-action='recalibrate-reserve']");
+    if (recalibrateReserveTarget) {
+      this._clearCardActionTimer();
+      event.preventDefault();
+      event.stopPropagation();
+      this._triggerRecalibrateReserve();
+      return;
+    }
     const tabTarget = event.target.closest("[data-tab]");
     if (tabTarget) {
       this._clearCardActionTimer();
@@ -10132,6 +10188,37 @@ class GazonIntelligentCard extends HTMLElement {
     }
     this._hass.callService(service.domain, service.service, {
       entity_id: targetEntityId,
+    });
+  }
+
+  _triggerRecalibrateReserve() {
+    if (!this._hass) {
+      return;
+    }
+    const service = splitServiceName("gazon_intelligent.recalibrate_reserve");
+    if (!service) {
+      return;
+    }
+    const targetEntityId = this._serviceTargetEntityId();
+    if (!targetEntityId) {
+      return;
+    }
+    const current = this._entityNumber("entity_reserve_actuelle");
+    const input = window.prompt(
+      "Recaler la réserve hydrique du sol (mm).\n\nLa valeur est figée pour le reste de la journée puis évolue normalement dès demain. À utiliser de préférence le soir, hors pluie ou arrosage important.",
+      current !== null ? String(current) : "",
+    );
+    if (input === null) {
+      return;
+    }
+    const value = Number(String(input).replace(",", ".").trim());
+    if (!Number.isFinite(value) || value < 0) {
+      window.alert("Valeur invalide : saisis un nombre de millimètres positif.");
+      return;
+    }
+    this._hass.callService(service.domain, service.service, {
+      entity_id: targetEntityId,
+      reserve_mm: Math.round(value * 10) / 10,
     });
   }
 
@@ -11365,6 +11452,37 @@ function renderWateringTab(card) {
       : 0
   );
   const hydricFillWidth = hydricUsefulWidth + hydricSurplusWidth;
+  // Repère MAD : niveau de réserve utile sous lequel l'arrosage se déclenche
+  // (déplétion ≥ seuil MAD). Position sur la piste (échelle = réserve totale du sol).
+  const madRatio = context.madRatio != null && context.madRatio > 0 && context.madRatio < 1
+    ? context.madRatio
+    : 0.5;
+  const madThresholdMm = context.reserveUsefulMax != null
+    ? context.reserveUsefulMax * (1 - madRatio)
+    : null;
+  const madMarkerPct = (madThresholdMm != null && context.reserveStockMax != null && context.reserveStockMax > 0)
+    ? Math.max(0, Math.min(100, (madThresholdMm / context.reserveStockMax) * 100))
+    : null;
+  const autoBlockage = card._autoBlockageState();
+  const showBlockage = autoBlockage.present
+    && (windowState.isBlocked
+      || windowState.isAwaiting
+      || autoBlockage.blocked
+      || autoBlockage.safetyLock
+      || (objective <= 0 && Boolean(autoBlockage.why)));
+  const blockageHtml = showBlockage
+    ? `
+        <div class="gz2-blockage gz2-blockage--${autoBlockage.tone}">
+          <div class="gz2-blockage__head">
+            ${renderIconBox(autoBlockage.safetyLock ? "mdi:lock-alert" : "mdi:water-alert", "sm")}
+            <span class="gz2-blockage__title">${escapeHtml(autoBlockage.reason || "Arrosage bloqué")}</span>
+          </div>
+          ${autoBlockage.why ? `<div class="gz2-blockage__why">${escapeHtml(autoBlockage.why)}</div>` : ""}
+          ${autoBlockage.howToUnblock
+            ? `<div class="gz2-blockage__how">${renderIconBox("mdi:lightbulb-on-outline", "sm")}<span>${escapeHtml(autoBlockage.howToUnblock)}</span></div>`
+            : ""}
+        </div>`
+    : "";
   const reserveHydricFacts = [
     {
       label: "Réserve utile",
@@ -11502,6 +11620,8 @@ function renderWateringTab(card) {
           ${heroSub ? `<div class="gz2-hero__sub">${escapeHtml(heroSub)}</div>` : ""}
         </div>
 
+        ${blockageHtml}
+
         ${renderWateringProgressSection(card, wateringProgress)}
 
         <div class="gz2-reperes" aria-label="Repères">
@@ -11527,10 +11647,22 @@ function renderWateringTab(card) {
             ${hydricSurplusWidth > 0
               ? `<span class="gz2-meter__surplus" style="left:${escapeHtml(String(hydricUsefulWidth))}%; width:${escapeHtml(String(hydricSurplusWidth))}%;"></span>`
               : ""}
+            ${madMarkerPct != null
+              ? `<span class="gz2-meter__mad" style="left:${escapeHtml(String(madMarkerPct))}%;" title="Seuil d'arrosage (MAD)" aria-label="Seuil d'arrosage (MAD)"></span>`
+              : ""}
           </div>
-          <div class="gz2-meter__meta">${escapeHtml(`Réserve utile ${reserveUsefulValue} · Surplus ${surplusHydriqueValue} · Déplétion ${depletionUsefulValue}`)}</div>
+          <div class="gz2-meter__meta">${escapeHtml(
+            `Réserve utile ${reserveUsefulValue} · Surplus ${surplusHydriqueValue} · Déplétion ${depletionUsefulValue}`
+            + (madThresholdMm != null ? ` · Seuil MAD ${formatNumber(madThresholdMm, 1)} mm` : "")
+          )}</div>
+          ${madMarkerPct != null ? `<div class="gz2-meter__legend"><span class="gz2-meter__legend-mark"></span>Sous ce repère, un arrosage se déclenche</div>` : ""}
         </div>
         <div class="gz2-cards">${renderGz2Cards(reserveHydricFacts)}</div>
+        <div class="gz2-actions">
+          <button type="button" class="gz2-btn gz2-btn--ghost" data-gazon-action="recalibrate-reserve" title="Recaler la réserve hydrique du sol">
+            ${renderIconBox("mdi:target", "sm")}<span>Recaler la réserve</span>
+          </button>
+        </div>
 
         <div class="gz2-eyebrow gz2-eyebrow--section">Décision</div>
         <div class="gz2-cards">${renderGz2Cards(decisionFacts)}</div>
@@ -12197,6 +12329,7 @@ ${EDITOR_STYLES}
             ${this._renderEntityInput("entity_niveau_pertinence", "Niveau de pertinence")}
             ${this._renderEntityInput("entity_prochaine_fenetre_optimale", "Prochaine fenêtre optimale")}
             ${this._renderEntityInput("entity_prochain_blocage_attendu", "Prochain blocage attendu")}
+            ${this._renderEntityInput("entity_arrosage_auto_blocage", "Blocage arrosage auto")}
             ${this._renderEntityInput("entity_arrosage_recommande", "Irrigation")}
             ${this._renderEntityInput("entity_arrosage_apres_application_autorise", "Post-application")}
             ${this._renderEntityInput("entity_signal_irrigation", "Signal irrigation")}

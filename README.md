@@ -43,6 +43,10 @@ Le but est simple:
   - réglages
 - vue prioritaire qui met en avant la vraie décision utile du moment
 - lecture cohérente de la tonte, de l’arrosage et du contexte gazon
+- suivi d’arrosage en temps réel : mm appliqués **par zone** et **surplus** projeté pendant le cycle (0.10.1)
+- bandeau **« 🌙 Arrosage du soir prévu »** dès que le créneau recommandé est le soir (rafraîchissement canicule), avec la plage horaire (0.10.2)
+- **refonte ludique complète des 7 onglets (0.10.3 → 0.10.5)** : chaque onglet a sa **mascotte animée** dédiée (réservoir d'eau, pelouse savante, robot tondeuse, brin de gazon, flacon, carnet, engrenage) qui change d'expression selon l'état réel ; détails techniques repliés dans un volet, thème vert doux cohérent, barre d'onglets en pastilles
+- **mascottes réactives à la météo (0.10.5)** : décor animé derrière la mascotte (ciel jour/nuit, soleil à rayons, nuages qui dérivent, pluie/neige, étoiles, brume de canicule) selon la **température et la condition réelles** ; la mascotte Synthèse met des **lunettes de soleil** quand il fait beau/chaud, sue en canicule, etc. — animations respectant `prefers-reduced-motion`
 - tuiles synthétiques compactes pour les signaux importants
 - support des cas multi-pelouse
 - gestion propre des textes longs, des blocages et des fallbacks

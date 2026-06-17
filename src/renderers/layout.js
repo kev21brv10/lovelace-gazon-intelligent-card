@@ -747,6 +747,7 @@ export function renderWateringProgressSection(card, progressState) {
     const detail = String(progressState.detail || "").trim();
     const activeZoneLabels = Array.isArray(progressState.activeZoneLabels) ? progressState.activeZoneLabels.filter(Boolean) : [];
     const activeZoneLabel = activeZoneLabels.join(" · ");
+    const waterText = String(progressState.waterText || "").trim();
     const metaParts = [];
     if (progressState.startedAtLabel) {
       metaParts.push(progressState.startedAtLabel);
@@ -765,6 +766,7 @@ export function renderWateringProgressSection(card, progressState) {
           </div>
           <div class="tab-panel__section-summary" data-watering-progress="summary">${escapeHtml(summary)}</div>
           ${activeZoneLabel ? `<div class="tab-panel__watering-zone" data-watering-progress="zone">Zone active · ${escapeHtml(activeZoneLabel)}</div>` : `<div class="tab-panel__watering-zone" data-watering-progress="zone" hidden></div>`}
+          ${waterText ? `<div class="tab-panel__watering-water" data-watering-progress="water">${escapeHtml(waterText)}</div>` : `<div class="tab-panel__watering-water" data-watering-progress="water" hidden></div>`}
           <div class="tab-progress" data-watering-progress="progress" aria-label="${escapeHtml(summary)}">
             <div class="tab-progress__bar gi-progress">
               <span class="gi-progress__bar ${progressState.critical ? "gi-progress__bar--critical" : ""}" data-watering-progress="bar" style="width:${escapeHtml(String(percent))}%;"></span>
@@ -989,8 +991,34 @@ export function renderProductsTab(card) {
       : "1 application enregistrée"
     : "Aucune application enregistrée";
 
+  // --- Scène ludique Produits : le flacon ---
+  const prodActive = Boolean(selection.selectedProductId) && !/^aucun/i.test(String(selection.selectedProductName || "").trim());
+  const prMood = prodActive ? "active" : "idle";
+  const prTitle = prodActive ? "Produit prêt" : (catalogue.hasProducts ? "Aucun produit choisi" : "Pas encore de produit");
+  const prSentence = prodActive
+    ? `Produit actif : ${selection.selectedProductName}.`
+    : (catalogue.hasProducts ? "Choisis un produit pour la prochaine intervention." : "Ajoute un produit dans le catalogue pour commencer.");
+  const productsScene = renderPlayfulScene({
+    variant: "product",
+    eyebrow: "Produits",
+    title: prTitle,
+    sentence: prSentence,
+    pillIcon: "mdi:package-variant",
+    pill: prodActive ? (selection.selectedProductName || "Produit actif") : "Catalogue",
+    mascot: gzProductMascot({ mood: prMood }),
+    tiles: [
+      { icon: "mdi:package-variant", label: "Produit", value: prodActive ? selection.selectedProductName : "Aucun", sub: prodActive ? (selection.usageModeLabel || "") : "" },
+      { icon: "mdi:calendar-month", label: "Période", value: prodActive ? (selection.selectedProductMonthsLabel || "—") : "—", sub: "" },
+      { icon: "mdi:history", label: "Dernière application", value: hasApplication ? "Faite" : "Aucune", sub: "" },
+    ],
+  });
+
   return `
-      <section class="gz2-overview" aria-label="Produits">
+      ${productsScene}
+
+      <details class="gz-details">
+        <summary>Voir les détails techniques</summary>
+      <section class="gz2-overview" aria-label="Produits (détails)">
         ${renderGz2Hero("Référentiel produit", productsSummary, productsHint, { icon: "mdi:package-variant", tone: "accent" })}
         <div class="gz2-eyebrow gz2-eyebrow--section">Catalogue</div>
         <div class="gz2-card__sub" style="margin:0 0 12px;">${escapeHtml(catalogue.summary || "Catalogue local")}</div>
@@ -999,6 +1027,7 @@ export function renderProductsTab(card) {
         <div class="gz2-card__sub" style="margin:0 0 12px;">${escapeHtml(hasApplication ? lastApplicationSummary : lastApplicationHint)}</div>
         ${renderApplicationHistoryInline(applicationHistory)}
       </section>
+      </details>
     `;
 }
 
@@ -1024,8 +1053,38 @@ export function renderInterventionTab(card) {
     : null);
   const temperatureConstraintState = formatTemperatureRangeConstraint(temperatureConstraint);
 
+  // --- Scène ludique Intervention : le carnet / check-list ---
+  const interText = `${ui.title || ""} ${ui.badge || ""} ${recommendation.status || ""}`.toLowerCase();
+  const interScore = asNumber(debug?.score);
+  let interTodo;
+  if (/(non prioritaire|faible|rien|aucune)/.test(interText)) {
+    interTodo = false;
+  } else if (interScore != null) {
+    interTodo = interScore >= 50;
+  } else {
+    interTodo = !["neutral", "success"].includes(recommendationTone);
+  }
+  const interventionScene = renderPlayfulScene({
+    variant: "task",
+    eyebrow: "Intervention",
+    title: interTodo ? "Une intervention à prévoir" : "Rien à prévoir",
+    sentence: ui.summary || (interTodo ? "Un traitement est recommandé." : "Aucun traitement nécessaire pour le moment."),
+    pillIcon: recommendationIcon || "mdi:spray-bottle",
+    pill: ui.badge || (interTodo ? "À préparer" : "Rien à faire"),
+    mascot: gzTaskMascot({ mood: interTodo ? "todo" : "clear" }),
+    tiles: [
+      { icon: "mdi:spray-bottle", label: "À préparer", value: ui.actionLabel || "—", sub: "" },
+      { icon: "mdi:information-outline", label: "Statut", value: ui.badge || formatStatusLabel(recommendation.status) || "—", sub: "" },
+      { icon: "mdi:lightbulb-on-outline", label: "Astuce", value: ui.hint ? "Voir conseil" : "—", sub: ui.hint ? compactDecisionText(ui.hint, { maxLength: 30 }) : "" },
+    ],
+  });
+
   return `
-      <section class="gz2-overview" aria-label="Intervention">
+      ${interventionScene}
+
+      <details class="gz-details">
+        <summary>Voir les détails techniques</summary>
+      <section class="gz2-overview" aria-label="Intervention (détails)">
         ${renderGz2Hero(ui.title || "Intervention", ui.summary || "Non disponible", ui.hint || "", { icon: "mdi:spray-bottle", tone: "accent" })}
         ${
           temperatureConstraintState
@@ -1073,6 +1132,7 @@ export function renderInterventionTab(card) {
           ${renderDebugInterventionSection(card, debug, false)}
         </details>
       </section>
+      </details>
     `;
 }
 
@@ -1139,8 +1199,41 @@ export function renderOverviewTab(card) {
     { label: "Dernier arrosage", value: lastWatering.label },
   ];
 
+  // --- Scène ludique Synthèse : la pelouse « savante » qui connaît tout ---
+  const synthLvl = String(card._entityState("entity_niveau", "") || "").toLowerCase();
+  let synthMood = "happy";
+  let synthTitle = "Tout roule au jardin !";
+  if (/(urgent|alerte|critique|danger)/.test(synthLvl)) { synthMood = "worried"; synthTitle = "Quelque chose à regarder"; }
+  else if (/(faire|action)/.test(synthLvl)) { synthMood = "todo"; synthTitle = "Une petite action à prévoir"; }
+  const synthPhase = String(card._entityState("entity_phase", "") || "").trim() || "Normal";
+  const synthWeather = card._weatherState();
+  const synthTemp = synthWeather && synthWeather.temperature != null ? synthWeather.temperature : null;
+  const synthCond = synthWeather ? synthWeather.condition || "" : "";
+  const synthWeatherPill = synthWeather
+    ? { icon: synthWeather.icon || "mdi:weather-partly-cloudy", text: synthWeather.summary }
+    : { icon: "mdi:eye-check-outline", text: "Je surveille tout pour toi" };
+  const synthScene = renderPlayfulScene({
+    variant: "synth",
+    eyebrow: "Aujourd'hui",
+    title: synthTitle,
+    sentence: titleText,
+    pillIcon: synthWeatherPill.icon,
+    pill: synthWeatherPill.text,
+    backdrop: gzWeatherBackdrop(synthTemp, synthCond),
+    mascot: gzSynthMascot({ mood: synthMood, temp: synthTemp, condition: synthCond }),
+    tiles: [
+      { icon: "mdi:water", label: "Eau", value: nextWatering.label || "—", sub: "prochain arrosage" },
+      { icon: "mdi:robot-mower", label: "Tonte", value: nextMowing.label || "—", sub: "prochaine tonte" },
+      { icon: "mdi:grass", label: "Gazon", value: synthPhase, sub: "phase actuelle" },
+    ],
+  });
+
   return `
-      <section class="gz2-overview" aria-label="Synthèse">
+      ${synthScene}
+
+      <details class="gz-details">
+        <summary>Voir les détails techniques</summary>
+      <section class="gz2-overview" aria-label="Synthèse (détails)">
         ${renderGz2Hero("Conseil du jour", titleText, heroSub, { icon: "mdi:lightbulb-on-outline", tone: "accent" })}
 
         <div class="gz2-reperes" aria-label="Repères">
@@ -1178,7 +1271,355 @@ export function renderOverviewTab(card) {
           })()}
         </div>
       </section>
+      </details>
     `;
+}
+
+function gzKidIcon(icon, color) {
+  return `<ha-icon icon="${escapeHtml(icon)}" style="--mdc-icon-size:18px;width:18px;height:18px;color:${color || "#2E8B57"};" aria-hidden="true"></ha-icon>`;
+}
+
+// --- Helpers météo partagés par les mascottes (température + condition) ---
+function gzWeatherFlags(temp = null, condition = "") {
+  const cond = String(condition || "").toLowerCase();
+  const night = /night/.test(cond);
+  return {
+    cond,
+    has: temp != null || cond !== "",
+    raining: /(rain|pour|storm|lightning|hail|drizzle)/.test(cond),
+    snowing: /snow/.test(cond),
+    cloudy: /(cloud|fog|overcast|mist|partlycloudy)/.test(cond),
+    sunny: cond === "sunny" || cond === "clear" || cond === "clear-night",
+    night,
+    windy: /wind/.test(cond),
+    hot: temp != null && temp >= 30,
+    veryHot: temp != null && temp >= 34,
+    cold: temp != null && temp <= 6,
+    frost: temp != null && temp <= 0,
+  };
+}
+
+function gzPrecipTop(f, y = 16) {
+  if (f.raining) {
+    return `<g>${[0, 1, 2].map((i) => `<path class="gz-drop d${i + 1}" d="M${52 + i * 22} ${y} q3.5 5 0 9 q-3.5 -4 0 -9z" fill="#7CC6F0"/>`).join("")}</g>`;
+  }
+  if (f.snowing) {
+    return `<g>${[0, 1, 2].map((i) => `<circle class="gz-drop d${i + 1}" cx="${54 + i * 22}" cy="${y + 3}" r="3" fill="#EAF4FB"/>`).join("")}</g>`;
+  }
+  return "";
+}
+
+function gzSkyBadge(f, cx = 120, cy = 24, r = 12) {
+  if (!f.has) return "";
+  if (f.raining) {
+    return `<g class="gz-pastille"><circle cx="${cx}" cy="${cy}" r="${r}" fill="#E6EEF3"/><ellipse cx="${cx}" cy="${cy - 2}" rx="${(r * 0.7).toFixed(1)}" ry="${(r * 0.46).toFixed(1)}" fill="#AEC3D2"/><g stroke="#5BB8E8" stroke-width="2" stroke-linecap="round"><line x1="${cx - 5}" y1="${cy + 6}" x2="${cx - 7}" y2="${cy + 10}"/><line x1="${cx + 1}" y1="${cy + 6}" x2="${cx - 1}" y2="${cy + 10}"/><line x1="${cx + 7}" y1="${cy + 6}" x2="${cx + 5}" y2="${cy + 10}"/></g></g>`;
+  }
+  if (f.snowing) {
+    return `<g class="gz-pastille"><circle cx="${cx}" cy="${cy}" r="${r}" fill="#EFF5F9"/><ellipse cx="${cx}" cy="${cy - 3}" rx="${(r * 0.7).toFixed(1)}" ry="${(r * 0.46).toFixed(1)}" fill="#C2D2DD"/><g fill="#8FB8D6"><circle cx="${cx - 5}" cy="${cy + 8}" r="1.6"/><circle cx="${cx + 1}" cy="${cy + 9}" r="1.6"/><circle cx="${cx + 6}" cy="${cy + 7}" r="1.6"/></g></g>`;
+  }
+  if (f.cloudy) {
+    return `<g class="gz-pastille"><circle cx="${cx}" cy="${cy}" r="${r}" fill="#EEF2F5"/><ellipse cx="${cx - 3}" cy="${cy + 1}" rx="${(r * 0.7).toFixed(1)}" ry="${(r * 0.46).toFixed(1)}" fill="#C2CDD6"/><ellipse cx="${cx + 5}" cy="${cy - 1}" rx="${(r * 0.46).toFixed(1)}" ry="${(r * 0.38).toFixed(1)}" fill="#D5DEE5"/></g>`;
+  }
+  const col = f.veryHot ? "#E8772E" : "#EFA63C";
+  const rr = ((f.hot || f.veryHot) ? r * 0.46 : r * 0.38).toFixed(1);
+  return `<g class="gz-pastille"><circle cx="${cx}" cy="${cy}" r="${r}" fill="#FBEFD7"/><circle cx="${cx}" cy="${cy}" r="${rr}" fill="${col}"/><g stroke="${col}" stroke-width="1.7" stroke-linecap="round"><line x1="${cx}" y1="${cy - r + 1}" x2="${cx}" y2="${cy - r + 4}"/><line x1="${cx}" y1="${cy + r - 4}" x2="${cx}" y2="${cy + r - 1}"/><line x1="${cx - r + 1}" y1="${cy}" x2="${cx - r + 4}" y2="${cy}"/><line x1="${cx + r - 4}" y1="${cy}" x2="${cx + r - 1}" y2="${cy}"/></g></g>`;
+}
+
+export function renderPlayfulScene(scene) {
+  const tiles = (scene.tiles || []).filter(Boolean).map((t) => `
+      <div class="gz-kidtile">
+        <div class="gz-kidtile__h">${gzKidIcon(t.icon)}<span>${escapeHtml(t.label)}</span></div>
+        <div class="gz-kidtile__v">${escapeHtml(t.value || "—")}</div>
+        ${t.sub ? `<div class="gz-kidtile__s">${escapeHtml(t.sub)}</div>` : ""}
+      </div>`).join("");
+  return `
+      <div class="gz-scene gz-scene--${escapeHtml(scene.variant || "water")}">
+        <div class="gz-scene__art"><div class="gz-scene__stage">${scene.backdrop || ""}${scene.mascot || ""}</div></div>
+        <div class="gz-scene__msg">
+          <div class="gz-scene__eyebrow">${escapeHtml(scene.eyebrow || "")}</div>
+          <div class="gz-scene__title">${escapeHtml(scene.title || "")}</div>
+          <div class="gz-scene__text">${escapeHtml(scene.sentence || "")}</div>
+          ${scene.pill ? `<div class="gz-scene__pill">${gzKidIcon(scene.pillIcon || "mdi:information-outline")}<span>${escapeHtml(scene.pill)}</span></div>` : ""}
+        </div>
+      </div>
+      ${tiles ? `<div class="gz-kidtiles">${tiles}</div>` : ""}`;
+}
+
+// Décor météo animé rendu DERRIÈRE la mascotte (ciel, soleil/lune, nuages, pluie, neige…)
+function gzWeatherBackdrop(temp = null, condition = "") {
+  const f = gzWeatherFlags(temp, condition);
+  if (!f.has) {
+    return `<svg class="gz-scene__sky" viewBox="0 0 150 172" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="150" height="172" fill="#EBF6F0"/></svg>`;
+  }
+  const sig = `${f.night ? "n" : ""}${f.raining ? "r" : ""}${f.snowing ? "s" : ""}${f.cloudy ? "c" : ""}${f.veryHot ? "H" : ""}${f.hot ? "h" : ""}${f.sunny ? "y" : ""}` || "x";
+  const gid = `gzsky_${sig}`;
+  let g1; let g2;
+  if (f.night) { g1 = "#3D4C78"; g2 = "#6E7CA6"; }
+  else if (f.raining) { g1 = "#B6C5D0"; g2 = "#D7E0E6"; }
+  else if (f.snowing) { g1 = "#CBD9E4"; g2 = "#ECF2F7"; }
+  else if (f.cloudy) { g1 = "#C3CFD8"; g2 = "#E2E9EE"; }
+  else if (f.veryHot) { g1 = "#FCE0B4"; g2 = "#FDF2DD"; }
+  else if (f.hot) { g1 = "#FBEBCB"; g2 = "#FCF7EC"; }
+  else { g1 = "#CDEBF8"; g2 = "#ECF8FC"; }
+
+  const clear = !f.raining && !f.snowing && !f.cloudy;
+  const sun = (clear && !f.night)
+    ? `<g class="gz-spin" style="transform-origin:114px 40px"><g stroke="${f.veryHot ? "#F6C879" : "#FBE0A0"}" stroke-width="3" stroke-linecap="round">${Array.from({ length: 8 }, (_, i) => { const a = i * 45 * Math.PI / 180; return `<line x1="${(114 + Math.cos(a) * 15).toFixed(1)}" y1="${(40 + Math.sin(a) * 15).toFixed(1)}" x2="${(114 + Math.cos(a) * 22).toFixed(1)}" y2="${(40 + Math.sin(a) * 22).toFixed(1)}"/>`; }).join("")}</g></g><circle cx="114" cy="40" r="13" fill="${f.veryHot ? "#FBD588" : "#FCEAB0"}"/>`
+    : "";
+  const moon = f.night
+    ? `<circle cx="116" cy="38" r="13" fill="#F3EFD6"/><circle cx="121" cy="34" r="11" fill="${g1}"/>`
+    : "";
+  const stars = f.night
+    ? `<g fill="#EAF0FF">${[[28, 30, 0], [52, 22, 0.6], [82, 32, 1.1], [40, 52, 1.6], [98, 58, 0.3]].map(([x, y, d]) => `<circle class="gz-twinkle" style="animation-delay:${d}s" cx="${x}" cy="${y}" r="1.5"/>`).join("")}</g>`
+    : "";
+  const clouds = (f.cloudy || f.raining || f.snowing)
+    ? `<g class="gz-drift" fill="#FFFFFF" opacity=".82"><ellipse cx="38" cy="40" rx="20" ry="11"/><ellipse cx="56" cy="36" rx="14" ry="9"/></g><g class="gz-drift gz-drift--2" fill="#FFFFFF" opacity=".6"><ellipse cx="104" cy="60" rx="16" ry="9"/><ellipse cx="118" cy="57" rx="11" ry="7"/></g>`
+    : (clear && !f.night) ? `<g class="gz-drift" fill="#FFFFFF" opacity=".5"><ellipse cx="34" cy="34" rx="15" ry="8"/><ellipse cx="46" cy="31" rx="10" ry="6"/></g>` : "";
+  const rain = f.raining
+    ? `<g class="gz-rain" stroke="#D4E7F4" stroke-width="2" stroke-linecap="round">${[8, 30, 52, 74, 96, 118, 140].map((x, i) => `<line style="animation-delay:${(i % 4) * 0.16}s" x1="${x}" y1="58" x2="${x - 6}" y2="76"/>`).join("")}</g>`
+    : "";
+  const snow = f.snowing
+    ? `<g class="gz-snow" fill="#FFFFFF">${[[18, 58, 0], [42, 70, 0.5], [68, 56, 1], [94, 72, 0.3], [120, 60, 0.8], [136, 76, 1.3]].map(([x, y, d]) => `<circle style="animation-delay:${d}s" cx="${x}" cy="${y}" r="2.4"/>`).join("")}</g>`
+    : "";
+  const haze = f.veryHot
+    ? `<g class="gz-shimmer" fill="none" stroke="#FFFFFF" stroke-width="2" opacity=".4" stroke-linecap="round"><path d="M18 150 q8 -4 16 0 t16 0"/><path d="M74 158 q8 -4 16 0 t16 0"/></g>`
+    : "";
+  const edge = f.night ? "#3D4C78" : "#E9F7EF";
+  return `<svg class="gz-scene__sky" viewBox="0 0 150 172" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${g1}"/><stop offset="1" stop-color="${g2}"/></linearGradient>
+        <radialGradient id="${gid}_v" cx="50%" cy="40%" r="78%"><stop offset="52%" stop-color="${edge}" stop-opacity="0"/><stop offset="100%" stop-color="${edge}" stop-opacity="0.92"/></radialGradient>
+      </defs>
+      <rect width="150" height="172" fill="url(#${gid})"/>
+      ${stars}${sun}${moon}${clouds}${rain}${snow}${haze}
+      <ellipse cx="75" cy="178" rx="74" ry="36" fill="#FFFFFF" opacity=".2"/>
+      <rect width="150" height="172" fill="url(#${gid}_v)"/>
+    </svg>`;
+}
+
+function gzWaterMascot({ fillPct = 50, madPct = 50, mood = "happy", raining = false, drinking = false, temp = null, condition = "" } = {}) {
+  const top = 46;
+  const h = 104;
+  const bottom = top + h;
+  const wTop = Math.round(bottom - Math.max(4, Math.min(100, fillPct)) / 100 * h);
+  const madY = Math.round(bottom - Math.max(0, Math.min(100, madPct)) / 100 * h);
+  const mouth = mood === "sad"
+    ? `<path d="M62 123 q13 -11 26 0" fill="none" stroke="#21433A" stroke-width="3.5" stroke-linecap="round"/>`
+    : `<path d="M62 117 q13 11 26 0" fill="none" stroke="#21433A" stroke-width="3.5" stroke-linecap="round"/>`;
+  const sweat = mood === "sad"
+    ? `<path class="gz-drop" d="M100 95 q5 7 0 12 q-5 -5 0 -12z" fill="#7CC6F0"/>`
+    : "";
+  const overDrops = (drinking || raining)
+    ? `<g>${[0, 1, 2].map((i) => `<path class="gz-drop d${i + 1}" d="M${58 + i * 16} 16 q4 6 0 11 q-4 -5 0 -11z" fill="#7CC6F0"/>`).join("")}</g>`
+    : "";
+  const sleeping = mood === "sleep";
+  const eyes = sleeping
+    ? `<g class="gz-eyes"><path d="M58 104 q6 6 12 0" fill="none" stroke="#21433A" stroke-width="3.5" stroke-linecap="round"/><path d="M80 104 q6 6 12 0" fill="none" stroke="#21433A" stroke-width="3.5" stroke-linecap="round"/></g>`
+    : `<g class="gz-eyes"><circle cx="64" cy="104" r="5.5" fill="#21433A"/><circle cx="86" cy="104" r="5.5" fill="#21433A"/><circle cx="66" cy="102" r="1.6" fill="#fff"/><circle cx="88" cy="102" r="1.6" fill="#fff"/></g>`;
+  const zzz = sleeping
+    ? `<g class="gz-bob" fill="#5B8C74" font-weight="700"><text x="98" y="64" font-size="12">z</text><text x="108" y="52" font-size="16">Z</text></g>`
+    : "";
+  return `
+      <svg viewBox="0 0 150 172" width="100%" role="img" aria-label="État de la pelouse et de sa réserve d'eau">
+        <defs><clipPath id="gzjar"><rect x="38" y="46" width="74" height="104" rx="16"/></clipPath></defs>
+        ${overDrops}${zzz}
+        <g clip-path="url(#gzjar)">
+          <rect x="38" y="46" width="74" height="104" fill="#EAF3FB"/>
+          <rect class="gz-wv" x="30" y="${wTop}" width="90" height="${bottom - wTop + 10}" fill="#7CC6F0"/>
+          <path class="gz-wv" d="M30 ${wTop} q11 -7 22 0 t22 0 t22 0 t22 0 v12 h-88 z" fill="#9AD6F5"/>
+          <circle class="gz-b" cx="58" cy="142" r="3.4" fill="#fff" opacity=".5"/>
+          <circle class="gz-b b2" cx="82" cy="142" r="2.6" fill="#fff" opacity=".5"/>
+          <circle class="gz-b b3" cx="70" cy="142" r="3" fill="#fff" opacity=".5"/>
+        </g>
+        <rect x="38" y="46" width="74" height="104" rx="16" fill="none" stroke="#B7D8C6" stroke-width="2"/>
+        <line x1="34" y1="${madY}" x2="116" y2="${madY}" stroke="#E08A3C" stroke-width="2" stroke-dasharray="4 4"/>
+        <text x="118" y="${madY + 4}" font-size="11" font-weight="600" fill="#B86A22">soif</text>
+        <g class="gz-grass"><g stroke="#4FA84F" stroke-width="5" stroke-linecap="round">
+          <line x1="62" y1="48" x2="56" y2="26"/><line x1="75" y1="48" x2="75" y2="20"/><line x1="88" y1="48" x2="94" y2="26"/>
+        </g></g>
+        <g class="gz-face">
+          ${eyes}
+          ${mouth}
+        </g>
+        ${sweat}
+      </svg>`;
+}
+
+function gzSynthMascot({ mood = "happy", temp = null, condition = "" } = {}) {
+  const cond = String(condition || "").toLowerCase();
+  const hot = temp != null && temp >= 30;
+  const veryHot = temp != null && temp >= 34;
+  const cold = temp != null && temp <= 6;
+
+  // Joues : chaudes quand il fait chaud, fraîches quand il fait froid
+  const cheeks = (hot || veryHot)
+    ? `<circle cx="55" cy="112" r="5" fill="#F0A24C" opacity=".5"/><circle cx="95" cy="112" r="5" fill="#F0A24C" opacity=".5"/>`
+    : cold
+      ? `<circle cx="55" cy="112" r="5" fill="#7FB6E6" opacity=".55"/><circle cx="95" cy="112" r="5" fill="#7FB6E6" opacity=".55"/>`
+      : "";
+  // Goutte de sueur (chaud) / souffle (froid)
+  const sweat = (hot || veryHot)
+    ? `<path class="gz-drop" d="M101 98 q5 7 0 12 q-5 -5 0 -12z" fill="#7CC6F0"/>`
+    : "";
+  const breath = cold
+    ? `<ellipse class="gz-drop" cx="98" cy="124" rx="6" ry="4" fill="#FFFFFF" opacity=".6"/>`
+    : "";
+  // Bouche : pantelante si très chaud, crispée si froid, sinon selon l'humeur
+  const mouth = veryHot
+    ? `<path d="M66 115 q9 13 18 0 z" fill="#C56B6B" stroke="#21433A" stroke-width="2.6" stroke-linejoin="round"/>`
+    : cold
+      ? `<path d="M67 119 q8 4 16 0" fill="none" stroke="#21433A" stroke-width="3" stroke-linecap="round"/>`
+      : mood === "worried"
+        ? `<path d="M65 120 q10 -7 20 0" fill="none" stroke="#21433A" stroke-width="3" stroke-linecap="round"/>`
+        : mood === "todo"
+          ? `<path d="M66 116 q9 6 18 0" fill="none" stroke="#21433A" stroke-width="3" stroke-linecap="round"/>`
+          : `<path d="M64 114 q11 10 22 0" fill="none" stroke="#21433A" stroke-width="3.2" stroke-linecap="round"/>`;
+  // Lunettes de soleil quand le soleil tape (utile), sinon rien
+  const shades = (cond === "sunny" || cond === "clear") || (temp != null && temp >= 28);
+  const niceEyes = `<g class="gz-eyes">
+            <ellipse cx="61" cy="100" rx="3.6" ry="4.7" fill="#21433A"/><ellipse cx="89" cy="100" rx="3.6" ry="4.7" fill="#21433A"/>
+            <circle cx="62.4" cy="98" r="1.5" fill="#fff"/><circle cx="90.4" cy="98" r="1.5" fill="#fff"/>
+          </g>`;
+  const sunglasses = `<g class="gz-shades">
+            <path d="M50 94 q-7 -1 -12 -6" fill="none" stroke="#26332E" stroke-width="3" stroke-linecap="round"/>
+            <path d="M100 94 q7 -1 12 -6" fill="none" stroke="#26332E" stroke-width="3" stroke-linecap="round"/>
+            <rect x="49" y="91" width="23" height="16" rx="7" fill="#2B3A36"/>
+            <rect x="78" y="91" width="23" height="16" rx="7" fill="#2B3A36"/>
+            <path d="M72 95 q3.5 -2 6 0" fill="none" stroke="#26332E" stroke-width="3" stroke-linecap="round"/>
+            <line x1="53" y1="95" x2="59" y2="95" stroke="#7FA295" stroke-width="2.4" stroke-linecap="round" opacity=".75"/>
+            <line x1="82" y1="95" x2="88" y2="95" stroke="#7FA295" stroke-width="2.4" stroke-linecap="round" opacity=".75"/>
+          </g>`;
+  const eyewear = shades ? sunglasses : niceEyes;
+  return `
+      <svg viewBox="0 0 150 172" width="100%" role="img" aria-label="Pelouse savante qui surveille la météo du jardin">
+        <g class="gz-grass"><g stroke="#4FA84F" stroke-width="6" stroke-linecap="round">
+          <line x1="60" y1="74" x2="53" y2="44"/><line x1="75" y1="74" x2="75" y2="38"/><line x1="90" y1="74" x2="97" y2="44"/>
+        </g></g>
+        <circle cx="75" cy="106" r="35" fill="#9AD89A"/>
+        <g class="gz-face">
+          ${cheeks}
+          ${eyewear}
+          ${mouth}
+        </g>
+        ${sweat}${breath}
+      </svg>`;
+}
+
+function gzMowerMascot({ mood = "rest", temp = null, condition = "" } = {}) {
+  const rolling = mood === "mow";
+  const wheel = (cx) => rolling
+    ? `<circle cx="${cx}" cy="122" r="11" fill="#3F5E50"/><g class="gz-roll" style="transform-origin:${cx}px 122px"><line x1="${cx}" y1="114" x2="${cx}" y2="130" stroke="#8FD0A8" stroke-width="2.6" stroke-linecap="round"/><line x1="${cx - 8}" y1="122" x2="${cx + 8}" y2="122" stroke="#8FD0A8" stroke-width="2.6" stroke-linecap="round"/></g><circle cx="${cx}" cy="122" r="3" fill="#3F5E50"/>`
+    : `<circle cx="${cx}" cy="122" r="11" fill="#3F5E50"/><circle cx="${cx}" cy="122" r="4" fill="#8FD0A8"/>`;
+  const zzz = mood === "charge"
+    ? `<g fill="#5B7A6D" font-weight="600"><text x="104" y="58" font-size="13">z</text><text x="114" y="46" font-size="17">Z</text></g>`
+    : "";
+  const eyes = mood === "charge"
+    ? `<line x1="60" y1="92" x2="70" y2="92" stroke="#1F3A4D" stroke-width="3" stroke-linecap="round"/><line x1="80" y1="92" x2="90" y2="92" stroke="#1F3A4D" stroke-width="3" stroke-linecap="round"/>`
+    : `<g class="gz-eyes"><circle cx="65" cy="91" r="4.5" fill="#1F3A4D"/><circle cx="85" cy="91" r="4.5" fill="#1F3A4D"/></g>`;
+  const mouth = mood === "blocked"
+    ? `<path d="M64 108 q11 -7 22 0" fill="none" stroke="#1F3A4D" stroke-width="3" stroke-linecap="round"/>`
+    : `<path d="M64 104 q11 9 22 0" fill="none" stroke="#1F3A4D" stroke-width="3" stroke-linecap="round"/>`;
+  const clippings = mood === "mow"
+    ? `<g class="gz-drop" fill="#4FA84F"><circle cx="116" cy="116" r="2.6"/><circle cx="126" cy="124" r="2"/><circle cx="121" cy="108" r="1.8"/></g>`
+    : "";
+  const speed = mood === "mow"
+    ? `<g stroke="#9FCBB4" stroke-width="2.6" stroke-linecap="round" opacity=".75"><line x1="18" y1="98" x2="32" y2="98"/><line x1="14" y1="108" x2="30" y2="108"/><line x1="20" y1="118" x2="33" y2="118"/></g>`
+    : "";
+  return `
+      <svg viewBox="0 0 150 172" width="100%" role="img" aria-label="Robot tondeuse">
+        ${zzz}${clippings}${speed}
+        <g class="gz-face">
+          <line x1="75" y1="62" x2="75" y2="46" stroke="#7FB39A" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="75" cy="42" r="4" fill="${mood === "blocked" ? "#E0843C" : "#5DBE7E"}"/>
+          <rect x="40" y="62" width="70" height="52" rx="16" fill="#8FD0A8"/>
+          <rect x="50" y="80" width="50" height="20" rx="9" fill="#fff" opacity=".5"/>
+          ${eyes}
+          ${mouth}
+        </g>
+        ${wheel(56)}${wheel(94)}
+        <g stroke="#4FA84F" stroke-width="4" stroke-linecap="round"><line x1="34" y1="138" x2="34" y2="130"/><line x1="46" y1="138" x2="46" y2="128"/><line x1="104" y1="138" x2="104" y2="128"/><line x1="116" y1="138" x2="116" y2="130"/></g>
+      </svg>`;
+}
+
+function gzGazonMascot({ mood = "normal", temp = null, condition = "" } = {}) {
+  const bladeTop = mood === "seed" ? 96 : 70;
+  const mouth = mood === "stress"
+    ? `<path d="M65 124 q10 -7 20 0" fill="none" stroke="#21433A" stroke-width="3.2" stroke-linecap="round"/>`
+    : mood === "winter"
+      ? `<path d="M66 122 h18" fill="none" stroke="#21433A" stroke-width="3" stroke-linecap="round"/>`
+      : `<path d="M64 118 q11 10 22 0" fill="none" stroke="#21433A" stroke-width="3.2" stroke-linecap="round"/>`;
+  return `
+      <svg viewBox="0 0 150 172" width="100%" role="img" aria-label="État du gazon">
+        <ellipse cx="75" cy="150" rx="48" ry="13" fill="#D8C39A"/>
+        <g class="gz-grass"><g stroke="#4FA84F" stroke-width="7" stroke-linecap="round">
+          <line x1="55" y1="150" x2="47" y2="${bladeTop + 8}"/>
+          <line x1="75" y1="150" x2="75" y2="${bladeTop}"/>
+          <line x1="95" y1="150" x2="103" y2="${bladeTop + 8}"/>
+        </g></g>
+        <circle cx="75" cy="116" r="27" fill="#9AD89A"/>
+        <g class="gz-face">
+          <g class="gz-eyes"><circle cx="66" cy="110" r="4.5" fill="#21433A"/><circle cx="84" cy="110" r="4.5" fill="#21433A"/></g>
+          ${mouth}
+        </g>
+      </svg>`;
+}
+
+function gzProductMascot({ mood = "active" } = {}) {
+  const spray = mood === "active"
+    ? `<g class="gz-drop" fill="#7CC6F0"><circle cx="44" cy="58" r="2.6"/><circle cx="35" cy="64" r="2"/><circle cx="39" cy="51" r="2"/></g>`
+    : "";
+  const mouth = mood === "idle"
+    ? `<path d="M70 114 h18" fill="none" stroke="#21433A" stroke-width="3" stroke-linecap="round"/>`
+    : `<path d="M69 110 q11 9 21 0" fill="none" stroke="#21433A" stroke-width="3.2" stroke-linecap="round"/>`;
+  return `
+      <svg viewBox="0 0 150 172" width="100%" role="img" aria-label="Produit d'intervention">
+        ${spray}
+        <rect x="76" y="50" width="16" height="12" rx="2" fill="#7FB39A"/>
+        <rect x="58" y="58" width="22" height="9" rx="2" fill="#7FB39A"/>
+        <g class="gz-face">
+          <rect x="64" y="64" width="48" height="78" rx="13" fill="#9AD6B0"/>
+          <rect x="70" y="92" width="36" height="28" rx="6" fill="#fff" opacity=".55"/>
+          <g class="gz-eyes"><circle cx="80" cy="100" r="4.5" fill="#21433A"/><circle cx="96" cy="100" r="4.5" fill="#21433A"/></g>
+          ${mouth}
+        </g>
+      </svg>`;
+}
+
+function gzTaskMascot({ mood = "clear" } = {}) {
+  const content = mood === "todo"
+    ? `<g stroke="#9FCBB4" stroke-width="3" stroke-linecap="round"><line x1="60" y1="92" x2="92" y2="92"/><line x1="60" y1="104" x2="92" y2="104"/><line x1="60" y1="116" x2="80" y2="116"/></g>`
+    : `<path d="M60 102 l9 9 l18 -20" fill="none" stroke="#4FA84F" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const mouth = mood === "todo"
+    ? `<path d="M67 136 h18" fill="none" stroke="#21433A" stroke-width="3" stroke-linecap="round"/>`
+    : `<path d="M65 132 q11 9 21 0" fill="none" stroke="#21433A" stroke-width="3.2" stroke-linecap="round"/>`;
+  return `
+      <svg viewBox="0 0 150 172" width="100%" role="img" aria-label="Intervention à préparer">
+        <g class="gz-face">
+          <rect x="48" y="64" width="54" height="84" rx="11" fill="#F4FBF7" stroke="#9FCBB4" stroke-width="2.5"/>
+          <rect x="62" y="56" width="26" height="14" rx="5" fill="#8FD0A8"/>
+          ${content}
+          <g class="gz-eyes"><circle cx="64" cy="130" r="3.6" fill="#21433A"/><circle cx="86" cy="130" r="3.6" fill="#21433A"/></g>
+          ${mouth}
+        </g>
+      </svg>`;
+}
+
+function gzGearMascot() {
+  const teeth = Array.from({ length: 8 }, (_, i) => {
+    const a = (i * 45) * Math.PI / 180;
+    const cx = 75 + Math.cos(a) * 39;
+    const cy = 100 + Math.sin(a) * 39;
+    return `<rect x="${(cx - 6).toFixed(1)}" y="${(cy - 6).toFixed(1)}" width="12" height="12" rx="2" fill="#AFC4BB" transform="rotate(${i * 45} ${cx.toFixed(1)} ${cy.toFixed(1)})"/>`;
+  }).join("");
+  return `
+      <svg viewBox="0 0 150 172" width="100%" role="img" aria-label="Réglages">
+        <g class="gz-spin">${teeth}<circle cx="75" cy="100" r="34" fill="#C6D7CF"/></g>
+        <circle cx="75" cy="100" r="27" fill="#9FB7AD"/>
+        <g class="gz-face">
+          <g class="gz-eyes"><circle cx="66" cy="96" r="4" fill="#2C3E38"/><circle cx="84" cy="96" r="4" fill="#2C3E38"/></g>
+          <path d="M67 108 q8 7 16 0" fill="none" stroke="#2C3E38" stroke-width="3" stroke-linecap="round"/>
+        </g>
+      </svg>`;
 }
 
 export function renderWateringTab(card) {
@@ -1396,8 +1837,64 @@ export function renderWateringTab(card) {
       </button>`;
   }).join("");
 
+  // Bandeau « arrosage du soir prévu » : visible dès que le créneau recommandé est le soir
+  // (rafraîchissement canicule), pour ne pas avoir à fouiller la fenêtre.
+  const eveningPlanned = windowState.publicState === "soir" && !windowState.isBlocked && windowState.objective > 0;
+  const eveningBannerHtml = eveningPlanned
+    ? `
+        <div class="gz2-evening" role="status">
+          <span class="gz2-evening__icon" aria-hidden="true">🌙</span>
+          <span class="gz2-evening__text">Arrosage du soir prévu${windowState.eveningWindowDisplay ? ` · ${escapeHtml(windowState.eveningWindowDisplay)}` : ""}</span>
+        </div>`
+    : "";
+
+  // --- Vue ludique (compréhensible par un enfant) ---
+  const wateringNow = Boolean(wateringProgress && wateringProgress.active);
+  const reserveUsefulKid = (context.reserveUsefulMax && context.reserveUsefulMax > 0) ? context.reserveUsefulMax : 12;
+  const reserveActKid = context.reserveActuelle;
+  const fillPctKid = reserveActKid != null ? Math.max(4, Math.min(100, (reserveActKid / reserveUsefulKid) * 100)) : 55;
+  const madPctKid = madThresholdMm != null ? Math.max(0, Math.min(100, (madThresholdMm / reserveUsefulKid) * 100)) : 50;
+  const blockTxtKid = `${windowState.blockReason || ""} ${windowState.blockReasonLabel || ""}`.toLowerCase();
+  const rainBlockedKid = isBlocked && /pluie/.test(blockTxtKid);
+  const cooldownBlockedKid = isBlocked && /(cooldown|repos)/.test(blockTxtKid);
+  const thirstyKid = !wateringNow && context.depletionRatio != null && context.depletionRatio >= madRatio;
+  let kid;
+  if (wateringNow) {
+    kid = { mood: "happy", drinking: true, title: "Elle boit en ce moment !", sentence: "L'eau arrive dans la terre, le réservoir se remplit.", pillIcon: "mdi:sprinkler", pill: `Arrosage en cours · ${formatNumber(wateringProgress.progressPercent || 0, 0)} %` };
+  } else if (rainBlockedKid) {
+    kid = { mood: "happy", raining: true, title: "Pas besoin d'arroser", sentence: "La pluie va s'en occuper toute seule.", pillIcon: "mdi:weather-rainy", pill: "Pluie prévue" };
+  } else if (cooldownBlockedKid) {
+    kid = { mood: "sleep", title: "Elle se repose", sentence: "Elle a déjà bu il y a peu. Elle reboira quand elle aura soif.", pillIcon: "mdi:sleep", pill: "Au repos" };
+  } else if (thirstyKid) {
+    kid = { mood: "sad", title: "Ma pelouse a soif", sentence: "Le niveau d'eau est bas, elle va bientôt boire.", pillIcon: "mdi:water-alert", pill: "Bientôt un arrosage" };
+  } else {
+    kid = { mood: "happy", title: "Ma pelouse va bien !", sentence: "Elle a assez d'eau en réserve dans la terre.", pillIcon: "mdi:emoticon-happy-outline", pill: "Tout va bien" };
+  }
+  const wxWater = card._weatherState();
+  const playfulScene = renderPlayfulScene({
+    variant: "water",
+    eyebrow: "Arrosage",
+    title: kid.title,
+    sentence: kid.sentence,
+    pill: kid.pill,
+    pillIcon: kid.pillIcon,
+    backdrop: gzWeatherBackdrop(wxWater ? wxWater.temperature : null, wxWater ? wxWater.condition : ""),
+    mascot: gzWaterMascot({ fillPct: fillPctKid, madPct: madPctKid, mood: kid.mood, raining: Boolean(kid.raining), drinking: Boolean(kid.drinking), temp: wxWater ? wxWater.temperature : null, condition: wxWater ? wxWater.condition : "" }),
+    tiles: [
+      { icon: "mdi:water", label: "Dernier arrosage", value: lastWatering.label || "—", sub: "ce qu'elle a bu" },
+      { icon: "mdi:clock-outline", label: "Prochaine boisson", value: wateringNow ? "maintenant" : (cooldownBlockedKid ? "au repos" : (nextWatering.label || "—")), sub: wateringNow ? "en cours" : "" },
+      { icon: "mdi:cup-water", label: "Réservoir d'eau", value: reserveActKid != null ? `${formatNumber(reserveActKid, 0)} / ${formatNumber(reserveUsefulKid, 0)} mm` : "—", sub: thirstyKid ? "il a soif" : (fillPctKid >= 90 ? "bien plein" : "correct") },
+    ],
+  });
+
   return `
-      <section class="gz2-overview" aria-label="Irrigation">
+      ${playfulScene}
+
+      ${eveningBannerHtml}
+
+      <details class="gz-details"${wateringNow ? " open" : ""}>
+        <summary>Voir les détails techniques</summary>
+      <section class="gz2-overview" aria-label="Irrigation (détails)">
         ${renderGz2Hero("Décision eau", heroTitle, heroSub, { icon: card._statusIcon(windowState.status) || "mdi:water", tone: windowState.tone || "accent" })}
 
         ${blockageHtml}
@@ -1453,6 +1950,7 @@ export function renderWateringTab(card) {
             : ""
         }
       </section>
+      </details>
     `;
 }
 
@@ -1522,8 +2020,42 @@ export function renderGazonTab(card) {
     },
   ];
 
+  // --- Scène ludique Gazon : le brin d'herbe selon la saison ---
+  const phaseRaw = String(phase || "").toLowerCase();
+  const riskRaw = String(risk || "").toLowerCase();
+  let gzMood = "normal";
+  let gzTitle = "Le gazon est en forme";
+  let gzSentence = "Belle pelouse, rien à signaler.";
+  if (/(semis|sursemis|germination|lev)/.test(phaseRaw)) {
+    gzMood = "seed"; gzTitle = "Le gazon pousse"; gzSentence = "De jeunes pousses : on les chouchoute.";
+  } else if (/(hiver|dormance|repos)/.test(phaseRaw)) {
+    gzMood = "winter"; gzTitle = "Le gazon se repose"; gzSentence = "Saison calme : il tourne au ralenti.";
+  } else if (/(élev|elev|fort|critique|haut)/.test(riskRaw)) {
+    gzMood = "stress"; gzTitle = "Le gazon est un peu stressé"; gzSentence = "Petit coup d'œil : le risque est élevé.";
+  }
+  const wxGazon = card._weatherState();
+  const gazonScene = renderPlayfulScene({
+    variant: "gazon",
+    eyebrow: "Gazon",
+    title: gzTitle,
+    sentence: gzSentence,
+    pillIcon: "mdi:grass",
+    pill: phase ? `Phase ${formatStatusLabel(phase)}` : "Phase Normal",
+    backdrop: gzWeatherBackdrop(wxGazon ? wxGazon.temperature : null, wxGazon ? wxGazon.condition : ""),
+    mascot: gzGazonMascot({ mood: gzMood, temp: wxGazon ? wxGazon.temperature : null, condition: wxGazon ? wxGazon.condition : "" }),
+    tiles: [
+      { icon: "mdi:grass", label: "Phase", value: formatStatusLabel(phase) || "Normal", sub: "saison" },
+      { icon: "mdi:shield-alert-outline", label: "Risque", value: formatStatusLabel(risk) || "—", sub: "" },
+      { icon: "mdi:sprout", label: "Sous-phase", value: hasSubPhase ? formatStatusLabel(subPhase) : "—", sub: hasSubPhase ? progressLabel : "" },
+    ],
+  });
+
   return `
-      <section class="gz2-overview" aria-label="Gazon">
+      ${gazonScene}
+
+      <details class="gz-details">
+        <summary>Voir les détails techniques</summary>
+      <section class="gz2-overview" aria-label="Gazon (détails)">
         ${renderGz2Hero("Gazon", formatStatusLabel(phase) || "Gazon", gazonHint, { icon: "mdi:grass", tone: "accent" })}
         <div class="gz2-cards">${renderGz2Cards(card, gazonFacts)}</div>
         ${hasSubPhase ? `
@@ -1535,6 +2067,7 @@ export function renderGazonTab(card) {
         </div>
         ` : ""}
       </section>
+      </details>
     `;
 }
 
@@ -1657,13 +2190,49 @@ export function renderMowingTab(card) {
                   : null,
   }));
 
+  // --- Scène ludique Tonte : le robot tondeuse ---
+  const tonteRaw = `${tonte?.state || ""} ${mowerState.label || ""}`.toLowerCase();
+  let mowMood = "rest";
+  let mowTitle = "Prêt à tondre";
+  let mowSentence = "Tout est ok pour une tonte quand ce sera le bon moment.";
+  let mowPill = "Peut tondre";
+  let mowPillIcon = "mdi:robot-mower";
+  if (/(cours|mowing|tond)/.test(tonteRaw)) {
+    mowMood = "mow"; mowTitle = "Le robot tond !"; mowSentence = "Il est en train de couper l'herbe."; mowPill = "Tonte en cours";
+  } else if (mowerState.present && mowerState.battery != null && mowerState.battery < 30) {
+    mowMood = "charge"; mowTitle = "Il recharge sa batterie"; mowSentence = "Il repartira tondre une fois rechargé."; mowPill = "En charge"; mowPillIcon = "mdi:battery-charging";
+  } else if (!actionPossible) {
+    mowMood = "blocked"; mowTitle = "Il ne peut pas tondre"; mowSentence = compactDecisionText(mowingDecisionSummary, { maxLength: 96 }); mowPill = "En pause"; mowPillIcon = "mdi:robot-mower-off";
+  }
+  const wxMow = card._weatherState();
+  const mowScene = renderPlayfulScene({
+    variant: "mow",
+    eyebrow: "Tonte",
+    title: mowTitle,
+    sentence: mowSentence,
+    pill: mowPill,
+    pillIcon: mowPillIcon,
+    backdrop: gzWeatherBackdrop(wxMow ? wxMow.temperature : null, wxMow ? wxMow.condition : ""),
+    mascot: gzMowerMascot({ mood: mowMood, temp: wxMow ? wxMow.temperature : null, condition: wxMow ? wxMow.condition : "" }),
+    tiles: [
+      { icon: "mdi:content-cut", label: "État", value: tonteValue, sub: mowerState.present ? (mowerState.label || "robot") : "robot" },
+      { icon: "mdi:calendar-clock", label: "Prochaine tonte", value: nextMowing.label || "—", sub: "" },
+      { icon: "mdi:ruler", label: "Hauteur conseillée", value: heightValue || "—", sub: heightSecondary || "" },
+    ],
+  });
+
   return `
-      <section class="gz2-overview" aria-label="Tonte">
+      ${mowScene}
+
+      <details class="gz-details"${mowMood === "mow" ? " open" : ""}>
+        <summary>Voir les détails techniques</summary>
+      <section class="gz2-overview" aria-label="Tonte (détails)">
         ${renderGz2Hero("Tonte", tonteValue, mowingDecisionSummary, { icon: "mdi:content-cut", tone: "accent" })}
         <div class="gz2-chips">${renderGz2Chips(mowingDecisionPills)}</div>
         <div class="gz2-eyebrow gz2-eyebrow--section">Lecture rapide</div>
         <div class="gz2-cards">${renderGz2Cards(card, mowingCards)}</div>
       </section>
+      </details>
     `;
 }
 
@@ -1695,8 +2264,28 @@ export function renderConfigTab(card) {
     { label: "Hauteur max tondeuse", value: heightMax.value, tone: heightMax.tone, entityKey: "entity_hauteur_max_tondeuse" },
   ];
 
+  // --- Scène ludique Réglages : l'engrenage ---
+  const configScene = renderPlayfulScene({
+    variant: "config",
+    eyebrow: "Réglages",
+    title: "Les réglages du jardin",
+    sentence: "Touche une tuile pour ouvrir le contrôle dans Home Assistant.",
+    pillIcon: "mdi:cog-outline",
+    pill: switchState.label || "Réglages",
+    mascot: gzGearMascot(),
+    tiles: [
+      { icon: "mdi:water-pump", label: "Arrosage auto", value: switchState.label || "—", sub: "" },
+      { icon: "mdi:robot-mower", label: "Coord. tondeuse", value: mowerCoordinationState.label || "—", sub: "" },
+      { icon: "mdi:flower-outline", label: "Mode gazon", value: formatApplicationMode(mode) || "—", sub: "" },
+    ],
+  });
+
   return `
-      <section class="gz2-overview" aria-label="Réglages">
+      ${configScene}
+
+      <details class="gz-details" open>
+        <summary>Tous les réglages</summary>
+      <section class="gz2-overview" aria-label="Réglages (détails)">
         ${renderGz2Hero("Réglages", "Autorisations & contrôles", "Touchez une tuile pour ouvrir le contrôle Home Assistant.", { icon: "mdi:cog-outline", tone: "neutral" })}
         <div class="gz2-eyebrow gz2-eyebrow--section">Autorisations & coordination</div>
         <div class="gz2-cards">${renderGz2Cards(card, controlItems)}</div>
@@ -1706,6 +2295,7 @@ export function renderConfigTab(card) {
         <div class="gz2-eyebrow gz2-eyebrow--section">Hauteurs de tondeuse</div>
         <div class="gz2-cards">${renderGz2Cards(card, heightItems)}</div>
       </section>
+      </details>
     `;
 }
 

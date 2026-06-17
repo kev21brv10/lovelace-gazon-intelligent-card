@@ -1,6 +1,6 @@
 export const CARD_TYPE = "gazon-intelligent-card";
 export const CARD_NAME = "Gazon Intelligent Card";
-export const CARD_VERSION = "0.10.0";
+export const CARD_VERSION = "0.10.5";
 
 export const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -291,7 +291,7 @@ export const RENDER_SIGNATURE_ATTRS = {
   entity_prochaine_tonte: ["target_date", "target_display", "target_datetime", "target_datetime_display", "action_possible", "tonte_statut", "block_reason", "reason", "summary", "machine_unavailable_label", "machine_unavailable_detail"],
   entity_prochain_blocage_attendu: ["source_entity", "source_status", "block_reason", "block_label", "confidence_score", "phase", "month", "temperature", "summary"],
   entity_plan_arrosage: ["summary", "duration_human", "zone_count", "objective_mm", "plan_type", "passages", "fractionation", "total_duration_min"],
-  entity_arrosage_en_cours: ["active", "started_at_utc", "last_activity_at_utc", "active_zone_count", "zone_count", "progress_percent", "active_zones", "active_zone_labels", "current_passage", "passage_count", "source", "watering_cause"],
+  entity_arrosage_en_cours: ["active", "started_at_utc", "last_activity_at_utc", "active_zone_count", "zone_count", "progress_percent", "active_zones", "active_zone_labels", "current_passage", "passage_count", "source", "watering_cause", "zone_mm_applied", "surface_mm_applied", "total_mm_applied", "target_mm", "live_reserve_mm", "live_surplus_mm"],
   entity_dernier_arrosage: ["source", "date_action", "detected_at", "zone_count", "summary", "watering_cause", "total_mm"],
   entity_derniere_application: ["source", "application_requires_watering_after", "application_post_watering_mm", "application_irrigation_block_hours", "application_irrigation_delay_minutes", "application_block_active", "application_block_remaining_minutes", "application_post_watering_pending", "application_post_watering_delay_remaining_minutes", "application_post_watering_ready", "application_post_watering_remaining_mm", "application_post_watering_status"],
   entity_catalogue_produits: ["products_count", "product_ids", "product_names", "products_summary", "summary"],

@@ -1814,6 +1814,22 @@ class GazonIntelligentCard extends HTMLElement {
     return [];
   }
 
+  _liveZoneWaterLabel(attrs) {
+    const zoneMm = attrs.zone_mm_applied;
+    if (!zoneMm || typeof zoneMm !== "object") {
+      return "";
+    }
+    const parts = [];
+    for (const [zoneId, mm] of Object.entries(zoneMm)) {
+      const value = asNumber(mm);
+      if (value === null) {
+        continue;
+      }
+      parts.push(`${this._friendlyZoneLabel(zoneId)} ${formatNumber(value, 1)}`);
+    }
+    return parts.length ? `${parts.join(" · ")} mm` : "";
+  }
+
   _estimatedWateringTotalSeconds() {
     const entity = this._planEntity();
     const attrs = entity?.attributes || {};
@@ -1902,6 +1918,23 @@ class GazonIntelligentCard extends HTMLElement {
       detailParts.push(`Restant ${formatDurationHuman(remainingSeconds / 60.0)}`);
     }
     const summary = `Irrigation en cours ${formatNumber(progressPercent, 0) || 0}%`;
+    // Suivi de l'eau en temps réel (mm par zone + surplus), exposé par l'intégration.
+    const surfaceMmApplied = asNumber(attrs.surface_mm_applied);
+    const liveSurplusMm = asNumber(attrs.live_surplus_mm);
+    const liveReserveMm = asNumber(attrs.live_reserve_mm);
+    const targetMm = asNumber(attrs.target_mm);
+    const zoneWaterLabel = this._liveZoneWaterLabel(attrs);
+    const waterParts = [];
+    if (surfaceMmApplied !== null && surfaceMmApplied > 0) {
+      waterParts.push(`Déjà ${formatNumber(surfaceMmApplied, 1)} mm${targetMm ? ` / ${formatNumber(targetMm, 1)}` : ""}`);
+    }
+    if (zoneWaterLabel) {
+      waterParts.push(zoneWaterLabel);
+    }
+    if (liveSurplusMm !== null) {
+      waterParts.push(`Surplus ${formatNumber(liveSurplusMm, 1)} mm`);
+    }
+    const waterText = waterParts.join(" · ");
     return {
       active: true,
       progressPercent,
@@ -1917,6 +1950,11 @@ class GazonIntelligentCard extends HTMLElement {
       passageCount: passageCount ?? 1,
       plannedTotalSeconds,
       critical: progressPercent >= 90,
+      surfaceMmApplied,
+      liveSurplusMm,
+      liveReserveMm,
+      targetMm,
+      waterText,
     };
   }
 
@@ -1972,6 +2010,7 @@ class GazonIntelligentCard extends HTMLElement {
     const detail = String(progressState.detail || "").trim();
     const activeZoneLabels = Array.isArray(progressState.activeZoneLabels) ? progressState.activeZoneLabels.filter(Boolean) : [];
     const activeZoneLabel = activeZoneLabels.join(" · ");
+    const waterText = String(progressState.waterText || "").trim();
     const metaParts = [];
     if (progressState.startedAtLabel) {
       metaParts.push(progressState.startedAtLabel);
@@ -2000,6 +2039,16 @@ class GazonIntelligentCard extends HTMLElement {
         } else {
           zoneNode.hidden = true;
           zoneNode.textContent = "";
+        }
+      }
+      const waterNode = section.querySelector('[data-watering-progress="water"]');
+      if (waterNode) {
+        if (waterText) {
+          waterNode.hidden = false;
+          waterNode.textContent = waterText;
+        } else {
+          waterNode.hidden = true;
+          waterNode.textContent = "";
         }
       }
       const progressNode = section.querySelector('[data-watering-progress="progress"]');
@@ -3402,20 +3451,20 @@ class GazonIntelligentCard extends HTMLElement {
     const cards = fields.map((field) => {
       const entity = this._entity(field.key);
       const value = this._formatFieldValue(field, entity);
-      const tone = this._toneForField(field, entity);
       const secondary = this._config?.show_secondary_info ? this._secondaryFieldText(field, entity) : "";
       const eid = this._entityId(field.key);
-      const vTone = ["success", "warning", "danger", "critical"].includes(tone) ? ` gz2-card__value--${tone}` : "";
       return `
-        <button type="button" class="gz2-card" data-more-info-entity="${escapeHtml(eid)}">
-          <div class="gz2-card__label">${escapeHtml(field.label)}</div>
-          <div class="gz2-card__value${vTone}">${escapeHtml(value)}</div>
-          ${secondary ? `<div class="gz2-card__sub">${escapeHtml(secondary)}</div>` : ""}
+        <button type="button" class="gz-advtile" data-more-info-entity="${escapeHtml(eid)}">
+          <div class="gz-advtile__label">${escapeHtml(field.label)}</div>
+          <div class="gz-advtile__value">${escapeHtml(value)}</div>
+          ${secondary ? `<div class="gz-advtile__sub">${escapeHtml(secondary)}</div>` : ""}
         </button>`;
     }).join("");
     return `
-      <div class="gz2-eyebrow gz2-eyebrow--section">${escapeHtml(title)}</div>
-      <div class="gz2-cards">${cards}</div>
+      <div class="gz-adv">
+        <div class="gz-adv__title">${escapeHtml(title)}</div>
+        <div class="gz-advtiles">${cards}</div>
+      </div>
     `;
   }
 

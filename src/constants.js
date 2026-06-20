@@ -71,7 +71,9 @@ export const DEFAULT_CONFIG = {
   entity_delai_reprise_tonte_apres_arrosage: "number.gazon_intelligent_delai_reprise_tonte_apres_arrosage",
   manual_action_service: "gazon_intelligent.start_manual_irrigation",
   manual_action_label: "Irrigation manuelle",
-  tap_action: { action: "more-info" },
+  // Pas d'action « globale » sur le fond de la carte : chaque zone utile (tuiles,
+  // scènes, repères) ouvre déjà la fiche de SON entité. Reste configurable.
+  tap_action: { action: "none" },
   hold_action: { action: "none" },
   double_tap_action: { action: "none" },
 };

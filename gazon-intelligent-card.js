@@ -2276,6 +2276,13 @@ const CARD_STYLES = String.raw`
         .gz2-evening__icon { font-size: 1.15em; line-height: 1; }
         .gz2-evening__text { line-height: 1.4; }
         .gz-scene { display: flex; gap: 18px; align-items: center; background: #E9F7EF; border: 1px solid #C9E9D6; border-radius: 18px; padding: 18px 20px; }
+        /* Zones cliquables (more-info par entité) : indices visuels discrets. */
+        .gz-scene--clickable { cursor: pointer; transition: transform .12s ease, box-shadow .12s ease; }
+        .gz-scene--clickable:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(31,107,58,0.10); }
+        .gz-scene--clickable:focus-visible { outline: 2px solid var(--gi-accent); outline-offset: 3px; }
+        .gz2-rep--clickable { cursor: pointer; transition: background .12s ease, border-color .12s ease; }
+        .gz2-rep--clickable:hover { border-color: color-mix(in srgb, var(--gi-accent) 45%, transparent); background: var(--gi-accent-soft); }
+        .gz2-rep--clickable:focus-visible { outline: 2px solid var(--gi-accent); outline-offset: 2px; }
         .gz-scene__art { flex: 0 0 132px; max-width: 132px; }
         .gz-scene__stage { position: relative; border-radius: 16px; overflow: hidden; --gz-sky-edge: #E9F7EF; }
         .gz-scene__sky { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; }
@@ -2663,7 +2670,9 @@ const DEFAULT_CONFIG = {
   entity_delai_reprise_tonte_apres_arrosage: "number.gazon_intelligent_delai_reprise_tonte_apres_arrosage",
   manual_action_service: "gazon_intelligent.start_manual_irrigation",
   manual_action_label: "Irrigation manuelle",
-  tap_action: { action: "more-info" },
+  // Pas d'action « globale » sur le fond de la carte : chaque zone utile (tuiles,
+  // scènes, repères) ouvre déjà la fiche de SON entité. Reste configurable.
+  tap_action: { action: "none" },
   hold_action: { action: "none" },
   double_tap_action: { action: "none" },
 };
@@ -8084,6 +8093,12 @@ console.info(
 
 
 
+// Identifiant d'entité pour rendre une zone cliquable (more-info), seulement si
+// l'entité existe réellement côté hass — sinon on n'ajoute pas le binding.
+function moreInfoId(card, key) {
+  return card._entity(key) ? card._entityId(key) : null;
+}
+
 function renderGz2Hero(eyebrow, title, sub = "", opts = {}) {
   const icon = opts.icon || null;
   const tone = opts.tone || "accent";
@@ -8945,6 +8960,7 @@ function renderProductsTab(card) {
     : (catalogue.hasProducts ? "Choisis un produit pour la prochaine intervention." : "Ajoute un produit dans le catalogue pour commencer.");
   const productsScene = renderPlayfulScene({
     variant: "product",
+    entityId: moreInfoId(card, "entity_catalogue_produits"),
     eyebrow: "Produits",
     title: prTitle,
     sentence: prSentence,
@@ -9011,6 +9027,7 @@ function renderInterventionTab(card) {
   }
   const interventionScene = renderPlayfulScene({
     variant: "task",
+    entityId: moreInfoId(card, "entity_prochaine_intervention"),
     eyebrow: "Intervention",
     title: interTodo ? "Une intervention à prévoir" : "Rien à prévoir",
     sentence: ui.summary || (interTodo ? "Un traitement est recommandé." : "Aucun traitement nécessaire pour le moment."),
@@ -9138,10 +9155,10 @@ function renderOverviewTab(card) {
     heroSub = "";
   }
   const reperes = [
-    { label: "Fenêtre", value: windowState.statusLabel },
-    { label: "Prochain arrosage", value: nextWatering.label },
-    { label: "Prochaine tonte", value: nextMowing.label },
-    { label: "Dernier arrosage", value: lastWatering.label },
+    { label: "Fenêtre", value: windowState.statusLabel, entityKey: "entity_fenetre_optimale" },
+    { label: "Prochain arrosage", value: nextWatering.label, entityKey: "entity_prochain_arrosage" },
+    { label: "Prochaine tonte", value: nextMowing.label, entityKey: "entity_prochaine_tonte" },
+    { label: "Dernier arrosage", value: lastWatering.label, entityKey: "entity_dernier_arrosage" },
   ];
 
   // --- Scène ludique Synthèse : la pelouse « savante » qui connaît tout ---
@@ -9159,6 +9176,7 @@ function renderOverviewTab(card) {
     : { icon: "mdi:eye-check-outline", text: "Je surveille tout pour toi" };
   const synthScene = renderPlayfulScene({
     variant: "synth",
+    entityId: moreInfoId(card, "entity_assistant"),
     eyebrow: "Aujourd'hui",
     title: synthTitle,
     sentence: titleText,
@@ -9182,12 +9200,18 @@ function renderOverviewTab(card) {
         ${renderGz2Hero("Conseil du jour", titleText, heroSub, { icon: "mdi:lightbulb-on-outline", tone: "accent" })}
 
         <div class="gz2-reperes" aria-label="Repères">
-          ${reperes.map((r) => `
-            <div class="gz2-rep">
+          ${reperes.map((r) => {
+            const eid = moreInfoId(card, r.entityKey);
+            const attrs = eid
+              ? ` data-more-info-entity="${escapeHtml(eid)}" role="button" tabindex="0" title="Voir le détail"`
+              : "";
+            return `
+            <div class="gz2-rep${eid ? " gz2-rep--clickable" : ""}"${attrs}>
               <div class="gz2-rep__label">${escapeHtml(r.label)}</div>
               <div class="gz2-rep__value">${escapeHtml(r.value || "—")}</div>
             </div>
-          `).join("")}
+          `;
+          }).join("")}
         </div>
 
         <div class="gz2-eyebrow">Essentiel</div>
@@ -9251,8 +9275,15 @@ function renderPlayfulScene(scene) {
         <div class="gz-kidtile__v">${escapeHtml(t.value || "—")}</div>
         ${t.sub ? `<div class="gz-kidtile__s">${escapeHtml(t.sub)}</div>` : ""}
       </div>`).join("");
+  // Scène cliquable : si une entité est fournie, toute la scène ouvre sa fiche
+  // (more-info), géré par le binding global [data-more-info-entity].
+  const eid = scene.entityId || null;
+  const sceneAttrs = eid
+    ? ` data-more-info-entity="${escapeHtml(eid)}" role="button" tabindex="0" title="Voir le détail"`
+    : "";
+  const sceneClickable = eid ? " gz-scene--clickable" : "";
   return `
-      <div class="gz-scene gz-scene--${escapeHtml(scene.variant || "water")}">
+      <div class="gz-scene gz-scene--${escapeHtml(scene.variant || "water")}${sceneClickable}"${sceneAttrs}>
         <div class="gz-scene__art"><div class="gz-scene__stage">${scene.backdrop || ""}${scene.mascot || ""}</div></div>
         <div class="gz-scene__msg">
           <div class="gz-scene__eyebrow">${escapeHtml(scene.eyebrow || "")}</div>
@@ -9755,10 +9786,10 @@ function renderWateringTab(card) {
   ].filter(Boolean);
 
   const reperes = [
-    { label: "Objectif", value: objectiveLabel },
-    { label: "Type", value: wateringTypeLabel },
-    { label: "Prochain arrosage", value: nextWatering.label },
-    { label: "Dernier arrosage", value: lastWatering.label },
+    { label: "Objectif", value: objectiveLabel, entityKey: "entity_objectif_arrosage" },
+    { label: "Type", value: wateringTypeLabel, entityKey: "entity_type_arrosage" },
+    { label: "Prochain arrosage", value: nextWatering.label, entityKey: "entity_prochain_arrosage" },
+    { label: "Dernier arrosage", value: lastWatering.label, entityKey: "entity_dernier_arrosage" },
   ];
   const heroTitle = heroNextText || irrigationSignal.summary || windowState.summary || "Irrigation";
   const heroSub = shouldShowHeroHint ? heroHintText : "";
@@ -9842,6 +9873,7 @@ function renderWateringTab(card) {
   const wxWater = card._weatherState();
   const playfulScene = renderPlayfulScene({
     variant: "water",
+    entityId: moreInfoId(card, "entity_prochain_arrosage"),
     eyebrow: "Arrosage",
     title: kid.title,
     sentence: kid.sentence,
@@ -9871,12 +9903,18 @@ function renderWateringTab(card) {
         ${renderWateringProgressSection(card, wateringProgress)}
 
         <div class="gz2-reperes" aria-label="Repères">
-          ${reperes.map((r) => `
-            <div class="gz2-rep">
+          ${reperes.map((r) => {
+            const eid = moreInfoId(card, r.entityKey);
+            const attrs = eid
+              ? ` data-more-info-entity="${escapeHtml(eid)}" role="button" tabindex="0" title="Voir le détail"`
+              : "";
+            return `
+            <div class="gz2-rep${eid ? " gz2-rep--clickable" : ""}"${attrs}>
               <div class="gz2-rep__label">${escapeHtml(r.label)}</div>
               <div class="gz2-rep__value">${escapeHtml(r.value || "—")}</div>
             </div>
-          `).join("")}
+          `;
+          }).join("")}
         </div>
 
         ${
@@ -10005,6 +10043,7 @@ function renderGazonTab(card) {
   const wxGazon = card._weatherState();
   const gazonScene = renderPlayfulScene({
     variant: "gazon",
+    entityId: moreInfoId(card, "entity_phase"),
     eyebrow: "Gazon",
     title: gzTitle,
     sentence: gzSentence,
@@ -10176,6 +10215,7 @@ function renderMowingTab(card) {
   const wxMow = card._weatherState();
   const mowScene = renderPlayfulScene({
     variant: "mow",
+    entityId: moreInfoId(card, "entity_prochaine_tonte"),
     eyebrow: "Tonte",
     title: mowTitle,
     sentence: mowSentence,
@@ -10236,6 +10276,7 @@ function renderConfigTab(card) {
   // --- Scène ludique Réglages : l'engrenage ---
   const configScene = renderPlayfulScene({
     variant: "config",
+    entityId: moreInfoId(card, "entity_switch_arrosage_automatique"),
     eyebrow: "Réglages",
     title: "Les réglages du jardin",
     sentence: "Touche une tuile pour ouvrir le contrôle dans Home Assistant.",

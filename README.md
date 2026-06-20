@@ -49,6 +49,7 @@ Le but est simple:
 - **mascottes réactives à la météo (0.10.5)** : décor animé derrière la mascotte (ciel jour/nuit, soleil à rayons, nuages qui dérivent, pluie/neige, étoiles, brume de canicule) selon la **température et la condition réelles** ; la mascotte Synthèse met des **lunettes de soleil** quand il fait beau/chaud, sue en canicule, etc. — animations respectant `prefers-reduced-motion`
 - **mode sombre natif (0.10.6)** : palette dédiée pour la refonte ludique (plus de plaques claires sur fond noir) qui suit le thème Home Assistant
 - **réserve « affichée » + rafraîchissement du soir probable (0.10.6)** : la jauge d'eau suit la descente progressive de la réserve selon le soleil, et la mascotte annonce un rafraîchissement du soir **probable** tant qu'il n'est pas encore déclenché
+- **clic par entité (0.10.6)** : tuiles, scènes/mascottes et repères ouvrent chacun la **fiche de leur entité** ; plus d'action « globale » surprenante sur le fond
 - **allègement interne (0.10.6)** : ~2 000 lignes de CSS et de code mort de l'ancien design retirées, le rendu actuel est inchangé
 - tuiles synthétiques compactes pour les signaux importants
 - support des cas multi-pelouse
@@ -275,12 +276,17 @@ entity_delai_reprise_tonte_apres_arrosage: number.gazon_intelligent_delai_repris
 manual_action_service: gazon_intelligent.start_manual_irrigation
 manual_action_label: Irrigation manuelle
 tap_action:
-  action: more-info
+  action: none
 hold_action:
   action: none
 double_tap_action:
   action: none
 ```
+
+> 💡 **Clic par entité** : chaque zone utile (tuiles chiffrées, scènes/mascottes de
+> chaque onglet, repères de la synthèse) ouvre directement la **fiche de son entité**
+> (more-info). Le fond de la carte ne déclenche donc plus d'action « globale » par
+> défaut (`tap_action: none`) — tu peux le réactiver en configurant `tap_action`.
 
 ## ⚙️ Options principales
 

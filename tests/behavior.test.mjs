@@ -88,20 +88,29 @@ test("repli d'action carte = entité assistant, jamais la météo", () => {
   assert.doesNotMatch(String(fallback), /^weather\./, "ne doit jamais retomber sur weather.*");
 });
 
-test("le tap_action carte dispatche un more-info sur l'assistant, pas la météo", () => {
+test("le fond de carte n'ouvre RIEN par défaut (pas d'action globale)", () => {
   const { el } = makeCard();
-  let detail = null;
-  el.addEventListener("hass-action", (ev) => {
-    detail = ev.detail;
+  assert.equal((el._config.tap_action || {}).action, "none", "tap_action par défaut = none");
+  let fired = false;
+  el.addEventListener("hass-action", () => {
+    fired = true;
   });
   el._performConfiguredAction("tap_action", el._defaultActionEntityId());
-  assert.ok(detail, "événement hass-action dispatché");
-  // Forme standard hass-action : l'entité cible est au niveau racine du config
-  // (à côté du sous-objet tap_action), c'est ce que lit le handleAction de HA.
-  const target = detail.config && detail.config.entity;
-  assert.equal(target, "sensor.gazon_intelligent_assistant");
-  assert.doesNotMatch(String(target), /^weather\./);
-  assert.equal((detail.config.tap_action || {}).action, "more-info");
+  assert.equal(fired, false, "aucune action globale n'est dispatchée sur le fond");
+});
+
+test("la scène (synthèse) est cliquable et ouvre la fiche de son entité", () => {
+  const { el } = makeCard();
+  const scene = el.shadowRoot.querySelector(".gz-scene[data-more-info-entity]");
+  assert.ok(scene, "scène cliquable rendue");
+  assert.equal(scene.getAttribute("data-more-info-entity"), "sensor.gazon_intelligent_assistant");
+  assert.ok(scene.classList.contains("gz-scene--clickable"));
+  let info = null;
+  el.addEventListener("hass-more-info", (ev) => {
+    info = ev.detail;
+  });
+  scene.click();
+  assert.equal(info && info.entityId, "sensor.gazon_intelligent_assistant", "clic scène → more-info de l'entité");
 });
 
 test("le rendu expose la nav gz2 et plus l'ancienne .tab-nav / .section-nav", () => {

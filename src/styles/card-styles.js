@@ -2276,6 +2276,13 @@ export const CARD_STYLES = String.raw`
         .gz2-evening__icon { font-size: 1.15em; line-height: 1; }
         .gz2-evening__text { line-height: 1.4; }
         .gz-scene { display: flex; gap: 18px; align-items: center; background: #E9F7EF; border: 1px solid #C9E9D6; border-radius: 18px; padding: 18px 20px; }
+        /* Zones cliquables (more-info par entité) : indices visuels discrets. */
+        .gz-scene--clickable { cursor: pointer; transition: transform .12s ease, box-shadow .12s ease; }
+        .gz-scene--clickable:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(31,107,58,0.10); }
+        .gz-scene--clickable:focus-visible { outline: 2px solid var(--gi-accent); outline-offset: 3px; }
+        .gz2-rep--clickable { cursor: pointer; transition: background .12s ease, border-color .12s ease; }
+        .gz2-rep--clickable:hover { border-color: color-mix(in srgb, var(--gi-accent) 45%, transparent); background: var(--gi-accent-soft); }
+        .gz2-rep--clickable:focus-visible { outline: 2px solid var(--gi-accent); outline-offset: 2px; }
         .gz-scene__art { flex: 0 0 132px; max-width: 132px; }
         .gz-scene__stage { position: relative; border-radius: 16px; overflow: hidden; --gz-sky-edge: #E9F7EF; }
         .gz-scene__sky { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; }

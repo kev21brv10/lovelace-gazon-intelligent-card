@@ -24,11 +24,17 @@ jobs:
       - name: Install JS dev dependencies
         run: npm ci
 
+      - name: Committed .gz decompresses to committed .js
+        run: python3 scripts/check_bundle_sync.py gazon-intelligent-card.js.gz
+
       - name: Build bundle
         run: python3 scripts/build.py
 
-      - name: Bundle committed in sync
-        run: git diff --exit-code -- gazon-intelligent-card.js gazon-intelligent-card.js.gz
+      - name: Bundle source in sync (text, deterministic)
+        # Le .js est une concaténation déterministe des sources ; le .gz est exclu
+        # car la compression gzip n'est pas reproductible octet pour octet d'une
+        # plateforme à l'autre (vérifié à l'étape précédente via décompression).
+        run: git diff --exit-code -- gazon-intelligent-card.js
 
       - name: JS syntax check
         run: node --check gazon-intelligent-card.js

@@ -1,6 +1,6 @@
 export const CARD_TYPE = "gazon-intelligent-card";
 export const CARD_NAME = "Gazon Intelligent Card";
-export const CARD_VERSION = "0.10.5";
+export const CARD_VERSION = "0.10.6";
 
 export const DEFAULT_CONFIG = {
   title: "Gazon Intelligent",
@@ -336,6 +336,12 @@ export const RENDER_SIGNATURE_ATTRS = {
     "reserve_minimale_mm",
     "depletion_mm",
     "depletion_ratio",
+    "et_elapsed_fraction",
+    "reserve_actuelle_affichee_mm",
+    "reserve_stock_affichee_mm",
+    "depletion_affichee_mm",
+    "depletion_ratio_affiche",
+    "evening_cooling_likely",
     "depletion_allowed_mm",
     "mad_ratio",
     "et0_mm",

@@ -163,8 +163,6 @@ export const CARD_STYLES = String.raw`
         }
 
         .gi-card,
-        .gi-panel,
-        .gi-tab,
         .gi-progress__bar {
           transition:
             transform var(--gi-motion-fast) var(--gi-ease-standard),
@@ -174,13 +172,6 @@ export const CARD_STYLES = String.raw`
             color var(--gi-motion-fast) var(--gi-ease-standard),
             box-shadow var(--gi-motion-fast) var(--gi-ease-standard),
             filter var(--gi-motion-fast) var(--gi-ease-standard);
-        }
-
-        .gi-row {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          min-width: 0;
         }
 
         .gi-icon {
@@ -238,108 +229,6 @@ export const CARD_STYLES = String.raw`
           transform: none;
         }
 
-        .gi-tabs,
-        .tab-nav,
-        .section-nav {
-          display: flex;
-          gap: var(--gi-nav-gap);
-          flex-wrap: nowrap;
-          overflow-x: auto;
-          scroll-behavior: smooth;
-          scroll-padding-inline: 10px;
-          -webkit-overflow-scrolling: touch;
-          box-sizing: border-box;
-          max-width: 100%;
-          scrollbar-width: none;
-          padding-inline: 10px;
-          padding-bottom: 2px;
-          margin: var(--gi-nav-margin);
-          scroll-snap-type: x proximity;
-        }
-
-        @media (min-width: 760px) {
-          .gi-tabs,
-          .tab-nav,
-          .section-nav {
-            flex-wrap: wrap;
-            overflow-x: visible;
-            scroll-snap-type: none;
-          }
-
-          .gi-tab,
-          .tab-nav__item,
-          .section-nav__item {
-            min-width: 0;
-          }
-        }
-
-        .gi-tabs::-webkit-scrollbar,
-        .tab-nav::-webkit-scrollbar,
-        .section-nav::-webkit-scrollbar {
-          display: none;
-        }
-
-        .gi-tab,
-        .tab-nav__item,
-        .section-nav__item {
-          position: relative;
-          display: flex;
-          align-items: center;
-          gap: var(--gi-nav-item-gap);
-          flex: 0 0 auto;
-          min-width: 0;
-          border: 1px solid var(--gi-surface-border);
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 20%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, white) 100%);
-          color: var(--secondary-text-color);
-          border-radius: 12px;
-          padding: var(--gi-nav-item-padding);
-          font-size: var(--gi-font-xs);
-          font-weight: 700;
-          line-height: 1.15;
-          cursor: pointer;
-          user-select: none;
-          -webkit-tap-highlight-color: transparent;
-          box-shadow: var(--gi-surface-shadow);
-          transition:
-            transform var(--gi-motion-fast) var(--gi-ease-standard),
-            background-color var(--gi-motion-fast) var(--gi-ease-standard),
-            color var(--gi-motion-fast) var(--gi-ease-standard),
-            border-color var(--gi-motion-fast) var(--gi-ease-standard),
-            box-shadow var(--gi-motion-fast) var(--gi-ease-standard);
-          scroll-snap-align: start;
-          overflow: hidden;
-        }
-
-        .gi-tab::before,
-        .tab-nav__item::before,
-        .section-nav__item::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background:
-            radial-gradient(circle at 18% 20%, color-mix(in srgb, var(--gi-tab-companion) 22%, transparent) 0%, transparent 28%),
-            linear-gradient(135deg, color-mix(in srgb, var(--gi-tab-accent) 16%, transparent) 0%, transparent 100%);
-          opacity: 0;
-          transition: opacity var(--gi-motion-fast) var(--gi-ease-standard);
-          pointer-events: none;
-        }
-
-        .gi-tab:hover,
-        .tab-nav__item:hover,
-        .section-nav__item:hover {
-          background: color-mix(in srgb, var(--secondary-background-color) 52%, var(--gi-tab-accent) 48%);
-          border-color: var(--gi-surface-border-strong);
-          box-shadow: var(--gi-surface-shadow-strong);
-          transform: translateY(-1px);
-        }
-
-        .gi-tab:hover::before,
-        .tab-nav__item:hover::before,
-        .section-nav__item:hover::before {
-          opacity: 1;
-        }
-
         .gi-tab .gi-icon,
         .tab-nav__item .gi-icon,
         .section-nav__item .gi-icon {
@@ -347,32 +236,7 @@ export const CARD_STYLES = String.raw`
           height: 18px;
         }
 
-        .gi-tab--active,
-        .tab-nav__item--active,
-        .section-nav__item--active {
-          color: var(--primary-text-color);
-          border-color: var(--gi-surface-border-strong);
-          background:
-            radial-gradient(circle at 16% 18%, color-mix(in srgb, var(--gi-tab-companion) 18%, transparent) 0%, transparent 24%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 48%, transparent) 0%, transparent 100%),
-            color-mix(in srgb, var(--secondary-background-color) 94%, white);
-          box-shadow:
-            0 12px 30px rgba(0, 0, 0, 0.16),
-            0 0 0 1px color-mix(in srgb, var(--gi-tab-glow-color) 28%, transparent),
-            0 0 34px color-mix(in srgb, var(--gi-tab-glow-color) 20%, transparent),
-            inset 0 1px 0 rgba(255, 255, 255, 0.06);
-          transform: translateY(-1px) scale(1.01);
-          font-weight: 700;
-        }
-
-        .gi-tab--active::before,
-        .tab-nav__item--active::before,
-        .section-nav__item--active::before {
-          opacity: 1;
-        }
-
-        /* Onglets « ludiques » — pastilles douces vertes, raccord avec le thème enfant */
-        .tab-nav {
+        /* Onglets « ludiques » — pastilles douces vertes{
           gap: 8px;
           border-bottom: none;
           padding: 6px;
@@ -384,56 +248,8 @@ export const CARD_STYLES = String.raw`
           border-radius: 999px;
         }
 
-        .tab-nav .tab-nav__item {
-          border: 1px solid transparent;
-          border-radius: 999px;
-          background: none;
-          box-shadow: none;
-          color: #4f7a64;
-          padding: 8px 16px;
-          margin-bottom: 0;
-          font-weight: 700;
-          font-size: var(--gi-font-sm);
-          transform: none;
-          overflow: visible;
-          transition:
-            background-color .18s ease,
-            color .18s ease,
-            border-color .18s ease,
-            box-shadow .18s ease;
-        }
-
-        .tab-nav .tab-nav__item::before {
-          content: none;
-        }
-
         .tab-nav .tab-nav__item .gi-icon {
           display: none;
-        }
-
-        .tab-nav .tab-nav__item:hover {
-          background: #FFFFFF;
-          box-shadow: none;
-          transform: none;
-          color: #2E8B57;
-          border-color: #D7EEE0;
-        }
-
-        .tab-nav .tab-nav__item--active {
-          background: #FFFFFF;
-          box-shadow: 0 4px 12px rgba(46, 139, 87, 0.16);
-          transform: none;
-          color: #1D6B3A;
-          border-color: #BFE6CE;
-        }
-
-        .tab-panel,
-        .gi-panel {
-          display: flex;
-          flex-direction: column;
-          gap: var(--gi-space-4);
-          animation: gi-fade-up var(--gi-motion-fast) var(--gi-ease-soft);
-          will-change: transform, opacity;
         }
 
         .tab-panel > * {
@@ -445,10 +261,7 @@ export const CARD_STYLES = String.raw`
         .tab-panel > *:nth-child(3) { animation-delay: 80ms; }
         .tab-panel > *:nth-child(4) { animation-delay: 120ms; }
         .tab-panel > *:nth-child(5) { animation-delay: 160ms; }
-
-        .tab-panel__hero,
-        .tab-panel__section,
-        .tab-panel__block {
+        .tab-panel__section{
           display: flex;
           flex-direction: column;
           border: 1px solid var(--gi-surface-border);
@@ -462,34 +275,6 @@ export const CARD_STYLES = String.raw`
             background-color var(--gi-motion-fast) var(--gi-ease-standard),
             box-shadow var(--gi-motion-fast) var(--gi-ease-standard);
         }
-
-        .tab-panel__hero {
-          gap: 10px;
-          border-color: var(--gi-surface-border-strong);
-          background: var(--gi-surface-fill-accent);
-          box-shadow: inset 3px 0 0 var(--gi-accent);
-        }
-
-        .tab-panel--intervention .tab-panel__hero {
-          gap: 10px;
-        }
-
-        .tab-panel--intervention .tab-panel__hero-next {
-          font-size: var(--gi-font-xl);
-          font-weight: 900;
-          line-height: 1.18;
-        }
-
-        .tab-panel--intervention .tab-panel__hero-hint {
-          max-width: 68ch;
-        }
-
-        .tab-panel__hero--pulse {
-          animation: gazonPulseSoft 2.8s ease-in-out infinite;
-        }
-
-        .tab-panel__hero-top,
-        .tab-panel__header,
         .tab-panel__section-head {
           display: flex;
           flex-direction: var(--gi-inline-direction);
@@ -502,9 +287,6 @@ export const CARD_STYLES = String.raw`
           border-bottom: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
           position: relative;
         }
-
-        .tab-panel__hero-top::before,
-        .tab-panel__header::before,
         .tab-panel__section-head::before {
           content: "";
           position: absolute;
@@ -517,57 +299,18 @@ export const CARD_STYLES = String.raw`
           opacity: 0.92;
           pointer-events: none;
         }
-
-        .tab-panel__hero-summary,
-        .tab-panel__title,
-        .tab-panel__section-summary,
-        .tab-panel__block-value {
+        .tab-panel__section-summary{
           min-width: 0;
           overflow-wrap: anywhere;
         }
-
-        .tab-panel__hero-summary {
-          font-size: var(--gi-label-size);
-          text-transform: uppercase;
-          letter-spacing: var(--gi-label-spacing);
-          font-weight: var(--gi-weight-medium);
-          line-height: 1.2;
-          color: var(--secondary-text-color);
-        }
-
-        .tab-panel__hero-next,
-        .tab-panel__hero-hint,
-        .tab-panel__block-hint,
-        .tab-panel__section-hint,
         .tab-panel__section-meta,
-        .tab-panel__section-title,
         .tab-panel__eyebrow,
-        .tab-panel__stat-secondary,
         .tab-panel__empty {
           color: var(--secondary-text-color);
         }
-
-        .tab-panel__hero-next,
-        .tab-panel__hero-hint,
-        .tab-panel__block-hint,
-        .tab-panel__section-hint,
-        .tab-panel__header-hint,
-        .tab-panel__stat-secondary,
         .tab-panel__empty {
           font-size: var(--gi-font-sm);
           line-height: var(--gi-body-line);
-        }
-
-        .tab-panel__hero-next {
-          font-size: var(--gi-font-2xl);
-          font-weight: var(--gi-weight-medium);
-          line-height: var(--gi-tight-line);
-          color: var(--primary-text-color);
-          letter-spacing: -0.01em;
-        }
-
-        .tab-panel__hero-hint {
-          max-width: 72ch;
         }
 
         .tab-panel__section {
@@ -575,19 +318,6 @@ export const CARD_STYLES = String.raw`
           flex-direction: column;
           gap: 10px;
           border-color: var(--gi-surface-border);
-        }
-
-        .tab-panel__section--overview-facts,
-        .tab-panel__section--mowing-summary,
-        .tab-panel__section--intervention-overview,
-        .tab-panel__section--intervention-technical {
-          gap: 8px;
-        }
-
-        .tab-panel--overview .tab-panel__summary-list {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px;
         }
 
         .tab-panel--overview .tab-panel__summary-row {
@@ -612,47 +342,6 @@ export const CARD_STYLES = String.raw`
 
         .tab-panel--overview .tab-panel__summary-row:first-child {
           padding-top: 12px;
-        }
-
-        .tab-panel__history-foldout {
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 12%, var(--divider-color));
-          border-radius: 20px;
-          overflow: hidden;
-        }
-
-        .tab-panel__history-foldout[open] {
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 18%, var(--divider-color));
-        }
-
-        .tab-panel__history-foldout-summary {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          padding: 12px 14px;
-          cursor: pointer;
-          list-style: none;
-          user-select: none;
-        }
-
-        .tab-panel__history-foldout-summary::-webkit-details-marker {
-          display: none;
-        }
-
-        .tab-panel__history-foldout-head {
-          align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-        }
-
-        .tab-panel__history-foldout-body {
-          padding: 0 14px 14px;
-        }
-
-        .tab-panel__history-rail {
-          gap: 10px;
-          border: 1px solid #D7EEE0;
-          border-radius: 20px;
-          overflow: hidden;
         }
 
         .tab-panel__history-inline {
@@ -733,14 +422,6 @@ export const CARD_STYLES = String.raw`
           margin-top: 1px;
         }
 
-        .tab-panel__decision-strip--overview {
-          margin-top: 2px;
-          display: grid !important;
-          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-          gap: 22px 28px;
-          padding: 4px 4px 8px;
-        }
-
         .tab-panel__decision-strip--overview .gi-pill {
           width: 100%;
           min-width: 0;
@@ -761,17 +442,6 @@ export const CARD_STYLES = String.raw`
         .tab-panel__decision-strip--overview .gi-pill__value {
           font-size: var(--gi-font-lg);
           color: var(--primary-text-color);
-        }
-
-        .tab-panel__history-foldout-preview {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-          gap: 8px;
-          margin-top: 2px;
-        }
-
-        .tab-panel__history-foldout-preview .tab-panel__summary-list {
-          display: contents;
         }
 
         .tab-panel__history-foldout-preview .tab-panel__summary-row {
@@ -797,32 +467,11 @@ export const CARD_STYLES = String.raw`
           line-height: 1.28;
         }
 
-        .tab-panel__section-title {
-          font-size: var(--gi-label-size);
-          text-transform: uppercase;
-          letter-spacing: var(--gi-label-spacing);
-          line-height: 1.15;
-        }
-
-        .tab-panel__header-hint {
-          margin-top: 4px;
-          color: var(--secondary-text-color);
-          font-size: var(--gi-font-xs);
-          line-height: var(--gi-body-line);
-        }
-
         .tab-panel__section-summary {
           font-size: var(--gi-font-md);
           font-weight: 750;
           line-height: 1.28;
           letter-spacing: -0.01em;
-        }
-
-        .tab-panel__summary-list {
-          display: flex;
-          flex-direction: column;
-          gap: 0;
-          min-width: 0;
         }
 
         .tab-panel__summary-row {
@@ -911,130 +560,6 @@ export const CARD_STYLES = String.raw`
           overflow-wrap: anywhere;
         }
 
-        .tab-panel__field {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          min-width: 0;
-        }
-
-        .tab-panel__field-label {
-          font-size: var(--gi-font-xxs);
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          color: var(--secondary-text-color);
-        }
-
-        .tab-panel__workflow {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 0;
-        }
-
-        .tab-panel__workflow-step {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          min-width: 0;
-          padding: 6px 10px;
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 10%, var(--gi-surface-border));
-          border-radius: 14px;
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 7%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, black) 100%);
-          box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
-          color: var(--secondary-text-color);
-          font-size: 0.64rem;
-          font-weight: 700;
-          letter-spacing: 0.02em;
-          text-transform: uppercase;
-        }
-
-        .tab-panel__workflow-step--active {
-          color: var(--primary-text-color);
-          border-color: var(--gi-surface-border-strong);
-        }
-
-        .tab-panel__workflow-step--done {
-          color: var(--primary-text-color);
-          border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 30%, var(--gi-surface-border-strong));
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 9%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 96%, black) 100%);
-        }
-
-        .tab-panel__workflow-index {
-          display: inline-grid;
-          place-items: center;
-          width: 18px;
-          height: 18px;
-          border-radius: 999px;
-          background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
-          color: var(--primary-text-color);
-          font-size: 10px;
-          font-weight: 900;
-          flex: none;
-        }
-
-        .tab-panel__workflow-connector {
-          flex: 1 1 auto;
-          height: 1px;
-          border-radius: 999px;
-          background: linear-gradient(90deg, color-mix(in srgb, var(--gazon-section-accent) 22%, transparent), color-mix(in srgb, var(--gazon-section-accent) 6%, transparent));
-          min-width: 12px;
-        }
-
-        .tab-panel__workflow-label {
-          white-space: nowrap;
-        }
-
-        .tab-panel__intervention-workflow {
-          gap: 10px;
-        }
-
-        .tab-panel__decision-strip {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          padding: 0 2px;
-        }
-
-        .tab-panel__intervention-layout {
-          display: grid;
-          grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-          gap: 12px;
-          align-items: stretch;
-        }
-
-        .tab-panel__intervention-card {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          min-width: 0;
-          padding: 14px 15px;
-          border-radius: 20px;
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 10%, var(--divider-color));
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 96%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
-          box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.04),
-            0 8px 18px rgba(0, 0, 0, 0.10);
-        }
-
-        .tab-panel__intervention-card--picker {
-          border-color: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 18%, var(--divider-color));
-          background:
-            radial-gradient(circle at 10% 12%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 7%, transparent) 0%, transparent 24%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 4%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
-        }
-
-        .tab-panel__intervention-card--action {
-          justify-content: center;
-          border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 18%, var(--divider-color));
-          background:
-            radial-gradient(circle at 8% 12%, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 6%, transparent) 0%, transparent 24%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 3%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 93%, black) 100%);
-        }
-
         .tab-panel__intervention-card .tab-panel__section-head {
           margin-bottom: 0;
         }
@@ -1043,17 +568,11 @@ export const CARD_STYLES = String.raw`
           font-size: var(--gi-font-sm);
         }
 
-        .tab-panel__intervention-card .tab-panel__section-hint {
-          font-size: var(--gi-font-xs);
-        }
-
-        .tab-panel__intervention-card--picker .tab-panel__section-summary,
-        .tab-panel__intervention-card--picker .tab-panel__section-hint {
+        .tab-panel__intervention-card--picker .tab-panel__section-summary{
           color: color-mix(in srgb, var(--primary-text-color) 88%, var(--gazon-water-color, #44c8ea));
         }
 
-        .tab-panel__intervention-card--action .tab-panel__section-summary,
-        .tab-panel__intervention-card--action .tab-panel__section-hint {
+        .tab-panel__intervention-card--action .tab-panel__section-summary{
           color: color-mix(in srgb, var(--primary-text-color) 88%, var(--gazon-success-color, #4fc38c));
         }
 
@@ -1114,89 +633,6 @@ export const CARD_STYLES = String.raw`
           overflow-wrap: anywhere;
         }
 
-        .tab-panel__intervention-card--action .tab-panel__cta {
-          width: 100%;
-          min-height: 76px;
-          border-radius: 14px;
-        }
-
-        .tab-panel__select-shell {
-          position: relative;
-          display: flex;
-          align-items: center;
-          min-width: 0;
-          border: 1px solid color-mix(in srgb, var(--gazon-water-color, #44c8ea) 16%, var(--gi-surface-border-strong));
-          border-radius: 16px;
-          padding: 7px 12px 7px 10px;
-          background:
-            radial-gradient(circle at 18% 50%, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 7%, transparent) 0%, transparent 16%),
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 97%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 92%, black) 100%);
-          box-shadow: var(--gi-surface-shadow);
-          gap: 10px;
-          min-height: 52px;
-        }
-
-        .tab-panel__select-prefix {
-          display: inline-grid;
-          place-items: center;
-          width: 30px;
-          height: 30px;
-          border-radius: 10px;
-          background: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 12%, transparent);
-          color: var(--primary-text-color);
-          flex: none;
-        }
-
-        .tab-panel__select {
-          appearance: none;
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          width: 100%;
-          min-width: 0;
-          min-height: 32px;
-          border: 0;
-          border-radius: 0;
-          padding: 4px 34px 4px 0;
-          background: transparent;
-          color: var(--primary-text-color);
-          box-shadow: none;
-          font: inherit;
-          font-size: var(--gi-font-sm);
-          font-weight: 700;
-          line-height: 1.2;
-          cursor: pointer;
-          outline: none;
-        }
-
-        .tab-panel__select:disabled {
-          cursor: not-allowed;
-          opacity: 0.65;
-        }
-
-        .tab-panel__select:focus-visible {
-          border-color: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 42%, var(--gi-surface-border-strong));
-          box-shadow:
-            0 0 0 2px color-mix(in srgb, var(--gazon-water-color, #44c8ea) 24%, transparent),
-            var(--gi-surface-shadow-strong);
-        }
-
-        .tab-panel__intervention-card--action .tab-panel__cta {
-          letter-spacing: 0.015em;
-        }
-
-        .tab-panel__select-chevron {
-          position: absolute;
-          inset-inline-end: 12px;
-          pointer-events: none;
-          color: var(--secondary-text-color);
-          opacity: 0.88;
-        }
-
-        .tab-panel__section--intervention-picker,
-        .tab-panel__section--application-history {
-          gap: 10px;
-        }
-
         .tab-panel__debug-foldout[open] {
           border-color: color-mix(in srgb, var(--gazon-section-accent) 16%, var(--divider-color));
         }
@@ -1232,22 +668,6 @@ export const CARD_STYLES = String.raw`
           padding: 0 14px 14px;
         }
 
-        .tab-panel__grid {
-          display: grid;
-          grid-template-columns: var(--gi-grid-template);
-          gap: var(--gi-grid-gap);
-          align-items: stretch;
-          grid-auto-rows: 1fr;
-          align-content: start;
-        }
-
-        .tab-panel__grid--priority,
-        .tab-panel__grid--featured,
-        .tab-panel__grid--decision-board {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          grid-auto-flow: dense;
-        }
-
         .tab-panel__grid--priority > *,
         .tab-panel__grid--featured > *,
         .tab-panel__grid--decision-board > * {
@@ -1272,13 +692,6 @@ export const CARD_STYLES = String.raw`
           font-size: var(--gi-font-xl);
         }
 
-        .tab-panel__facts-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: var(--gi-space-3);
-          align-items: stretch;
-        }
-
         .tab-panel__facts-grid > * {
           min-width: 0;
         }
@@ -1293,230 +706,8 @@ export const CARD_STYLES = String.raw`
           min-height: 96px;
         }
 
-        .tab-panel__metric-rail {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        .tab-panel__metric-row {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) auto;
-          align-items: center;
-          gap: 12px;
-          width: 100%;
-          min-width: 0;
-          padding: 12px 14px;
-          border: 1px solid color-mix(in srgb, var(--gi-surface-border) 88%, transparent);
-          border-radius: 18px;
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 98%, white) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
-          box-shadow:
-            inset 0 1px 0 rgba(255,255,255,0.05),
-            0 6px 16px rgba(0,0,0,0.06);
-          text-align: left;
-          box-sizing: border-box;
-        }
-
-        button.tab-panel__metric-row {
-          cursor: pointer;
-          font: inherit;
-          color: inherit;
-          appearance: none;
-          -webkit-appearance: none;
-        }
-
-        button.tab-panel__metric-row:hover {
-          transform: translateY(-1px);
-          border-color: var(--gi-surface-border-strong);
-          box-shadow:
-            inset 0 1px 0 rgba(255,255,255,0.05),
-            0 10px 22px rgba(0,0,0,0.10);
-        }
-
-        button.tab-panel__metric-row:focus-visible {
-          outline: none;
-          box-shadow:
-            0 0 0 2px color-mix(in srgb, var(--gazon-card-accent) 24%, transparent),
-            inset 0 1px 0 rgba(255,255,255,0.05),
-            0 8px 18px rgba(0,0,0,0.08);
-        }
-
-        .tab-panel__metric-row--danger {
-          border-color: color-mix(in srgb, var(--gazon-danger-color) 24%, var(--gi-surface-border));
-        }
-
-        .tab-panel__metric-row--warning {
-          border-color: color-mix(in srgb, var(--gazon-warning-color) 24%, var(--gi-surface-border));
-        }
-
-        .tab-panel__metric-row--success {
-          border-color: color-mix(in srgb, var(--gazon-success-color) 24%, var(--gi-surface-border));
-        }
-
-        .tab-panel__metric-row--accent {
-          border-color: color-mix(in srgb, var(--gazon-accent-tone-color) 24%, var(--gi-surface-border));
-        }
-
-        .tab-panel__metric-rail--mowing .tab-panel__metric-row,
-        .tab-panel__metric-rail--gazon .tab-panel__metric-row {
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 28%, var(--gi-surface-border));
-          background:
-            radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--gazon-section-accent) 10%, transparent) 0%, transparent 22%),
-            radial-gradient(circle at 10% 82%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 8%, transparent) 0%, transparent 22%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 7%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
-        }
-
-        .tab-panel__metric-rail--mowing .tab-panel__metric-row--success,
-        .tab-panel__metric-rail--gazon .tab-panel__metric-row--success {
-          background:
-            radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 16%, transparent) 0%, transparent 22%),
-            radial-gradient(circle at 10% 82%, color-mix(in srgb, var(--gazon-section-accent) 10%, transparent) 0%, transparent 22%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 9%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
-        }
-
-        .tab-panel__metric-rail--mowing .tab-panel__metric-row--warning,
-        .tab-panel__metric-rail--gazon .tab-panel__metric-row--warning {
-          background:
-            radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 16%, transparent) 0%, transparent 22%),
-            radial-gradient(circle at 10% 82%, color-mix(in srgb, var(--gazon-section-accent) 10%, transparent) 0%, transparent 22%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 9%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
-        }
-
-        .tab-panel__metric-rail--mowing .tab-panel__metric-row--danger,
-        .tab-panel__metric-rail--gazon .tab-panel__metric-row--danger,
-        .tab-panel__metric-rail--mowing .tab-panel__metric-row--critical,
-        .tab-panel__metric-rail--gazon .tab-panel__metric-row--critical {
-          background:
-            radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--gazon-danger-color, #f15f69) 14%, transparent) 0%, transparent 22%),
-            radial-gradient(circle at 10% 82%, color-mix(in srgb, var(--gazon-section-accent) 8%, transparent) 0%, transparent 22%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-danger-color, #f15f69) 8%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
-        }
-
-        .tab-panel__metric-rail--mowing .tab-panel__metric-row--accent,
-        .tab-panel__metric-rail--gazon .tab-panel__metric-row--accent {
-          background:
-            radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--gazon-accent-tone-color, #44c8ea) 16%, transparent) 0%, transparent 22%),
-            radial-gradient(circle at 10% 82%, color-mix(in srgb, var(--gazon-section-accent) 10%, transparent) 0%, transparent 22%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-accent-tone-color, #44c8ea) 9%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
-        }
-
-        .tab-panel__metric-rail--mowing .tab-panel__metric-row--neutral,
-        .tab-panel__metric-rail--gazon .tab-panel__metric-row--neutral {
-          background:
-            radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--gazon-section-accent) 14%, transparent) 0%, transparent 22%),
-            radial-gradient(circle at 10% 82%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 10%, transparent) 0%, transparent 22%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 8%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
-        }
-
-        .tab-panel__metric-main {
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .tab-panel__metric-head {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          flex-wrap: wrap;
-          gap: 12px;
-          min-width: 0;
-        }
-
-        .tab-panel__metric-label {
-          font-size: var(--gi-label-size);
-          text-transform: uppercase;
-          letter-spacing: var(--gi-label-spacing);
-          color: var(--secondary-text-color);
-          line-height: 1.14;
-          flex: 0 1 auto;
-          min-width: 0;
-        }
-
-        .tab-panel__metric-value {
-          font-size: var(--gi-font-md);
-          font-weight: 800;
-          line-height: 1.18;
-          color: var(--primary-text-color);
-          text-align: right;
-          flex: 0 1 auto;
-          min-width: 0;
-          white-space: normal;
-          overflow-wrap: anywhere;
-        }
-
-        .tab-panel__metric-note {
-          font-size: var(--gi-font-xs);
-          line-height: var(--gi-body-line);
-          color: var(--secondary-text-color);
-          min-width: 0;
-          overflow-wrap: anywhere;
-        }
-
-        .tab-panel__metric-icon {
-          width: 22px;
-          height: 22px;
-          display: grid;
-          place-items: center;
-          color: color-mix(in srgb, var(--gazon-section-accent) 72%, var(--primary-text-color));
-          opacity: 0.92;
-        }
-
-        .tab-panel__grid--config {
-          grid-template-columns: var(--gi-grid-template);
-          gap: var(--gi-grid-gap);
-        }
-
-        .tab-panel__grid--products {
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        }
-
-        .tab-panel__catalogue-slider {
-          min-width: 0;
-        }
-
-        .tab-panel__card-slider {
-          min-width: 0;
-          overflow-x: auto;
-          overflow-y: hidden;
-          padding-bottom: 2px;
-          scrollbar-width: thin;
-          scrollbar-color: color-mix(in srgb, var(--gazon-section-accent) 24%, transparent) transparent;
-        }
-
-        .tab-panel__card-slider::-webkit-scrollbar {
-          height: 7px;
-        }
-
-        .tab-panel__card-slider::-webkit-scrollbar-thumb {
-          border-radius: 999px;
-          background: color-mix(in srgb, var(--gazon-section-accent) 22%, transparent);
-        }
-
-        .tab-panel__card-slider-track {
-          display: grid;
-          grid-auto-flow: column;
-          grid-auto-columns: minmax(220px, 1fr);
-          gap: 10px;
-          align-items: stretch;
-        }
-
-        .tab-panel__card-slider-item {
-          min-width: 0;
-        }
-
         .tab-panel__card-slider-item > * {
           height: 100%;
-        }
-
-        .tab-panel__card-slider--catalogue .tab-panel__card-slider-track {
-          grid-auto-columns: minmax(240px, 280px);
-        }
-
-        .tab-panel__card-slider--config .tab-panel__card-slider-track {
-          grid-auto-columns: minmax(260px, 320px);
         }
 
         .tab-panel__card-slider--config .gi-card-core--stat {
@@ -1537,50 +728,8 @@ export const CARD_STYLES = String.raw`
           -webkit-line-clamp: 2;
         }
 
-        .tab-panel__products-layout {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
-          gap: 12px;
-          align-items: start;
-        }
-
         .tab-panel__products-layout > .tab-panel__section {
           min-width: 0;
-        }
-
-        .tab-panel__products-layout .tab-panel__section--products-scope {
-          grid-column: 1 / -1;
-        }
-
-        .tab-panel--products .tab-panel__hero {
-          position: relative;
-          overflow: hidden;
-        }
-
-        .tab-panel--products .tab-panel__hero::after {
-          content: "";
-          position: absolute;
-          inset-inline: 0;
-          inset-block-end: 0;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 45%, transparent), transparent);
-          pointer-events: none;
-        }
-
-        .tab-panel--products .tab-panel__hero-next {
-          max-width: 58ch;
-        }
-
-        .tab-panel--products .tab-panel__hero-hint {
-          max-width: 66ch;
-        }
-
-        .tab-panel--products .tab-panel__section--catalogue-reference {
-          gap: 8px;
-        }
-
-        .tab-panel--products .tab-panel__grid--products {
-          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         }
 
         .tab-panel--products .tab-panel__section--catalogue-reference .tab-panel__section-summary,
@@ -1589,42 +738,9 @@ export const CARD_STYLES = String.raw`
           line-height: 1.16;
         }
 
-        .tab-panel--products .tab-panel__section--catalogue-reference .tab-panel__section-hint,
-        .tab-panel--products .tab-panel__section--application-history .tab-panel__section-hint {
-          font-size: var(--gi-font-xs);
-          line-height: 1.24;
-        }
-
         .tab-panel--products .tab-panel__section--catalogue-reference .tab-panel__section-head,
         .tab-panel--products .tab-panel__section--application-history .tab-panel__section-head {
           margin-bottom: 2px;
-        }
-
-        .tab-panel__grid--featured {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .tab-panel__grid--config-top,
-        .tab-panel__grid--config-debits {
-          grid-template-columns: var(--gi-grid-template);
-          grid-auto-rows: 1fr;
-          align-content: start;
-        }
-
-        .tab-panel__grid--config-top {
-          gap: var(--gi-grid-gap);
-        }
-
-        .tab-panel__grid--config-debits {
-          gap: var(--gi-grid-gap);
-        }
-
-        .tab-panel__section--config-debits {
-          gap: 10px;
-        }
-
-        .tab-panel__section--config-quick {
-          gap: 10px;
         }
 
         .tab-panel--config .tab-panel__section {
@@ -1636,30 +752,12 @@ export const CARD_STYLES = String.raw`
           border-color: color-mix(in srgb, var(--gazon-section-accent) 28%, var(--divider-color));
         }
 
-        .tab-panel--config .tab-panel__section-head,
-        .tab-panel--config .tab-panel__header {
+        .tab-panel--config .tab-panel__section-head{
           border-bottom-color: color-mix(in srgb, var(--gazon-section-accent) 18%, transparent);
-        }
-
-        .tab-panel--config .tab-panel__section-title {
-          color: color-mix(in srgb, var(--primary-text-color) 84%, var(--gazon-section-accent));
-        }
-
-        .tab-panel__section--products {
-          gap: 6px;
         }
 
         .tab-panel__section--products .gi-card-core--stat {
           min-height: 58px;
-        }
-
-        .tab-panel__section--application-history,
-        .tab-panel__section--catalogue-reference {
-          min-height: 0;
-        }
-
-        .tab-panel--products .tab-panel__card-slider--catalogue .tab-panel__card-slider-track {
-          grid-auto-columns: minmax(210px, 240px);
         }
 
         .tab-panel--products .tab-panel__card-slider--catalogue .gi-card-core--stat {
@@ -1681,72 +779,12 @@ export const CARD_STYLES = String.raw`
           line-height: 1.2;
         }
 
-        .tab-panel--intervention .tab-panel__hero {
-          position: relative;
-          overflow: hidden;
-        }
-
-        .tab-panel--intervention .tab-panel__hero::after {
-          content: "";
-          position: absolute;
-          inset-inline: 0;
-          inset-block-end: 0;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gazon-success-color, #4fc38c) 24%, transparent), transparent);
-          pointer-events: none;
-        }
-
-        .tab-panel--intervention .tab-panel__hero-next {
-          max-width: 62ch;
-        }
-
-        .tab-panel--intervention .tab-panel__hero-hint {
-          max-width: 66ch;
-        }
-
-        .tab-panel--intervention .tab-panel__decision-strip {
-          padding: 10px 12px;
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 10%, var(--divider-color));
-          border-radius: 18px;
-          background:
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 2%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, white) 100%);
-        }
-
-        .tab-panel--intervention .tab-panel__intervention-layout {
-          gap: 14px;
-        }
-
-        .tab-panel__intervention-layout--workflow {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .tab-panel__intervention-layout--workflow .tab-panel__intervention-card--proposed {
-          grid-column: 1 / -1;
-        }
-
-        .tab-panel__intervention-card--proposed {
-          border-color: color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 18%, var(--divider-color));
-          background:
-            radial-gradient(circle at 8% 14%, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 6%, transparent) 0%, transparent 24%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 3%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 94%, black) 100%);
-        }
-
-        .tab-panel__intervention-card--proposed .tab-panel__section-summary,
-        .tab-panel__intervention-card--proposed .tab-panel__section-hint {
+        .tab-panel__intervention-card--proposed .tab-panel__section-summary{
           color: color-mix(in srgb, var(--primary-text-color) 90%, var(--gazon-warning-color, #d6a34f));
         }
 
         .tab-panel__intervention-card--proposed .tab-panel__section-meta {
           color: color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 42%, var(--secondary-text-color));
-        }
-
-        .tab-panel__chips {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          align-content: flex-start;
-          gap: 8px;
-          margin-top: 2px;
         }
 
         .tab-progress {
@@ -1825,183 +863,6 @@ export const CARD_STYLES = String.raw`
           color: var(--secondary-text-color);
         }
 
-        .tab-panel__section--hydric {
-          gap: 12px;
-        }
-
-        .tab-panel__hydric-hero {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 12px;
-          padding: 14px 16px;
-          border-radius: 18px;
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 22%, var(--gi-surface-border));
-          background:
-            radial-gradient(circle at 84% 10%, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 10%, transparent) 0%, transparent 28%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 7%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 97%, black) 100%);
-          box-shadow: inset 0 1px 0 color-mix(in srgb, white 28%, transparent);
-        }
-
-        .tab-panel__hydric-hero--success {
-          border-color: color-mix(in srgb, var(--gazon-success-color, #8fb56b) 28%, var(--gi-surface-border));
-        }
-
-        .tab-panel__hydric-hero--warning {
-          border-color: color-mix(in srgb, var(--gazon-warning-color, #d6a34f) 28%, var(--gi-surface-border));
-        }
-
-        .tab-panel__hydric-hero--danger {
-          border-color: color-mix(in srgb, var(--gazon-danger-color, #d76b73) 28%, var(--gi-surface-border));
-        }
-
-        .tab-panel__hydric-hero--critical {
-          border-color: color-mix(in srgb, var(--gazon-critical-color, #d94f57) 34%, var(--gi-surface-border));
-        }
-
-        .tab-panel__hydric-hero-main {
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-        }
-
-        .tab-panel__hydric-hero-label {
-          font-size: var(--gi-font-xs);
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.12em;
-          color: color-mix(in srgb, var(--secondary-text-color) 78%, var(--primary-text-color));
-        }
-
-        .tab-panel__hydric-hero-value {
-          font-size: clamp(1.38rem, 4.3vw, 2.18rem);
-          line-height: 1.02;
-          font-weight: 800;
-          letter-spacing: -0.02em;
-          color: var(--primary-text-color);
-          word-break: break-word;
-        }
-
-        .tab-panel__hydric-hero-note {
-          font-size: var(--gi-font-xs);
-          line-height: 1.32;
-          color: var(--secondary-text-color);
-        }
-
-        .tab-panel__hydric-hero-badge {
-          flex: 0 0 auto;
-          align-self: flex-start;
-          padding: 7px 12px;
-          border-radius: 999px;
-          font-size: var(--gi-font-xs);
-          font-weight: 800;
-          line-height: 1;
-          color: color-mix(in srgb, var(--primary-text-color) 90%, var(--gazon-section-accent));
-          background: color-mix(in srgb, var(--gazon-section-accent) 12%, transparent);
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 20%, transparent);
-        }
-
-        .tab-panel__hydric-meter {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          padding-inline: 2px;
-        }
-
-        .tab-panel__hydric-meter-bar {
-          position: relative;
-          height: 12px;
-          overflow: hidden;
-          border-radius: 999px;
-          background: color-mix(in srgb, var(--secondary-text-color) 11%, transparent);
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 16%, transparent);
-          box-shadow: inset 0 1px 2px rgba(80, 104, 62, 0.05);
-        }
-
-        .tab-panel__hydric-meter-bar-useful,
-        .tab-panel__hydric-meter-bar-surplus,
-        .tab-panel__hydric-meter-bar-cap {
-          position: absolute;
-          inset-block: 0;
-          display: block;
-          border-radius: inherit;
-        }
-
-        .tab-panel__hydric-meter-bar-useful {
-          inset-inline-start: 0;
-          background: linear-gradient(90deg, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 68%, white), color-mix(in srgb, var(--gazon-section-accent) 82%, white));
-          box-shadow: 0 0 10px color-mix(in srgb, var(--gazon-water-color, #44c8ea) 18%, transparent);
-        }
-
-        .tab-panel__hydric-meter-bar-surplus {
-          background: linear-gradient(90deg, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 84%, white), color-mix(in srgb, var(--gazon-lawn-color, #80da67) 58%, var(--gazon-water-color, #44c8ea)));
-          opacity: 0.82;
-        }
-
-        .tab-panel__hydric-meter-bar-cap {
-          inset-inline-start: 0;
-          background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 100%);
-          pointer-events: none;
-          mix-blend-mode: screen;
-        }
-
-        .tab-panel__hydric-meter-meta {
-          font-size: var(--gi-font-xs);
-          line-height: 1.25;
-          color: var(--secondary-text-color);
-        }
-
-        .tab-panel__metric-rail--watering-hydric .tab-panel__metric-row {
-          min-height: 76px;
-        }
-
-        .tab-panel__metric-rail--watering-hydric .tab-panel__metric-value {
-          font-size: calc(var(--gi-font-sm) * 1.05);
-        }
-
-        .tab-panel__metric-rail--watering-hydric .tab-panel__metric-note {
-          font-size: var(--gi-font-xs);
-        }
-
-        .gi-action--primary {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          justify-content: flex-start;
-          gap: var(--gi-action-gap);
-          width: var(--gi-action-width);
-          min-height: 72px;
-          padding-inline: var(--gi-action-padding-inline) var(--gi-action-padding-inline-end);
-          padding-block: var(--gi-action-padding-block);
-          border: 1px solid var(--gi-surface-border-strong);
-          border-radius: 20px;
-          cursor: pointer;
-          color: white;
-          font: inherit;
-          font-weight: 900;
-          font-size: var(--gi-font-lg);
-          letter-spacing: 0.01em;
-          background:
-            linear-gradient(135deg, color-mix(in srgb, var(--gazon-card-accent) 95%, white) 0%, color-mix(in srgb, var(--gazon-section-accent) 88%, black) 100%);
-          box-shadow:
-            0 16px 30px rgba(0, 0, 0, 0.18),
-            0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent),
-            0 0 24px color-mix(in srgb, var(--gazon-water-color, #44c8ea) 16%, transparent);
-          text-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
-          position: relative;
-          overflow: hidden;
-        }
-
-        .gi-action--primary::after {
-          content: "›";
-          margin-left: auto;
-          font-size: var(--gi-font-2xl);
-          line-height: 1;
-          opacity: 0.94;
-          flex: none;
-        }
-
         .gi-action--primary .gi-icon {
           width: var(--gi-action-icon-size);
           height: var(--gi-action-icon-size);
@@ -2014,62 +875,8 @@ export const CARD_STYLES = String.raw`
           height: var(--gi-action-icon-glyph-size);
         }
 
-        .gi-action--primary:disabled {
-          cursor: not-allowed;
-          color: var(--secondary-text-color);
-          text-shadow: none;
-          background:
-            linear-gradient(
-              135deg,
-              color-mix(in srgb, var(--card-background-color, #ffffff) 96%, var(--gazon-card-accent) 4%) 0%,
-              color-mix(in srgb, var(--card-background-color, #ffffff) 88%, var(--divider-color, #d8dde3) 12%) 100%
-            );
-          border-color: color-mix(in srgb, var(--divider-color, #d8dde3) 78%, transparent);
-          box-shadow: none;
-          filter: grayscale(0.15);
-          opacity: 0.84;
-        }
-
         .gi-action--primary:disabled .gi-icon {
           background: color-mix(in srgb, var(--divider-color, #d8dde3) 48%, transparent);
-        }
-
-        .gi-action--danger {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          justify-content: flex-start;
-          gap: var(--gi-action-gap);
-          width: var(--gi-action-width);
-          min-height: 72px;
-          padding-inline: var(--gi-action-padding-inline) var(--gi-action-padding-inline-end);
-          padding-block: var(--gi-action-padding-block);
-          border: 1px solid color-mix(in srgb, var(--gazon-danger-color, #f15f69) 54%, var(--gi-surface-border-strong));
-          border-radius: 20px;
-          cursor: pointer;
-          color: white;
-          font: inherit;
-          font-weight: 900;
-          font-size: var(--gi-font-lg);
-          letter-spacing: 0.01em;
-          background:
-            linear-gradient(135deg, color-mix(in srgb, var(--gazon-danger-color, #f15f69) 97%, white) 0%, color-mix(in srgb, var(--gazon-danger-color, #c62828) 86%, black) 100%);
-          box-shadow:
-            0 16px 30px rgba(0, 0, 0, 0.18),
-            0 0 0 1px color-mix(in srgb, var(--gazon-danger-color, #f15f69) 18%, transparent),
-            0 0 24px color-mix(in srgb, var(--gazon-danger-color, #f15f69) 14%, transparent);
-          text-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
-          position: relative;
-          overflow: hidden;
-        }
-
-        .gi-action--danger::after {
-          content: "›";
-          margin-left: auto;
-          font-size: var(--gi-font-2xl);
-          line-height: 1;
-          opacity: 0.94;
-          flex: none;
         }
 
         .gi-action--danger .gi-icon {
@@ -2082,46 +889,6 @@ export const CARD_STYLES = String.raw`
         .gi-action--danger .gi-icon ha-icon {
           width: var(--gi-action-icon-glyph-size);
           height: var(--gi-action-icon-glyph-size);
-        }
-
-        .gi-action--danger:disabled {
-          cursor: not-allowed;
-          opacity: 0.62;
-          filter: grayscale(0.2);
-          box-shadow: none;
-        }
-
-        @media (hover: hover) {
-          .gi-action--primary:hover {
-              border-color: color-mix(in srgb, var(--gazon-card-accent) 52%, var(--divider-color));
-            box-shadow:
-              0 18px 34px rgba(0, 0, 0, 0.22),
-              0 0 0 1px color-mix(in srgb, var(--gazon-card-accent) 18%, transparent);
-          }
-          .gi-action--danger:hover:not(:disabled) {
-            border-color: color-mix(in srgb, var(--gazon-danger-color, #f15f69) 60%, var(--divider-color));
-            box-shadow:
-              0 18px 34px rgba(0, 0, 0, 0.22),
-              0 0 0 1px color-mix(in srgb, var(--gazon-danger-color, #f15f69) 18%, transparent);
-          }
-        }
-
-        .gi-action {
-          cursor: pointer;
-          user-select: none;
-          -webkit-tap-highlight-color: transparent;
-        }
-
-        .gi-config-action {
-          display: flex;
-          flex-direction: column;
-          gap: 0;
-          width: 100%;
-          border: 0;
-          padding: 0;
-          margin: 0;
-          background: transparent;
-          text-align: inherit;
         }
 
         .gi-config-action .gi-card-core {
@@ -2139,26 +906,10 @@ export const CARD_STYLES = String.raw`
           }
         }
 
-        .gi-config-action:focus-visible {
-          outline: none;
-        }
-
         .gi-config-action:focus-visible .gi-card-core {
           box-shadow:
             0 0 0 2px color-mix(in srgb, var(--gazon-card-accent) 38%, transparent),
             var(--gi-surface-shadow-strong);
-        }
-
-        .gi-overview-action {
-          display: flex;
-          flex-direction: column;
-          gap: 0;
-          width: 100%;
-          border: 0;
-          padding: 0;
-          margin: 0;
-          background: transparent;
-          text-align: inherit;
         }
 
         .gi-overview-action .gi-card-core {
@@ -2169,10 +920,6 @@ export const CARD_STYLES = String.raw`
           .gi-overview-action:hover .gi-card-core {
               box-shadow: var(--gi-surface-shadow-strong);
           }
-        }
-
-        .gi-overview-action:focus-visible {
-          outline: none;
         }
 
         .gi-overview-action:focus-visible .gi-card-core {
@@ -2194,14 +941,6 @@ export const CARD_STYLES = String.raw`
           box-shadow: var(--gi-surface-shadow);
         }
 
-        .gi-info--main {
-          border-color: var(--gi-surface-border);
-          background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-lawn-color, #80da67) 10%, transparent) 0%, transparent 26%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 9%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 98%, white) 100%);
-          box-shadow: var(--gi-surface-shadow-strong);
-        }
-
         .gi-info--secondary {
           border-color: color-mix(in srgb, var(--gazon-section-accent) 10%, var(--divider-color));
           background:
@@ -2209,29 +948,9 @@ export const CARD_STYLES = String.raw`
             linear-gradient(180deg, color-mix(in srgb, var(--gazon-section-accent) 3%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--secondary-background-color) 100%, white) 100%);
         }
 
-        .gi-alert--critical {
-          animation: gi-pulse 1.8s ease-out infinite;
-        }
-
-        .tab-panel__block {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .tab-panel__block--danger {
-          border-color: color-mix(in srgb, var(--gazon-danger-color) 22%, transparent);
-        }
-
-        .tab-panel__block--neutral {
-          border-color: rgba(127, 127, 127, 0.15);
-        }
-
         .decision-hero,
         .decision-plan,
-        .decision-context,
-        .decision-block,
-        .decision-footer {
+        .decision-context{
           border: 1px solid var(--gi-surface-border);
           border-radius: 22px;
           background:
@@ -2246,10 +965,6 @@ export const CARD_STYLES = String.raw`
           flex-direction: column;
           gap: 8px;
           border-color: var(--gi-surface-border-strong);
-        }
-
-        .decision-hero--pulse {
-          animation: gazonPulseSoft 2.8s ease-in-out infinite;
         }
 
         .decision-hero__top {
@@ -2320,9 +1035,7 @@ export const CARD_STYLES = String.raw`
           line-height: 1.3;
         }
 
-        .decision-plan__label,
-        .decision-context__label,
-        .decision-block__label {
+        .decision-plan__label{
           font-size: var(--gi-label-size);
           text-transform: uppercase;
           letter-spacing: var(--gi-label-spacing);
@@ -2364,8 +1077,7 @@ export const CARD_STYLES = String.raw`
           overflow-wrap: anywhere;
         }
 
-        .decision-plan__chips,
-        .decision-context__grid {
+        .decision-plan__chips{
           display: flex;
           flex-wrap: wrap;
           align-items: center;
@@ -2547,86 +1259,11 @@ export const CARD_STYLES = String.raw`
           gap: 8px;
         }
 
-        .decision-block {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .decision-block--danger {
-          border-color: color-mix(in srgb, var(--gazon-danger-color) 22%, transparent);
-        }
-
-        .decision-block__value {
-          font-size: var(--gi-font-sm);
-          font-weight: 700;
-          line-height: 1.32;
-          overflow-wrap: anywhere;
-        }
-
-        .decision-block__hint {
-          color: var(--secondary-text-color);
-          font-size: var(--gi-font-sm);
-          line-height: 1.3;
-        }
-
-        .decision-footer {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-          padding-top: 10px;
-          padding-bottom: 10px;
-        }
-
         .decision-advanced {
           display: flex;
           flex-direction: column;
           gap: 12px;
           margin-top: 6px;
-        }
-
-        .advanced-group {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          padding: 14px;
-          border-radius: calc(var(--gazon-border-radius) - 8px);
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 16%, var(--divider-color));
-          background:
-            radial-gradient(circle at 92% 10%, color-mix(in srgb, var(--gi-tab-companion) 12%, transparent) 0%, transparent 28%),
-            linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 8%, transparent), transparent 36%),
-            color-mix(in srgb, var(--card-background-color) 86%, var(--gi-tab-accent) 4%);
-        }
-
-        .advanced-group__head {
-          display: grid;
-          gap: 4px;
-        }
-
-        .advanced-group__eyebrow {
-          font-size: 0.72rem;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: var(--secondary-text-color);
-        }
-
-        .advanced-group__title {
-          font-size: 1rem;
-          font-weight: 700;
-          color: var(--primary-text-color);
-        }
-
-        .advanced-group__meta {
-          font-size: var(--gi-font-sm);
-          line-height: 1.4;
-          color: var(--secondary-text-color);
-          max-width: 72ch;
-        }
-
-        .advanced-group__grid {
-          display: grid;
-          gap: 10px;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         }
 
         * {
@@ -2746,22 +1383,12 @@ export const CARD_STYLES = String.raw`
           margin-bottom: var(--gi-header-margin-bottom);
         }
 
-        .header--clickable,
-        .hero__lead[data-action-target="primary"] {
-          cursor: pointer;
-        }
-
         .card,
         .gi-card,
         .header,
-        .gi-action,
-        .hero__lead,
-        .gi-tab,
-        .tab-nav__item,
         .gi-info,
         .gi-pill--status,
         .gi-pill--context,
-        .gi-panel,
         .gi-progress__bar {
           transition:
             transform var(--gi-motion-fast) var(--gi-ease-standard),
@@ -2772,17 +1399,8 @@ export const CARD_STYLES = String.raw`
         }
 
         @media (hover: hover) {
-          .hero__lead:hover,
-          .gi-action:hover,
-          .gi-tab:hover,
-          .tab-nav__item:hover {
-          }
-
-          .tab-panel__hero:hover,
           .tab-panel__section:hover,
-          .advanced-group:hover,
-          .gi-card-core:hover,
-          .hero__lead:hover {
+          .gi-card-core:hover{
             transform: translateY(-2px);
             box-shadow:
               var(--gi-surface-shadow-strong),
@@ -2790,59 +1408,9 @@ export const CARD_STYLES = String.raw`
           }
         }
 
-        .header__title-wrap {
-          display: flex;
-          gap: 10px;
-          align-items: center;
-          min-width: 0;
-          flex: 1;
-        }
-
-        .header__meta {
-          display: flex;
-          flex-direction: column;
-          flex-wrap: nowrap;
-          justify-content: flex-end;
-          align-items: flex-end;
-          gap: 6px;
-          min-width: 0;
-          margin-left: auto;
-        }
-
-        .header__weather {
-          max-width: min(240px, 100%);
-          width: 100%;
-        }
-
         .header__weather .gi-pill__value {
           font-size: var(--gi-font-xxs);
           font-weight: 650;
-        }
-
-        .header__action {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          min-height: 30px;
-          padding: 4px 11px;
-          border-radius: 999px;
-          border: 1px solid color-mix(in srgb, var(--gazon-success-color) 26%, var(--divider-color));
-          background:
-            linear-gradient(135deg, color-mix(in srgb, var(--gazon-success-color) 18%, var(--secondary-background-color)) 0%, color-mix(in srgb, var(--gazon-water-color) 12%, var(--secondary-background-color)) 100%) !important;
-          color: var(--primary-text-color) !important;
-          box-shadow:
-            0 6px 14px rgba(0, 0, 0, 0.10),
-            0 0 0 1px color-mix(in srgb, var(--gazon-success-color) 8%, transparent);
-          font-size: var(--gi-font-xxs);
-          font-weight: 800;
-          cursor: pointer;
-          white-space: nowrap;
-          width: auto;
-          flex: 0 0 auto;
-          width: 100%;
-          max-width: 184px;
-          overflow: hidden;
-          text-shadow: none;
         }
 
         .header__action .gi-icon {
@@ -2852,145 +1420,15 @@ export const CARD_STYLES = String.raw`
           background: color-mix(in srgb, var(--gazon-success-color) 10%, transparent);
         }
 
-        .header__action::after {
-          content: none;
-        }
-
         .header__action span:last-child {
           overflow: hidden;
           text-overflow: ellipsis;
           min-width: 0;
         }
 
-        .card--theme-light .header__action {
-          background:
-            linear-gradient(135deg, color-mix(in srgb, var(--gazon-success-color) 14%, white) 0%, color-mix(in srgb, var(--gazon-water-color) 10%, white) 100%) !important;
-          border-color: color-mix(in srgb, var(--gazon-success-color) 24%, var(--divider-color)) !important;
-          box-shadow:
-            0 6px 14px rgba(0, 0, 0, 0.06),
-            0 0 0 1px color-mix(in srgb, var(--gazon-success-color) 10%, transparent);
-          color: var(--primary-text-color) !important;
-        }
-
-        .card--theme-dark .header__action {
-          background:
-            linear-gradient(135deg, color-mix(in srgb, var(--gazon-success-color) 18%, #141b1a) 0%, color-mix(in srgb, var(--gazon-water-color) 10%, #141b1a) 100%) !important;
-          border-color: color-mix(in srgb, var(--gazon-success-color) 20%, rgba(255, 255, 255, 0.10)) !important;
-          box-shadow:
-            0 6px 14px rgba(0, 0, 0, 0.18),
-            0 0 0 1px color-mix(in srgb, var(--gazon-success-color) 10%, transparent);
-          color: #f7fff7 !important;
-        }
-
-        @media (max-width: 600px) {
-          .header__action {
-            max-width: 144px;
-            padding: 4px 8px;
-            font-size: var(--gi-font-xxs);
-          }
-        }
-
-        .card--theme-light .header__weather {
-          background: #ffffff;
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(0, 0, 0, 0.08));
-          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
-        }
-
-        .card--theme-dark .header__weather {
-          background: #000000;
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 14%, rgba(255, 255, 255, 0.10));
-          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
-        }
-
-        .header__icon {
-          width: calc(var(--gazon-icon-size) * 1.2);
-          height: calc(var(--gazon-icon-size) * 1.2);
-          border-radius: 999px;
-          display: grid;
-          place-items: center;
-          color: white;
-          background: linear-gradient(145deg, color-mix(in srgb, var(--gi-tab-accent) 68%, white), color-mix(in srgb, var(--gi-tab-companion) 72%, var(--gi-tab-mist-color)));
-          box-shadow:
-            0 8px 18px color-mix(in srgb, var(--gi-tab-glow-color) 18%, transparent),
-            inset 0 1px 0 rgba(255, 255, 255, 0.16);
-          flex: none;
-        }
-
-        .header__icon--warning { background: var(--gazon-warning-color, #7e9a3c); }
-        .header__icon--danger { background: var(--gazon-danger-color, #c62828); }
-        .header__icon--success { background: var(--gazon-success-color, #4f8f3a); }
-        .header__icon--neutral { background: var(--gazon-neutral-color, #607d8b); }
-        .header__icon--accent { background: var(--gazon-accent-tone-color, #2b8c7c); }
-        .header__icon--critical { background: var(--gazon-critical-color, #ff1744); }
-
         .header__icon .gi-icon {
           width: 14px;
           height: 14px;
-        }
-
-        .header__titles {
-          min-width: 0;
-        }
-
-        .header__title {
-          font-size: var(--gi-font-xl);
-          font-weight: 900;
-          line-height: 1.14;
-          letter-spacing: -0.01em;
-        }
-
-        .header__subtitle {
-          color: var(--secondary-text-color);
-          font-size: var(--gi-font-xs);
-          line-height: var(--gi-body-line);
-        }
-
-        .header__subtitle::before {
-          content: "";
-          display: inline-block;
-          width: 7px;
-          height: 7px;
-          border-radius: 999px;
-          margin-right: 6px;
-          vertical-align: middle;
-          background: var(--gazon-card-tone-color);
-          box-shadow: 0 0 0 3px color-mix(in srgb, var(--gazon-card-tone-color) 14%, transparent);
-        }
-
-        .hero {
-          display: grid;
-          grid-template-columns: minmax(280px, 1.05fr) minmax(0, 1.5fr);
-          min-width: 0;
-          gap: var(--gi-hero-gap);
-          align-items: stretch;
-          margin: var(--gi-hero-margin);
-        }
-
-        .hero__lead {
-          min-width: 0;
-          border-radius: 24px;
-          padding: var(--gi-hero-lead-padding);
-          border: 1px solid color-mix(in srgb, var(--gazon-section-accent) 26%, var(--divider-color));
-          background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gi-tab-companion) 7%, transparent) 0%, transparent 26%),
-            linear-gradient(135deg, color-mix(in srgb, var(--gi-tab-accent) 8%, transparent) 0%, color-mix(in srgb, var(--gi-tab-companion) 6%, transparent) 100%),
-            color-mix(in srgb, var(--secondary-background-color) 76%, transparent);
-          box-shadow:
-            0 8px 18px rgba(0, 0, 0, 0.12),
-            0 0 0 1px color-mix(in srgb, var(--gi-tab-accent) 6%, transparent);
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: var(--gi-hero-lead-gap);
-          flex: 1 1 260px;
-        }
-
-        .hero__metrics {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-          min-width: 0;
-          gap: var(--gi-hero-metrics-gap);
-          align-content: start;
         }
 
         .hero__metrics .gi-card-core {
@@ -3002,98 +1440,9 @@ export const CARD_STYLES = String.raw`
           min-height: 108px;
         }
 
-        .hero__lead-icon {
-          width: 20px;
-          height: 20px;
-          border-radius: 999px;
-          display: grid;
-          place-items: center;
-          flex: none;
-          color: var(--gazon-section-accent);
-          background: color-mix(in srgb, var(--gazon-section-accent) 20%, transparent);
-        }
-
         .hero__lead-icon .gi-icon {
           width: 12px;
           height: 12px;
-        }
-
-        .hero__label {
-          font-size: 0.66rem;
-          text-transform: uppercase;
-          letter-spacing: 0.10em;
-          font-weight: 800;
-          color: var(--secondary-text-color);
-          margin-bottom: 6px;
-        }
-
-        .hero__value {
-          font-size: var(--gi-font-lg);
-          font-weight: 900;
-          line-height: 1.18;
-          min-width: 0;
-          overflow-wrap: anywhere;
-          hyphens: auto;
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-
-        .hero__lead--danger {
-          color: var(--gazon-danger-color, #c62828);
-        }
-
-        .lead--empty {
-          color: var(--secondary-text-color);
-          font-weight: 500;
-        }
-
-        .lead--danger {
-          color: var(--gazon-danger-color, #c62828);
-        }
-
-        .decision-grid {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: stretch;
-          gap: 8px;
-          margin: 4px 0 10px;
-        }
-
-        .decision {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          flex: 1 1 150px;
-          border-radius: 18px;
-          padding: 11px 12px;
-          border: 1px solid rgba(127, 127, 127, 0.15);
-          background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--gazon-water-color, #44c8ea) 8%, transparent) 0%, transparent 30%),
-            linear-gradient(180deg, color-mix(in srgb, var(--secondary-background-color) 92%, white) 0%, var(--secondary-background-color) 100%);
-          box-shadow: none;
-        }
-
-        .decision--action {
-          border-color: color-mix(in srgb, var(--gazon-success-color) 20%, transparent);
-        }
-
-        .decision--avoid {
-          border-color: color-mix(in srgb, var(--gazon-danger-color) 18%, transparent);
-        }
-
-        .decision__label {
-          font-size: var(--gi-font-xxs);
-          text-transform: uppercase;
-          letter-spacing: 0.03em;
-          color: var(--secondary-text-color);
-          margin-bottom: 4px;
-        }
-
-        .decision__value {
-          font-weight: 600;
-          line-height: 1.28;
         }
 
         .tiles {
@@ -3126,11 +1475,7 @@ export const CARD_STYLES = String.raw`
             background-color var(--gi-motion-fast) var(--gi-ease-standard),
             box-shadow var(--gi-motion-fast) var(--gi-ease-standard);
         }
-
-        /* Synthèse : pas de boîtes imbriquées — hero & sections coulent sur la carte */
-        .tab-panel--overview .tab-panel__hero,
-        .tab-panel--overview .tab-panel__section,
-        .tab-panel--overview .tab-panel__block {
+        .tab-panel--overview .tab-panel__section{
           background: transparent;
           border: none;
           box-shadow: none;
@@ -3352,12 +1697,8 @@ export const CARD_STYLES = String.raw`
           border: 1px dashed var(--divider-color);
           border-radius: 16px;
         }
-
-        .card--editor-preview .gi-panel,
-        .card--editor-preview .gi-tab,
         .card--editor-preview .gi-pill--status,
         .card--editor-preview .gi-pill--context,
-        .card--editor-preview .gi-action,
         .card--editor-preview .gi-info,
         .card--editor-preview .gi-progress__bar {
           animation: none !important;
@@ -3429,18 +1770,14 @@ export const CARD_STYLES = String.raw`
           background: linear-gradient(180deg, transparent 0%, transparent 100%);
           opacity: 0;
           z-index: 0;
-        }
-
-        .card--theme-light :is(.tab-panel__hero, .tab-panel__section, .tab-panel__block, .gi-info, .gi-info--main, .gi-info--secondary, .decision-hero, .decision-plan, .decision-context, .decision-block, .decision-footer, .gi-card-core, .gi-tab, .tab-nav__item, .hero__lead, .decision) {
+        } .tab-panel__section, .gi-info, .gi-info--secondary, .decision-hero, .decision-plan, .decision-context, .gi-card-core{
           background:
             radial-gradient(circle at 84% 0%, color-mix(in srgb, var(--gi-tab-companion) 12%, transparent) 0%, transparent 20%),
             radial-gradient(circle at 8% 94%, color-mix(in srgb, var(--gi-tab-mist-color) 14%, transparent) 0%, transparent 22%),
             linear-gradient(180deg, color-mix(in srgb, var(--gi-tab-accent) 6%, #ffffff) 0%, color-mix(in srgb, #ffffff 92%, var(--gazon-lawn-color) 8%) 100%);
           border-color: color-mix(in srgb, var(--gazon-section-accent) 22%, rgba(0, 0, 0, 0.08));
           box-shadow: var(--gi-theme-shadow-override);
-        }
-
-        .card--theme-dark :is(.tab-panel__hero, .tab-panel__section, .tab-panel__block, .gi-info, .gi-info--main, .gi-info--secondary, .decision-hero, .decision-plan, .decision-context, .decision-block, .decision-footer, .gi-card-core, .gi-tab, .tab-nav__item, .hero__lead, .decision) {
+        } .tab-panel__section, .gi-info, .gi-info--secondary, .decision-hero, .decision-plan, .decision-context, .gi-card-core{
           background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0%, rgba(255, 255, 255, 0.005) 100%),
             var(--gi-surface-fill);
@@ -3463,16 +1800,9 @@ export const CARD_STYLES = String.raw`
         }
 
         .card--theme-light .gi-card-core__secondary,
-        .card--theme-light .tab-panel__hero-next,
-        .card--theme-light .tab-panel__hero-hint,
-        .card--theme-light .tab-panel__block-hint,
-        .card--theme-light .tab-panel__section-hint,
         .card--theme-light .tab-panel__section-meta,
-        .card--theme-light .tab-panel__section-title,
         .card--theme-light .tab-panel__eyebrow,
-        .card--theme-light .tab-panel__stat-secondary,
         .card--theme-light .tab-panel__empty,
-        .card--theme-light .tab-panel__header-hint,
         .card--theme-light .decision-hero__next,
         .card--theme-light .decision-hero__hint,
         .card--theme-light .decision-plan__meta,
@@ -3480,7 +1810,6 @@ export const CARD_STYLES = String.raw`
         .card--theme-light .gi-pill__value,
         .card--theme-light .gi-card-core__label,
         .card--theme-light .gi-card-core__secondary,
-        .card--theme-light .header__subtitle,
         .card--theme-light .footer {
           color: color-mix(in srgb, #000000 68%, var(--secondary-text-color));
         }
@@ -3490,58 +1819,29 @@ export const CARD_STYLES = String.raw`
           border-color: color-mix(in srgb, var(--gazon-section-accent) 20%, rgba(0, 0, 0, 0.08));
         }
 
-        .card--theme-light .header__icon--warning { background: color-mix(in srgb, var(--gazon-warning-color) 74%, white); }
-        .card--theme-light .header__icon--danger { background: color-mix(in srgb, var(--gazon-danger-color) 74%, white); }
-        .card--theme-light .header__icon--success { background: color-mix(in srgb, var(--gazon-success-color) 74%, white); }
-        .card--theme-light .header__icon--neutral { background: color-mix(in srgb, var(--gazon-neutral-color) 74%, white); }
-        .card--theme-light .header__icon--accent { background: color-mix(in srgb, var(--gazon-accent-tone-color) 74%, white); }
-        .card--theme-light .header__icon--critical { background: color-mix(in srgb, var(--gazon-critical-color) 74%, white); }
-
         .card--theme-dark .gi-card-core__secondary,
-        .card--theme-dark .tab-panel__hero-hint,
-        .card--theme-dark .tab-panel__block-hint,
-        .card--theme-dark .tab-panel__section-hint,
         .card--theme-dark .tab-panel__section-meta,
-        .card--theme-dark .tab-panel__section-title,
         .card--theme-dark .tab-panel__eyebrow,
-        .card--theme-dark .tab-panel__stat-secondary,
         .card--theme-dark .tab-panel__empty,
-        .card--theme-dark .tab-panel__header-hint,
         .card--theme-dark .decision-hero__hint,
         .card--theme-dark .decision-plan__meta,
         .card--theme-dark .gi-pill__label,
         .card--theme-dark .gi-pill__value,
         .card--theme-dark .gi-card-core__label,
         .card--theme-dark .gi-card-core__secondary,
-        .card--theme-dark .header__subtitle,
         .card--theme-dark .footer {
           color: color-mix(in srgb, #ffffff 72%, var(--secondary-text-color));
         }
-
-        .card--theme-dark .tab-panel__hero-next,
         .card--theme-dark .decision-hero__next,
         .card--theme-dark .decision-plan__summary,
         .card--theme-dark .tab-panel__section-summary,
-        .card--theme-dark .tab-panel__summary-value,
-        .card--theme-dark .tab-panel__metric-value,
-        .card--theme-dark .header__title {
+        .card--theme-dark .tab-panel__summary-value{
           color: color-mix(in srgb, #ffffff 92%, var(--primary-text-color));
         }
-
-        .card--theme-dark .tab-panel__hero-summary,
         .card--theme-dark .tab-panel__summary-label,
-        .card--theme-dark .tab-panel__metric-label,
         .card--theme-dark .decision-plan__label,
-        .card--theme-dark .tab-panel__section-title,
         .card--theme-dark .tab-panel__eyebrow {
           color: color-mix(in srgb, #ffffff 58%, var(--secondary-text-color));
-        }
-
-        .card--theme-dark .advanced-group {
-          background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0%, rgba(255, 255, 255, 0.004) 100%),
-            #13191e;
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 20%, rgba(255, 255, 255, 0.10));
         }
 
         .card--theme-dark :is(.gi-pill--neutral) {
@@ -3568,8 +1868,6 @@ export const CARD_STYLES = String.raw`
         .card--theme-dark .gi-pill--accent .gi-pill__value {
           color: color-mix(in srgb, #ffffff 90%, var(--primary-text-color));
         }
-
-        .card--theme-dark .tab-panel__intervention-card--proposed,
         .card--theme-dark .tab-panel__temperature-constraint--warning {
           border-color: var(--gi-warning-border);
           background:
@@ -3578,14 +1876,12 @@ export const CARD_STYLES = String.raw`
         }
 
         .card--theme-dark .tab-panel__intervention-card--proposed .tab-panel__section-summary,
-        .card--theme-dark .tab-panel__intervention-card--proposed .tab-panel__section-hint,
         .card--theme-dark .tab-panel__temperature-constraint--warning .tab-panel__temperature-detail {
           color: color-mix(in srgb, #ffffff 88%, var(--primary-text-color));
         }
 
         .card--theme-dark .tab-panel__intervention-card--proposed .tab-panel__section-meta,
-        .card--theme-dark .tab-panel__temperature-constraint--warning .tab-panel__temperature-hint,
-        .card--theme-dark .tab-panel__metric-row--warning .tab-panel__metric-note {
+        .card--theme-dark .tab-panel__temperature-constraint--warning .tab-panel__temperature-hint{
           color: color-mix(in srgb, #ffffff 72%, var(--secondary-text-color));
         }
 
@@ -3593,68 +1889,18 @@ export const CARD_STYLES = String.raw`
           --tab-panel-summary-value-color: color-mix(in srgb, var(--gi-warning-ink) 88%, var(--primary-text-color));
         }
 
-        .card--theme-dark .tab-panel__metric-row--warning {
-          border-color: var(--gi-warning-border);
-        }
-
-        .card--theme-dark .tab-panel--intervention .tab-panel__decision-strip {
-          background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 0.003) 100%),
-            #12181d;
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 18%, rgba(255, 255, 255, 0.10));
-        }
-
-        .card--theme-dark .tab-panel__intervention-card {
-          background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0%, rgba(255, 255, 255, 0.004) 100%),
-            #131a1f;
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 18%, rgba(255, 255, 255, 0.10));
-        }
-
-        .card--theme-dark .tab-panel__intervention-card--picker {
-          background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0%, rgba(255, 255, 255, 0.004) 100%),
-            #131b20;
-          border-color: color-mix(in srgb, var(--gazon-water-color, #44c8ea) 20%, rgba(255, 255, 255, 0.10));
-        }
-
         .card--theme-dark .tab-panel__intervention-card--picker .tab-panel__section-summary,
-        .card--theme-dark .tab-panel__intervention-card--picker .tab-panel__section-hint,
         .card--theme-dark .tab-panel__intervention-card--picker .tab-panel__section-meta {
           color: color-mix(in srgb, #ffffff 88%, var(--primary-text-color));
         }
 
-        .card--theme-dark .tab-panel__intervention-card--action {
-          background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0%, rgba(255, 255, 255, 0.004) 100%),
-            #141c18;
-          border-color: color-mix(in srgb, var(--gazon-success-color, #4fc38c) 20%, rgba(255, 255, 255, 0.10));
-        }
-
         .card--theme-dark .tab-panel__intervention-card--action .tab-panel__section-summary,
-        .card--theme-dark .tab-panel__intervention-card--action .tab-panel__section-hint,
         .card--theme-dark .tab-panel__intervention-card--action .tab-panel__section-meta {
           color: color-mix(in srgb, #ffffff 88%, var(--primary-text-color));
         }
-
-        .card--theme-dark .tab-panel--intervention .tab-panel__workflow-step,
-        .card--theme-dark .tab-panel--intervention .tab-panel__workflow-step--active,
-        .card--theme-dark .tab-panel--intervention .tab-panel__workflow-step--done,
-        .card--theme-dark .tab-panel--intervention .tab-panel__workflow-label,
         .card--theme-dark .tab-panel--intervention .tab-panel__section-meta,
-        .card--theme-dark .tab-panel--intervention .tab-panel__select,
-        .card--theme-dark .tab-panel--intervention .tab-panel__select-chevron,
-        .card--theme-dark .tab-panel--intervention .tab-panel__select-prefix,
-        .card--theme-dark .tab-panel--intervention .gi-action--primary,
-        .card--theme-dark .tab-panel--intervention .gi-action--primary span,
-        .card--theme-dark .tab-panel--intervention .gi-action--primary::after {
+        .card--theme-dark .tab-panel--intervention .gi-action--primary span{
           color: color-mix(in srgb, #ffffff 92%, var(--primary-text-color));
-        }
-
-        .card--theme-dark .tab-panel--intervention .tab-panel__workflow-step {
-          background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 0.003) 100%),
-            #141b20;
         }
 
         .card--theme-dark .tab-panel--intervention .gi-pill--context,
@@ -3673,70 +1919,27 @@ export const CARD_STYLES = String.raw`
         .card--theme-dark .tab-panel--intervention .gi-pill--accent .gi-pill__label,
         .card--theme-dark .tab-panel--intervention .gi-pill--accent .gi-pill__value,
         .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--proposed .tab-panel__section-summary,
-        .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--proposed .tab-panel__section-hint,
         .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--proposed .tab-panel__section-meta,
         .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--picker .tab-panel__section-summary,
-        .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--picker .tab-panel__section-hint,
         .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--picker .tab-panel__section-meta,
         .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--action .tab-panel__section-summary,
-        .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--action .tab-panel__section-hint,
         .card--theme-dark .tab-panel--intervention .tab-panel__intervention-card--action .tab-panel__section-meta {
           color: color-mix(in srgb, #ffffff 92%, var(--primary-text-color)) !important;
         }
-
-        .card--theme-dark .tab-panel--intervention .tab-panel__select-prefix {
-          background: rgba(255, 255, 255, 0.06);
-        }
-
-        .card--theme-dark .tab-panel--intervention .gi-action--primary:disabled,
-        .card--theme-dark .tab-panel--intervention .gi-action--primary:disabled span,
-        .card--theme-dark .tab-panel--intervention .gi-action--primary:disabled::after {
+        .card--theme-dark .tab-panel--intervention .gi-action--primary:disabled span{
           color: color-mix(in srgb, #ffffff 82%, var(--secondary-text-color));
           opacity: 1;
         }
 
-        .card--theme-dark .tab-panel__metric-row {
-          background: var(--gi-surface);
-          border-color: var(--gi-border);
-          box-shadow: none;
-        }
-
-        .card--theme-dark button.tab-panel__metric-row:hover {
-          border-color: color-mix(in srgb, var(--gazon-section-accent) 24%, rgba(255, 255, 255, 0.14));
-          box-shadow:
-            inset 0 1px 0 rgba(255,255,255,0.03),
-            0 14px 28px rgba(0,0,0,0.30);
-        }
-
-        .card--theme-dark button.tab-panel__metric-row:focus-visible {
-          box-shadow:
-            0 0 0 2px color-mix(in srgb, var(--gazon-card-accent) 24%, transparent),
-            inset 0 1px 0 rgba(255,255,255,0.03),
-            0 12px 24px rgba(0,0,0,0.28);
-        }
-
-        .card--theme-dark .header__icon--warning { background: color-mix(in srgb, var(--gazon-warning-color) 74%, black); }
-        .card--theme-dark .header__icon--danger { background: color-mix(in srgb, var(--gazon-danger-color) 74%, black); }
-        .card--theme-dark .header__icon--success { background: color-mix(in srgb, var(--gazon-success-color) 74%, black); }
-        .card--theme-dark .header__icon--neutral { background: color-mix(in srgb, var(--gazon-neutral-color) 74%, black); }
-        .card--theme-dark .header__icon--accent { background: color-mix(in srgb, var(--gazon-accent-tone-color) 74%, black); }
-        .card--theme-dark .header__icon--critical { background: color-mix(in srgb, var(--gazon-critical-color) 74%, black); }
-
         @media (prefers-reduced-motion: reduce) {
           .card,
           .gi-card,
-          .tab-panel,
           .tab-panel > *,
-          .gi-panel,
-          .gi-tab,
-          .tab-nav__item,
           .gi-pill,
-          .gi-action,
           .gi-info,
           .gi-progress__bar,
           .tab-progress__bar,
           .card--pulse-critical,
-          .gi-alert--critical,
           .card--gradient::after {
             animation: none !important;
             transition: none !important;
@@ -3777,14 +1980,6 @@ export const CARD_STYLES = String.raw`
             --gi-surface-shadow-strong: 0 12px 24px rgba(0, 0, 0, 0.12);
           }
 
-          .hero {
-            grid-template-columns: 1fr;
-          }
-
-          .tab-panel__section--products {
-            gap: 6px;
-          }
-
           .tab-panel__section--products .tab-panel__section-summary {
             font-size: var(--gi-font-sm);
             line-height: 1.25;
@@ -3794,30 +1989,6 @@ export const CARD_STYLES = String.raw`
             min-height: 68px;
           }
 
-          .tab-panel__intervention-layout {
-            grid-template-columns: 1fr;
-          }
-
-          .tab-panel__intervention-card {
-            padding: 11px 12px;
-          }
-
-          .tab-panel__workflow {
-            gap: 6px;
-          }
-
-          .tab-panel__workflow-step {
-            padding: 6px 8px;
-          }
-
-          .tab-panel__select-shell {
-            min-height: 48px;
-          }
-
-          .tab-panel__intervention-card--action .tab-panel__cta {
-            min-height: 70px;
-          }
-
           .tab-panel__history-inline-head {
             flex-direction: column;
             align-items: flex-start;
@@ -3825,27 +1996,6 @@ export const CARD_STYLES = String.raw`
 
           .tab-panel__history-inline-meta {
             text-align: left;
-          }
-        }
-
-        @media (max-width: 1400px) {
-          .tab-panel__products-layout,
-          .tab-panel__intervention-layout,
-          .tab-panel__intervention-layout--workflow,
-          .tab-panel__grid--priority,
-          .tab-panel__grid--featured,
-          .tab-panel__grid--decision-board,
-          .tab-panel__facts-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .tab-panel__intervention-layout--workflow .tab-panel__intervention-card--proposed,
-          .tab-panel__products-layout .tab-panel__section--products-scope {
-            grid-column: auto;
-          }
-
-          .tab-panel__decision-strip--overview {
-            grid-template-columns: 1fr !important;
           }
         }
 
@@ -3869,63 +2019,9 @@ export const CARD_STYLES = String.raw`
             align-items: stretch;
           }
 
-          .header__title-wrap {
-            width: 100%;
-            gap: 8px;
-          }
-
-          .tab-panel__decision-strip--overview {
-            grid-template-columns: 1fr;
-          }
-
-          .header__meta {
-            width: 100%;
-            gap: 6px;
-            margin-left: 0;
-          }
-
-          .header__weather {
-            align-self: flex-end;
-          }
-
-          .header__icon {
-            width: calc(var(--gazon-icon-size) * 1.02);
-            height: calc(var(--gazon-icon-size) * 1.02);
-          }
-
           .header__icon .gi-icon {
             width: 11px;
             height: 11px;
-          }
-
-          .header__title {
-            font-size: var(--gi-font-md);
-            line-height: 1.14;
-          }
-
-          .header__subtitle {
-            font-size: var(--gi-font-xs);
-            line-height: 1.22;
-          }
-
-          .header__action {
-            align-self: flex-end;
-          }
-
-          .hero {
-            gap: 6px;
-            margin: 1px 0 4px;
-          }
-
-          .hero__lead {
-            padding: 9px 10px;
-            gap: 6px;
-            flex-basis: 220px;
-          }
-
-          .hero__lead-icon {
-            width: 18px;
-            height: 18px;
           }
 
           .hero__lead-icon .gi-icon {
@@ -3933,34 +2029,12 @@ export const CARD_STYLES = String.raw`
             height: 11px;
           }
 
-          .hero__label {
-            margin-bottom: 2px;
-          }
-
-          .hero__value {
-            font-size: var(--gi-font-sm);
-            line-height: 1.16;
-            -webkit-line-clamp: 1;
-          }
-
-          .hero__metrics {
-            gap: 4px;
-          }
-
-          .hero__metrics {
-            grid-template-columns: repeat(auto-fit, minmax(122px, 1fr));
-          }
-
           .hero__metrics .gi-card-core {
             flex-basis: 100px;
             min-height: 70px;
           }
-
-          .tab-panel--products .tab-panel__hero-top,
           .tab-panel--products .tab-panel__section-head,
-          .tab-panel--intervention .tab-panel__hero-top,
           .tab-panel--intervention .tab-panel__section-head,
-          .tab-panel__history-foldout-head,
           .tab-panel--intervention .tab-panel__debug-foldout-summary {
             flex-direction: column;
             align-items: flex-start;
@@ -3975,31 +2049,6 @@ export const CARD_STYLES = String.raw`
             max-width: 100%;
           }
 
-          .tab-panel__products-layout {
-            grid-template-columns: 1fr;
-          }
-
-          .tab-panel__grid--priority,
-          .tab-panel__grid--featured,
-          .tab-panel__grid--decision-board {
-            grid-template-columns: 1fr;
-          }
-
-          .tab-panel__hero {
-            padding: 11px 12px;
-          }
-
-          .tab-panel__hero-summary {
-            font-size: var(--gi-font-xs);
-            line-height: 1.16;
-          }
-
-          .tab-panel__hero-next,
-          .tab-panel__hero-hint {
-            font-size: var(--gi-font-sm);
-            line-height: 1.24;
-          }
-
           .tab-panel--products .gi-card-core--stat {
             min-height: 64px;
           }
@@ -4010,130 +2059,14 @@ export const CARD_STYLES = String.raw`
             min-height: 78px;
           }
 
-          .tab-panel--products .tab-panel__section-summary,
-          .tab-panel--products .tab-panel__section-hint {
+          .tab-panel--products .tab-panel__section-summary{
             font-size: var(--gi-font-sm);
             line-height: 1.22;
           }
 
-          .tab-panel__decision-strip--overview {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-
-          .tab-panel__facts-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .tab-panel__hydric-hero {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 10px;
-            padding: 12px 13px;
-          }
-
-          .tab-panel__hydric-hero-value {
-            font-size: clamp(1.5rem, 7.2vw, 2rem);
-          }
-
-          .tab-panel__hydric-hero-badge {
-            width: fit-content;
-          }
-
-          .tab-panel__hydric-meter-bar {
-            height: 10px;
-          }
-
-          .tab-panel__metric-rail--watering-hydric .tab-panel__metric-row {
-            min-height: 70px;
-          }
-
-          .tab-panel__metric-head {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 2px;
-          }
-
-          .tab-panel__metric-value {
-            text-align: left;
-          }
-
-          .tab-panel__history-foldout-preview {
-            grid-template-columns: 1fr;
-          }
-
-          .tab-panel__card-slider-track {
-            grid-auto-columns: min(84vw, 260px);
-          }
-
-          .tab-panel__card-slider--config .tab-panel__card-slider-track {
-            grid-auto-columns: min(88vw, 300px);
-          }
-
-          .tab-panel__card-slider-item {
-            scroll-snap-align: start;
-          }
-
-          .tab-panel__card-slider {
-            scroll-snap-type: x proximity;
-            scroll-padding-inline: 6px;
-            -webkit-overflow-scrolling: touch;
-          }
-
-          .tab-panel__history-foldout-summary {
-            padding: 11px 12px;
-          }
-
-          .tab-panel__history-foldout-body {
-            padding: 0 12px 12px;
-          }
-
-          .tab-panel--intervention .tab-panel__decision-strip {
-            flex-direction: column;
-            align-items: stretch;
-          }
-
-          .tab-panel--intervention .tab-panel__decision-strip {
-            padding: 8px 10px;
-          }
-
-          .tab-panel--intervention .tab-panel__intervention-layout {
-            gap: 8px;
-            grid-template-columns: 1fr;
-          }
-
-          .tab-panel--intervention .tab-panel__intervention-card {
-            padding: 10px 11px;
-            gap: 8px;
-          }
-
-          .tab-panel--intervention .tab-panel__intervention-card .tab-panel__section-summary,
-          .tab-panel--intervention .tab-panel__intervention-card .tab-panel__section-hint {
+          .tab-panel--intervention .tab-panel__intervention-card .tab-panel__section-summary{
             font-size: var(--gi-font-xs);
             line-height: 1.22;
-          }
-
-          .tab-panel--intervention .tab-panel__select-shell {
-            min-height: 44px;
-            padding: 6px 10px 6px 8px;
-            gap: 8px;
-          }
-
-          .tab-panel--intervention .tab-panel__select {
-            padding-right: 30px;
-          }
-
-          .tab-panel--intervention .tab-panel__select-prefix {
-            width: 26px;
-            height: 26px;
-          }
-
-          .tab-panel--intervention .tab-panel__select-chevron {
-            inset-inline-end: 10px;
-          }
-
-          .tab-panel--intervention .tab-panel__intervention-card--action .tab-panel__cta {
-            min-height: 64px;
-            border-radius: 12px;
           }
         }
 
@@ -4168,7 +2101,6 @@ export const CARD_STYLES = String.raw`
           font-size: var(--gi-font-sm);
           color: var(--gi-text-muted);
         }
-        .gz2-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
         .gz2-header__meta { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
         .gz2-weather {
           display: flex; align-items: center; gap: 6px;
@@ -4241,7 +2173,6 @@ export const CARD_STYLES = String.raw`
           margin-bottom: 12px;
         }
         .gz2-hero { margin-bottom: 22px; }
-        .gz2-hero__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
         .gz2-hero__title {
           font-size: var(--gi-font-2xl);
           font-weight: var(--gi-weight-medium);
@@ -4346,7 +2277,7 @@ export const CARD_STYLES = String.raw`
         .gz2-evening__text { line-height: 1.4; }
         .gz-scene { display: flex; gap: 18px; align-items: center; background: #E9F7EF; border: 1px solid #C9E9D6; border-radius: 18px; padding: 18px 20px; }
         .gz-scene__art { flex: 0 0 132px; max-width: 132px; }
-        .gz-scene__stage { position: relative; border-radius: 16px; overflow: hidden; }
+        .gz-scene__stage { position: relative; border-radius: 16px; overflow: hidden; --gz-sky-edge: #E9F7EF; }
         .gz-scene__sky { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; }
         .gz-scene__stage > svg:not(.gz-scene__sky) { position: relative; z-index: 1; }
         .gz-scene__art svg { display: block; width: 100%; height: auto; }
@@ -4391,14 +2322,11 @@ export const CARD_STYLES = String.raw`
         .gz-advtile__label { font-size: 12px; color: #2E8B57; margin-bottom: 4px; }
         .gz-advtile__value { font-size: 18px; font-weight: 600; color: #1D6B3A; line-height: 1.2; }
         .gz-advtile__sub { font-size: 11.5px; color: #6E8C7F; margin-top: 4px; line-height: 1.45; }
-        .gz-pastille { transform-box: fill-box; transform-origin: center; animation: gz-bob 3s ease-in-out infinite; }
-        .gz-pastille.p2 { animation-delay: .8s; }
-        .gz-pastille.p3 { animation-delay: 1.6s; }
-        @media (prefers-reduced-motion: reduce) { .gz-pastille { animation: none; } }
         @keyframes gz-spin { to { transform: rotate(360deg); } }
         .gz-spin { transform-box: fill-box; transform-origin: center; animation: gz-spin 16s linear infinite; }
-        .gz-roll { transform-box: fill-box; animation: gz-spin 1.1s linear infinite; }
-        @media (prefers-reduced-motion: reduce) { .gz-spin, .gz-roll { animation: none; } }
+        @keyframes gz-mow { 0%,100% { transform: translateX(-1px) rotate(-0.9deg); } 50% { transform: translateX(1.3px) rotate(0.9deg); } }
+        .gz-mow { transform-box: view-box; transform-origin: 75px 132px; animation: gz-mow 0.55s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) { .gz-spin, .gz-mow { animation: none; } }
         /* Décor météo animé (derrière la mascotte) */
         @keyframes gz-drift { 0% { transform: translateX(-10px); } 100% { transform: translateX(12px); } }
         @keyframes gz-rainfall { 0% { transform: translate(3px, -14px); opacity: 0; } 25% { opacity: .9; } 100% { transform: translate(-3px, 18px); opacity: 0; } }
@@ -4422,6 +2350,48 @@ export const CARD_STYLES = String.raw`
         .gz2-card--static { background: #F2FAF5 !important; border: 1px solid #D7EEE0 !important; border-radius: 14px !important; }
         .gz2-card--static .gz2-card__label { color: #2E8B57 !important; }
         footer.footer { background: #F7FBF9 !important; border: 1px solid #D7EEE0 !important; border-radius: 12px !important; color: #6E8C7F !important; padding: 10px 14px !important; }
+
+        /* === Mode sombre de la refonte ludique (sinon plaques claires sur fond noir) === */
+        .card--theme-dark .gz-scene__stage { --gz-sky-edge: #11231B; }
+        .card--theme-dark .gz-scene { background: #14241C; border-color: #2B4A39; }
+        .card--theme-dark .gz-scene__eyebrow { color: #74D3A0; }
+        .card--theme-dark .gz-scene__title { color: #A9E9C6; }
+        .card--theme-dark .gz-scene__text { color: #BFD7CC; }
+        .card--theme-dark .gz-scene__pill { background: #1C3328; border-color: #2F5141; color: #CFE6DA; }
+        .card--theme-dark .gz-kidtile { background: #15271E; border-color: #2A4838; }
+        .card--theme-dark .gz-kidtile__h { color: #74D3A0; }
+        .card--theme-dark .gz-kidtile__v { color: #A9E9C6; }
+        .card--theme-dark .gz-kidtile__s { color: #8FB0A1; }
+        .card--theme-dark .gz2-nav { background: #14241C; border-color: #2B4A39; }
+        .card--theme-dark .gz2-nav__item { color: #8FB6A1; }
+        .card--theme-dark .gz2-nav__item:hover { background: #1C3328; color: #A9E9C6; border-color: #2F5141; }
+        .card--theme-dark .gz2-nav__item--active,
+        .card--theme-dark .gz2-nav__item--active:hover { background: #22402F; color: #CFF2DD; border-color: #3C6A52; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+        .card--theme-dark .gz-details { --gi-surface: #14241C; --gi-surface-2: #182C22; --gi-surface-fill: #14241C; --gi-surface-fill-accent: #182C22; --gi-border: #2B4A39; --gi-border-strong: #386B52; --gi-surface-border: #2B4A39; --gi-surface-border-strong: #386B52; }
+        .card--theme-dark .gz-details > summary { color: #8FB6A1; }
+        .card--theme-dark .gz-details .gz2-card,
+        .card--theme-dark .gz-details .gz2-rep,
+        .card--theme-dark .gz-details .gz2-meter,
+        .card--theme-dark .gz2-card--static { background: #15271E !important; border-color: #2A4838 !important; }
+        .card--theme-dark .gz-details .gz2-card:hover { border-color: #3C6A52 !important; }
+        .card--theme-dark .gz-details .gz2-card__label,
+        .card--theme-dark .gz-details .gz2-rep__label,
+        .card--theme-dark .gz-details .gz2-eyebrow,
+        .card--theme-dark .gz-details .gz2-eyebrow--section,
+        .card--theme-dark .gz2-card--static .gz2-card__label { color: #74D3A0 !important; }
+        .card--theme-dark .gz-details .gz2-rep__value { color: #A9E9C6 !important; }
+        .card--theme-dark .gz-advtile { background: #15271E; border-color: #2A4838; }
+        .card--theme-dark .gz-advtile:hover { border-color: #3C6A52; }
+        .card--theme-dark .gz-advtile__label { color: #74D3A0; }
+        .card--theme-dark .gz-advtile__value { color: #A9E9C6; }
+        .card--theme-dark .gz-advtile__sub { color: #8FB0A1; }
+        .card--theme-dark footer.footer { background: #15271E !important; border-color: #2A4838 !important; color: #8FB0A1 !important; }
+        .card--theme-dark .tab-panel__temperature-constraint { background: #16271E; border-color: #2B4A39; }
+        .card--theme-dark .tab-panel__temperature-constraint--success { background: #14271D; border-color: #2E5A40; }
+        .card--theme-dark .tab-panel__temperature-constraint--warning { background: #2A2415; border-color: #5A4A24; }
+        .card--theme-dark .tab-panel__temperature-constraint--danger { background: #2A1A18; border-color: #5A2F2C; }
+        .card--theme-dark .tab-panel__history-rail-body { scrollbar-color: #386B52 transparent; }
+        .card--theme-dark .tab-panel__history-rail-body::-webkit-scrollbar-thumb { background: #386B52; }
 
         /* Basé sur la largeur de la CARTE (pas du navigateur) : header lisible
            même quand la carte est étroite dans un dashboard large. */

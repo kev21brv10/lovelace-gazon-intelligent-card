@@ -47,6 +47,9 @@ Le but est simple:
 - bandeau **« 🌙 Arrosage du soir prévu »** dès que le créneau recommandé est le soir (rafraîchissement canicule), avec la plage horaire (0.10.2)
 - **refonte ludique complète des 7 onglets (0.10.3 → 0.10.5)** : chaque onglet a sa **mascotte animée** dédiée (réservoir d'eau, pelouse savante, robot tondeuse, brin de gazon, flacon, carnet, engrenage) qui change d'expression selon l'état réel ; détails techniques repliés dans un volet, thème vert doux cohérent, barre d'onglets en pastilles
 - **mascottes réactives à la météo (0.10.5)** : décor animé derrière la mascotte (ciel jour/nuit, soleil à rayons, nuages qui dérivent, pluie/neige, étoiles, brume de canicule) selon la **température et la condition réelles** ; la mascotte Synthèse met des **lunettes de soleil** quand il fait beau/chaud, sue en canicule, etc. — animations respectant `prefers-reduced-motion`
+- **mode sombre natif (0.10.6)** : palette dédiée pour la refonte ludique (plus de plaques claires sur fond noir) qui suit le thème Home Assistant
+- **réserve « affichée » + rafraîchissement du soir probable (0.10.6)** : la jauge d'eau suit la descente progressive de la réserve selon le soleil, et la mascotte annonce un rafraîchissement du soir **probable** tant qu'il n'est pas encore déclenché
+- **allègement interne (0.10.6)** : ~2 000 lignes de CSS et de code mort de l'ancien design retirées, le rendu actuel est inchangé
 - tuiles synthétiques compactes pour les signaux importants
 - support des cas multi-pelouse
 - gestion propre des textes longs, des blocages et des fallbacks

@@ -87,7 +87,7 @@ class CardContractTests(unittest.TestCase):
 
     def test_products_tab_exposes_application_history(self):
         self.assertIn("application_history", MAIN_SRC)
-        self.assertIn("renderApplicationHistoryItems", LAYOUT_SRC)
+        self.assertIn("renderApplicationHistoryInline", LAYOUT_SRC)
         self.assertIn("Dernière application", LAYOUT_SRC)
 
     def test_overview_proposal_keeps_blocked_mowing_as_in_progress(self):
@@ -126,6 +126,24 @@ class CardContractTests(unittest.TestCase):
         self.assertIn("return fallback;", entity_state_body)
         self.assertIn('label: "À estimer"', next_mowing_body)
         self.assertIn('detail: mowingBlock.reasonLabel || mowerState.reason || "Aucune fenêtre de tonte calculée"', next_mowing_body)
+
+    def test_card_tap_fallback_entity_is_not_weather(self):
+        # Régression : le repli de l'action « more-info » au niveau carte ne doit PAS
+        # prioriser la météo (entity_weather), sinon un clic sur le fond de la carte
+        # ouvre toujours la fiche weather.* au lieu de l'entité décisionnelle.
+        body = extract_function_body(MAIN_SRC, "_defaultActionEntityId")
+        self.assertNotIn('"entity_weather"', body)
+        self.assertIn("ENTITY_KEYS", body)
+
+    def test_tab_nav_autoscroll_targets_current_nav(self):
+        # Régression : la mise au point auto de l'onglet actif doit viser la nav réelle
+        # (gz2-nav), pas l'ancienne (.tab-nav / .section-nav) retirée par la refonte gz2,
+        # sinon querySelector renvoie null et le défilement est un no-op silencieux.
+        body = extract_function_body(MAIN_SRC, "_scrollTabNavIntoView")
+        self.assertIn(".gz2-nav", body)
+        self.assertIn(".gz2-nav__item--active", body)
+        self.assertNotIn(".tab-nav", body)
+        self.assertNotIn(".section-nav", body)
 
     def test_compact_decision_text_sanitizes_technical_hints(self):
         self.assertIn("export function sanitizePublicDecisionText(value)", FORMATTERS_SRC)

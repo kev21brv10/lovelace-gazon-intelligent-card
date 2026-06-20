@@ -125,7 +125,7 @@ def extract_readme_option_keys(source):
 
 
 def extract_readme_complete_yaml_keys(source):
-    match = re.search(r"## 🧱 Exemple YAML complet\s+```yaml\n(?P<body>.*?)\n```", source, re.S)
+    match = re.search(r"## 🧱 Exemple YAML complet[\s\S]*?```yaml\n(?P<body>.*?)\n```", source, re.S)
     if not match:
         raise SystemExit("README.md must contain a complete YAML example block")
     return re.findall(r"^(?!\s)([a-zA-Z0-9_]+):", match.group("body"), re.M)

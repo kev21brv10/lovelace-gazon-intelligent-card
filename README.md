@@ -97,7 +97,7 @@ L’objectif est d’éviter les cartes qui disent tout à la fois sans hiérarc
 
 ### Installation manuelle
 
-1. Copie [`gazon-intelligent-card.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/gazon-intelligent-card.js) dans `config/www/gazon-intelligent-card/`
+1. Copie [`gazon-intelligent-card.js`](gazon-intelligent-card.js) dans `config/www/gazon-intelligent-card/`
 2. Ajoute la ressource Lovelace:
 
 ```yaml
@@ -203,6 +203,9 @@ Cette version fonctionne si les entités publiques standard de l’intégration 
 
 ## 🧱 Exemple YAML complet
 
+<details>
+<summary>Voir l'exemple complet (toutes les clés — normalement inutile, tout est auto-détecté)</summary>
+
 ```yaml
 type: custom:gazon-intelligent-card
 title: Gazon Principal
@@ -283,14 +286,19 @@ double_tap_action:
   action: none
 ```
 
+</details>
+
 > 💡 **Clic par entité** : chaque zone utile (tuiles chiffrées, scènes/mascottes de
-> chaque onglet, repères de la synthèse) ouvre directement la **fiche de son entité**
+> chaque onglet, repères de la synthèse et de l'irrigation) ouvre directement la **fiche de son entité**
 > (more-info). Le fond de la carte ne déclenche donc plus d'action « globale » par
 > défaut (`tap_action: none`) — tu peux le réactiver en configurant `tap_action`.
 
 ## ⚙️ Options principales
 
-Toutes les clés de configuration supportées par la card:
+La plupart du temps tu n'as **rien à mapper** : les entités sont auto-détectées. Les réglages d'apparence les plus utiles sont `theme_mode`, `accent_color`, `minimal_mode`, `show_advanced_details` et `tap_action`.
+
+<details>
+<summary>Toutes les clés de configuration supportées</summary>
 
 - `title`
 - `show_icons`
@@ -364,39 +372,28 @@ Toutes les clés de configuration supportées par la card:
 - `hold_action`
 - `double_tap_action`
 
-## 🧱 Structure du projet
-
-- [`src/gazon-intelligent-card.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/src/gazon-intelligent-card.js): point d’entrée source
-- [`src/renderers/layout.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/src/renderers/layout.js): rendu du layout et des panneaux
-- [`src/renderers/primitives.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/src/renderers/primitives.js): primitives communes
-- [`src/utils/formatters.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/src/utils/formatters.js): formatage et tonalités
-- [`src/styles/card-styles.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/src/styles/card-styles.js): styles de la carte
-- [`src/editor/editor.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/src/editor/editor.js): éditeur visuel
-- [`gazon-intelligent-card.js`](/Users/kevin/vs%20code/Github/lovelace-gazon-intelligent-card/gazon-intelligent-card.js): bundle distribué
+</details>
 
 ## 🧪 Développement
 
-Scripts disponibles:
+<details>
+<summary>Build, tests et discipline de publication (contributeurs)</summary>
 
 ```bash
-python3 scripts/build.py
-python3 scripts/validate.py
+npm install                                          # dépendances de test (jsdom)
+python3 scripts/build.py                             # régénère le bundle depuis src/
+python3 scripts/validate.py                          # vérifie le contrat (entités, README, bundle)
+python3 -m unittest discover -s tests -p "test_*.py" # tests de contrat (source)
+npm test                                             # tests comportementaux (jsdom)
 ```
 
-La release locale habituelle:
+La CI (`Validate`) rejoue exactement ces étapes sur chaque push et PR.
 
-```bash
-python3 scripts/build.py
-python3 scripts/validate.py
-```
-
-Discipline de publication:
-
-- mets à jour les sources
-- rebuild le bundle
-- valide le dépôt
+- mets à jour les sources puis rebuild le bundle et valide le dépôt
 - publie toujours le `bundle + sources ensemble`
 - ne publie jamais seulement `src/` ou seulement `gazon-intelligent-card.js`
+
+</details>
 
 ## 🚫 Ce que la card ne cherche pas à faire
 

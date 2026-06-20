@@ -1,4 +1,10 @@
-import { SECTION_DEFS, TAB_DEFS } from "../constants.js";
+import { TAB_DEFS } from "../constants.js";
+
+// Identifiant d'entité pour rendre une zone cliquable (more-info), seulement si
+// l'entité existe réellement côté hass — sinon on n'ajoute pas le binding.
+function moreInfoId(card, key) {
+  return card._entity(key) ? card._entityId(key) : null;
+}
 import {
   asNumber,
   computeActionTone,
@@ -11,14 +17,12 @@ import {
   formatMm,
   formatPlanType,
   formatProductUsageMode,
-  formatRecommendationState,
   formatIrrigationSignalLabel,
   formatStatusLabel,
   formatNumber,
   formatDurationHuman,
   formatInterventionStatusPresentation,
   formatWateringCauseLabel,
-  formatWateringBlockReason,
   formatWateringTypeLabel,
   compactDecisionText,
   safeFormatMonthLabel as formatMonthLabel,
@@ -26,7 +30,6 @@ import {
   safeRenderStatusPill as renderStatusPill,
   humanDateTimeText,
   isEmpty,
-  isUnavailableState,
   phaseTone,
   formatHydricUxState,
 } from "../utils/formatters.js";
@@ -316,61 +319,6 @@ function renderDebugConstraintCards(card, constraints, emptyText) {
     })
     .filter(Boolean)
     .join("");
-}
-
-function renderCompactSummaryList(items, emptyText = "Aucune information supplémentaire.") {
-  const rows = Array.isArray(items)
-    ? items.filter(Boolean).map((item) => {
-        if (typeof item === "string") {
-          return { label: "", value: item, note: "", tone: "neutral", entityKey: null };
-        }
-        if (!item || typeof item !== "object") {
-          return null;
-        }
-        return {
-          label: String(item.label || "").trim(),
-          value: String(item.value || "").trim(),
-          note: String(item.note || "").trim(),
-          tone: String(item.tone || "neutral").trim().toLowerCase() || "neutral",
-          entityKey: String(item.entityKey || "").trim() || null,
-        };
-      }).filter(Boolean)
-    : [];
-  if (!rows.length) {
-    return `<div class="tab-panel__empty">${escapeHtml(emptyText)}</div>`;
-  }
-  return `
-    <div class="tab-panel__summary-list">
-      ${rows
-        .map(
-          (row) => `
-            ${
-              row.entityKey
-                ? `
-                  <button
-                    type="button"
-                    class="tab-panel__summary-row tab-panel__summary-row--action tab-panel__summary-row--${escapeHtml(row.tone || "neutral")}"
-                    data-more-info-entity="${escapeHtml(row.entityKey)}"
-                    aria-label="${escapeHtml(row.label ? `Ouvrir ${row.label}` : row.value || "Ouvrir le détail")}"
-                  >
-                    ${row.label ? `<div class="tab-panel__summary-label">${escapeHtml(row.label)}</div>` : ""}
-                    <div class="tab-panel__summary-value">${escapeHtml(row.value || "Non disponible")}</div>
-                    ${row.note ? `<div class="tab-panel__summary-note">${escapeHtml(row.note)}</div>` : ""}
-                  </button>
-                `
-                : `
-                  <div class="tab-panel__summary-row tab-panel__summary-row--${escapeHtml(row.tone || "neutral")}">
-                    ${row.label ? `<div class="tab-panel__summary-label">${escapeHtml(row.label)}</div>` : ""}
-                    <div class="tab-panel__summary-value">${escapeHtml(row.value || "Non disponible")}</div>
-                    ${row.note ? `<div class="tab-panel__summary-note">${escapeHtml(row.note)}</div>` : ""}
-                  </div>
-                `
-            }
-          `,
-        )
-        .join("")}
-    </div>
-  `;
 }
 
 function getDebugInterventionState(card) {
@@ -865,59 +813,6 @@ function buildApplicationHistoryRows(items) {
     : [];
 }
 
-function renderApplicationHistoryItems(items) {
-  const rows = buildApplicationHistoryRows(items);
-  if (!rows.length) {
-    return `<div class="tab-panel__empty">Aucune application enregistrée dans l’historique local.</div>`;
-  }
-  return renderCompactSummaryList(rows, "Aucune application enregistrée dans l’historique local.");
-}
-
-function renderApplicationHistoryPreview(items, limit = 2) {
-  const rows = buildApplicationHistoryRows(items).slice(0, Math.max(0, limit));
-  if (!rows.length) {
-    return "";
-  }
-  return `
-    <div class="tab-panel__history-foldout-preview">
-      ${renderCompactSummaryList(rows, "Aucune application enregistrée dans l’historique local.")}
-    </div>
-  `;
-}
-
-function renderApplicationHistoryFoldout(items) {
-  const history = Array.isArray(items) ? items.filter((item) => item && typeof item === "object") : [];
-  if (!history.length) {
-    return "";
-  }
-  const countLabel = history.length > 1 ? `${history.length} applications enregistrées` : "1 application enregistrée";
-  const rows = buildApplicationHistoryRows(history);
-  return `
-      <section class="tab-panel__history-rail gi-info gi-info--secondary">
-        <div class="tab-panel__section-head tab-panel__history-foldout-head">
-          <div class="tab-panel__eyebrow">Historique complet</div>
-          <div class="tab-panel__section-meta">${escapeHtml(countLabel)}</div>
-        </div>
-        <div class="tab-panel__section-hint">Défilement vertical, de la plus récente à la plus ancienne.</div>
-        <div class="tab-panel__history-rail-body">
-          <div class="tab-panel__history-rail-track">
-            ${rows
-              .map(
-                (row) => `
-                  <div class="tab-panel__history-rail-item tab-panel__summary-row tab-panel__summary-row--${escapeHtml(row.tone || "neutral")}">
-                    ${row.label ? `<div class="tab-panel__summary-label">${escapeHtml(row.label)}</div>` : ""}
-                    <div class="tab-panel__summary-value">${escapeHtml(row.value || "Non disponible")}</div>
-                    ${row.note ? `<div class="tab-panel__summary-note">${escapeHtml(row.note)}</div>` : ""}
-                  </div>
-                `,
-              )
-              .join("")}
-          </div>
-        </div>
-      </section>
-    `;
-}
-
 function renderApplicationHistoryInline(items) {
   const history = Array.isArray(items) ? items.filter((item) => item && typeof item === "object") : [];
   if (!history.length) {
@@ -1000,6 +895,7 @@ export function renderProductsTab(card) {
     : (catalogue.hasProducts ? "Choisis un produit pour la prochaine intervention." : "Ajoute un produit dans le catalogue pour commencer.");
   const productsScene = renderPlayfulScene({
     variant: "product",
+    entityId: moreInfoId(card, "entity_catalogue_produits"),
     eyebrow: "Produits",
     title: prTitle,
     sentence: prSentence,
@@ -1066,6 +962,7 @@ export function renderInterventionTab(card) {
   }
   const interventionScene = renderPlayfulScene({
     variant: "task",
+    entityId: moreInfoId(card, "entity_prochaine_intervention"),
     eyebrow: "Intervention",
     title: interTodo ? "Une intervention à prévoir" : "Rien à prévoir",
     sentence: ui.summary || (interTodo ? "Un traitement est recommandé." : "Aucun traitement nécessaire pour le moment."),
@@ -1193,10 +1090,10 @@ export function renderOverviewTab(card) {
     heroSub = "";
   }
   const reperes = [
-    { label: "Fenêtre", value: windowState.statusLabel },
-    { label: "Prochain arrosage", value: nextWatering.label },
-    { label: "Prochaine tonte", value: nextMowing.label },
-    { label: "Dernier arrosage", value: lastWatering.label },
+    { label: "Fenêtre", value: windowState.statusLabel, entityKey: "entity_fenetre_optimale" },
+    { label: "Prochain arrosage", value: nextWatering.label, entityKey: "entity_prochain_arrosage" },
+    { label: "Prochaine tonte", value: nextMowing.label, entityKey: "entity_prochaine_tonte" },
+    { label: "Dernier arrosage", value: lastWatering.label, entityKey: "entity_dernier_arrosage" },
   ];
 
   // --- Scène ludique Synthèse : la pelouse « savante » qui connaît tout ---
@@ -1214,12 +1111,13 @@ export function renderOverviewTab(card) {
     : { icon: "mdi:eye-check-outline", text: "Je surveille tout pour toi" };
   const synthScene = renderPlayfulScene({
     variant: "synth",
+    entityId: moreInfoId(card, "entity_assistant"),
     eyebrow: "Aujourd'hui",
     title: synthTitle,
     sentence: titleText,
     pillIcon: synthWeatherPill.icon,
     pill: synthWeatherPill.text,
-    backdrop: gzWeatherBackdrop(synthTemp, synthCond),
+    backdrop: gzWeatherBackdrop(synthTemp, synthCond, gzIsDark(card)),
     mascot: gzSynthMascot({ mood: synthMood, temp: synthTemp, condition: synthCond }),
     tiles: [
       { icon: "mdi:water", label: "Eau", value: nextWatering.label || "—", sub: "prochain arrosage" },
@@ -1237,12 +1135,18 @@ export function renderOverviewTab(card) {
         ${renderGz2Hero("Conseil du jour", titleText, heroSub, { icon: "mdi:lightbulb-on-outline", tone: "accent" })}
 
         <div class="gz2-reperes" aria-label="Repères">
-          ${reperes.map((r) => `
-            <div class="gz2-rep">
+          ${reperes.map((r) => {
+            const eid = moreInfoId(card, r.entityKey);
+            const attrs = eid
+              ? ` data-more-info-entity="${escapeHtml(eid)}" role="button" tabindex="0" title="Voir le détail"`
+              : "";
+            return `
+            <div class="gz2-rep${eid ? " gz2-rep--clickable" : ""}"${attrs}>
               <div class="gz2-rep__label">${escapeHtml(r.label)}</div>
               <div class="gz2-rep__value">${escapeHtml(r.value || "—")}</div>
             </div>
-          `).join("")}
+          `;
+          }).join("")}
         </div>
 
         <div class="gz2-eyebrow">Essentiel</div>
@@ -1299,32 +1203,6 @@ function gzWeatherFlags(temp = null, condition = "") {
   };
 }
 
-function gzPrecipTop(f, y = 16) {
-  if (f.raining) {
-    return `<g>${[0, 1, 2].map((i) => `<path class="gz-drop d${i + 1}" d="M${52 + i * 22} ${y} q3.5 5 0 9 q-3.5 -4 0 -9z" fill="#7CC6F0"/>`).join("")}</g>`;
-  }
-  if (f.snowing) {
-    return `<g>${[0, 1, 2].map((i) => `<circle class="gz-drop d${i + 1}" cx="${54 + i * 22}" cy="${y + 3}" r="3" fill="#EAF4FB"/>`).join("")}</g>`;
-  }
-  return "";
-}
-
-function gzSkyBadge(f, cx = 120, cy = 24, r = 12) {
-  if (!f.has) return "";
-  if (f.raining) {
-    return `<g class="gz-pastille"><circle cx="${cx}" cy="${cy}" r="${r}" fill="#E6EEF3"/><ellipse cx="${cx}" cy="${cy - 2}" rx="${(r * 0.7).toFixed(1)}" ry="${(r * 0.46).toFixed(1)}" fill="#AEC3D2"/><g stroke="#5BB8E8" stroke-width="2" stroke-linecap="round"><line x1="${cx - 5}" y1="${cy + 6}" x2="${cx - 7}" y2="${cy + 10}"/><line x1="${cx + 1}" y1="${cy + 6}" x2="${cx - 1}" y2="${cy + 10}"/><line x1="${cx + 7}" y1="${cy + 6}" x2="${cx + 5}" y2="${cy + 10}"/></g></g>`;
-  }
-  if (f.snowing) {
-    return `<g class="gz-pastille"><circle cx="${cx}" cy="${cy}" r="${r}" fill="#EFF5F9"/><ellipse cx="${cx}" cy="${cy - 3}" rx="${(r * 0.7).toFixed(1)}" ry="${(r * 0.46).toFixed(1)}" fill="#C2D2DD"/><g fill="#8FB8D6"><circle cx="${cx - 5}" cy="${cy + 8}" r="1.6"/><circle cx="${cx + 1}" cy="${cy + 9}" r="1.6"/><circle cx="${cx + 6}" cy="${cy + 7}" r="1.6"/></g></g>`;
-  }
-  if (f.cloudy) {
-    return `<g class="gz-pastille"><circle cx="${cx}" cy="${cy}" r="${r}" fill="#EEF2F5"/><ellipse cx="${cx - 3}" cy="${cy + 1}" rx="${(r * 0.7).toFixed(1)}" ry="${(r * 0.46).toFixed(1)}" fill="#C2CDD6"/><ellipse cx="${cx + 5}" cy="${cy - 1}" rx="${(r * 0.46).toFixed(1)}" ry="${(r * 0.38).toFixed(1)}" fill="#D5DEE5"/></g>`;
-  }
-  const col = f.veryHot ? "#E8772E" : "#EFA63C";
-  const rr = ((f.hot || f.veryHot) ? r * 0.46 : r * 0.38).toFixed(1);
-  return `<g class="gz-pastille"><circle cx="${cx}" cy="${cy}" r="${r}" fill="#FBEFD7"/><circle cx="${cx}" cy="${cy}" r="${rr}" fill="${col}"/><g stroke="${col}" stroke-width="1.7" stroke-linecap="round"><line x1="${cx}" y1="${cy - r + 1}" x2="${cx}" y2="${cy - r + 4}"/><line x1="${cx}" y1="${cy + r - 4}" x2="${cx}" y2="${cy + r - 1}"/><line x1="${cx - r + 1}" y1="${cy}" x2="${cx - r + 4}" y2="${cy}"/><line x1="${cx + r - 4}" y1="${cy}" x2="${cx + r - 1}" y2="${cy}"/></g></g>`;
-}
-
 export function renderPlayfulScene(scene) {
   const tiles = (scene.tiles || []).filter(Boolean).map((t) => `
       <div class="gz-kidtile">
@@ -1332,8 +1210,15 @@ export function renderPlayfulScene(scene) {
         <div class="gz-kidtile__v">${escapeHtml(t.value || "—")}</div>
         ${t.sub ? `<div class="gz-kidtile__s">${escapeHtml(t.sub)}</div>` : ""}
       </div>`).join("");
+  // Scène cliquable : si une entité est fournie, toute la scène ouvre sa fiche
+  // (more-info), géré par le binding global [data-more-info-entity].
+  const eid = scene.entityId || null;
+  const sceneAttrs = eid
+    ? ` data-more-info-entity="${escapeHtml(eid)}" role="button" tabindex="0" title="Voir le détail"`
+    : "";
+  const sceneClickable = eid ? " gz-scene--clickable" : "";
   return `
-      <div class="gz-scene gz-scene--${escapeHtml(scene.variant || "water")}">
+      <div class="gz-scene gz-scene--${escapeHtml(scene.variant || "water")}${sceneClickable}"${sceneAttrs}>
         <div class="gz-scene__art"><div class="gz-scene__stage">${scene.backdrop || ""}${scene.mascot || ""}</div></div>
         <div class="gz-scene__msg">
           <div class="gz-scene__eyebrow">${escapeHtml(scene.eyebrow || "")}</div>
@@ -1345,16 +1230,27 @@ export function renderPlayfulScene(scene) {
       ${tiles ? `<div class="gz-kidtiles">${tiles}</div>` : ""}`;
 }
 
+// Thème sombre actif ? (résout le mode "auto" via hass.themes.darkMode)
+function gzIsDark(card) {
+  const tm = (card && card._config && card._config.theme_mode) || "auto";
+  if (tm === "dark") return true;
+  if (tm === "light") return false;
+  return Boolean(card && card._hass && card._hass.themes && card._hass.themes.darkMode);
+}
+
 // Décor météo animé rendu DERRIÈRE la mascotte (ciel, soleil/lune, nuages, pluie, neige…)
-function gzWeatherBackdrop(temp = null, condition = "") {
+function gzWeatherBackdrop(temp = null, condition = "", isDark = false) {
   const f = gzWeatherFlags(temp, condition);
   if (!f.has) {
-    return `<svg class="gz-scene__sky" viewBox="0 0 150 172" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="150" height="172" fill="#EBF6F0"/></svg>`;
+    return `<svg class="gz-scene__sky" viewBox="0 0 150 172" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="150" height="172" fill="var(--gz-sky-edge, #EBF6F0)"/></svg>`;
   }
-  const sig = `${f.night ? "n" : ""}${f.raining ? "r" : ""}${f.snowing ? "s" : ""}${f.cloudy ? "c" : ""}${f.veryHot ? "H" : ""}${f.hot ? "h" : ""}${f.sunny ? "y" : ""}` || "x";
+  // En thème sombre, on rend toujours une scène de NUIT (ciel indigo, lune, étoiles) pour
+  // rester cohérent avec l'UI sombre, quelle que soit l'heure réelle.
+  const night = f.night || isDark;
+  const sig = `${night ? "n" : ""}${f.raining ? "r" : ""}${f.snowing ? "s" : ""}${f.cloudy ? "c" : ""}${f.veryHot ? "H" : ""}${f.hot ? "h" : ""}${f.sunny ? "y" : ""}` || "x";
   const gid = `gzsky_${sig}`;
   let g1; let g2;
-  if (f.night) { g1 = "#3D4C78"; g2 = "#6E7CA6"; }
+  if (night) { g1 = "#3D4C78"; g2 = "#6E7CA6"; }
   else if (f.raining) { g1 = "#B6C5D0"; g2 = "#D7E0E6"; }
   else if (f.snowing) { g1 = "#CBD9E4"; g2 = "#ECF2F7"; }
   else if (f.cloudy) { g1 = "#C3CFD8"; g2 = "#E2E9EE"; }
@@ -1363,18 +1259,18 @@ function gzWeatherBackdrop(temp = null, condition = "") {
   else { g1 = "#CDEBF8"; g2 = "#ECF8FC"; }
 
   const clear = !f.raining && !f.snowing && !f.cloudy;
-  const sun = (clear && !f.night)
-    ? `<g class="gz-spin" style="transform-origin:114px 40px"><g stroke="${f.veryHot ? "#F6C879" : "#FBE0A0"}" stroke-width="3" stroke-linecap="round">${Array.from({ length: 8 }, (_, i) => { const a = i * 45 * Math.PI / 180; return `<line x1="${(114 + Math.cos(a) * 15).toFixed(1)}" y1="${(40 + Math.sin(a) * 15).toFixed(1)}" x2="${(114 + Math.cos(a) * 22).toFixed(1)}" y2="${(40 + Math.sin(a) * 22).toFixed(1)}"/>`; }).join("")}</g></g><circle cx="114" cy="40" r="13" fill="${f.veryHot ? "#FBD588" : "#FCEAB0"}"/>`
+  const sun = (clear && !night)
+    ? `<g class="gz-spin"><g stroke="${f.veryHot ? "#F6C879" : "#FBE0A0"}" stroke-width="3" stroke-linecap="round">${Array.from({ length: 8 }, (_, i) => { const a = i * 45 * Math.PI / 180; return `<line x1="${(114 + Math.cos(a) * 15).toFixed(1)}" y1="${(40 + Math.sin(a) * 15).toFixed(1)}" x2="${(114 + Math.cos(a) * 22).toFixed(1)}" y2="${(40 + Math.sin(a) * 22).toFixed(1)}"/>`; }).join("")}</g></g><circle cx="114" cy="40" r="13" fill="${f.veryHot ? "#FBD588" : "#FCEAB0"}"/>`
     : "";
-  const moon = f.night
+  const moon = night
     ? `<circle cx="116" cy="38" r="13" fill="#F3EFD6"/><circle cx="121" cy="34" r="11" fill="${g1}"/>`
     : "";
-  const stars = f.night
+  const stars = night
     ? `<g fill="#EAF0FF">${[[28, 30, 0], [52, 22, 0.6], [82, 32, 1.1], [40, 52, 1.6], [98, 58, 0.3]].map(([x, y, d]) => `<circle class="gz-twinkle" style="animation-delay:${d}s" cx="${x}" cy="${y}" r="1.5"/>`).join("")}</g>`
     : "";
   const clouds = (f.cloudy || f.raining || f.snowing)
     ? `<g class="gz-drift" fill="#FFFFFF" opacity=".82"><ellipse cx="38" cy="40" rx="20" ry="11"/><ellipse cx="56" cy="36" rx="14" ry="9"/></g><g class="gz-drift gz-drift--2" fill="#FFFFFF" opacity=".6"><ellipse cx="104" cy="60" rx="16" ry="9"/><ellipse cx="118" cy="57" rx="11" ry="7"/></g>`
-    : (clear && !f.night) ? `<g class="gz-drift" fill="#FFFFFF" opacity=".5"><ellipse cx="34" cy="34" rx="15" ry="8"/><ellipse cx="46" cy="31" rx="10" ry="6"/></g>` : "";
+    : (clear && !night) ? `<g class="gz-drift" fill="#FFFFFF" opacity=".5"><ellipse cx="34" cy="34" rx="15" ry="8"/><ellipse cx="46" cy="31" rx="10" ry="6"/></g>` : "";
   const rain = f.raining
     ? `<g class="gz-rain" stroke="#D4E7F4" stroke-width="2" stroke-linecap="round">${[8, 30, 52, 74, 96, 118, 140].map((x, i) => `<line style="animation-delay:${(i % 4) * 0.16}s" x1="${x}" y1="58" x2="${x - 6}" y2="76"/>`).join("")}</g>`
     : "";
@@ -1384,11 +1280,13 @@ function gzWeatherBackdrop(temp = null, condition = "") {
   const haze = f.veryHot
     ? `<g class="gz-shimmer" fill="none" stroke="#FFFFFF" stroke-width="2" opacity=".4" stroke-linecap="round"><path d="M18 150 q8 -4 16 0 t16 0"/><path d="M74 158 q8 -4 16 0 t16 0"/></g>`
     : "";
-  const edge = f.night ? "#3D4C78" : "#E9F7EF";
+  // Le bord (vignette) se fond toujours dans le fond de la scène via --gz-sky-edge
+  // (clair en thème clair, sombre en thème sombre) → pas de halo.
+  const edge = "var(--gz-sky-edge, #E9F7EF)";
   return `<svg class="gz-scene__sky" viewBox="0 0 150 172" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <defs>
         <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${g1}"/><stop offset="1" stop-color="${g2}"/></linearGradient>
-        <radialGradient id="${gid}_v" cx="50%" cy="40%" r="78%"><stop offset="52%" stop-color="${edge}" stop-opacity="0"/><stop offset="100%" stop-color="${edge}" stop-opacity="0.92"/></radialGradient>
+        <radialGradient id="${gid}_v" cx="50%" cy="40%" r="78%"><stop offset="52%" style="stop-color:${edge};stop-opacity:0"/><stop offset="100%" style="stop-color:${edge};stop-opacity:0.92"/></radialGradient>
       </defs>
       <rect width="150" height="172" fill="url(#${gid})"/>
       ${stars}${sun}${moon}${clouds}${rain}${snow}${haze}
@@ -1405,12 +1303,16 @@ function gzWaterMascot({ fillPct = 50, madPct = 50, mood = "happy", raining = fa
   const madY = Math.round(bottom - Math.max(0, Math.min(100, madPct)) / 100 * h);
   const mouth = mood === "sad"
     ? `<path d="M62 123 q13 -11 26 0" fill="none" stroke="#21433A" stroke-width="3.5" stroke-linecap="round"/>`
-    : `<path d="M62 117 q13 11 26 0" fill="none" stroke="#21433A" stroke-width="3.5" stroke-linecap="round"/>`;
+    : drinking
+      ? `<ellipse cx="75" cy="120" rx="5.5" ry="6.5" fill="#21433A"/>`
+      : `<path d="M62 117 q13 11 26 0" fill="none" stroke="#21433A" stroke-width="3.5" stroke-linecap="round"/>`;
   const sweat = mood === "sad"
     ? `<path class="gz-drop" d="M100 95 q5 7 0 12 q-5 -5 0 -12z" fill="#7CC6F0"/>`
     : "";
   const overDrops = (drinking || raining)
-    ? `<g>${[0, 1, 2].map((i) => `<path class="gz-drop d${i + 1}" d="M${58 + i * 16} 16 q4 6 0 11 q-4 -5 0 -11z" fill="#7CC6F0"/>`).join("")}</g>`
+    ? `<g>${[[50, 10, 0], [62, 6, 0.3], [75, 12, 0.6], [88, 7, 0.2], [100, 11, 0.45]].map(
+        ([x, y, d]) => `<path class="gz-drop" style="animation-delay:${d}s" d="M${x} ${y} q4.5 7 0 13 q-4.5 -6 0 -13z" fill="#5BB8E8"/>`,
+      ).join("")}</g>`
     : "";
   const sleeping = mood === "sleep";
   const eyes = sleeping
@@ -1507,9 +1409,7 @@ function gzSynthMascot({ mood = "happy", temp = null, condition = "" } = {}) {
 
 function gzMowerMascot({ mood = "rest", temp = null, condition = "" } = {}) {
   const rolling = mood === "mow";
-  const wheel = (cx) => rolling
-    ? `<circle cx="${cx}" cy="122" r="11" fill="#3F5E50"/><g class="gz-roll" style="transform-origin:${cx}px 122px"><line x1="${cx}" y1="114" x2="${cx}" y2="130" stroke="#8FD0A8" stroke-width="2.6" stroke-linecap="round"/><line x1="${cx - 8}" y1="122" x2="${cx + 8}" y2="122" stroke="#8FD0A8" stroke-width="2.6" stroke-linecap="round"/></g><circle cx="${cx}" cy="122" r="3" fill="#3F5E50"/>`
-    : `<circle cx="${cx}" cy="122" r="11" fill="#3F5E50"/><circle cx="${cx}" cy="122" r="4" fill="#8FD0A8"/>`;
+  const wheel = (cx) => `<circle cx="${cx}" cy="122" r="11" fill="#3F5E50"/><circle cx="${cx}" cy="122" r="4" fill="#8FD0A8"/>`;
   const zzz = mood === "charge"
     ? `<g fill="#5B7A6D" font-weight="600"><text x="104" y="58" font-size="13">z</text><text x="114" y="46" font-size="17">Z</text></g>`
     : "";
@@ -1528,16 +1428,18 @@ function gzMowerMascot({ mood = "rest", temp = null, condition = "" } = {}) {
   return `
       <svg viewBox="0 0 150 172" width="100%" role="img" aria-label="Robot tondeuse">
         ${zzz}${clippings}${speed}
-        <g class="gz-face">
-          <line x1="75" y1="62" x2="75" y2="46" stroke="#7FB39A" stroke-width="3" stroke-linecap="round"/>
-          <circle cx="75" cy="42" r="4" fill="${mood === "blocked" ? "#E0843C" : "#5DBE7E"}"/>
-          <rect x="40" y="62" width="70" height="52" rx="16" fill="#8FD0A8"/>
-          <rect x="50" y="80" width="50" height="20" rx="9" fill="#fff" opacity=".5"/>
-          ${eyes}
-          ${mouth}
+        <g class="${rolling ? "gz-mow" : ""}">
+          <g class="gz-face">
+            <line x1="75" y1="62" x2="75" y2="46" stroke="#7FB39A" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="75" cy="42" r="4" fill="${mood === "blocked" ? "#E0843C" : "#5DBE7E"}"/>
+            <rect x="40" y="62" width="70" height="52" rx="16" fill="#8FD0A8"/>
+            <rect x="50" y="80" width="50" height="20" rx="9" fill="#fff" opacity=".5"/>
+            ${eyes}
+            ${mouth}
+          </g>
+          ${wheel(56)}${wheel(94)}
+          <g stroke="#4FA84F" stroke-width="4" stroke-linecap="round"><line x1="34" y1="138" x2="34" y2="130"/><line x1="46" y1="138" x2="46" y2="128"/><line x1="104" y1="138" x2="104" y2="128"/><line x1="116" y1="138" x2="116" y2="130"/></g>
         </g>
-        ${wheel(56)}${wheel(94)}
-        <g stroke="#4FA84F" stroke-width="4" stroke-linecap="round"><line x1="34" y1="138" x2="34" y2="130"/><line x1="46" y1="138" x2="46" y2="128"/><line x1="104" y1="138" x2="104" y2="128"/><line x1="116" y1="138" x2="116" y2="130"/></g>
       </svg>`;
 }
 
@@ -1819,10 +1721,10 @@ export function renderWateringTab(card) {
   ].filter(Boolean);
 
   const reperes = [
-    { label: "Objectif", value: objectiveLabel },
-    { label: "Type", value: wateringTypeLabel },
-    { label: "Prochain arrosage", value: nextWatering.label },
-    { label: "Dernier arrosage", value: lastWatering.label },
+    { label: "Objectif", value: objectiveLabel, entityKey: "entity_objectif_arrosage" },
+    { label: "Type", value: wateringTypeLabel, entityKey: "entity_type_arrosage" },
+    { label: "Prochain arrosage", value: nextWatering.label, entityKey: "entity_prochain_arrosage" },
+    { label: "Dernier arrosage", value: lastWatering.label, entityKey: "entity_dernier_arrosage" },
   ];
   const heroTitle = heroNextText || irrigationSignal.summary || windowState.summary || "Irrigation";
   const heroSub = shouldShowHeroHint ? heroHintText : "";
@@ -1840,6 +1742,10 @@ export function renderWateringTab(card) {
   // Bandeau « arrosage du soir prévu » : visible dès que le créneau recommandé est le soir
   // (rafraîchissement canicule), pour ne pas avoir à fouiller la fenêtre.
   const eveningPlanned = windowState.publicState === "soir" && !windowState.isBlocked && windowState.objective > 0;
+  // Anticipation honnête : tant que le cooling n'est pas encore déclenché (fenêtre du soir),
+  // on annonce qu'il est PROBABLE si les conditions réelles sont là (canicule + air sec +
+  // marge de séchage). Conditionnel : se retire de lui-même si l'air redevient humide.
+  const eveningLikely = !eveningPlanned && Boolean(context.eveningCoolingLikely);
   const eveningBannerHtml = eveningPlanned
     ? `
         <div class="gz2-evening" role="status">
@@ -1858,8 +1764,30 @@ export function renderWateringTab(card) {
   const rainBlockedKid = isBlocked && /pluie/.test(blockTxtKid);
   const cooldownBlockedKid = isBlocked && /(cooldown|repos)/.test(blockTxtKid);
   const thirstyKid = !wateringNow && context.depletionRatio != null && context.depletionRatio >= madRatio;
+  // Application de produit : la mascotte prévient quand un produit vient d'être appliqué et que
+  // son arrosage d'incorporation est imminent, puis pendant l'incorporation elle-même.
+  const appEntity = card._entity("entity_derniere_application");
+  const appAttrs = (appEntity && appEntity.attributes) || {};
+  const appProductName = String((appEntity && appEntity.state) || "").trim();
+  const appRequiresWatering = appAttrs.application_requires_watering_after === true;
+  const appPostPending = appAttrs.application_post_watering_pending === true;
+  const appPostRemainingMm = Number(appAttrs.application_post_watering_remaining_mm) || 0;
+  const appPostDelayMin = Number(appAttrs.application_post_watering_delay_remaining_minutes) || 0;
+  const appPostStatus = String(appAttrs.application_post_watering_status || "").trim().toLowerCase();
+  const incorporationNow = wateringNow && wateringProgress.wateringCause === "post_application";
+  const eveningCoolingNow = wateringNow && wateringProgress.wateringCause === "rafraichissement_soir";
+  const incorporationPending = !wateringNow && appRequiresWatering && appPostPending
+    && appPostRemainingMm > 0 && appPostStatus !== "termine";
+  const appLabel = appProductName || "le produit";
   let kid;
-  if (wateringNow) {
+  if (incorporationNow) {
+    kid = { mood: "happy", drinking: true, title: "Elle boit le produit !", sentence: `Elle fait pénétrer ${appLabel} dans la terre.`, pillIcon: "mdi:spray-bottle", pill: `Incorporation · ${formatNumber(wateringProgress.progressPercent || 0, 0)} %` };
+  } else if (incorporationPending) {
+    const delayTxt = appPostDelayMin > 0 ? ` (dans ~${formatNumber(appPostDelayMin, 0)} min)` : "";
+    kid = { mood: "happy", title: "Produit appliqué", sentence: `Tu viens d'appliquer ${appLabel}. Je vais l'arroser pour le faire pénétrer${delayTxt}.`, pillIcon: "mdi:timer-sand", pill: "Arrosage d'incorporation à venir" };
+  } else if (eveningCoolingNow) {
+    kid = { mood: "happy", drinking: true, title: "Petit rafraîchissement du soir", sentence: "Elle se rafraîchit pour la nuit — l'eau fait baisser la température du sol.", pillIcon: "mdi:weather-night", pill: `Rafraîchissement en cours · ${formatNumber(wateringProgress.progressPercent || 0, 0)} %` };
+  } else if (wateringNow) {
     kid = { mood: "happy", drinking: true, title: "Elle boit en ce moment !", sentence: "L'eau arrive dans la terre, le réservoir se remplit.", pillIcon: "mdi:sprinkler", pill: `Arrosage en cours · ${formatNumber(wateringProgress.progressPercent || 0, 0)} %` };
   } else if (rainBlockedKid) {
     kid = { mood: "happy", raining: true, title: "Pas besoin d'arroser", sentence: "La pluie va s'en occuper toute seule.", pillIcon: "mdi:weather-rainy", pill: "Pluie prévue" };
@@ -1870,15 +1798,23 @@ export function renderWateringTab(card) {
   } else {
     kid = { mood: "happy", title: "Ma pelouse va bien !", sentence: "Elle a assez d'eau en réserve dans la terre.", pillIcon: "mdi:emoticon-happy-outline", pill: "Tout va bien" };
   }
+  // C'est la mascotte qui annonce le rafraîchissement du soir (plutôt qu'un bandeau séparé) :
+  // probabilité honnête, qui se retire si l'air redevient humide.
+  if (eveningLikely && !wateringNow && !rainBlockedKid && !incorporationPending) {
+    kid.sentence = `${kid.sentence} Et un petit rafraîchissement du soir est probable, si l'air reste sec.`;
+    kid.pill = "Rafraîchissement probable ce soir";
+    kid.pillIcon = "mdi:weather-night";
+  }
   const wxWater = card._weatherState();
   const playfulScene = renderPlayfulScene({
     variant: "water",
+    entityId: moreInfoId(card, "entity_prochain_arrosage"),
     eyebrow: "Arrosage",
     title: kid.title,
     sentence: kid.sentence,
     pill: kid.pill,
     pillIcon: kid.pillIcon,
-    backdrop: gzWeatherBackdrop(wxWater ? wxWater.temperature : null, wxWater ? wxWater.condition : ""),
+    backdrop: gzWeatherBackdrop(wxWater ? wxWater.temperature : null, wxWater ? wxWater.condition : "", gzIsDark(card)),
     mascot: gzWaterMascot({ fillPct: fillPctKid, madPct: madPctKid, mood: kid.mood, raining: Boolean(kid.raining), drinking: Boolean(kid.drinking), temp: wxWater ? wxWater.temperature : null, condition: wxWater ? wxWater.condition : "" }),
     tiles: [
       { icon: "mdi:water", label: "Dernier arrosage", value: lastWatering.label || "—", sub: "ce qu'elle a bu" },
@@ -1902,12 +1838,18 @@ export function renderWateringTab(card) {
         ${renderWateringProgressSection(card, wateringProgress)}
 
         <div class="gz2-reperes" aria-label="Repères">
-          ${reperes.map((r) => `
-            <div class="gz2-rep">
+          ${reperes.map((r) => {
+            const eid = moreInfoId(card, r.entityKey);
+            const attrs = eid
+              ? ` data-more-info-entity="${escapeHtml(eid)}" role="button" tabindex="0" title="Voir le détail"`
+              : "";
+            return `
+            <div class="gz2-rep${eid ? " gz2-rep--clickable" : ""}"${attrs}>
               <div class="gz2-rep__label">${escapeHtml(r.label)}</div>
               <div class="gz2-rep__value">${escapeHtml(r.value || "—")}</div>
             </div>
-          `).join("")}
+          `;
+          }).join("")}
         </div>
 
         ${
@@ -2036,12 +1978,13 @@ export function renderGazonTab(card) {
   const wxGazon = card._weatherState();
   const gazonScene = renderPlayfulScene({
     variant: "gazon",
+    entityId: moreInfoId(card, "entity_phase"),
     eyebrow: "Gazon",
     title: gzTitle,
     sentence: gzSentence,
     pillIcon: "mdi:grass",
     pill: phase ? `Phase ${formatStatusLabel(phase)}` : "Phase Normal",
-    backdrop: gzWeatherBackdrop(wxGazon ? wxGazon.temperature : null, wxGazon ? wxGazon.condition : ""),
+    backdrop: gzWeatherBackdrop(wxGazon ? wxGazon.temperature : null, wxGazon ? wxGazon.condition : "", gzIsDark(card)),
     mascot: gzGazonMascot({ mood: gzMood, temp: wxGazon ? wxGazon.temperature : null, condition: wxGazon ? wxGazon.condition : "" }),
     tiles: [
       { icon: "mdi:grass", label: "Phase", value: formatStatusLabel(phase) || "Normal", sub: "saison" },
@@ -2207,12 +2150,13 @@ export function renderMowingTab(card) {
   const wxMow = card._weatherState();
   const mowScene = renderPlayfulScene({
     variant: "mow",
+    entityId: moreInfoId(card, "entity_prochaine_tonte"),
     eyebrow: "Tonte",
     title: mowTitle,
     sentence: mowSentence,
     pill: mowPill,
     pillIcon: mowPillIcon,
-    backdrop: gzWeatherBackdrop(wxMow ? wxMow.temperature : null, wxMow ? wxMow.condition : ""),
+    backdrop: gzWeatherBackdrop(wxMow ? wxMow.temperature : null, wxMow ? wxMow.condition : "", gzIsDark(card)),
     mascot: gzMowerMascot({ mood: mowMood, temp: wxMow ? wxMow.temperature : null, condition: wxMow ? wxMow.condition : "" }),
     tiles: [
       { icon: "mdi:content-cut", label: "État", value: tonteValue, sub: mowerState.present ? (mowerState.label || "robot") : "robot" },
@@ -2267,6 +2211,7 @@ export function renderConfigTab(card) {
   // --- Scène ludique Réglages : l'engrenage ---
   const configScene = renderPlayfulScene({
     variant: "config",
+    entityId: moreInfoId(card, "entity_switch_arrosage_automatique"),
     eyebrow: "Réglages",
     title: "Les réglages du jardin",
     sentence: "Touche une tuile pour ouvrir le contrôle dans Home Assistant.",

@@ -1,6 +1,6 @@
 {
   "name": "lovelace-gazon-intelligent-card",
-  "version": "0.10.5",
+  "version": "0.10.6",
   "description": "Lovelace card for Home Assistant integration Gazon Intelligent",
   "license": "MIT",
   "private": false,
@@ -14,7 +14,11 @@
   "scripts": {
     "build": "python3 scripts/build.py",
     "validate": "python3 scripts/validate.py",
+    "test": "node --test tests/*.test.mjs",
     "release": "python3 scripts/build.py && python3 scripts/validate.py"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1"
   },
   "keywords": [
     "home-assistant",

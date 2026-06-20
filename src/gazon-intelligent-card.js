@@ -1,6 +1,7 @@
 import {
   CARD_NAME,
   CARD_TYPE,
+  CARD_VERSION,
   SECTION_ACCENTS,
   DEFAULT_CONFIG,
   ENTITY_KEYS,
@@ -4152,3 +4153,11 @@ if (!window.customCards.some((card) => card.type === CARD_TYPE)) {
       "https://github.com/kev21brv10/lovelace-gazon-intelligent-card",
   });
 }
+
+// Bannière de version au chargement (pratique HACS standard : facilite le support
+// et confirme quelle build est réellement servie par le navigateur).
+console.info(
+  `%c GAZON-INTELLIGENT-CARD %c v${CARD_VERSION} `,
+  "color:#fff;background:#2f9e44;font-weight:700;border-radius:3px 0 0 3px;",
+  "color:#2f9e44;background:#e9f7ef;font-weight:700;border-radius:0 3px 3px 0;",
+);

@@ -16,8 +16,28 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Build
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install JS dev dependencies
+        run: npm ci
+
+      - name: Build bundle
         run: python3 scripts/build.py
 
-      - name: Validate
+      - name: Bundle committed in sync
+        run: git diff --exit-code -- gazon-intelligent-card.js gazon-intelligent-card.js.gz
+
+      - name: JS syntax check
+        run: node --check gazon-intelligent-card.js
+
+      - name: Validate contract
         run: python3 scripts/validate.py
+
+      - name: Contract tests (source)
+        run: python3 -m unittest discover -s tests -p "test_*.py" -v
+
+      - name: Behavioral tests (jsdom)
+        run: npm test

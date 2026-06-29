@@ -32,6 +32,11 @@ import {
   isEmpty,
   phaseTone,
   formatHydricUxState,
+  formatSkipReason,
+  formatSkipRelativeDate,
+  zoneColor,
+  zoneLabel,
+  formatWateringCause,
 } from "../utils/formatters.js";
 
 function renderGz2Hero(eyebrow, title, sub = "", opts = {}) {
@@ -1144,6 +1149,7 @@ export function renderOverviewTab(card) {
             <div class="gz2-rep${eid ? " gz2-rep--clickable" : ""}"${attrs}>
               <div class="gz2-rep__label">${escapeHtml(r.label)}</div>
               <div class="gz2-rep__value">${escapeHtml(r.value || "—")}</div>
+              ${r.sub ? `<div class="gz2-rep__sub">${escapeHtml(r.sub)}</div>` : ""}
             </div>
           `;
           }).join("")}
@@ -1524,6 +1530,166 @@ function gzGearMascot() {
       </svg>`;
 }
 
+function renderZoneBars(zones) {
+  if (!Array.isArray(zones) || !zones.length) return "";
+  const maxMin = Math.max(...zones.map((z) => asNumber(z.duration_min) ?? 0), 1);
+  const rows = zones.map((z, i) => {
+    const eid = String(z.entity_id || z.zone || "");
+    const label = zoneLabel(eid, z.order, i);
+    const color = zoneColor(eid, i);
+    const pct = Math.max(3, Math.min(100, ((asNumber(z.duration_min) ?? 0) / maxMin) * 100));
+    const mm = z.mm != null ? `${formatNumber(asNumber(z.mm), 1)} mm` : "";
+    return `
+      <div class="gi-zone-bar-row">
+        <span class="gi-zone-badge" style="background:${escapeHtml(color)}">${escapeHtml(label)}</span>
+        <div class="gi-zone-track"><div class="gi-zone-fill" style="width:${escapeHtml(String(Math.round(pct)))}%;background:${escapeHtml(color)}"></div></div>
+        <span class="gi-zone-bar-meta">${escapeHtml(mm)}</span>
+      </div>`;
+  }).join("");
+  return `<div class="gi-zone-bars">${rows}</div>`;
+}
+
+function renderWateringHistoryEntry(entry, index) {
+  const dateStr = String(entry.date || "").trim();
+  const relDate = dateStr ? formatSkipRelativeDate(dateStr) : "";
+  const causeLabel = entry.watering_cause ? formatWateringCause(entry.watering_cause) : "";
+  const sourceParts = [relDate, causeLabel].filter(Boolean);
+  const mm = asNumber(entry.surface_mm ?? entry.total_mm);
+  const mmLabel = mm != null && mm > 0 ? `${formatNumber(mm, 1)} mm` : "—";
+  const zones = Array.isArray(entry.zones) ? entry.zones : [];
+  const zoneCount = zones.length || (asNumber(entry.zone_count) ?? 0);
+  const subLabel = zoneCount > 1 ? `${zoneCount} zones` : (zoneCount === 1 ? "1 zone" : "");
+  const badgeHtml = `<span class="gi-hist-badge gi-hist-badge--ok">Fait</span>`;
+
+  let zoneBadgesHtml = "";
+  if (zones.length) {
+    const shown = zones.slice(0, 3);
+    zoneBadgesHtml = `<div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">` +
+      shown.map((z, i) => {
+        const eid = String(z.entity_id || z.zone || "");
+        const lbl = zoneLabel(eid, z.order, i);
+        const col = zoneColor(eid, i);
+        return `<span class="gi-zone-badge" style="background:${escapeHtml(col)};font-size:8px;padding:1px 5px">${escapeHtml(lbl)}</span>`;
+      }).join("") +
+      (zones.length > 3 ? `<span class="gi-zone-badge" style="background:#94A3B8;font-size:8px;padding:1px 5px">+${zones.length - 3}</span>` : "") +
+      `</div>`;
+  }
+
+  return `
+    <div class="gi-hist-entry">
+      <div class="gi-hist-entry__body">
+        <div class="gi-hist-entry__name">Arrosage</div>
+        ${zoneBadgesHtml}
+        <div class="gi-hist-entry__meta">${escapeHtml(sourceParts.join(" · "))}</div>
+      </div>
+      <div class="gi-hist-entry__right">
+        <div class="gi-hist-entry__val">${escapeHtml(mmLabel)}</div>
+        ${subLabel ? `<div class="gi-hist-entry__sub">${escapeHtml(subLabel)}</div>` : ""}
+      </div>
+      ${badgeHtml}
+    </div>`;
+}
+
+function renderSkipHistoryEntry(skip) {
+  const dateStr = String(skip.date || "").trim();
+  const relDate = dateStr ? formatSkipRelativeDate(dateStr) : "";
+  const reasonLabel = formatSkipReason(skip.reason);
+  const fenetre = String(skip.fenetre || "").trim();
+  const metaParts = [relDate, fenetre || null].filter(Boolean);
+  const mm = asNumber(skip.objectif_mm);
+  const mmLabel = mm != null && mm > 0 ? `${formatNumber(mm, 1)} mm` : "—";
+  const isBlocked = ["irrigation_blocked", "auto_not_allowed", "execution_not_allowed"].includes(String(skip.reason || ""));
+  const badgeClass = isBlocked ? "gi-hist-badge--block" : "gi-hist-badge--skip";
+  const badgeText = isBlocked ? "Bloqué" : "Ignoré";
+  return `
+    <div class="gi-hist-entry gi-hist-entry--skip">
+      <div class="gi-hist-entry__body">
+        <div class="gi-hist-entry__name">${fenetre === "soir" ? "Arrosage du soir ignoré" : "Arrosage matin ignoré"}</div>
+        <div class="gi-hist-entry__meta">${escapeHtml(metaParts.join(" · "))} · ${escapeHtml(reasonLabel)}</div>
+      </div>
+      <div class="gi-hist-entry__right">
+        <div class="gi-hist-entry__val">${escapeHtml(mmLabel)}</div>
+        <div class="gi-hist-entry__sub">objectif</div>
+      </div>
+      <span class="gi-hist-badge ${escapeHtml(badgeClass)}">${escapeHtml(badgeText)}</span>
+    </div>`;
+}
+
+export function renderWateringHistorySection(card) {
+  const lastWatering = card._lastWateringState();
+  const nextWatering = card._nextWateringState();
+  const context = card._objectiveContext();
+  const derArrosageEntity = card._entity("entity_dernier_arrosage");
+  const attrs = derArrosageEntity?.attributes || {};
+
+  const lastMm = lastWatering.value != null ? `${formatNumber(lastWatering.value, 1)} mm` : "—";
+  const lastWhen = String(attrs.detected_at || attrs.date_action || "").trim();
+  const reserveMm = context.reserveActuelle != null
+    ? `${formatNumber(context.reserveActuelle, 1)} mm`
+    : "—";
+  const reserveMax = context.reserveUsefulMax != null ? `/ ${formatNumber(context.reserveUsefulMax, 1)} mm` : "";
+
+  const statCards = [
+    { label: "Dernier arrosage", value: lastMm, sub: lastWhen || "—" },
+    { label: "Réserve utile", value: reserveMm, sub: reserveMax || "sol" },
+    { label: "Prochain", value: nextWatering.label || "—", sub: "" },
+  ];
+
+  const statsHtml = `
+    <div class="gi-stat-row">
+      ${statCards.map((s) => `
+        <div class="gi-stat-card">
+          <div class="gi-stat-card__label">${escapeHtml(s.label)}</div>
+          <div class="gi-stat-card__value">${escapeHtml(s.value)}</div>
+          ${s.sub ? `<div class="gi-stat-card__sub">${escapeHtml(s.sub)}</div>` : ""}
+        </div>`).join("")}
+    </div>`;
+
+  const lastZones = Array.isArray(attrs.zones) ? attrs.zones : [];
+  const zoneBarsHtml = lastZones.length
+    ? `<div class="gi-hist-section-label">Zones · dernier cycle</div>${renderZoneBars(lastZones)}`
+    : "";
+
+  const wateringEntries = Array.isArray(attrs.derniers_arrosages) ? attrs.derniers_arrosages : [];
+  const skipEntries = Array.isArray(attrs.derniers_refus) ? attrs.derniers_refus : [];
+
+  const mergedEntries = [];
+  let wi = 0;
+  let si = 0;
+  while (mergedEntries.length < 8 && (wi < wateringEntries.length || si < skipEntries.length)) {
+    const we = wateringEntries[wi];
+    const se = skipEntries[si];
+    if (!we && !se) break;
+    if (!se || (we && String(we.recorded_at || we.date || "") >= String(se.recorded_at || se.date || ""))) {
+      mergedEntries.push({ kind: "water", data: we, idx: wi });
+      wi++;
+    } else {
+      mergedEntries.push({ kind: "skip", data: se, idx: si });
+      si++;
+    }
+  }
+
+  if (!mergedEntries.length && !lastZones.length) return "";
+
+  const entriesHtml = mergedEntries.length
+    ? `<div class="gi-hist-section-label">Historique récent</div>
+       <div class="gi-hist-entries">
+         ${mergedEntries.map((e) =>
+           e.kind === "water"
+             ? renderWateringHistoryEntry(e.data, e.idx)
+             : renderSkipHistoryEntry(e.data)
+         ).join("")}
+       </div>`
+    : "";
+
+  return `
+    <div class="gi-hist">
+      ${statsHtml}
+      ${zoneBarsHtml}
+      ${entriesHtml}
+    </div>`;
+}
+
 export function renderWateringTab(card) {
   const windowState = card._windowState();
   const irrigationSignal = card._irrigationSignalState();
@@ -1720,11 +1886,19 @@ export function renderWateringTab(card) {
     } : null,
   ].filter(Boolean);
 
+  const lastSkipEntry = (() => {
+    const skips = card._entity("entity_dernier_arrosage")?.attributes?.derniers_refus;
+    return Array.isArray(skips) && skips.length ? skips[0] : null;
+  })();
+  const lastSkipSub = lastSkipEntry
+    ? `Refus ${formatSkipRelativeDate(lastSkipEntry.date)} · ${formatSkipReason(lastSkipEntry.reason)}`
+    : null;
+
   const reperes = [
     { label: "Objectif", value: objectiveLabel, entityKey: "entity_objectif_arrosage" },
     { label: "Type", value: wateringTypeLabel, entityKey: "entity_type_arrosage" },
     { label: "Prochain arrosage", value: nextWatering.label, entityKey: "entity_prochain_arrosage" },
-    { label: "Dernier arrosage", value: lastWatering.label, entityKey: "entity_dernier_arrosage" },
+    { label: "Dernier arrosage", value: lastWatering.label, sub: lastSkipSub, entityKey: "entity_dernier_arrosage" },
   ];
   const heroTitle = heroNextText || irrigationSignal.summary || windowState.summary || "Irrigation";
   const heroSub = shouldShowHeroHint ? heroHintText : "";
@@ -1823,7 +1997,11 @@ export function renderWateringTab(card) {
     ],
   });
 
+  const historySection = renderWateringHistorySection(card);
+
   return `
+      ${historySection}
+
       ${playfulScene}
 
       ${eveningBannerHtml}
@@ -1847,6 +2025,7 @@ export function renderWateringTab(card) {
             <div class="gz2-rep${eid ? " gz2-rep--clickable" : ""}"${attrs}>
               <div class="gz2-rep__label">${escapeHtml(r.label)}</div>
               <div class="gz2-rep__value">${escapeHtml(r.value || "—")}</div>
+              ${r.sub ? `<div class="gz2-rep__sub">${escapeHtml(r.sub)}</div>` : ""}
             </div>
           `;
           }).join("")}
@@ -1891,6 +2070,7 @@ export function renderWateringTab(card) {
             `
             : ""
         }
+
       </section>
       </details>
     `;

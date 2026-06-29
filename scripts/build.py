@@ -1,70 +1,12 @@
 from pathlib import Path
 import gzip
-import shutil
 
-ROOT = Path(__file__).resolve().parents[1]
-SRC_CONSTANTS = ROOT / "src" / "constants.js"
-SRC_MAIN = ROOT / "src" / "gazon-intelligent-card.js"
-SRC_FORMATTERS = ROOT / "src" / "utils" / "formatters.js"
-SRC_PRIMITIVES = ROOT / "src" / "renderers" / "primitives.js"
-SRC_LAYOUT = ROOT / "src" / "renderers" / "layout.js"
-SRC_EDITOR = ROOT / "src" / "editor" / "editor.js"
-SRC_CARD_STYLES = ROOT / "src" / "styles" / "card-styles.js"
-SRC_EDITOR_STYLES = ROOT / "src" / "styles" / "editor-styles.js"
-DIST_DIR = ROOT / "dist"
-ROOT_MAIN = ROOT / "gazon-intelligent-card.js"
-ROOT_MAIN_GZ = ROOT / "gazon-intelligent-card.js.gz"
+ROOT     = Path(__file__).resolve().parents[1]
+SRC      = ROOT / "src" / "gazon-intelligent-card.js"
+DIST     = ROOT / "gazon-intelligent-card.js"
+DIST_GZ  = ROOT / "gazon-intelligent-card.js.gz"
 
-def strip_module_source(text: str) -> str:
-    lines = []
-    skipping_import = False
-    for line in text.splitlines(keepends=True):
-        if skipping_import:
-            if ";" in line:
-                skipping_import = False
-            continue
-        if line.lstrip().startswith("import "):
-            if ";" not in line:
-                skipping_import = True
-            continue
-        if line.startswith("export "):
-            lines.append(line[len("export "):])
-        else:
-            lines.append(line)
-    return "".join(lines)
-
-card_styles = SRC_CARD_STYLES.read_text(encoding="utf-8").split("`", 1)[1].rsplit("`;", 1)[0]
-editor_styles = SRC_EDITOR_STYLES.read_text(encoding="utf-8").split("`", 1)[1].rsplit("`;", 1)[0]
-constants = strip_module_source(SRC_CONSTANTS.read_text(encoding="utf-8"))
-main = strip_module_source(SRC_MAIN.read_text(encoding="utf-8"))
-formatters = strip_module_source(SRC_FORMATTERS.read_text(encoding="utf-8"))
-primitives = strip_module_source(SRC_PRIMITIVES.read_text(encoding="utf-8"))
-layout = strip_module_source(SRC_LAYOUT.read_text(encoding="utf-8"))
-editor = strip_module_source(SRC_EDITOR.read_text(encoding="utf-8"))
-
-bundle = (
-    "const CARD_STYLES = String.raw`"
-    + card_styles
-    + "`;\n"
-    + "const EDITOR_STYLES = String.raw`"
-    + editor_styles
-    + "`;\n\n"
-    + constants
-    + "\n\n"
-    + formatters
-    + "\n\n"
-    + primitives
-    + "\n\n"
-    + main
-    + "\n\n"
-    + layout
-    + "\n\n"
-    + editor
-)
-
-if DIST_DIR.exists():
-    shutil.rmtree(DIST_DIR)
-ROOT_MAIN.write_text(bundle, encoding="utf-8")
-ROOT_MAIN_GZ.write_bytes(gzip.compress(bundle.encode("utf-8"), mtime=0))
-
-print(f"Built {ROOT_MAIN.relative_to(ROOT)}")
+content = SRC.read_text(encoding="utf-8")
+DIST.write_text(content, encoding="utf-8")
+DIST_GZ.write_bytes(gzip.compress(content.encode("utf-8"), mtime=0))
+print(f"Built {DIST.relative_to(ROOT)}  ({len(content):,} chars)")

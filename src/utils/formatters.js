@@ -810,6 +810,68 @@ export function formatWateringBlockReason(value) {
   return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
 }
 
+const SKIP_REASON_LABELS = {
+  recent_watering: "Cooldown actif",
+  irrigation_blocked: "Blocage ext.",
+  auto_not_allowed: "Auto interdit",
+  execution_not_allowed: "Exécution bloquée",
+  evening_cooling_done: "Refraîch. soir fait",
+  user_confirmation_required: "Confirmation requise",
+};
+
+export function formatSkipReason(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) return "Refus";
+  return SKIP_REASON_LABELS[normalized] || normalized.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+export function formatSkipRelativeDate(dateStr) {
+  if (!dateStr) return "";
+  try {
+    const todayMs = Date.now();
+    const skipMs = new Date(dateStr).setHours(12, 0, 0, 0);
+    const diffDays = Math.floor((todayMs - skipMs) / 86400000);
+    if (diffDays <= 0) return "aujourd'hui";
+    if (diffDays === 1) return "hier";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  } catch (_) {
+    return String(dateStr);
+  }
+}
+
+const ZONE_COLORS = [
+  "#3B82F6",
+  "#10B981",
+  "#F59E0B",
+  "#8B5CF6",
+  "#EF4444",
+  "#6366F1",
+];
+
+export function zoneColor(entityId, index = 0) {
+  const id = String(entityId || "").toLowerCase();
+  const m = id.match(/zone[_\s-]?(\d+)/);
+  const n = m ? parseInt(m[1], 10) - 1 : index;
+  return ZONE_COLORS[Math.max(0, n) % ZONE_COLORS.length];
+}
+
+export function zoneLabel(entityId, order = null, index = 0) {
+  const id = String(entityId || "").toLowerCase();
+  const m = id.match(/zone[_\s-]?(\d+)/);
+  if (m) return `Z${m[1]}`;
+  if (order !== null && order !== undefined) return `Z${order + 1}`;
+  return `Z${index + 1}`;
+}
+
+export function formatWateringCause(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (normalized === "hydrique") return "hydrique";
+  if (normalized === "post_application") return "post-produit";
+  if (normalized === "rafraichissement_soir") return "refraîch.";
+  return normalized || "auto";
+}
+
 export function formatSwitchState(value) {
   const normalized = String(value ?? "").trim().toLowerCase();
   if (["on", "true", "yes", "1", "oui"].includes(normalized)) {

@@ -409,6 +409,14 @@ function tonePct(ratio) {
   if (p < 0.5)   return 'warn';
   return 'accent';
 }
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 // ─── Card ────────────────────────────────────────────────────────────────────
 
@@ -438,22 +446,22 @@ class GazonIntelligentCard extends HTMLElement {
       subtitle: config.subtitle || null,
       zones:    config.zones    || [],
       pompe_switch:                  config.pompe_switch,
-      entity_assistant:              config.entity_assistant,
-      entity_arrosage_en_cours:      config.entity_arrosage_en_cours,
-      entity_prochain_arrosage:      config.entity_prochain_arrosage,
-      entity_prochaine_tonte:        config.entity_prochaine_tonte,
-      entity_tonte_autorisee:        config.entity_tonte_autorisee,
-      entity_phase:                  config.entity_phase,
-      entity_risque:                 config.entity_risque,
-      entity_reserve:                config.entity_reserve,
-      entity_etat_hydrique:          config.entity_etat_hydrique,
-      entity_hauteur_conseillee:     config.entity_hauteur_conseillee,
-      entity_switch_arrosage_auto:   config.entity_switch_arrosage_auto,
-      entity_switch_tondeuse:        config.entity_switch_tondeuse,
-      entity_prochaine_intervention: config.entity_prochaine_intervention,
+      entity_assistant:              config.entity_assistant              || 'sensor.gazon_intelligent_assistant',
+      entity_arrosage_en_cours:      config.entity_arrosage_en_cours      || 'sensor.gazon_intelligent_arrosage_en_cours',
+      entity_prochain_arrosage:      config.entity_prochain_arrosage      || 'sensor.gazon_intelligent_prochain_arrosage',
+      entity_prochaine_tonte:        config.entity_prochaine_tonte        || 'sensor.gazon_intelligent_prochaine_tonte',
+      entity_tonte_autorisee:        config.entity_tonte_autorisee        || 'binary_sensor.gazon_intelligent_tonte_autorisee',
+      entity_phase:                  config.entity_phase                  || 'sensor.gazon_intelligent_phase',
+      entity_risque:                 config.entity_risque                 || 'sensor.gazon_intelligent_risque',
+      entity_reserve:                config.entity_reserve                || 'sensor.gazon_intelligent_reserve',
+      entity_etat_hydrique:          config.entity_etat_hydrique          || 'sensor.gazon_intelligent_etat_hydrique',
+      entity_hauteur_conseillee:     config.entity_hauteur_conseillee     || 'sensor.gazon_intelligent_hauteur_conseillee',
+      entity_switch_arrosage_auto:   config.entity_switch_arrosage_auto   || 'input_boolean.gazon_intelligent_arrosage_auto',
+      entity_switch_tondeuse:        config.entity_switch_tondeuse        || 'input_boolean.gazon_intelligent_tondeuse_auto',
+      entity_prochaine_intervention: config.entity_prochaine_intervention || 'sensor.gazon_intelligent_prochaine_intervention',
       entity_meteo:                  config.entity_meteo,
-      entity_dernier_arrosage:       config.entity_dernier_arrosage,
-      entity_objectif_arrosage:      config.entity_objectif_arrosage,
+      entity_dernier_arrosage:       config.entity_dernier_arrosage       || 'sensor.gazon_intelligent_dernier_arrosage',
+      entity_objectif_arrosage:      config.entity_objectif_arrosage      || 'sensor.gazon_intelligent_objectif_d_arrosage',
     };
     if (this._shadow) this._render();
   }
@@ -660,7 +668,7 @@ class GazonIntelligentCard extends HTMLElement {
           <div class="hero-icon">${heroIcon}</div>
           <div class="hero-body">
             <div class="hero-title">${heroTitle}</div>
-            ${reason ? `<div class="hero-sub">${reason}</div>` : ''}
+            ${reason ? `<div class="hero-sub">${esc(reason)}</div>` : ''}
           </div>
         </div>
         <div class="hero-foot">
@@ -1156,23 +1164,24 @@ class GazonIntelligentCard extends HTMLElement {
 
     const isRecommended = iState === 'recommande' || iState === 'recommended';
     const heroTone = isRecommended ? 'purple' : 'warn';
-    const showHero = iState && iState !== 'unavailable' && iState !== 'unknown';
+    const INACTIVE_STATES = ['unavailable', 'unknown', 'non_requis', 'not_required', 'none', ''];
+    const showHero = iState && !INACTIVE_STATES.includes(iState);
 
     return `
       ${showHero ? `
         <div class="hero ${heroTone}">
           <div class="hero-eyebrow">${this._t('next_intervention')}</div>
-          <div class="hero-title">${produit}</div>
-          ${hint ? `<div class="hero-sub">${hint}</div>` : ''}
-          ${score !== null ? `<div class="hero-badge"><div class="hero-dot"></div>${score} % · ${iState}</div>` : ''}
+          <div class="hero-title">${esc(produit)}</div>
+          ${hint ? `<div class="hero-sub">${esc(hint)}</div>` : ''}
+          ${score !== null ? `<div class="hero-badge"><div class="hero-dot"></div>${esc(score)} % · ${esc(iState)}</div>` : ''}
         </div>` : ''}
 
       ${summary ? `
         <div class="zone-card">
           <div class="zone-dot purple"></div>
           <div class="zone-info">
-            <div class="zone-name">${summary}</div>
-            ${actionL ? `<div class="zone-detail">${actionL}</div>` : ''}
+            <div class="zone-name">${esc(summary)}</div>
+            ${actionL ? `<div class="zone-detail">${esc(actionL)}</div>` : ''}
           </div>
         </div>` : ''}
 
@@ -1356,8 +1365,10 @@ class GazonIntelligentCardEditor extends HTMLElement {
 
 // ─── Registration ─────────────────────────────────────────────────────────────
 
-customElements.define('gazon-intelligent-card',        GazonIntelligentCard);
-customElements.define('gazon-intelligent-card-editor', GazonIntelligentCardEditor);
+if (!customElements.get('gazon-intelligent-card'))
+  customElements.define('gazon-intelligent-card', GazonIntelligentCard);
+if (!customElements.get('gazon-intelligent-card-editor'))
+  customElements.define('gazon-intelligent-card-editor', GazonIntelligentCardEditor);
 
 window.customCards = window.customCards || [];
 if (!window.customCards.find(c => c.type === 'gazon-intelligent-card')) {

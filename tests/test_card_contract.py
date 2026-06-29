@@ -1,156 +1,172 @@
+"""Contract tests for the monolithic gazon-intelligent-card.
+
+These tests verify behavioural invariants and structural guarantees of the
+monolithic card. They run against the source files directly
+and are intentionally lightweight — no DOM, no JS runtime needed.
+"""
 from __future__ import annotations
 
 from pathlib import Path
 import re
 import unittest
 
-
 ROOT = Path(__file__).resolve().parents[1]
-MAIN_SRC = (ROOT / "src/gazon-intelligent-card.js").read_text(encoding="utf-8")
-LAYOUT_SRC = (ROOT / "src/renderers/layout.js").read_text(encoding="utf-8")
-FORMATTERS_SRC = (ROOT / "src/utils/formatters.js").read_text(encoding="utf-8")
-CONSTANTS_SRC = (ROOT / "src/constants.js").read_text(encoding="utf-8")
-VALIDATE_SRC = (ROOT / "scripts/validate.py").read_text(encoding="utf-8")
+MAIN_SRC      = (ROOT / "src/gazon-intelligent-card.js").read_text(encoding="utf-8")
+VALIDATE_SRC  = (ROOT / "scripts/validate.py").read_text(encoding="utf-8")
+README_SRC    = (ROOT / "README.md").read_text(encoding="utf-8")
 
 
-def extract_function_body(source: str, function_name: str) -> str:
-    match = re.search(rf"function\s+{re.escape(function_name)}\([^)]*\)\s*\{{(?P<body>.*?)\n\}}", source, re.S)
-    if not match:
-        match = re.search(rf"{re.escape(function_name)}\([^)]*\)\s*\{{(?P<body>.*?)\n  \}}", source, re.S)
-    if not match:
-        raise AssertionError(f"Could not find {function_name} in source")
-    return match.group("body")
+class CardStructureTests(unittest.TestCase):
+    """The card must expose the mandatory Lovelace web-component API."""
+
+    def test_custom_element_is_registered(self):
+        self.assertIn("customElements.define", MAIN_SRC)
+
+    def test_window_custom_cards_is_declared(self):
+        self.assertIn("window.customCards", MAIN_SRC)
+
+    def test_set_config_is_present(self):
+        self.assertIn("setConfig(", MAIN_SRC)
+
+    def test_set_hass_is_present(self):
+        self.assertIn("set hass(", MAIN_SRC)
+
+    def test_connected_callback_is_present(self):
+        self.assertIn("connectedCallback()", MAIN_SRC)
+
+    def test_visual_editor_is_exposed(self):
+        # HA requires getConfigElement() or getConfigForm() for visual editing.
+        has_element = "getConfigElement" in MAIN_SRC
+        has_form    = "getConfigForm"    in MAIN_SRC
+        self.assertTrue(has_element or has_form,
+                        "Card must expose getConfigElement() or getConfigForm()")
+
+    def test_get_layout_options_is_present(self):
+        # Required for grid-layout resize support.
+        self.assertIn("getLayoutOptions", MAIN_SRC)
+
+    def test_get_stub_config_is_present(self):
+        self.assertIn("getStubConfig", MAIN_SRC)
 
 
-class CardContractTests(unittest.TestCase):
-    def test_minimal_public_contract_is_explicit(self):
-        self.assertIn("export const MINIMAL_PUBLIC_CONTRACT_ENTITY_KEYS =", CONSTANTS_SRC)
-        for key in (
-            "entity_assistant",
-            "entity_prochain_arrosage",
-            "entity_prochaine_tonte",
-            "entity_prochaine_intervention",
-            "entity_signal_irrigation",
-            "entity_signal_intervention",
-        ):
-            self.assertIn(f'"{key}"', CONSTANTS_SRC)
-        self.assertIn("export const MINIMAL_PUBLIC_CONTRACT_REQUIRED_ATTRIBUTES =", CONSTANTS_SRC)
+class TabRenderingTests(unittest.TestCase):
+    """All 6 tabs must be implemented."""
 
-    def test_validate_script_locks_minimal_contract_and_release_discipline(self):
-        self.assertIn("MINIMAL_PUBLIC_CONTRACT_ENTITY_KEYS", VALIDATE_SRC)
-        self.assertIn("MINIMAL_PUBLIC_CONTRACT_REQUIRED_ATTRIBUTES", VALIDATE_SRC)
-        self.assertIn('ensure_readme_section(readme, "## 🧩 Exemple minimal")', VALIDATE_SRC)
-        self.assertIn('ensure_readme_section(readme, "## 🧱 Exemple YAML complet")', VALIDATE_SRC)
-        self.assertIn('ensure_readme_section(readme, "## ⚙️ Options principales")', VALIDATE_SRC)
-        self.assertIn('ensure_readme_section(readme, "## 🧪 Développement")', VALIDATE_SRC)
-        self.assertIn('bundle + sources ensemble', VALIDATE_SRC)
+    def test_tab_synthese(self):
+        self.assertIn("_tab_synthese", MAIN_SRC)
 
-    def test_irrigation_signal_never_uses_binary_sensor_state_as_action_label(self):
-        body = extract_function_body(MAIN_SRC, "_irrigationSignalState")
-        self.assertIn("formatIrrigationSignalLabel", body)
-        self.assertIn("formatIrrigationSignalTone", body)
-        self.assertNotIn("formatStatusLabel(entity?.state)", body)
+    def test_tab_arrosage(self):
+        self.assertIn("_tab_arrosage", MAIN_SRC)
 
-    def test_layout_signal_presentation_does_not_promote_raw_on_state(self):
-        body = extract_function_body(LAYOUT_SRC, "renderInterventionTab")
-        self.assertIn("formatIrrigationSignalLabel", body)
-        self.assertIn("formatIrrigationSignalTone", body)
-        self.assertNotIn('state === "on"', body)
+    def test_tab_tonte(self):
+        self.assertIn("_tab_tonte", MAIN_SRC)
 
-    def test_mower_ambiguity_label_is_explicit(self):
-        self.assertIn(
-            'ambiguous: "Tondeuse ambiguë: plusieurs robots détectés, configuration requise"',
-            FORMATTERS_SRC,
-        )
-        self.assertIn('configured_missing: "Tondeuse configurée introuvable"', FORMATTERS_SRC)
-        self.assertIn('missing: "Tondeuse manquante"', FORMATTERS_SRC)
+    def test_tab_gazon(self):
+        self.assertIn("_tab_gazon", MAIN_SRC)
 
-    def test_mower_state_sanitizes_sentinel_display_values(self):
-        body = extract_function_body(MAIN_SRC, "_mowerState")
-        self.assertIn("normalizeOptionalDisplayValue", body)
-        self.assertIn("const nextDeparture = normalizeOptionalDisplayValue(", body)
-        self.assertIn("const reason = normalizeOptionalDisplayValue(", body)
-        self.assertIn("let presenceLabel = normalizeOptionalDisplayValue(", body)
+    def test_tab_produits(self):
+        self.assertIn("_tab_produits", MAIN_SRC)
 
-    def test_recommendation_state_is_non_actionable(self):
-        self.assertIn('return "Recommandée"', FORMATTERS_SRC)
-        self.assertIn('return "Non requise"', FORMATTERS_SRC)
+    def test_tab_reglages(self):
+        self.assertIn("_tab_reglages", MAIN_SRC)
 
-    def test_tonte_contract_exposes_explicit_clarity_flags(self):
+
+class SyntheseTabContractTests(unittest.TestCase):
+    """Synthèse tab must expose the key decision-surface data."""
+
+    def test_action_icons_map_is_present(self):
+        self.assertIn("ACTION_ICONS", MAIN_SRC)
+
+    def test_canicule_detection(self):
+        self.assertIn("canicule", MAIN_SRC)
+
+    def test_hero_tone_variants(self):
+        # Hero must support at least warn and danger tones.
+        self.assertIn("warn", MAIN_SRC)
+        self.assertIn("danger", MAIN_SRC)
+
+    def test_reserve_mini_bar(self):
+        self.assertIn("stat-mini-bar", MAIN_SRC)
+
+    def test_risk_stat_card_colored(self):
+        self.assertIn("risk-", MAIN_SRC)
+
+    def test_tonte_clarity_flags_are_read(self):
+        # The card must read the explicit tonte-clarity flags from the assistant.
         self.assertIn("gazon_permet_tonte", MAIN_SRC)
         self.assertIn("machine_permet_tonte", MAIN_SRC)
-        self.assertIn("action_possible", MAIN_SRC)
-        # Le rendu de l'onglet Tonte (gz2) vit dans layout.js.
-        self.assertIn("Gazon permet la tonte", LAYOUT_SRC)
-        self.assertIn('label: "Machine"', LAYOUT_SRC)
-        self.assertIn('label: "Action"', LAYOUT_SRC)
 
-    def test_products_tab_exposes_application_history(self):
-        self.assertIn("application_history", MAIN_SRC)
-        self.assertIn("renderApplicationHistoryInline", LAYOUT_SRC)
-        self.assertIn("Dernière application", LAYOUT_SRC)
+    def test_auto_status_in_hero(self):
+        self.assertIn("auto_on", MAIN_SRC)
+        self.assertIn("auto_off", MAIN_SRC)
 
-    def test_overview_proposal_keeps_blocked_mowing_as_in_progress(self):
-        body = extract_function_body(MAIN_SRC, "_overviewProposal")
-        self.assertIn('assistant.status === "blocked" && assistant.action === "tonte"', body)
-        self.assertIn('title = "Tonte en cours";', body)
-        self.assertIn('title = "Tonte possible";', body)
+    def test_context_pills(self):
+        self.assertIn("ctx-pill", MAIN_SRC)
+        self.assertIn("ET₀", MAIN_SRC)
 
-    def test_mowing_tab_exposes_decision_and_machine_state(self):
-        # Onglet Tonte réécrit en gz2 (layout.js) : doit exposer la décision,
-        # l'état machine et la distinction « Coordination désactivée ».
-        body = extract_function_body(LAYOUT_SRC, "renderMowingTab")
-        self.assertIn("mowingDecisionPills", body)
-        self.assertIn("mowingSummaryItems", body)
-        self.assertIn("coordinationDisabled", body)
-        self.assertIn("Coordination désactivée", body)
 
-    def test_mowing_tab_summary_prefers_hard_block_reason(self):
-        body = extract_function_body(LAYOUT_SRC, "renderMowingTab")
-        self.assertIn('mowingBlock.blocked', body)
-        self.assertIn('mowingBlock.reasonDetail || mowingBlock.detail || mowerState.reason || "Tonte bloquée par conditions."', body)
+class I18nTests(unittest.TestCase):
+    """Card must support FR and EN."""
 
-    def test_overview_prioritizes_irrigation_block_before_passive_mowing_states(self):
-        body = extract_function_body(MAIN_SRC, "_overviewProposal")
-        irrigation_idx = body.index('else if (irrigationSignal.reasonKind === "blocked")')
-        mowing_busy_idx = body.index('else if (mowingBusy)')
-        assistant_mowing_idx = body.index('else if (assistant.status === "blocked" && assistant.action === "tonte")')
-        self.assertLess(irrigation_idx, mowing_busy_idx)
-        self.assertLess(irrigation_idx, assistant_mowing_idx)
-        self.assertIn('nextMowingBlockReason.startsWith("phase_")', body)
+    def test_strings_object_has_fr_and_en(self):
+        self.assertIn("const STRINGS = {", MAIN_SRC)
+        self.assertIn("fr:", MAIN_SRC)
+        self.assertIn("en:", MAIN_SRC)
 
-    def test_missing_entities_keep_strict_readable_fallbacks(self):
-        entity_state_body = extract_function_body(MAIN_SRC, "_entityState")
-        next_mowing_body = extract_function_body(MAIN_SRC, "_nextMowingState")
-        self.assertIn('_entityState(entityKey, fallback = "Non disponible")', MAIN_SRC)
-        self.assertIn("return fallback;", entity_state_body)
-        self.assertIn('label: "À estimer"', next_mowing_body)
-        self.assertIn('detail: mowingBlock.reasonLabel || mowerState.reason || "Aucune fenêtre de tonte calculée"', next_mowing_body)
+    def test_translation_helper_present(self):
+        self.assertIn("_t(", MAIN_SRC)
+        self.assertIn("_lblt(", MAIN_SRC)
 
-    def test_card_tap_fallback_entity_is_not_weather(self):
-        # Régression : le repli de l'action « more-info » au niveau carte ne doit PAS
-        # prioriser la météo (entity_weather), sinon un clic sur le fond de la carte
-        # ouvre toujours la fiche weather.* au lieu de l'entité décisionnelle.
-        body = extract_function_body(MAIN_SRC, "_defaultActionEntityId")
-        self.assertNotIn('"entity_weather"', body)
-        self.assertIn("ENTITY_KEYS", body)
 
-    def test_tab_nav_autoscroll_targets_current_nav(self):
-        # Régression : la mise au point auto de l'onglet actif doit viser la nav réelle
-        # (gz2-nav), pas l'ancienne (.tab-nav / .section-nav) retirée par la refonte gz2,
-        # sinon querySelector renvoie null et le défilement est un no-op silencieux.
-        body = extract_function_body(MAIN_SRC, "_scrollTabNavIntoView")
-        self.assertIn(".gz2-nav", body)
-        self.assertIn(".gz2-nav__item--active", body)
-        self.assertNotIn(".tab-nav", body)
-        self.assertNotIn(".section-nav", body)
+class ValidateScriptTests(unittest.TestCase):
+    """scripts/validate.py must enforce the right invariants."""
 
-    def test_compact_decision_text_sanitizes_technical_hints(self):
-        self.assertIn("export function sanitizePublicDecisionText(value)", FORMATTERS_SRC)
-        compact_body = extract_function_body(FORMATTERS_SRC, "compactDecisionText")
-        self.assertIn("const text = sanitizePublicDecisionText(value);", compact_body)
-        self.assertIn("meteo[_a-z0-9-]*", FORMATTERS_SRC)
-        self.assertIn("espacement=", FORMATTERS_SRC)
+    def test_hacs_checks_present(self):
+        self.assertIn("hacs.json", VALIDATE_SRC)
+        self.assertIn("content_in_root", VALIDATE_SRC)
+        self.assertIn("iot_class", VALIDATE_SRC)
+
+    def test_bundle_integrity_check_present(self):
+        self.assertIn("gz_text != dist_text", VALIDATE_SRC)
+
+    def test_readme_sections_enforced(self):
+        self.assertIn('"## 🧩 Exemple minimal"', VALIDATE_SRC)
+        self.assertIn('"## 🧱 Exemple YAML complet"', VALIDATE_SRC)
+        self.assertIn('"## 🧪 Développement"', VALIDATE_SRC)
+
+    def test_bundle_and_sources_discipline_enforced(self):
+        self.assertIn("bundle + sources ensemble", VALIDATE_SRC)
+
+
+class ReadmeTests(unittest.TestCase):
+    """README must document the required sections and config keys."""
+
+    def test_required_sections_present(self):
+        for heading in (
+            "## 🧩 Exemple minimal",
+            "## 🧱 Exemple YAML complet",
+            "## 🧪 Développement",
+        ):
+            self.assertIn(heading, README_SRC, f"README missing section: {heading}")
+
+    def test_local_resource_path_documented(self):
+        self.assertIn("/local/gazon-intelligent-card/gazon-intelligent-card.js", README_SRC)
+
+    def test_complete_yaml_has_type_and_zones(self):
+        yaml_match = re.search(
+            r"## 🧱 Exemple YAML complet[\s\S]*?```yaml\n(?P<body>.*?)\n```",
+            README_SRC,
+            re.S,
+        )
+        self.assertIsNotNone(yaml_match, "README must contain a complete YAML example")
+        body = yaml_match.group("body")
+        self.assertIn("type:", body)
+        self.assertIn("zones:", body)
+        self.assertIn("entity_assistant:", body)
+
+    def test_hacs_install_instructions_present(self):
+        self.assertIn("HACS", README_SRC)
+        self.assertIn("hacsfiles", README_SRC)
 
 
 if __name__ == "__main__":

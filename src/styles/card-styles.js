@@ -2280,6 +2280,7 @@ export const CARD_STYLES = String.raw`
         .gz-scene--clickable { cursor: pointer; transition: transform .12s ease, box-shadow .12s ease; }
         .gz-scene--clickable:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(31,107,58,0.10); }
         .gz-scene--clickable:focus-visible { outline: 2px solid var(--gi-accent); outline-offset: 3px; }
+        .gz2-rep__sub { font-size: 11px; color: var(--gi-text-muted, #6B7F74); margin-top: 3px; line-height: 1.3; }
         .gz2-rep--clickable { cursor: pointer; transition: background .12s ease, border-color .12s ease; }
         .gz2-rep--clickable:hover { border-color: color-mix(in srgb, var(--gi-accent) 45%, transparent); background: var(--gi-accent-soft); }
         .gz2-rep--clickable:focus-visible { outline: 2px solid var(--gi-accent); outline-offset: 2px; }
@@ -2406,4 +2407,202 @@ export const CARD_STYLES = String.raw`
           .gz2-header { flex-wrap: wrap; }
           .gz2-header__meta { width: 100%; justify-content: space-between; }
         }
+
+        /* ── Historique ──────────────────────────────────────────────────── */
+
+        .gi-hist { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+
+        .gi-stat-row {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+        }
+
+        .gi-stat-card {
+          background: var(--gi-bg);
+          border: 0.5px solid var(--gi-border);
+          border-radius: var(--gi-radius-md);
+          padding: 10px 12px;
+        }
+
+        .gi-stat-card__label {
+          font-size: 9px;
+          text-transform: uppercase;
+          letter-spacing: .07em;
+          font-weight: 600;
+          color: var(--gi-text-muted);
+          margin-bottom: 4px;
+        }
+
+        .gi-stat-card__value {
+          font-size: var(--gi-font-lg);
+          font-weight: 500;
+          color: var(--gi-text);
+          line-height: 1.1;
+        }
+
+        .gi-stat-card__sub {
+          font-size: 10px;
+          color: var(--gi-text-muted);
+          margin-top: 2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .gi-zone-bars { display: flex; flex-direction: column; gap: 5px; }
+
+        .gi-zone-bar-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          height: 20px;
+        }
+
+        .gi-zone-badge {
+          font-size: 9px;
+          font-family: monospace;
+          font-weight: 700;
+          color: #fff;
+          padding: 2px 6px;
+          border-radius: 4px;
+          flex-shrink: 0;
+          min-width: 26px;
+          text-align: center;
+          line-height: 1.4;
+        }
+
+        .gi-zone-track {
+          flex: 1;
+          height: 10px;
+          border-radius: 5px;
+          background: var(--gi-surface-2);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .gi-zone-fill {
+          position: absolute;
+          left: 0;
+          top: 0;
+          height: 100%;
+          border-radius: 5px;
+          opacity: .85;
+          transition: width .4s ease;
+        }
+
+        .gi-zone-bar-meta {
+          font-size: 10px;
+          color: var(--gi-text-muted);
+          min-width: 36px;
+          text-align: right;
+          flex-shrink: 0;
+        }
+
+        .gi-zone-bar-axis {
+          display: flex;
+          justify-content: flex-end;
+          padding-left: 34px;
+          font-size: 9px;
+          color: var(--gi-text-muted);
+          margin-top: 1px;
+        }
+
+        .gi-hist-entries { display: flex; flex-direction: column; gap: 6px; }
+
+        .gi-hist-section-label {
+          font-size: 9px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: .07em;
+          color: var(--gi-text-muted);
+          margin-bottom: 2px;
+        }
+
+        .gi-hist-entry {
+          background: var(--gi-bg);
+          border: 0.5px solid var(--gi-border);
+          border-radius: var(--gi-radius-md);
+          padding: 10px 12px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .gi-hist-entry--skip {
+          background: transparent;
+          border-style: dashed;
+          opacity: .72;
+        }
+
+        .gi-hist-entry__body { flex: 1; min-width: 0; }
+
+        .gi-hist-entry__name {
+          font-size: 12px;
+          font-weight: 500;
+          color: var(--gi-text);
+          line-height: 1.2;
+        }
+
+        .gi-hist-entry--skip .gi-hist-entry__name { color: var(--gi-text-muted); }
+
+        .gi-hist-entry__meta {
+          font-size: 10px;
+          color: var(--gi-text-muted);
+          margin-top: 2px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .gi-hist-entry__right { text-align: right; flex-shrink: 0; }
+
+        .gi-hist-entry__val {
+          font-size: 12px;
+          font-weight: 500;
+          color: var(--gi-text);
+          line-height: 1.2;
+        }
+
+        .gi-hist-entry--skip .gi-hist-entry__val { color: var(--gi-text-muted); }
+
+        .gi-hist-entry__sub {
+          font-size: 10px;
+          color: var(--gi-text-muted);
+          margin-top: 1px;
+        }
+
+        .gi-hist-badge {
+          font-size: 9px;
+          font-weight: 600;
+          padding: 2px 7px;
+          border-radius: 99px;
+          border: 0.5px solid;
+          flex-shrink: 0;
+          white-space: nowrap;
+        }
+
+        .gi-hist-badge--ok {
+          background: color-mix(in srgb, var(--gi-status-success) 12%, transparent);
+          color: var(--gi-status-success);
+          border-color: color-mix(in srgb, var(--gi-status-success) 30%, transparent);
+        }
+
+        .gi-hist-badge--skip {
+          background: var(--gi-surface-2);
+          color: var(--gi-text-muted);
+          border-color: var(--gi-border);
+        }
+
+        .gi-hist-badge--block {
+          background: color-mix(in srgb, var(--gi-status-warning) 12%, transparent);
+          color: var(--gi-status-warning);
+          border-color: color-mix(in srgb, var(--gi-status-warning) 30%, transparent);
+        }
+
+        .card--theme-dark .gi-stat-card { background: #14241C; border-color: #2B4A39; }
+        .card--theme-dark .gi-hist-entry { background: #14241C; border-color: #2B4A39; }
+        .card--theme-dark .gi-hist-entry--skip { background: transparent; }
+        .card--theme-dark .gi-zone-track { background: #1C3328; }
 `;
+

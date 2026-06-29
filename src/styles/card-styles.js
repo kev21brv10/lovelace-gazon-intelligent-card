@@ -2408,7 +2408,7 @@ export const CARD_STYLES = String.raw`
           .gz2-header__meta { width: 100%; justify-content: space-between; }
         }
 
-        /* ── Historique style Sprinqua ────────────────────────────────────── */
+        /* ── Historique ──────────────────────────────────────────────────── */
 
         .gi-hist { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
 

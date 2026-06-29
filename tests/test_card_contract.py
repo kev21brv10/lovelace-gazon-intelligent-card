@@ -1,7 +1,7 @@
 """Contract tests for the monolithic gazon-intelligent-card.
 
 These tests verify behavioural invariants and structural guarantees of the
-Sprinqua-style monolithic card. They run against the source files directly
+monolithic card. They run against the source files directly
 and are intentionally lightweight — no DOM, no JS runtime needed.
 """
 from __future__ import annotations

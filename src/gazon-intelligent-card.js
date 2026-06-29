@@ -1,5 +1,5 @@
-// gazon-intelligent-card.js — style Sprinqua
-// Carte Lovelace unique pour l'intégration Gazon Intelligent
+// gazon-intelligent-card.js
+// Carte Lovelace dédiée à l'intégration Gazon Intelligent
 
 const GI_VERSION = '1.0.0';
 

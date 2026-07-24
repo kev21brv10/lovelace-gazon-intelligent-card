@@ -8,3 +8,7 @@ coverage/
 
 # Notes de projet personnelles (hors dépôt)
 CLAUDE.md
+
+# Python
+__pycache__/
+*.pyc

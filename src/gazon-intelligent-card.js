@@ -63,6 +63,9 @@ const STYLES = `
 .hero.warn    { background: var(--gi-warn); }
 .hero.danger  { background: var(--gi-danger); }
 .hero.purple  { background: var(--gi-purple); }
+.hero.rain    { background: #3b82f6; }
+.sess-progress-wrap { margin-top: 10px; height: 5px; border-radius: 4px; background: rgba(255,255,255,.25); overflow: hidden; }
+.sess-progress-bar  { height: 100%; border-radius: 4px; background: #fff; transition: width .6s ease; }
 .hero-eyebrow { font-size: 10px; opacity: 0.82; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
 .hero-header  { display: flex; align-items: center; gap: 12px; }
 .hero-icon    { font-size: 28px; line-height: 1; flex-shrink: 0; }
@@ -123,7 +126,7 @@ const STYLES = `
 .zone-active-clock  { font-size: 11px; color: var(--gi-accent); }
 .zone-active-elapsed{ font-size: 22px; font-weight: 700; color: var(--gi-accent); font-variant-numeric: tabular-nums; line-height: 1; }
 .zone-active-max    { font-size: 11px; color: var(--gi-muted); margin-left: auto; }
-.zone-active-stop   { width: 100%; margin-top: 10px; background: none; color: var(--gi-danger); border: 1.5px solid #fca5a5; border-radius: 10px; padding: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.zone-active-stop   { background: none; color: var(--gi-danger); border: 1.5px solid #fca5a5; border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
 /* Météo widget (sous le header, au-dessus des onglets) */
 .meteo-widget       { padding: 10px 16px 12px; background: var(--gi-surface); border-bottom: 1px solid var(--gi-border); }
 .meteo-top          { display: flex; align-items: center; justify-content: space-between; }
@@ -151,6 +154,79 @@ button.btn-pulse {
   border-radius: 8px; padding: 5px 9px; font-size: 12px;
   cursor: pointer; font-family: inherit;
 }
+
+/* ── Budget hebdomadaire ── */
+.budget-box {
+  background: var(--gi-surface); border: 0.5px solid var(--gi-border);
+  border-radius: 10px; padding: 9px 11px; margin-bottom: 8px;
+}
+.budget-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.budget-lbl { font-size: 12px; font-weight: 500; }
+.budget-val { font-size: 12px; color: var(--gi-muted); font-variant-numeric: tabular-nums; }
+.budget-val.over { color: var(--gi-danger); font-weight: 600; }
+.budget-track { height: 6px; border-radius: 4px; background: var(--gi-border); overflow: hidden; margin: 6px 0 5px; }
+.budget-bar { height: 100%; border-radius: 4px; }
+.budget-sub { font-size: 11px; color: var(--gi-muted); }
+
+/* Arrosages techniques (hors budget) : atténués + badge */
+.tl-log-entry.tech { opacity: .72; }
+.tech-badge, .pass-badge {
+  display: inline-block; border-radius: 20px; padding: 1px 7px;
+  font-size: 10px; font-weight: 500; vertical-align: middle;
+}
+.tech-badge { background: var(--gi-border); color: var(--gi-muted); margin-left: 4px; }
+.pass-badge { background: var(--gi-border); color: var(--gi-muted); margin-right: 6px; }
+
+/* ── Arrosage manuel : popup de préparation ── */
+.manual-run { display: flex; align-items: center; gap: 6px; }
+.modal-back {
+  position: fixed; inset: 0; z-index: 99;
+  background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.modal {
+  background: var(--gi-bg, #fff); color: var(--gi-text);
+  border: 0.5px solid var(--gi-border); border-radius: 16px;
+  width: 100%; max-width: 380px; max-height: 86vh; overflow-y: auto;
+  padding: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.3);
+}
+.modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.modal-title { font-size: 15px; font-weight: 600; }
+.modal-x {
+  background: none; border: none; color: var(--gi-muted);
+  font-size: 20px; line-height: 1; cursor: pointer; font-family: inherit; padding: 0 4px;
+}
+.modal-dose { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+input.manual-mm {
+  width: 82px; text-align: right;
+  background: var(--gi-surface); color: var(--gi-text);
+  border: 0.5px solid var(--gi-border); border-radius: 8px;
+  padding: 8px 9px; font-size: 17px; font-weight: 600; font-family: inherit;
+}
+.manual-unit { font-size: 13px; color: var(--gi-muted); }
+.modal-preset {
+  background: var(--gi-surface); border: 0.5px solid var(--gi-border);
+  border-radius: 20px; padding: 4px 10px; font-size: 11px; color: var(--gi-muted);
+  cursor: pointer; font-family: inherit; margin-left: auto;
+}
+.modal-rows { margin: 10px 0 2px; }
+.modal-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 0; border-bottom: 0.5px solid var(--gi-border); font-size: 12px;
+}
+.modal-row:last-child { border-bottom: none; }
+.modal-row .lbl { display: flex; align-items: center; gap: 7px; color: var(--gi-text); }
+.modal-row .val { color: var(--gi-muted); font-variant-numeric: tabular-nums; }
+.modal-row.total .lbl, .modal-row.total .val { font-weight: 600; color: var(--gi-text); }
+.modal-note {
+  font-size: 11px; color: var(--gi-muted); line-height: 1.45;
+  background: var(--gi-surface); border-radius: 8px; padding: 8px 10px; margin-top: 8px;
+}
+.modal-warn { color: var(--gi-warn); }
+.modal-actions { display: flex; gap: 8px; margin-top: 14px; }
+.modal-actions button { flex: 1; padding: 9px; border-radius: 10px; font-size: 13px; font-family: inherit; cursor: pointer; }
+.modal-cancel { background: none; color: var(--gi-muted); border: 0.5px solid var(--gi-border); }
+.modal-go { background: var(--gi-accent); color: #fff; border: none; font-weight: 600; }
 
 /* ── Chips ── */
 .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -239,6 +315,10 @@ button.toggle-sw.on .toggle-knob { transform: translateX(18px); }
 
 const ZONE_COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b'];
 
+// Causes d'arrosage TECHNIQUES : exclues du garde-fou hebdomadaire côté intégration
+// (cf. water.py::_TECHNICAL_WATERING_CAUSES). Doit rester aligné sur cette liste.
+const TECHNICAL_CAUSES = ['rafraichissement_soir', 'post_application'];
+
 // ─── i18n ────────────────────────────────────────────────────────────────────
 
 const STRINGS = {
@@ -248,7 +328,7 @@ const STRINGS = {
     tab_gazon: 'Gazon', tab_produits: 'Produits', tab_reglages: 'Réglages',
     // Sections
     section_zones: 'Zones', section_bilan: 'Bilan', section_zones_cfg: 'Zones configurées',
-    section_24h: '24 dernières heures', section_history: 'Historique — 7 jours',
+    section_24h: '24 dernières heures', section_history: 'Dernières sessions',
     // Timeline
     loading: 'Chargement…', no_watering_24h: 'Aucun arrosage sur 24 h',
     no_session_7d: 'Aucune session sur 7 jours', days_7: '7 jours', sessions: 'sess.',
@@ -257,10 +337,24 @@ const STRINGS = {
     blocked: 'Bloqué', planned: 'mm planifiés', window_lbl: 'Fenêtre',
     progress: 'Avancement', watering_active: 'Arrosage actif',
     next_intervention: 'Prochaine intervention', no_intervention: 'Aucune intervention recommandée',
+    last_application: 'Dernière application',
     // Zones
     no_zones: 'Aucune zone configurée', zone_inactive: 'Inactive',
     zone_active_badge: 'ACTIVE', pump: 'Pompe', pump_active: 'Active', pump_off: 'À l\'arrêt',
     btn_stop: '■ Arrêt', btn_off: 'Arrêt',
+    btn_water_now: 'Arroser',
+    btn_manual_setup: 'Configurer…',
+    manual_launch: 'Lancer',
+    manual_watering: 'Arrosage manuel',
+    manual_watering_hint: 'Conseillé :',
+    manual_watering_free: 'Choisis la dose à appliquer',
+    manual_total: 'Durée totale (zones en série)',
+    manual_no_rate: 'débit non configuré',
+    manual_reserve: 'Réserve :',
+    manual_blocked: 'Arrosage auto bloqué :',
+    manual_bypass: 'le lancement manuel passe outre.',
+    manual_peak_sun: 'Plein soleil : forte évaporation. Préfère tôt le matin.',
+    manual_cancel: 'Annuler',
     // Stats
     soil_reserve: 'Réserve sol', lawn_risk: 'Risque gazon', phase: 'Phase',
     next_mow: 'Prochaine tonte', mow_height: 'Hauteur cible', mow_height_lbl: 'Hauteur tonte',
@@ -284,6 +378,9 @@ const STRINGS = {
     // Session log source labels
     src_auto: 'Auto', src_manuel: 'Manuel', src_rafraich: 'Rafraîch. soir',
     cause_hydrique: 'hydrique', cause_soir: 'soir',
+    weekly_budget: 'Budget hebdomadaire',
+    technical_not_counted: 'techniques, non décomptés', total_received: 'total reçu',
+    technical: 'technique', passes: 'passages',
     // Editor
     editor_msg: 'Configurez la carte via l\'éditeur YAML.',
     today: "Aujourd'hui", tomorrow: 'Demain', yesterday: 'Hier',
@@ -293,16 +390,30 @@ const STRINGS = {
     tab_synthese: 'Overview', tab_arrosage: 'Watering', tab_tonte: 'Mowing',
     tab_gazon: 'Lawn', tab_produits: 'Products', tab_reglages: 'Settings',
     section_zones: 'Zones', section_bilan: 'Summary', section_zones_cfg: 'Configured zones',
-    section_24h: 'Last 24 hours', section_history: 'History — 7 days',
+    section_24h: 'Last 24 hours', section_history: 'Recent sessions',
     loading: 'Loading…', no_watering_24h: 'No watering in 24 h',
     no_session_7d: 'No session in 7 days', days_7: '7 days', sessions: 'sess.',
     next_watering: 'Next watering', session_active: 'Active session',
     blocked: 'Blocked', planned: 'mm planned', window_lbl: 'Window',
     progress: 'Progress', watering_active: 'Watering active',
     next_intervention: 'Next intervention', no_intervention: 'No intervention recommended',
+    last_application: 'Last application',
     no_zones: 'No zones configured', zone_inactive: 'Inactive',
     zone_active_badge: 'ACTIVE', pump: 'Pump', pump_active: 'Active', pump_off: 'Off',
     btn_stop: '■ Stop', btn_off: 'Off',
+    btn_water_now: 'Water',
+    btn_manual_setup: 'Set up…',
+    manual_launch: 'Run',
+    manual_watering: 'Manual watering',
+    manual_watering_hint: 'Suggested:',
+    manual_watering_free: 'Pick the amount to apply',
+    manual_total: 'Total time (zones in sequence)',
+    manual_no_rate: 'flow rate not set',
+    manual_reserve: 'Reserve:',
+    manual_blocked: 'Auto watering blocked:',
+    manual_bypass: 'a manual run overrides it.',
+    manual_peak_sun: 'Peak sun: high evaporation. Prefer early morning.',
+    manual_cancel: 'Cancel',
     soil_reserve: 'Soil reserve', lawn_risk: 'Lawn risk', phase: 'Phase',
     next_mow: 'Next mow', mow_height: 'Target height', mow_height_lbl: 'Mow height',
     risk_lbl: 'Risk', reserve_lbl: 'Reserve',
@@ -320,6 +431,9 @@ const STRINGS = {
     risk_faible: 'Low', risk_modere: 'Moderate', risk_eleve: 'High', risk_critique: 'Critical',
     src_auto: 'Auto', src_manuel: 'Manual', src_rafraich: 'Evening cool.',
     cause_hydrique: 'hydric', cause_soir: 'evening',
+    weekly_budget: 'Weekly budget',
+    technical_not_counted: 'technical, not counted', total_received: 'total received',
+    technical: 'technical', passes: 'passes',
     editor_msg: 'Configure the card via the YAML editor.',
     today: 'Today', tomorrow: 'Tomorrow', yesterday: 'Yesterday',
     _locale: 'en-US',
@@ -418,6 +532,16 @@ function esc(s) {
     .replace(/'/g, '&#39;');
 }
 
+// Durée lisible : « 12 min », « 1 h 05 ». Null/0 → tiret.
+function fmtDuration(minutes) {
+  if (!Number.isFinite(minutes) || minutes <= 0) return '—';
+  const total = Math.round(minutes);
+  if (total < 60) return `${total} min`;
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`;
+}
+
 // ─── Card ────────────────────────────────────────────────────────────────────
 
 class GazonIntelligentCard extends HTMLElement {
@@ -451,17 +575,19 @@ class GazonIntelligentCard extends HTMLElement {
       entity_prochain_arrosage:      config.entity_prochain_arrosage      || 'sensor.gazon_intelligent_prochain_arrosage',
       entity_prochaine_tonte:        config.entity_prochaine_tonte        || 'sensor.gazon_intelligent_prochaine_tonte',
       entity_tonte_autorisee:        config.entity_tonte_autorisee        || 'binary_sensor.gazon_intelligent_tonte_autorisee',
-      entity_phase:                  config.entity_phase                  || 'sensor.gazon_intelligent_phase',
-      entity_risque:                 config.entity_risque                 || 'sensor.gazon_intelligent_risque',
-      entity_reserve:                config.entity_reserve                || 'sensor.gazon_intelligent_reserve',
+      entity_phase:                  config.entity_phase                  || 'sensor.gazon_intelligent_phase_dominante',
+      entity_risque:                 config.entity_risque                 || 'sensor.gazon_intelligent_risque_gazon',
+      entity_reserve:                config.entity_reserve                || 'sensor.gazon_intelligent_reserve_actuelle',
       entity_etat_hydrique:          config.entity_etat_hydrique          || 'sensor.gazon_intelligent_etat_hydrique',
       entity_hauteur_conseillee:     config.entity_hauteur_conseillee     || 'sensor.gazon_intelligent_hauteur_de_tonte_conseillee',
-      entity_switch_arrosage_auto:   config.entity_switch_arrosage_auto   || 'input_boolean.gazon_intelligent_arrosage_auto',
+      entity_switch_arrosage_auto:   config.entity_switch_arrosage_auto   || 'switch.gazon_intelligent_arrosage_automatique_autorise',
       entity_switch_tondeuse:        config.entity_switch_tondeuse        || 'switch.gazon_intelligent_coordination_tondeuse',
       entity_prochaine_intervention: config.entity_prochaine_intervention || 'sensor.gazon_intelligent_prochaine_intervention',
+      entity_derniere_application:   config.entity_derniere_application   || 'sensor.gazon_intelligent_derniere_application',
       entity_meteo:                  config.entity_meteo,
-      entity_dernier_arrosage:       config.entity_dernier_arrosage       || 'sensor.gazon_intelligent_dernier_arrosage',
+      entity_dernier_arrosage:       config.entity_dernier_arrosage       || 'sensor.gazon_intelligent_dernier_arrosage_detecte',
       entity_objectif_arrosage:      config.entity_objectif_arrosage      || 'sensor.gazon_intelligent_objectif_d_arrosage',
+      entity_fenetre_optimale:       config.entity_fenetre_optimale       || 'sensor.gazon_intelligent_fenetre_optimale',
     };
     if (this._shadow) this._render();
   }
@@ -585,6 +711,7 @@ class GazonIntelligentCard extends HTMLElement {
         ${TABS.map(t => `<button class="tab${this._tab === t.key ? ' active' : ''}" data-tab="${t.key}">${t.label}</button>`).join('')}
       </div>
       <div class="content">${this._renderTab()}</div>
+      ${this._manualModal()}
     `;
   }
 
@@ -714,15 +841,41 @@ class GazonIntelligentCard extends HTMLElement {
   _tab_arrosage() {
     const h = this._hass; const c = this._config;
 
-    const sessAttr   = ent(h, c.entity_arrosage_en_cours)?.attributes || {};
-    const sessActive = sessAttr.active === true;
-    const sessSummary = sessAttr.summary || '';
+    const sessAttr    = ent(h, c.entity_arrosage_en_cours)?.attributes || {};
+    const sessActive  = sessAttr.active === true;
     const progressPct = sessAttr.progress_percent || 0;
+    const remainSecs  = sessAttr.remaining_session_seconds || 0;
+    const remainMin   = Math.ceil(remainSecs / 60);
+    const startedUtc  = sessAttr.started_at_utc;
+    let sessTimeLabel = '';
+    if (startedUtc) {
+      const d = new Date(startedUtc);
+      const today = new Date();
+      const isToday = d.toDateString() === today.toDateString();
+      const hhmm = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      sessTimeLabel = isToday ? `Démarré à ${hhmm}` : `Démarré le ${d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })} à ${hhmm}`;
+    }
 
-    const nextAttr  = ent(h, c.entity_prochain_arrosage)?.attributes || {};
-    const nextBlock = nextAttr.block_reason_label || '';
-    const nextWindow = nextAttr.watering_window_display || '';
-    const nextQty   = nextAttr.objective_mm;
+    // Arrosage manuel : ouvre un popup de préparation (dose + durée par zone) avant de lancer.
+    const objMm     = parseFloat(stateOf(h, c.entity_objectif_arrosage)) || 0;
+    const manualRow = `
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-name">${this._t('manual_watering')}</div>
+          <div class="toggle-sub">${objMm > 0
+            ? `${this._t('manual_watering_hint')} ${num(objMm, 1)} mm`
+            : this._t('manual_watering_free')}</div>
+        </div>
+        <button class="btn-on" data-action="manual-open">${this._t('btn_manual_setup')}</button>
+      </div>
+    `;
+
+    const nextAttr       = ent(h, c.entity_prochain_arrosage)?.attributes || {};
+    const nextBlock      = nextAttr.block_reason_label || '';
+    const nextBlockCode  = nextAttr.block_reason_code  || '';
+    const nextWindow     = nextAttr.watering_window_display || '';
+    const nextQty        = nextAttr.objective_mm;
+    const nextBlockRain  = nextBlockCode.includes('pluie') || nextBlockCode.includes('rain');
 
     const zones = c.zones || [];
     const zoneCards = zones.length ? zones.map((z, i) => {
@@ -737,18 +890,20 @@ class GazonIntelligentCard extends HTMLElement {
         const elapsed = lc ? Date.now() - new Date(lc).getTime() : 0;
         return `
           <div class="zone-card active">
-            <div class="zone-active-header">
-              <div class="zone-dot on"></div>
-              <div class="zone-name" style="flex:1">${z.name || 'Zone ' + (i + 1)}</div>
-              <span class="zone-ch" style="background:${color}">CH${i + 1}</span>
-              <span class="zone-active-badge">${this._t('zone_active_badge')}</span>
+            <div class="zone-dot on"></div>
+            <div class="zone-info">
+              <div class="zone-name">${z.name || 'Zone ' + (i + 1)}</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+                <span class="zone-ch" style="background:${color}">CH${i + 1}</span>
+                <span class="zone-active-badge">${this._t('zone_active_badge')}</span>
+                <span class="zone-active-clock">⏱</span>
+                <span class="zone-active-elapsed">${fmtTimer(elapsed)}</span>
+                ${z.debit ? `<span class="zone-detail">${z.debit} mm/h</span>` : ''}
+              </div>
             </div>
-            <div class="zone-active-timer">
-              <span class="zone-active-clock">⏱</span>
-              <span class="zone-active-elapsed">${fmtTimer(elapsed)}</span>
-              ${z.debit ? `<span class="zone-active-max">${z.debit} mm/h</span>` : ''}
+            <div class="zone-btns">
+              <button class="zone-active-stop" data-action="zone-off" data-switch="${sw}" data-pompe="${pompe}">${this._t('btn_stop')}</button>
             </div>
-            <button class="zone-active-stop" data-action="zone-off" data-switch="${sw}" data-pompe="${pompe}">${this._t('btn_stop')}</button>
           </div>`;
       }
 
@@ -785,13 +940,17 @@ class GazonIntelligentCard extends HTMLElement {
       ${sessActive ? `
         <div class="hero">
           <div class="hero-eyebrow">${this._t('session_active')}</div>
-          <div class="hero-title">${sessSummary || this._t('watering_active')}</div>
-          ${progressPct ? `<div class="hero-sub">${this._t('progress')} : ${progressPct} %</div>` : ''}
+          <div class="hero-title">${this._t('watering_active')}</div>
+          <div class="hero-sub">${sessTimeLabel}${remainMin > 0 ? ` · ~${remainMin} min restantes` : ''}</div>
+          <div class="sess-progress-wrap">
+            <div class="sess-progress-bar" style="width:${Math.min(100, num(progressPct, 0))}%"></div>
+          </div>
+          <div class="hero-badge" style="margin-top:6px"><div class="hero-dot"></div>${num(progressPct, 0)} %</div>
         </div>
       ` : nextBlock ? `
-        <div class="hero warn">
+        <div class="hero ${nextBlockRain ? 'rain' : 'warn'}">
           <div class="hero-eyebrow">${this._t('next_watering')}</div>
-          <div class="hero-title">${this._t('blocked')} · ${nextBlock}</div>
+          <div class="hero-title">${nextBlockRain ? '🌧️' : '⏳'} ${esc(nextBlock)}</div>
           ${nextWindow ? `<div class="hero-badge"><div class="hero-dot"></div>${this._t('window_lbl')} : ${nextWindow}</div>` : ''}
         </div>
       ` : (nextQty && parseFloat(nextQty) > 0) ? `
@@ -801,6 +960,8 @@ class GazonIntelligentCard extends HTMLElement {
           ${nextWindow ? `<div class="hero-badge"><div class="hero-dot"></div>${nextWindow}</div>` : ''}
         </div>
       ` : ''}
+
+      ${manualRow}
 
       <div class="section-title">${this._t('section_zones')}</div>
       ${zoneCards}
@@ -854,14 +1015,19 @@ class GazonIntelligentCard extends HTMLElement {
       const intSessions = zoneSegments[z.switch] || [];
       const allSessions = [...intSessions, ...rawSessions];
 
-      // If zone is currently active, extend/add bar to now
-      const currentlyOn = isOn(h, z.sensor) || isOn(h, z.switch);
-      if (currentlyOn) {
+      // Live session: use real session start from entity_arrosage_en_cours
+      const sessLiveAttr  = ent(h, c.entity_arrosage_en_cours)?.attributes || {};
+      const sessLiveActive = sessLiveAttr.active === true;
+      const sessStartUtc  = sessLiveAttr.started_at_utc;
+      const sessStartMs   = sessStartUtc ? new Date(sessStartUtc).getTime() : (now - (sessLiveAttr.elapsed_seconds || 60) * 1000);
+      const currentlyOn   = isOn(h, z.sensor) || isOn(h, z.switch);
+      const inSession     = sessLiveActive && sessLiveAttr.active_zones?.includes(z.switch);
+      if (currentlyOn || inSession) {
         const last = allSessions[allSessions.length - 1];
-        if (last && last.end_ms >= now - 60000) {
+        if (last && last.end_ms >= sessStartMs) {
           allSessions[allSessions.length - 1] = { ...last, end_ms: now };
         } else {
-          allSessions.push({ start_ms: now - 60000, end_ms: now });
+          allSessions.push({ start_ms: sessStartMs, end_ms: now });
         }
       }
 
@@ -873,7 +1039,7 @@ class GazonIntelligentCard extends HTMLElement {
         return `<div class="tl-bar" style="background:${color};left:${leftPct.toFixed(2)}%;width:${widthPct.toFixed(2)}%"></div>`;
       }).join('');
 
-      return `<div class="tl-row"><div class="tl-label">Z${i + 1}</div><div class="tl-track">${bars}</div></div>`;
+      return `<div class="tl-row"><div class="tl-label">CH${i + 1}</div><div class="tl-track">${bars}</div></div>`;
     }).join('');
 
     // ── 24h stats per zone (dot chips) from derniers_arrosages ──
@@ -912,22 +1078,71 @@ class GazonIntelligentCard extends HTMLElement {
       const timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
       const srcLabel = SOURCE_LABELS[e.source] || e.source;
       const causeLabel = (e.watering_cause && e.watering_cause !== e.source) ? ` · ${CAUSE_LABELS[e.watering_cause] || e.watering_cause}` : '';
-      const zoneChips = (e.zones || []).map(z => {
+      // Un cycle fractionné répète les mêmes zones (1 entrée par zone ET par passage). On cumule
+      // donc la durée par zone et on indique le nombre de passages, au lieu d'aligner 6 puces
+      // identiques pour 3 zones.
+      const byZone = new Map();
+      (e.zones || []).forEach(z => {
         const info = zoneBySwitch[z.entity_id];
-        if (!info) return '';
-        const dur = z.duration_min >= 1 ? Math.round(z.duration_min) + ' min' : Math.round(z.duration_min * 60) + ' s';
-        return `<span class="ch-badge" style="background:${info.color}">CH${info.idx+1}</span><span class="tl-log-zdur">${dur}</span>`;
+        if (!info) return;
+        const cur = byZone.get(z.entity_id) || { info, minutes: 0, passes: 0 };
+        cur.minutes += Number(z.duration_min) || 0;
+        cur.passes  += 1;
+        byZone.set(z.entity_id, cur);
+      });
+      const passes = byZone.size ? Math.max(...[...byZone.values()].map(v => v.passes)) : 0;
+      const zoneChips = [...byZone.values()].map(v => {
+        const dur = v.minutes >= 1 ? Math.round(v.minutes) + ' min' : Math.round(v.minutes * 60) + ' s';
+        return `<span class="ch-badge" style="background:${v.info.color}">CH${v.info.idx + 1}</span><span class="tl-log-zdur">${dur}</span>`;
       }).join('');
+      const passChip = passes > 1
+        ? `<span class="pass-badge">${passes} ${this._t('passes')}</span>` : '';
+
+      // Les arrosages TECHNIQUES (rafraîchissement du soir, incorporation post-produit) sont
+      // exclus du budget hebdomadaire : on les marque pour que le total reste lisible.
+      const isTech = TECHNICAL_CAUSES.includes(String(e.watering_cause || '').toLowerCase());
       const mmStr = e.total_mm >= 0.1 ? `${e.total_mm} mm` : '< 0.1 mm';
-      return `<div class="tl-log-entry">
+      return `<div class="tl-log-entry${isTech ? ' tech' : ''}">
         <div class="tl-log-row1">
-          <span class="tl-log-src">${srcLabel}${causeLabel}</span>
+          <span class="tl-log-src">${srcLabel}${causeLabel}${
+            isTech ? ` <span class="tech-badge">${this._t('technical')}</span>` : ''}</span>
           <span class="tl-log-when">${dayStr} ${timeStr}</span>
           <span class="tl-log-dur">${mmStr}</span>
         </div>
-        ${zoneChips ? `<div class="tl-log-zones">${zoneChips}</div>` : ''}
+        ${zoneChips ? `<div class="tl-log-zones">${passChip}${zoneChips}</div>` : ''}
       </div>`;
     }).join('');
+
+    // ── Budget hebdomadaire ────────────────────────────────────────────────────────────────
+    // Les DEUX chiffres viennent de l'intégration, qui seule connaît la vraie fenêtre 7 jours :
+    //   `arrosage_recent_7j`   = ce qui COMPTE au budget (technique et externe exclus)
+    //   `arrosage_applique_7j` = l'eau RÉELLEMENT reçue (technique inclus)
+    // Ne PAS les recalculer depuis `derniers_arrosages` : cette liste est plafonnée aux N
+    // dernières sessions, pas à 7 jours — le total serait faux (et peut passer sous le budget,
+    // ce qui est impossible). Absent = intégration plus ancienne → on masque la ligne.
+    const resAttrs   = ent(h, c.entity_reserve)?.attributes || {};
+    const budgetUsed = parseFloat(resAttrs.arrosage_recent_7j);
+    const applied    = parseFloat(resAttrs.arrosage_applique_7j);
+    const budgetMax  = parseFloat(ent(h, c.entity_fenetre_optimale)?.attributes?.weekly_guardrail_mm_max);
+    let budgetHtml = '';
+    if (Number.isFinite(budgetUsed) && Number.isFinite(budgetMax) && budgetMax > 0) {
+      const pct    = Math.round((budgetUsed / budgetMax) * 100);
+      const over   = budgetUsed >= budgetMax;
+      const barPct = Math.min(100, pct);
+      const barCol = over ? 'var(--gi-danger)' : pct >= 80 ? 'var(--gi-warn)' : 'var(--gi-accent)';
+      const tech   = Number.isFinite(applied) ? Math.max(0, applied - budgetUsed) : null;
+      budgetHtml = `
+        <div class="budget-box">
+          <div class="budget-top">
+            <span class="budget-lbl">${this._t('weekly_budget')}</span>
+            <span class="budget-val${over ? ' over' : ''}">${num(budgetUsed, 1)} / ${num(budgetMax, 1)} mm · ${pct} %</span>
+          </div>
+          <div class="budget-track"><div class="budget-bar" style="width:${barPct}%;background:${barCol}"></div></div>
+          ${Number.isFinite(applied) ? `<div class="budget-sub">${tech > 0
+            ? `+ <b>${num(tech, 1)} mm</b> ${this._t('technical_not_counted')} · `
+            : ''}${this._t('total_received')} <b>${num(applied, 1)} mm</b></div>` : ''}
+        </div>`;
+    }
 
     const windowHasSessions = derniersArrosages24.length > 0 || zones.some(z => {
       const sess = (this._history && z.switch) ? (this._history[z.switch] || []) : [];
@@ -950,6 +1165,7 @@ class GazonIntelligentCard extends HTMLElement {
       </div>
       ${this._history ? `
       <div class="section-title" style="margin-top:12px">${this._t('section_history')}</div>
+      ${budgetHtml}
       ${header7}
       ${logHtml ? `<div class="tl-log">${logHtml}</div>` : `<div class="tl-empty">${this._t('no_session_7d')}</div>`}
       ` : ''}`;
@@ -1013,10 +1229,12 @@ class GazonIntelligentCard extends HTMLElement {
   _tab_tonte() {
     const h = this._hass; const c = this._config;
 
-    const tonteAttr  = ent(h, c.entity_tonte_autorisee)?.attributes || {};
+    const tonteAttr   = ent(h, c.entity_tonte_autorisee)?.attributes || {};
     const tonteStatut = tonteAttr.tonte_statut || '';
-    const blockLbl   = tonteAttr.mowing_block_reason_label || '';
-    const gPermet    = tonteAttr.gazon_permet_tonte;
+    const blockLbl    = tonteAttr.mowing_block_reason_label || '';
+    const blockCode   = tonteAttr.mowing_block_reason_code  || '';
+    const blockRain   = blockCode.includes('pluie') || blockCode.includes('rain');
+    const gPermet     = tonteAttr.gazon_permet_tonte;
     const mPermet    = tonteAttr.machine_permet_tonte;
     const bat        = tonteAttr.tondeuse_batterie;
     const nomTonde   = tonteAttr.tondeuse_nom || 'Tondeuse robot';
@@ -1044,7 +1262,7 @@ class GazonIntelligentCard extends HTMLElement {
 
       ${blockLbl ? `
         <div class="chip-row">
-          <div class="chip"><div class="chip-dot" style="background:var(--gi-warn)"></div>${blockLbl}</div>
+          <div class="chip"><div class="chip-dot" style="background:${blockRain ? '#3b82f6' : 'var(--gi-warn)'}"></div>${blockRain ? '🌧️ ' : ''}${esc(blockLbl)}</div>
         </div>` : ''}
 
       <div class="stats-grid">
@@ -1167,6 +1385,15 @@ class GazonIntelligentCard extends HTMLElement {
     const INACTIVE_STATES = ['unavailable', 'unknown', 'non_requis', 'not_required', 'none', ''];
     const showHero = iState && !INACTIVE_STATES.includes(iState);
 
+    // Dernière application : l'onglet ne montrait que le « prochain » (prochaine_intervention) et
+    // jamais le « dernier », d'où l'impression que le produit qu'on vient d'appliquer disparaissait.
+    const laAttr   = ent(h, c.entity_derniere_application)?.attributes || {};
+    const laState  = stateOf(h, c.entity_derniere_application) || '';
+    const laActive = laState && !['unavailable', 'unknown', 'none', 'non_requis', ''].includes(laState);
+    const laDate   = laAttr.last_application_when || laAttr.date || '';
+    const laMeta   = [laAttr.type, laAttr.dose].filter(Boolean).join(' · ');
+    const laNote   = laAttr.note || '';
+
     return `
       ${showHero ? `
         <div class="hero ${heroTone}">
@@ -1186,6 +1413,17 @@ class GazonIntelligentCard extends HTMLElement {
         </div>` : ''}
 
       ${(!showHero && !summary) ? `<div class="empty">${this._t('no_intervention')}</div>` : ''}
+
+      ${laActive ? `
+        <div class="zone-card" style="margin-top:10px">
+          <div class="zone-dot on"></div>
+          <div class="zone-info">
+            <div class="zone-detail on">${this._t('last_application')}</div>
+            <div class="zone-name">${esc(laState)}${laDate ? ` · ${esc(laDate)}` : ''}</div>
+            ${laMeta ? `<div class="zone-detail">${esc(laMeta)}</div>` : ''}
+            ${laNote ? `<div class="zone-detail" style="white-space:normal">${esc(laNote)}</div>` : ''}
+          </div>
+        </div>` : ''}
     `;
   }
 
@@ -1249,6 +1487,35 @@ class GazonIntelligentCard extends HTMLElement {
       });
     });
 
+    // Popup d'arrosage manuel : on met à jour les durées EN PLACE à chaque frappe. Un re-rendu
+    // complet de la carte ferait perdre le focus du champ au milieu de la saisie.
+    const mmInput = card.querySelector('#gi-manual-mm');
+    if (mmInput) {
+      const refresh = () => {
+        const v = parseFloat(mmInput.value);
+        this._manualMm = Number.isFinite(v) ? v : null;
+        const rows = card.querySelector('#gi-manual-rows');
+        if (rows) rows.innerHTML = this._manualRowsHtml(this._manualMm || 0);
+        const go = card.querySelector('#gi-manual-go');
+        if (go) {
+          const v = this._manualMm;
+          go.textContent = `💧 ${this._t('manual_launch')}${v > 0 ? ` ${num(v, 1)} mm` : ''}`;
+          go.disabled = !(v > 0);
+        }
+        const after = card.querySelector('#gi-manual-after');
+        if (after) {
+          const resAttr  = ent(this._hass, this._config.entity_reserve)?.attributes || {};
+          const resNow   = parseFloat(resAttr.reserve_actuelle_mm);
+          const resUtile = parseFloat(resAttr.reserve_utile_mm);
+          if (Number.isFinite(resNow) && Number.isFinite(resUtile)) {
+            after.textContent = num(Math.min(resNow + (this._manualMm || 0), resUtile), 1);
+          }
+        }
+      };
+      mmInput.addEventListener('input', refresh);
+      mmInput.addEventListener('click', e => e.stopPropagation());
+    }
+
     card.querySelectorAll('[data-action]').forEach(el => {
       el.addEventListener('click', e => {
         e.stopPropagation();
@@ -1256,7 +1523,36 @@ class GazonIntelligentCard extends HTMLElement {
         const sw    = el.dataset.switch;
         const pompe = el.dataset.pompe;
 
-        if (action === 'toggle' && entity) {
+        if (action === 'modal-stop') {
+          return; // clic dans le popup : ne pas le refermer
+
+        } else if (action === 'manual-open') {
+          this._manualOpen = true;
+          this._render();
+
+        } else if (action === 'manual-close') {
+          this._manualOpen = false;
+          this._render();
+
+        } else if (action === 'manual-preset') {
+          this._manualMm = parseFloat(el.dataset.mm) || null;
+          this._render();
+
+        } else if (action === 'manual-run') {
+          // On relit la valeur DANS le DOM au moment du clic : c'est toujours la dernière saisie.
+          const input = card.querySelector('#gi-manual-mm');
+          const mm = parseFloat(input && input.value);
+          if (!(mm > 0)) return;
+          this._manualMm = mm;
+          // Cible explicite obligatoire : plusieurs gazons peuvent coexister sur l'installation.
+          this._call('gazon_intelligent', 'start_manual_irrigation', {
+            entity_id: this._config.entity_objectif_arrosage,
+            objectif_mm: mm,
+          });
+          this._manualOpen = false;
+          this._render();
+
+        } else if (action === 'toggle' && entity) {
           this._call('switch', 'toggle', { entity_id: entity });
 
         } else if (action === 'zone-on' && sw) {
@@ -1274,6 +1570,100 @@ class GazonIntelligentCard extends HTMLElement {
         }
       });
     });
+  }
+
+  // Durée par zone pour une dose donnée. Les zones s'enchaînent l'une après l'autre, et chacune
+  // doit recevoir la dose complète : durée = dose / débit. Le débit fait autorité côté
+  // intégration (number.<prefixe>_debit_zone_N) ; à défaut on prend celui saisi dans la carte.
+  _zonePlan(mm) {
+    const h = this._hass; const c = this._config;
+    const prefix = String(c.entity_objectif_arrosage || '')
+      .replace(/^sensor\./, '')
+      .replace(/_objectif_d_arrosage$/, '');
+    return (c.zones || []).map((z, i) => {
+      const fromIntegration = parseFloat(stateOf(h, `number.${prefix}_debit_zone_${i + 1}`));
+      const rate = Number.isFinite(fromIntegration) && fromIntegration > 0
+        ? fromIntegration
+        : (parseFloat(z.debit) || 0);
+      return {
+        name: z.name || `Zone ${i + 1}`,
+        rate,
+        minutes: rate > 0 && mm > 0 ? (mm / rate) * 60 : null,
+      };
+    });
+  }
+
+  // Lignes recalculées à chaque frappe (on ne re-rend pas toute la carte : le focus serait perdu).
+  _manualRowsHtml(mm) {
+    const plan = this._zonePlan(mm);
+    if (!plan.length) return `<div class="empty">${this._t('no_zones')}</div>`;
+    const total = plan.reduce((s, z) => s + (z.minutes || 0), 0);
+    const rows = plan.map((z, i) => `
+      <div class="modal-row">
+        <div class="lbl">
+          <div class="zone-dot" style="background:${ZONE_COLORS[i % ZONE_COLORS.length]}"></div>
+          ${esc(z.name)}
+        </div>
+        <div class="val">${z.rate > 0
+          ? `${num(z.rate, 0)} mm/h · <b>${fmtDuration(z.minutes)}</b>`
+          : this._t('manual_no_rate')}</div>
+      </div>`).join('');
+    return `${rows}
+      <div class="modal-row total">
+        <div class="lbl">${this._t('manual_total')}</div>
+        <div class="val">${fmtDuration(total)}</div>
+      </div>`;
+  }
+
+  _manualModal() {
+    if (!this._manualOpen) return '';
+    const h = this._hass; const c = this._config;
+    const objMm = parseFloat(stateOf(h, c.entity_objectif_arrosage)) || 0;
+    const mm    = this._manualMm ?? (objMm > 0 ? objMm : 3);
+
+    const resAttr  = ent(h, c.entity_reserve)?.attributes || {};
+    const resNow   = parseFloat(resAttr.reserve_actuelle_mm ?? stateOf(h, c.entity_reserve));
+    const resUtile = parseFloat(resAttr.reserve_utile_mm);
+    const resAfter = Number.isFinite(resNow) && Number.isFinite(resUtile)
+      ? Math.min(resNow + mm, resUtile) : null;
+
+    const blockLabel = ent(h, c.entity_prochain_arrosage)?.attributes?.block_reason_label || '';
+    const hour = new Date().getHours();
+    const peakSun = hour >= 10 && hour < 18;
+
+    return `
+      <div class="modal-back" data-action="manual-close">
+        <div class="modal" data-action="modal-stop">
+          <div class="modal-head">
+            <div class="modal-title">💧 ${this._t('manual_watering')}</div>
+            <button class="modal-x" data-action="manual-close">✕</button>
+          </div>
+
+          <div class="modal-dose">
+            <input class="manual-mm" id="gi-manual-mm" type="number"
+                   min="0.5" max="30" step="0.5" value="${mm}"
+                   aria-label="${this._t('manual_watering')}">
+            <span class="manual-unit">mm</span>
+            ${objMm > 0 ? `<button class="modal-preset" data-action="manual-preset"
+                 data-mm="${objMm}">${this._t('manual_watering_hint')} ${num(objMm, 1)} mm</button>` : ''}
+          </div>
+
+          <div class="modal-rows" id="gi-manual-rows">${this._manualRowsHtml(mm)}</div>
+
+          <div class="modal-note">
+            ${Number.isFinite(resAfter) ? `${this._t('manual_reserve')} <b>${num(resNow, 1)}</b> →
+               <b id="gi-manual-after">${num(resAfter, 1)}</b> / ${num(resUtile, 1)} mm<br>` : ''}
+            ${blockLabel ? `${this._t('manual_blocked')} <b>${esc(blockLabel)}</b> —
+               ${this._t('manual_bypass')}<br>` : ''}
+            ${peakSun ? `<span class="modal-warn">⚠️ ${this._t('manual_peak_sun')}</span>` : ''}
+          </div>
+
+          <div class="modal-actions">
+            <button class="modal-cancel" data-action="manual-close">${this._t('manual_cancel')}</button>
+            <button class="modal-go" id="gi-manual-go" data-action="manual-run">💧 ${this._t('manual_launch')} ${num(mm, 1)} mm</button>
+          </div>
+        </div>
+      </div>`;
   }
 
   _call(domain, service, data) {

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.12.1] - 2026-07-25
+
+### Corrigé
+- **Popup d'arrosage manuel — saisie de la dose impossible** : `set hass` re-rendait la carte à chaque changement d'état dans tout Home Assistant (plusieurs fois par seconde), ce qui recréait le champ de saisie en continu → la valeur tapée était écrasée et le focus perdu, la dose repassait sans cesse à celle conseillée. On ne re-rend plus tant que le popup est ouvert (il tient ses propres durées à jour en direct).
+
+### Modifié
+- **Budget hebdomadaire — libellé plus clair** : « dont X mm technique (hors budget) » laissait croire que le technique était compté. Remplacé par « + X mm techniques, non décomptés · total reçu Y mm » — l'eau technique s'**ajoute** au total reçu sans entrer dans le budget de l'auto.
+
 ## [0.12.0] - 2026-07-24
 
 ### Ajouté

@@ -598,6 +598,13 @@ class GazonIntelligentCard extends HTMLElement {
       this._shadow = this.attachShadow({ mode: 'open' });
       this._shadow.innerHTML = `<style>${STYLES}</style><div class="card" id="gi-card"></div>`;
     }
+    // Pas de re-rendu tant que le popup d'arrosage manuel est ouvert. `set hass` est appelé à
+    // CHAQUE changement d'état dans tout Home Assistant (plusieurs fois par seconde) ; un
+    // re-rendu recrée le champ de saisie, ce qui écrase la valeur tapée et fait perdre le focus
+    // — la dose repassait sans cesse à celle conseillée, impossible d'en choisir une autre.
+    // Le popup tient ses propres durées à jour en direct (cf. _bindEvents), il n'a donc pas
+    // besoin du rendu global ; les valeurs de contexte se rafraîchissent à sa fermeture.
+    if (this._manualOpen) return;
     this._render();
   }
 

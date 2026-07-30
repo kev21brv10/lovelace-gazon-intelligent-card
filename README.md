@@ -12,6 +12,12 @@
   <img src="https://img.shields.io/github/license/kev21brv10/lovelace-gazon-intelligent-card" alt="License">
 </p>
 
+<p align="center">
+  <img src="docs/images/synthese.png" alt="Onglet Synthèse de la card Gazon Intelligent" width="420">
+</p>
+
+<p align="center"><em>L'onglet Synthèse : la décision du moment, puis quatre phrases qui l'expliquent.</em></p>
+
 ## 🌱 Pourquoi cette card
 
 Cette card n'est pas une carte d'irrigation générique.
@@ -28,14 +34,33 @@ Elle a été conçue comme **frontend dédié** de l'intégration [`Gazon Intell
 ## ✨ Ce que la card apporte
 
 - **6 onglets** : Synthèse · Arrosage · Tonte · Gazon · Produits · Réglages
-- **Onglet Synthèse** : hero actionnable avec icône et titre selon la décision du moment, statut Auto intégré, bandeau canicule si actif, 4 stat-cards (réserve + risque + prochain arrosage + prochaine tonte), pills contexte (phase · ET₀ · pluie attendue)
-- **Timeline 24h glissante** : barres d'arrosage par zone sur la fenêtre courante
+- **Un briefing qui parle** : la Synthèse ne se contente pas d'afficher des valeurs, elle explique
+  en quatre phrases ce qui a été arrosé, où en est la réserve, pourquoi rien n'est prévu et ce
+  qu'attend la tonte
+- **Bandeau météo** : température, min/max, humidité, vent, pluie attendue, UV, point de rosée
+- **Frise des 24 h** : barres d'arrosage par zone sur la fenêtre glissante, avec durée et
+  nombre de sessions par zone
+- **Hauteur de gazon estimée** : jauge du jour et reste à pousser avant la hauteur cible
+- **Les services de l'intégration à portée de main**, rangés dans l'onglet où ils servent —
+  déclarer un arrosage manuel, une tonte, un produit appliqué, recalibrer la réserve
+- **Actions rapides contextuelles** : elles n'apparaissent que lorsqu'elles ont un sens
 - **Éditeur visuel natif** : `ha-form` avec sélecteurs d'entités HA (`ha-entity-picker`)
 - **i18n FR/EN** : langue détectée automatiquement depuis `hass.locale.language`
-- **Validation de config** : avertissements console si les zones sont manquantes
 - **`getLayoutOptions()`** : support du redimensionnement en mode grille HA
 - Support multi-pelouse (plusieurs instances de l'intégration)
-- Thèmes clair et sombre natifs HA
+- Thèmes clair et sombre natifs HA, téléphone / tablette / ordinateur
+
+## 📸 Les six onglets
+
+| Arrosage | Tonte | Produits |
+|---|---|---|
+| <img src="docs/images/arrosage.png" alt="Onglet Arrosage" width="240"> | <img src="docs/images/tonte.png" alt="Onglet Tonte" width="240"> | <img src="docs/images/produits.png" alt="Onglet Produits" width="240"> |
+| Prochain arrosage et sa fenêtre, zones pilotables une à une, frise des 24 h et journal des sessions. | État de la machine, prochaine tonte, hauteur cible et hauteur estimée du jour. | Prochaine intervention, historique des applications et déclaration en deux clics. |
+
+| Gazon | Réglages | Thème sombre |
+|---|---|---|
+| <img src="docs/images/gazon.png" alt="Onglet Gazon" width="240"> | <img src="docs/images/reglages.png" alt="Onglet Réglages" width="240"> | <img src="docs/images/sombre.png" alt="Thème sombre" width="240"> |
+| Phase, risque, réserve du sol et bilan. | Interrupteurs, services de l'intégration et outils de maintenance. | Les deux thèmes Home Assistant sont suivis nativement. |
 
 ## 🔗 Dépendance
 
@@ -154,6 +179,10 @@ zones:
 | `entity_phase` | entity | Phase dominante du gazon |
 | `entity_hauteur_conseillee` | entity | Hauteur de tonte conseillée |
 | `entity_prochaine_intervention` | entity | Prochaine intervention produit |
+| `entity_hauteur_gazon_estimee` | entity | Hauteur de gazon estimée (jauge de l'onglet Tonte) |
+| `entity_derniere_application` | entity | Dernière application produit (produit, date, type, dose) |
+| `entity_catalogue_produits` | entity | Catalogue des produits déclarés (popup de déclaration) |
+| `entity_fenetre_optimale` | entity | Plafond hebdomadaire (`weekly_guardrail_mm_max`) |
 | `entity_switch_arrosage_auto` | switch | Arrosage automatique activé/désactivé |
 | `entity_switch_tondeuse` | switch | Coordination tondeuse activée/désactivée |
 | `pompe_switch` | switch | Switch pompe (affiché dans l'onglet Arrosage) |
@@ -167,11 +196,11 @@ zones:
 <summary>Build, tests et discipline de publication</summary>
 
 ```bash
-python3 scripts/build.py                             # régénère le bundle depuis src/
-python3 -m unittest discover -s tests -p "test_*.py" # tests de contrat
+python3 scripts/build.py     # régénère le bundle depuis src/
+python3 scripts/validate.py  # contrôles de contrat + garde-fous de syntaxe
 ```
 
-La CI (`Validate`) rejoue ces étapes sur chaque push et PR.
+La CI (`Validate`) rejoue exactement ces deux étapes sur chaque push et PR.
 
 - Toujours rebuilder le bundle après modification des sources
 - Publier `bundle + sources ensemble`

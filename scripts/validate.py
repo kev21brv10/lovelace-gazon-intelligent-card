@@ -121,4 +121,21 @@ if "type" not in yaml_keys:
 if "zones" not in yaml_keys:
     raise SystemExit("README.md complete YAML example must include 'zones:'")
 
+# ── ACCENTS GRAVES DANS LE CSS ──────────────────────────────────────────────
+# Le bloc de styles vit dans un template JS : un accent grave le ferme, et le CSS qui suit
+# devient du code. Erreur commise TROIS fois le 30/07/2026 — dont une que `node --check` n'a
+# PAS vue, le fichier restant syntaxiquement valide pendant que la carte ne s'enregistrait
+# plus (« label is not defined »). Le contrôle est donc mécanique, ici, à chaque build.
+_src = (ROOT / "src" / "gazon-intelligent-card.js").read_text(encoding="utf-8") if (ROOT / "src" / "gazon-intelligent-card.js").exists() else ""
+_debut = _src.find("const STYLES = `")
+if _debut >= 0:
+    _fin = _src.index("`;", _debut + 16)
+    _bloc = _src[_debut + 16:_fin]
+    if "`" in _bloc:
+        _ligne = _src[:_debut + 16 + _bloc.index("`")].count("\n") + 1
+        raise SystemExit(
+            f"accent grave interdit dans le bloc CSS (ligne {_ligne}) : il ferme le template JS. "
+            "Reformuler le commentaire sans backtick."
+        )
+
 print("Validation OK")

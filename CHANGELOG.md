@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.26.0] - 2026-08-06
+
+### Corrigé
+- **La carte lisait le nouvel état « Retenu » comme « pas bloqué ».** L'intégration 0.48.0
+  distingue désormais « Non requis » (le gazon n'a besoin de rien) de « **Retenu** » (l'objectif
+  est à 0 *parce qu'*un garde-fou retient l'eau). Les deux tests de blocage de la carte ne
+  connaissaient que « Bloqué » : le hero et l'estimation auraient affiché une situation sereine
+  pendant que l'eau était retenue. Les deux comparaisons couvrent maintenant les deux états.
+
 ## [0.25.1] - 2026-08-04
 
 ### Corrigé

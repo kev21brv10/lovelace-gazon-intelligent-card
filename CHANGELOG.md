@@ -1,5 +1,179 @@
 # Changelog
 
+## [0.25.1] - 2026-08-04
+
+### Corrigé
+- **La liste des sessions affichait l'heure de FIN du cycle.** `recorded_at` est l'instant où
+  l'intégration enregistre la session, c'est-à-dire la fermeture de la dernière vanne : un
+  arrosage parti à 03:45:13 s'affichait « 05:18 ». Elle lit désormais `started_at`
+  (intégration 0.41.0), avec repli sur l'ancien champ pour les sessions plus anciennes.
+
+## [0.25.0] - 2026-08-03
+
+### Ajouté
+- **Hauteur de coupe réglable depuis l'onglet Réglages.** Beaucoup de robots — dont celui de
+  Kévin — ne publient pas leur hauteur de coupe : elle se saisit à la main. Or c'est le POINT
+  ZÉRO du modèle de pousse (`hauteur du gazon = hauteur de coupe + ce qui a poussé depuis`).
+  La régler ailleurs qu'à l'endroit où on lit la hauteur, c'est garantir qu'on l'oubliera après
+  avoir tourné la molette — et toute l'estimation part alors de travers, sans qu'aucun capteur
+  puisse le détecter. Deux boutons, la valeur en cm, bornée par les min/max de l'entité.
+
+### Corrigé
+- **« Pas d'arrosage pour l'instant : robot indisponible… »** — le résumé lisait la raison de
+  l'ASSISTANT, qui est une chaîne de priorités : quand l'arrosage n'a rien à signaler, elle
+  descend sur la tonte. La carte annonçait donc un motif de tondeuse comme raison de ne pas
+  arroser, pendant que la tuile juste dessous affichait le vrai motif (« Déjà arrosé
+  aujourd'hui »). Deux lignes, un même écran, une vraie et une fausse. Le résumé lit désormais
+  le motif de l'entité ARROSAGE.
+
+## [0.24.0] - 2026-08-01
+
+### Ajouté
+- **« Le sol réclame toujours X mm »** sous un arrosage retenu. L'entité « Objectif d'arrosage »
+  affiche 0 pendant un blocage — c'est juste, rien ne sera versé — mais la carte laissait alors
+  croire que le gazon n'avait besoin de rien, réserve sous le seuil comprise. Le besoin réel
+  vient du nouvel attribut `besoin_mm` (intégration 0.35.0) ; sans lui, la ligne ne s'affiche
+  simplement pas.
+
+### Outillage
+- **Le validateur vérifie la syntaxe du fichier construit** (`node --check`). Une virgule
+  manquante dans le dictionnaire de chaînes suffit à rendre la carte inchargeable — écran
+  blanc, aucun message. Cas réel ce jour : build et validation au vert sur un fichier qui ne
+  parsait pas.
+
+## [0.23.1] - 2026-07-31
+
+Deux défauts trouvés en rechargeant le banc avec **toutes** les valeurs réelles de
+l'installation, tirées de Home Assistant. Aucun des deux n'apparaissait sur le jeu d'essai
+précédent : les attributs concernés y étaient simplement absents, donc les blocs qui les
+affichent ne s'affichaient pas.
+
+### Corrigé
+- **« 0 % · blocked » dans l'en-tête Produits.** L'état interne de l'intégration, en anglais,
+  collé à un score qui ne veut rien dire quand rien n'est recommandé. L'état est traduit
+  (« Bloqué », « À préparer », « Recommandé »), et le score n'apparaît que s'il porte une
+  information — au-delà de 0.
+- **« · 0,0 mm » sans étiquette dans le Bilan.** `pluie_efficace` s'affichait nu, derrière
+  l'arrosage 7 j : rien ne disait que c'était de la pluie, et à zéro la mention n'apprend rien.
+  Étiquetée, et masquée quand elle vaut zéro.
+
+## [0.23.0] - 2026-07-31
+
+Tour complet des six onglets, avec les vraies valeurs de l'install. Quinze défauts.
+
+### Corrigé — ce qui trompait sur une décision
+- **L'onglet Arrosage promettait encore « imminent ».** Le titre disait « ⏳ Garde-fou
+  hebdomadaire », le sous-titre juste dessous « estimé imminent · sous réserve du budget ». La
+  nuance ne se lit pas : l'œil retient « imminent ». Et l'estimation répondait à une question
+  que personne ne pose — « quand le sol aura soif » — pendant que le titre répondait à « est-ce
+  que j'arrose ». Les deux sous-titres (héros Arrosage ET tuile Synthèse) disent désormais la
+  même chose que la jauge, dans les mêmes mots : « semaine couverte · reprise dès que le besoin
+  remonte ».
+- **Le même fait était vert en haut et orange en bas.** La règle de la carte — « l'orange est
+  une ALERTE, pas un état d'attente » — était violée par la jauge de budget elle-même : `held`
+  la peignait en orange pendant que le héros du même écran restait vert. L'orange est rendu à
+  ce qu'il signale vraiment : on approche du plafond dur (≥ 80 %).
+- **« À surveiller » était collé sur la ligne de la tondeuse.** Ce badge porte `tonte_statut`,
+  qui juge LA TONTE (donc le gazon), pas la machine. On lisait « Esperance Jr · À la station ·
+  100 % — À surveiller » : la tondeuse avait l'air en défaut alors qu'elle était chargée et
+  déclarée disponible. Deux axes, deux badges : la machine porte le sien, le verdict de tonte
+  est explicitement étiqueté « Tonte : … ».
+- **`confort` et `depletion` s'affichaient bruts, en minuscules.** La table `HYDRIC_LABELS` avait
+  été écrite contre un vocabulaire que l'intégration n'utilise plus : elle listait `stress`,
+  `optimal`, `charge`, `vide` — quatre entrées mortes — et ne couvrait NI `confort` NI
+  `depletion`, les deux états les plus fréquents. Table alignée sur les quatre états réels, et
+  le repli capitalise désormais au lieu de rendre la clé telle quelle.
+
+### Ajouté
+- **La pousse du jour** (`+ 0,17 cm poussé aujourd'hui`) : l'intégration la calcule heure par
+  heure et rien ne l'affichait — c'est la seule preuve visible que le modèle de pousse tourne.
+- **L'état du créneau de tonte** (`Créneau : À éviter`) : calculé, utilisé par le flow Node-RED,
+  jamais montré.
+- **Les deux nombres qui décident**, sur la jauge de réserve : déplétion réelle et seuil de
+  déclenchement, à la place d'un « 63 % · 7,6 mm » qui répétait la tuile juste au-dessus.
+- **Le critère qui bloque une intervention** est marqué (✓ / ⏳ + gras), via le nouvel attribut
+  `application_constraints` de l'intégration 0.33.0. Repli sur l'ancien découpage de chaîne si
+  l'intégration est plus ancienne.
+
+### Retiré
+- Deux tuiles mortes en bas de l'onglet Produits : « Intervention bloquée : … » répétait le
+  héros, « Dernière application » recopiait la première ligne de l'historique, note comprise.
+- La pastille « Tondeuse prête/indisponible », qui redisait le badge de la carte machine.
+- Le sous-titre « Tonte à reconsidérer le 01/08/2026 » sous une tuile affichant déjà « Demain » :
+  l'onglet donnait trois fois le même jour.
+
+### Modifié
+- **Séparateur décimal unifié.** La barre météo et les doses de session interpolaient les
+  valeurs brutes : « 23.8°C », « 0.3 mm », « 5.1 mm » côtoyaient « 7,6 mm » et « UV 3,8 » sur le
+  même écran. Tout passe par `num()`.
+- **« Dernières sessions » chapeautait la jauge de budget**, pas les sessions — le compteur
+  « 3 h 15 · 3 sessions » se retrouvait orphelin. Chaque bloc a son titre.
+- **« Coordination tondeuse » avait deux sous-titres** selon l'onglet. Un seul, désormais.
+- **L'onglet Produits n'était pas traduit** : titres, boutons et libellés étaient du français en
+  dur, dictionnaire contourné. Idem pour trois `toLocaleDateString('fr-FR')` figés dans
+  l'historique et les sessions. (Le `fr-FR` de la détection « arrosé aujourd'hui » est **volontaire**
+  et documenté : il compare au format produit par l'intégration, pas à un affichage.)
+
+## [0.22.4] - 2026-07-31
+
+### Modifié
+- **« Arrosage retenu au-delà de 21,0 mm » se lisait comme un plafond franchi.** La retenue est
+  en réalité CONDITIONNELLE : elle exige trois choses ensemble — au moins 3 arrosages sur la
+  fenêtre, 21 mm reçus, ET un besoin actuel faible. Si le gazon avait vraiment soif, l'arrosage
+  partirait jusqu'au plafond de 31,6 mm. Le libellé dit désormais ce qu'il en est :
+  « ⏸ Semaine couverte (21,0 mm) · reprise dès que le besoin remonte ».
+- **La ligne « total reçu » ne s'affiche plus quand elle est redondante.** Sans arrosage
+  technique (rafraîchissement du soir, incorporation après produit), elle répétait mot pour mot
+  le chiffre déjà lisible dans la jauge juste au-dessus.
+
+## [0.22.3] - 2026-07-31
+
+### Corrigé
+- **« Prochain arrosage : imminent » subsistait dans l'onglet *Arrosage*.** Les 0.22.1 et 0.22.2
+  n'avaient traité que la tuile de *Synthèse* : l'estimation est affichée à DEUX endroits, et le
+  grand bandeau de l'onglet Arrosage continuait d'annoncer « 💧 imminent ». Il porte désormais le
+  motif, l'estimation passant en sous-titre.
+- **La jauge de budget affichait « 70 %, vert » alors que l'arrosage était retenu.** Elle ne
+  connaissait que le PLAFOND (`weekly_guardrail_mm_max`, 31,6 mm), or l'intégration retient
+  l'arrosage dès le PLANCHER (`weekly_guardrail_mm_min`, 21 mm). Entre les deux, la jauge
+  suggérait une marge inexistante. Le plancher est désormais matérialisé sur la barre, la
+  couleur bascule dès qu'il est franchi, et une ligne l'énonce : « Arrosage retenu au-delà de
+  21,0 mm ».
+
+## [0.22.2] - 2026-07-31
+
+### Corrigé
+- **« Prochain arrosage : imminent » persistait en gros titre.** La 0.22.1 n'avait corrigé que
+  le SOUS-TITRE : la tuile continuait d'annoncer « imminent » pendant que le hero du même
+  panneau disait « Aucune action ». Le titre ne consultait le blocage que via l'état
+  `« Bloqué »` du capteur — or l'état est `« Non requis »` quand le sol n'a pas soif, alors
+  qu'un garde-fou retient quand même l'arrosage.
+- Le titre porte désormais le **motif** dans ce cas, et l'estimation passe en sous-titre à sa
+  juste valeur : « quand le sol aura soif », pas « quand j'arrose ».
+
+## [0.22.1] - 2026-07-31
+
+### Corrigé
+- **« Prochain arrosage : imminent » alors que l'arrosage était retenu.** La tuile annonçait un
+  arrosage imminent pendant que le hero du même panneau disait « Aucune action — garde-fou
+  hebdomadaire ». Cause : `_budgetOver()` RECALCULAIT la décision au lieu de la lire, et ne
+  comparait le cumul 7 jours qu'au plafond **dur** (`weekly_guardrail_mm_max`), alors que
+  l'intégration retient l'arrosage dès le seuil **bas** (`weekly_guardrail_mm_min`). Entre les
+  deux — 22,1 mm consommés pour un plancher à 21 et un plafond à 31,6, cas constaté le
+  31/07/2026 — l'arrosage était bloqué sans que la carte le signale.
+- La carte lit désormais le `block_reason` de l'intégration ; le calcul sur le plafond dur ne
+  sert plus que de repli. Principe : **ne pas recalculer une décision qu'on peut lire**.
+
+## [0.22.0] - 2026-07-30
+
+### Ajouté
+- **Bouton « Arrêter l'arrosage »** dans le bandeau *Session en cours* (onglet *Arrosage*).
+  Il n'apparaît que pendant un cycle — au repos il n'est pas masqué, il n'est pas rendu du
+  tout : il n'y a rien à arrêter. Appelle `gazon_intelligent.stop_irrigation` (intégration
+  0.31.0), qui ferme la vanne, enregistre l'eau déjà versée et libère le cycle.
+- **Pas de confirmation, volontairement** : un arrêt d'urgence qui demande « êtes-vous
+  sûr ? » n'en est pas un, et le geste est réversible — on peut relancer.
+
 ## [0.21.2] - 2026-07-30
 
 Regroupe **0.15.0 → 0.21.2**, jamais publiées séparément. La carte passe d'un tableau de bord

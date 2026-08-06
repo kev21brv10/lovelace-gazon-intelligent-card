@@ -1,7 +1,7 @@
 // gazon-intelligent-card.js
 // Carte Lovelace dédiée à l'intégration Gazon Intelligent
 
-const GI_VERSION = '0.25.1';  // tenu par scripts/build.py depuis package.json — il affichait
+const GI_VERSION = '0.26.0';  // tenu par scripts/build.py depuis package.json — il affichait
                           // « v1.0.0 » en Réglages depuis toujours, donc impossible de
                           // savoir quelle version tournait vraiment dans le navigateur.
 
@@ -1334,7 +1334,11 @@ class GazonIntelligentCard extends HTMLElement {
     // que l'état est « Non requis » (rien à arroser, pas réellement bloqué). Sinon l'estimation
     // ne s'afficherait jamais en confort.
     const nextArrState  = stateOf(h, c.entity_prochain_arrosage) || '';
-    const nextArrBlocked = nextArrState === 'Bloqué';
+    // « Retenu » (intégration 0.48.0) = l'objectif est à 0 PARCE QU'un garde-fou retient l'eau.
+    // Il annonçait auparavant « Non requis », ce qui prétendait que le gazon n'avait besoin de
+    // rien alors qu'on lui refusait précisément ce dont il avait besoin. Sans cette ligne, la
+    // carte lirait le nouvel état comme « pas bloqué » et afficherait une estimation sereine.
+    const nextArrBlocked = nextArrState === 'Bloqué' || nextArrState === 'Retenu';
     const nextArrBlockLbl = nextArrAttr.block_reason_label || '';
     const nextArrDue    = Number(nextArrQty) > 0;
     // Jour estimé du prochain arrosage (fourni par l'intégration : déplétion réserve → MAD).
@@ -1501,7 +1505,8 @@ class GazonIntelligentCard extends HTMLElement {
     const nextBlockRain  = nextBlockCode.includes('pluie') || nextBlockCode.includes('rain');
     // Blocage RÉEL = état « Bloqué » (pas la simple présence d'un block_reason_label qui peut
     // traîner en « Non requis »). Sinon le hero « bloqué » masquerait l'estimation en confort.
-    const nextBlocked    = (stateOf(h, c.entity_prochain_arrosage) || '') === 'Bloqué';
+    const nextBlockedState = stateOf(h, c.entity_prochain_arrosage) || '';
+    const nextBlocked    = nextBlockedState === 'Bloqué' || nextBlockedState === 'Retenu';
     const nextDayEst     = this._nextWateringDayLabel(
       nextAttr.jours_avant_arrosage_estime,
       nextAttr.date_prochain_arrosage_estime,

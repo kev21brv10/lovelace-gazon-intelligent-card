@@ -1,7 +1,7 @@
 // gazon-intelligent-card.js
 // Carte Lovelace dédiée à l'intégration Gazon Intelligent
 
-const GI_VERSION = '0.21.2';  // tenu par scripts/build.py depuis package.json — il affichait
+const GI_VERSION = '0.25.1';  // tenu par scripts/build.py depuis package.json — il affichait
                           // « v1.0.0 » en Réglages depuis toujours, donc impossible de
                           // savoir quelle version tournait vraiment dans le navigateur.
 
@@ -94,6 +94,13 @@ const STYLES = `
 .hero-sub     { font-size: 12px; opacity: 0.82; }
 .hero-foot    { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
 .hero-badge   { display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,.2); border-radius: 20px; padding: 4px 10px; font-size: 11px; }
+.hero-stop    { display: block; width: 100%; margin-top: 10px; padding: 11px 14px; border-radius: 14px;
+                border: 1.5px solid rgba(255,255,255,.55); background: rgba(255,255,255,.16);
+                color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+                transition: background .15s ease, border-color .15s ease; }
+.hero-stop:hover  { background: rgba(255,255,255,.28); border-color: rgba(255,255,255,.8); }
+.hero-stop:active { background: rgba(255,255,255,.36); }
+.hero-stop:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .hero-dot     { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.7); }
 .hero-status  { font-size: 10px; opacity: 0.75; display: flex; align-items: center; gap: 4px; }
 .hero-status-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.9); }
@@ -129,6 +136,11 @@ const STYLES = `
   padding-left: 16px; position: relative;
 }
 .cond-item::before { content: '·'; position: absolute; left: 5px; font-weight: 700; opacity: .6; }
+/* Le critère qui BLOQUE doit se voir sans lire les quatre. Puce et couleur, pas juste du gras :
+   un ton seul ne suffit pas en niveaux de gris ni pour un daltonien. */
+.cond-item.ok::before   { content: '✓'; color: var(--gi-accent); opacity: 1; font-size: 11px; }
+.cond-item.hold::before { content: '⏳'; opacity: 1; font-size: 10px; left: 3px; }
+.cond-item.hold { color: var(--gi-ink); font-weight: 600; }
 /* Hauteur réelle du gazon : une petite jauge vaut mieux qu'un nombre isolé — on voit d'un coup
    ce qu'il y a à couper. Le trait clair est la hauteur visée. */
 .pousse { display: flex; gap: 14px; align-items: center; margin: 12px 0 4px; padding: 12px 14px;
@@ -301,8 +313,23 @@ button.btn-pulse {
 .budget-val { font-size: 12px; color: var(--gi-muted); font-variant-numeric: tabular-nums; }
 .budget-val.over { color: var(--gi-danger); font-weight: 600; }
 .budget-track { height: 6px; border-radius: 4px; background: var(--gi-border); overflow: hidden; margin: 6px 0 5px; }
+.budget-track { position: relative; }
+.budget-floor { position: absolute; top: 0; bottom: 0; width: 2px;
+                background: var(--gi-ink); opacity: .55; }
+/* Attente saine, pas alerte : même raison que la couleur de la barre (voir barCol). */
+.budget-held  { margin-top: 5px; font-size: 11px; font-weight: 600; color: var(--gi-muted); }
 .budget-bar { height: 100%; border-radius: 4px; }
 .budget-sub { font-size: 11px; color: var(--gi-muted); }
+/* Hauteur de coupe : deux boutons et une valeur — pas un curseur. Le réglage est discret
+   (paliers de 5 mm) et se fait au retour de la tonte, souvent sur mobile. */
+.cut-stepper { display: flex; align-items: center; gap: 10px; }
+.cut-btn {
+  width: 34px; height: 34px; border-radius: 10px; border: 1.5px solid var(--gi-line);
+  background: var(--gi-card); color: var(--gi-ink); font-size: 19px; line-height: 1;
+  cursor: pointer; font-family: inherit;
+}
+.cut-btn:disabled { opacity: .35; cursor: default; }
+.cut-val { min-width: 58px; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; }
 
 /* Arrosages techniques (hors budget) : atténués + badge */
 .tl-log-entry.tech { opacity: .72; }
@@ -472,14 +499,17 @@ const STRINGS = {
     // Sections
     section_zones: 'Zones', section_bilan: 'Bilan', section_zones_cfg: 'Zones configurées',
     section_24h: '24 dernières heures', section_history: 'Dernières sessions',
+    section_budget: 'Budget de la semaine',
+    coord_name: 'Coordination tondeuse', coord_sub: "Bloque la tonte pendant l'arrosage",
+    cut_height: 'Hauteur de coupe', cut_height_sub: '\u00c0 r\u00e9gler quand tu tournes la molette',
     // Timeline
     loading: 'Chargement…', no_watering_24h: 'Aucun arrosage sur 24 h',
     no_session_7d: 'Aucune session récente', days_7: '7 jours', sessions: 'sess.',
     sessions_n: 'sessions', runtime_watered: "d'arrosage",
     tomorrow: 'demain', imminent: 'imminent', estimated: 'estimé', estimated_dawn: "estimé · à l'aube", days_unit: 'j',
-    budget_caveat: 'sous réserve du budget',
     // Hero / status
     next_watering: 'Prochain arrosage', session_active: 'Session en cours',
+    btn_stop_watering: "\u23F9 Arr\u00eater l'arrosage",
     blocked: 'Bloqué', planned: 'mm planifiés', window_lbl: 'Fenêtre',
     progress: 'Avancement', watering_active: 'Arrosage actif',
     next_intervention: 'Prochaine intervention', no_intervention: 'Aucune intervention recommandée',
@@ -506,6 +536,9 @@ const STRINGS = {
     next_mow: 'Prochaine tonte', mow_height: 'Hauteur cible', mow_height_lbl: 'Hauteur tonte',
     risk_lbl: 'Risque', reserve_lbl: 'Réserve',
     watering_7d: 'Arrosage 7j', auto_on: 'Auto activé', auto_off: 'Auto désactivé',
+    rain_effective: 'pluie',
+    itv_recommande: 'Recommand\u00e9', itv_preparation: '\u00c0 pr\u00e9parer',
+    itv_blocked: 'Bloqu\u00e9', itv_unavailable: 'Indisponible',
     watering_active_chip: 'Arrosage actif',
     // Action labels
     act_aucune_action: 'Aucune action', act_arroser: 'Arroser',
@@ -514,8 +547,8 @@ const STRINGS = {
     act_arroser_canicule_soir: 'Rafraîchissement du soir',
     act_attendre: 'En attente', act_attente_conditions: 'En attente', act_bloquer: 'Bloqué',
     // Hydric labels
-    hyd_plein: 'Plein', hyd_stress: 'Stress', hyd_critique: 'Critique',
-    hyd_optimal: 'Optimal', hyd_charge: 'En charge', hyd_vide: 'Vide',
+    hyd_plein: 'Réserve pleine', hyd_confort: 'Confort',
+    hyd_depletion: 'Réserve entamée', hyd_critique: 'Critique',
     // Mow labels
     tonte_autorisee: 'Autorisée', tonte_bloquee: 'Bloquée',
     tonte_a_surveiller: 'À surveiller', tonte_non_pertinent: 'Non applicable',
@@ -525,6 +558,21 @@ const STRINGS = {
     src_auto: 'Auto', src_manuel: 'Manuel', src_rafraich: 'Rafraîch. soir',
     cause_hydrique: 'hydrique', cause_soir: 'soir',
     weekly_budget: 'Budget hebdomadaire',
+    budget_floor: 'seuil de retenue',
+    budget_held: '\u23F8 Semaine couverte',
+    budget_held_end: 'reprise d\u00e8s que le besoin remonte',
+    budget_hold_sub: 'semaine couverte \u00b7 reprise d\u00e8s que le besoin remonte',
+    need_still: 'le sol r\u00e9clame toujours',
+    // Tonte : deux axes distincts (machine / gazon), \u00e0 ne jamais fusionner dans un libell\u00e9
+    mower_available: 'Disponible', mower_unavailable: 'Indisponible',
+    mowing_lbl: 'Tonte', chip_lawn: 'Gazon', chip_ready: 'pr\u00eat', chip_not_ready: 'pas pr\u00eat',
+    growth_today: 'pouss\u00e9 aujourd\'hui', mow_window_lbl: 'Cr\u00e9neau',
+    depletion_lbl: 'd\u00e9pl\u00e9tion', mad_lbl: 'seuil de d\u00e9clenchement',
+    applied_history: 'Ce que tu as appliqu\u00e9', tap_to_expand: 'Toucher pour tout lire',
+    show_less: 'R\u00e9duire', show_older_a: 'Voir les', show_older_b: 'plus anciennes',
+    declare_product: 'D\u00e9clarer un produit appliqu\u00e9',
+    undo_last_application: 'Annuler la derni\u00e8re application',
+    started_at: 'D\u00e9marr\u00e9 \u00e0', started_on: 'D\u00e9marr\u00e9 le', at_time: '\u00e0',
     technical_not_counted: 'techniques, non décomptés', total_received: 'total reçu',
     technical: 'technique', passes: 'passages',
     // Editor
@@ -537,12 +585,15 @@ const STRINGS = {
     tab_gazon: 'Lawn', tab_produits: 'Products', tab_reglages: 'Settings',
     section_zones: 'Zones', section_bilan: 'Summary', section_zones_cfg: 'Configured zones',
     section_24h: 'Last 24 hours', section_history: 'Recent sessions',
+    section_budget: 'This week\u2019s budget',
+    coord_name: 'Mower coordination', coord_sub: 'Blocks mowing while watering',
+    cut_height: 'Cutting height', cut_height_sub: 'Update it when you turn the dial',
     loading: 'Loading…', no_watering_24h: 'No watering in 24 h',
     no_session_7d: 'No recent session', days_7: '7 days', sessions: 'sess.',
     sessions_n: 'sessions', runtime_watered: 'of watering',
     tomorrow: 'tomorrow', imminent: 'imminent', estimated: 'estimated', estimated_dawn: 'estimated · at dawn', days_unit: 'd',
-    budget_caveat: 'budget permitting',
     next_watering: 'Next watering', session_active: 'Active session',
+    btn_stop_watering: '\u23F9 Stop watering',
     blocked: 'Blocked', planned: 'mm planned', window_lbl: 'Window',
     progress: 'Progress', watering_active: 'Watering active',
     next_intervention: 'Next intervention', no_intervention: 'No intervention recommended',
@@ -567,20 +618,37 @@ const STRINGS = {
     next_mow: 'Next mow', mow_height: 'Target height', mow_height_lbl: 'Mow height',
     risk_lbl: 'Risk', reserve_lbl: 'Reserve',
     watering_7d: 'Watering 7d', auto_on: 'Auto on', auto_off: 'Auto off',
+    rain_effective: 'rain',
+    itv_recommande: 'Recommended', itv_preparation: 'To prepare',
+    itv_blocked: 'Blocked', itv_unavailable: 'Unavailable',
     watering_active_chip: 'Watering active',
     act_aucune_action: 'No action', act_arroser: 'Water',
     act_arroser_application: 'Water (post-application)',
     act_arroser_canicule_survie: 'Survival dose (heat wave)',
     act_arroser_canicule_soir: 'Evening cooling',
     act_attendre: 'Waiting', act_attente_conditions: 'Waiting', act_bloquer: 'Blocked',
-    hyd_plein: 'Full', hyd_stress: 'Stress', hyd_critique: 'Critical',
-    hyd_optimal: 'Optimal', hyd_charge: 'Charging', hyd_vide: 'Empty',
+    hyd_plein: 'Reserve full', hyd_confort: 'Comfortable',
+    hyd_depletion: 'Reserve drawn down', hyd_critique: 'Critical',
     tonte_autorisee: 'Allowed', tonte_bloquee: 'Blocked',
     tonte_a_surveiller: 'Monitor', tonte_non_pertinent: 'N/A',
     risk_faible: 'Low', risk_modere: 'Moderate', risk_eleve: 'High', risk_critique: 'Critical',
     src_auto: 'Auto', src_manuel: 'Manual', src_rafraich: 'Evening cool.',
     cause_hydrique: 'hydric', cause_soir: 'evening',
     weekly_budget: 'Weekly budget',
+    budget_floor: 'hold threshold',
+    budget_held: '\u23F8 Week covered',
+    budget_held_end: 'resumes when the need rises',
+    budget_hold_sub: 'week covered \u00B7 resumes when the need rises',
+    need_still: 'the soil still needs',
+    mower_available: 'Available', mower_unavailable: 'Unavailable',
+    mowing_lbl: 'Mowing', chip_lawn: 'Lawn', chip_ready: 'ready', chip_not_ready: 'not ready',
+    growth_today: 'grown today', mow_window_lbl: 'Window',
+    depletion_lbl: 'depletion', mad_lbl: 'trigger threshold',
+    applied_history: 'What you applied', tap_to_expand: 'Tap to read in full',
+    show_less: 'Show less', show_older_a: 'Show', show_older_b: 'older entries',
+    declare_product: 'Declare an applied product',
+    undo_last_application: 'Undo last application',
+    started_at: 'Started at', started_on: 'Started on', at_time: 'at',
     technical_not_counted: 'technical, not counted', total_received: 'total received',
     technical: 'technical', passes: 'passes',
     editor_msg: 'Configure the card via the YAML editor.',
@@ -601,14 +669,28 @@ const ACTION_LABELS = {
   bloquer:                 'act_bloquer',
 };
 
+// ⚠️ ALIGNÉE SUR CE QUE L'INTÉGRATION ÉMET RÉELLEMENT, pas sur un vocabulaire supposé.
+// `_hydric_state_from_depletion_ratio` / `_from_reserve_ratio` (sensor.py) ne renvoient que
+// quatre états : plein · confort · depletion · critique. La table listait `stress`, `optimal`,
+// `charge` et `vide` — quatre entrées mortes — et ne couvrait NI `confort` NI `depletion`,
+// c'est-à-dire les deux états les plus fréquents : ils tombaient dans le repli et s'affichaient
+// bruts, en minuscules, dans « Bilan » (constaté le 31/07/2026 sur l'install réelle).
 const HYDRIC_LABELS = {
-  plein: 'hyd_plein', stress: 'hyd_stress', critique: 'hyd_critique',
-  optimal: 'hyd_optimal', charge: 'hyd_charge', vide: 'hyd_vide',
+  plein: 'hyd_plein', confort: 'hyd_confort',
+  depletion: 'hyd_depletion', critique: 'hyd_critique',
 };
 
 const TONTE_LABELS = {
   autorisee: 'tonte_autorisee', bloquee: 'tonte_bloquee',
   a_surveiller: 'tonte_a_surveiller', non_pertinent: 'tonte_non_pertinent',
+};
+
+// États publiés par `sensor.prochaine_intervention` (`status`). Ils étaient affichés BRUTS.
+const INTERVENTION_LABELS = {
+  recommande: 'itv_recommande', recommended: 'itv_recommande',
+  preparation: 'itv_preparation', possible: 'itv_preparation',
+  blocked: 'itv_blocked', bloque: 'itv_blocked',
+  unavailable: 'itv_unavailable',
 };
 
 const RISQUE_LABELS = {
@@ -751,6 +833,7 @@ class GazonIntelligentCard extends HTMLElement {
             : undefined),
       entity_dernier_arrosage:       config.entity_dernier_arrosage       || 'sensor.gazon_intelligent_dernier_arrosage_detecte',
       entity_objectif_arrosage:      config.entity_objectif_arrosage      || 'sensor.gazon_intelligent_objectif_d_arrosage',
+      entity_hauteur_coupe:          config.entity_hauteur_coupe          || 'number.gazon_intelligent_hauteur_coupe_tondeuse',
       entity_fenetre_optimale:       config.entity_fenetre_optimale       || 'sensor.gazon_intelligent_fenetre_optimale',
     };
     if (this._shadow) this._render();
@@ -804,7 +887,15 @@ class GazonIntelligentCard extends HTMLElement {
   _lblt(map, key, fallback) {
     const strKey = key && map[key];
     if (strKey) return this._t(strKey);
-    return fallback || (key ? String(key).replace(/_/g, ' ') : '—');
+    // ⚠️ Le repli rendait la clé BRUTE, en minuscules : « confort » s'affichait tel quel dans
+    // « Bilan » parce que la table `HYDRIC_LABELS` avait été écrite contre un vocabulaire que
+    // l'intégration n'utilise plus (constaté le 31/07/2026). La table est corrigée, mais le
+    // repli doit rester présentable : le jour où l'intégration ajoute un état, il se lira
+    // comme un libellé, pas comme un bug.
+    if (fallback) return fallback;
+    if (!key) return '—';
+    const mot = String(key).replace(/_/g, ' ');
+    return mot.charAt(0).toUpperCase() + mot.slice(1);
   }
 
   // Libellé humain du prochain jour d'arrosage ESTIMÉ par l'intégration (déplétion réserve → MAD).
@@ -829,6 +920,15 @@ class GazonIntelligentCard extends HTMLElement {
   _budgetOver() {
     const h = this._hass, c = this._config;
     if (!h || !c) return false;
+    // ⚠️ On LIT la décision de l'intégration, on ne la RECALCULE pas. Cette fonction ne
+    // comparait que le cumul 7 j au plafond DUR (`weekly_guardrail_mm_max`), alors que
+    // l'intégration retient l'arrosage dès le seuil BAS (`weekly_guardrail_mm_min`).
+    // Entre les deux — 22,1 mm consommés pour un plancher à 21 et un plafond à 31,6, cas
+    // constaté le 31/07/2026 — l'arrosage était bloqué sans que la carte le signale : la
+    // tuile annonçait « imminent » pendant que le hero disait « garde-fou hebdomadaire ».
+    const code = String(ent(h, c.entity_prochain_arrosage)?.attributes?.block_reason || '');
+    if (code.includes('garde_fou') || code.includes('guardrail')) return true;
+    // Repli : plafond dur atteint alors même qu'aucun motif n'est remonté.
     const used = parseFloat(ent(h, c.entity_reserve)?.attributes?.arrosage_recent_7j);
     const max  = parseFloat(ent(h, c.entity_fenetre_optimale)?.attributes?.weekly_guardrail_mm_max);
     return Number.isFinite(used) && Number.isFinite(max) && max > 0 && used >= max;
@@ -867,7 +967,10 @@ class GazonIntelligentCard extends HTMLElement {
       const tMax     = this._forecast?.temperature ?? null;
       const tMin     = this._forecast?.templow ?? null;
       const precip   = this._forecast?.precipitation ?? null;
-      const rangeStr = (tMin !== null && tMax !== null) ? `${tMin}–${tMax}${tUnit}` : '';
+      // ⚠️ `num()` et pas l'interpolation brute : la barre météo était le SEUL bloc de la
+      // carte à afficher des points décimaux (« 23.8°C », « 0.3 mm ») juste à côté de valeurs
+      // à la virgule (« UV 3,8 », « 7,6 mm »), sur la même ligne. Constaté le 31/07/2026.
+      const rangeStr = (tMin !== null && tMax !== null) ? `${num(tMin, 0)}–${num(tMax, 0)}${tUnit}` : '';
       const now      = new Date();
       const loc      = t('_locale');
       const dateStr  = now.toLocaleDateString(loc, {weekday:'short', day:'numeric', month:'short'});
@@ -877,7 +980,7 @@ class GazonIntelligentCard extends HTMLElement {
           <div class="meteo-left">
             <div class="meteo-icon">${METEO_ICONS[meteoState] || '🌡️'}</div>
             <div>
-              <div class="meteo-temp-range">${tCurrent !== null ? tCurrent + tUnit : '—'}</div>
+              <div class="meteo-temp-range">${tCurrent !== null ? num(tCurrent, 1) + tUnit : '—'}</div>
               ${rangeStr ? `<div class="meteo-label">${rangeStr}</div>` : `<div class="meteo-label">${t('today').toLowerCase()}</div>`}
             </div>
           </div>
@@ -887,9 +990,9 @@ class GazonIntelligentCard extends HTMLElement {
           </div>
         </div>
         <div class="meteo-stats">
-          ${meteoAttr.humidity   !== undefined ? `<span class="meteo-stat" title="Humidité de l'air">💧 ${meteoAttr.humidity} %</span>` : ''}
-          ${meteoAttr.wind_speed !== undefined ? `<span class="meteo-stat">💨 ${meteoAttr.wind_speed} ${meteoAttr.wind_speed_unit || 'km/h'}</span>` : ''}
-          ${precip !== null ? `<span class="meteo-stat" title="Pluie attendue aujourd'hui">🌧️ ${precip} mm</span>` : ''}
+          ${meteoAttr.humidity   !== undefined ? `<span class="meteo-stat" title="Humidité de l'air">💧 ${num(meteoAttr.humidity, 0)} %</span>` : ''}
+          ${meteoAttr.wind_speed !== undefined ? `<span class="meteo-stat">💨 ${num(meteoAttr.wind_speed, 1)} ${meteoAttr.wind_speed_unit || 'km/h'}</span>` : ''}
+          ${precip !== null ? `<span class="meteo-stat" title="Pluie attendue aujourd'hui">🌧️ ${num(precip, 1)} mm</span>` : ''}
           ${/* UV et point de rosée : disponibles sur la plupart des intégrations météo et
                 utiles POUR UN GAZON — l'UV dit la charge de stress lumineux, le point de rosée
                 annonce la rosée du matin, qui retarde la tonte et favorise les maladies.
@@ -1086,6 +1189,10 @@ class GazonIntelligentCard extends HTMLElement {
     const dernier   = stateOf(h, c.entity_dernier_arrosage);
     const quand     = attrOf(h, c.entity_dernier_arrosage, 'last_watering_when');
     const nbZones   = attrOf(h, c.entity_dernier_arrosage, 'zone_count');
+    // ⚠️ `fr-FR` VOULU ici, ce n'est PAS un affichage : `last_watering_when` est une chaîne
+    // produite par l'intégration, toujours au format « jj/mm/aaaa à hh:mm », quelle que soit
+    // la langue de l'interface. On compare donc au MÊME format. Le passer sur la locale de
+    // l'utilisateur casserait silencieusement la détection « arrosé aujourd'hui » en anglais.
     const auj       = quand && typeof quand === 'string'
       && quand.startsWith(new Date().toLocaleDateString('fr-FR'));
     if (auj && dernier && parseFloat(dernier) > 0) {
@@ -1117,7 +1224,14 @@ class GazonIntelligentCard extends HTMLElement {
     }
 
     // ── Ce qui est prévu, ou pourquoi rien ───────────────────────────────────
-    const motif   = attrOf(h, c.entity_assistant, 'reason');
+    // ⚠️ LE MOTIF D'ARROSAGE VIENT DE L'ENTITÉ ARROSAGE, pas de l'assistant.
+    // L'assistant est une CHAÎNE DE PRIORITÉS : quand l'arrosage n'a rien à signaler, il
+    // descend sur la tonte. Sa `reason` parlait donc de la tondeuse, et la carte l'annonçait
+    // comme la raison de ne pas arroser. Vu sur l'écran de Kévin le 03/08/2026 :
+    //   « Pas d'arrosage pour l'instant : robot indisponible: attendre qu'elle soit prête. »
+    // alors que la tuile juste dessous affichait le vrai motif, « Déjà arrosé aujourd'hui ».
+    // Deux lignes, un même écran, une vraie et une fausse.
+    const motif   = attrOf(h, c.entity_prochain_arrosage, 'block_reason_label');
     const prochain = stateOf(h, c.entity_prochain_arrosage);
     if (motif && String(motif).trim()) {
       lignes.push(`Pas d'arrosage pour l'instant : <b>${esc(this._minuscule(String(motif).replace(/\.$/, '')))}</b>.`);
@@ -1229,22 +1343,32 @@ class GazonIntelligentCard extends HTMLElement {
       nextArrAttr.jours_avant_arrosage_estime,
       nextArrAttr.date_prochain_arrosage_estime,
     );
+    // Le jour estimé ne regarde que la SOIF DU SOL, pas le droit d'arroser. Quand le garde-fou
+    // hebdomadaire retient l'arrosage, annoncer « imminent » en gros titre promet un arrosage
+    // qui n'aura pas lieu — et contredit le hero du même panneau, qui dit « Aucune action ».
+    // Constaté par Kévin le 31/07/2026. Le titre porte alors le MOTIF ; l'estimation reste
+    // visible en sous-titre, à sa juste valeur : « quand le sol aura soif », pas « quand j'arrose ».
+    const nextArrBudgetOver = this._budgetOver();
     const nextArrVal = nextArrBlocked
       ? (nextArrBlockLbl || nextArrState || '—')
-      : (!nextArrDue && nextArrDayEst ? nextArrDayEst : (nextArrWindow || '—'));
-    // Le jour estimé ne regarde que la soif du sol ; si le garde-fou hebdo est dépassé, le vrai
-    // arrosage peut être retenu → on le signale (« sous réserve du budget ») au lieu de la fenêtre.
-    const nextArrBudgetOver = this._budgetOver();
-    const nextArrEstSuffix = nextArrBudgetOver
-      ? ` · ${this._t('budget_caveat')}`
-      : (nextArrWindow ? ` · ${nextArrWindow}` : '');
+      : nextArrDue
+        ? (nextArrWindow || '—')
+        : nextArrBudgetOver
+          ? (nextArrBlockLbl || nextArrState || '—')
+          : (nextArrDayEst || nextArrWindow || '—');
     const nextArrSub = nextArrBlocked
       ? ''
       : nextArrDue
         ? (nextArrQty ? `<div class="stat-sub">${num(nextArrQty, 1)} mm</div>` : '')
-        : (nextArrDayEst
-            ? `<div class="stat-sub">${this._t('estimated')}${nextArrEstSuffix}</div>`
-            : '');
+        // Retenu par le garde-fou : même règle que le hero de l'onglet Arrosage — pas
+        // d'estimation, le sous-titre explique la RETENUE, dans les mots de la jauge.
+        : nextArrBudgetOver
+          ? `<div class="stat-sub">${this._t('budget_hold_sub')}</div>`
+          : nextArrDayEst
+            ? `<div class="stat-sub">${this._t('estimated')} ${nextArrDayEst}${
+                nextArrWindow ? ` · ${nextArrWindow}` : ''
+              }</div>`
+            : '';
 
     // ── Next mow ─────────────────────────────────────────────────────────────
     const nextTonteAttr = ent(h, c.entity_prochaine_tonte)?.attributes || {};
@@ -1339,8 +1463,12 @@ class GazonIntelligentCard extends HTMLElement {
       const d = new Date(startedUtc);
       const today = new Date();
       const isToday = d.toDateString() === today.toDateString();
-      const hhmm = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-      sessTimeLabel = isToday ? `Démarré à ${hhmm}` : `Démarré le ${d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })} à ${hhmm}`;
+      // Affichage : suit la langue de la carte. C'était figé sur fr-FR, libellé compris.
+      const loc  = this._t('_locale');
+      const hhmm = d.toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' });
+      sessTimeLabel = isToday
+        ? `${this._t('started_at')} ${hhmm}`
+        : `${this._t('started_on')} ${d.toLocaleDateString(loc, { day: '2-digit', month: '2-digit' })} ${this._t('at_time')} ${hhmm}`;
     }
 
     // Arrosage manuel : ouvre un popup de préparation (dose + durée par zone) avant de lancer.
@@ -1401,7 +1529,7 @@ class GazonIntelligentCard extends HTMLElement {
                 <span class="zone-active-badge">${this._t('zone_active_badge')}</span>
                 <span class="zone-active-clock">⏱</span>
                 <span class="zone-active-elapsed">${fmtTimer(elapsed)}</span>
-                ${z.debit ? `<span class="zone-detail">${z.debit} mm/h</span>` : ''}
+                ${z.debit ? `<span class="zone-detail">${num(z.debit, 0)} mm/h</span>` : ''}
               </div>
             </div>
             <div class="zone-btns">
@@ -1449,6 +1577,11 @@ class GazonIntelligentCard extends HTMLElement {
             <div class="sess-progress-bar" style="width:${Math.min(100, num(progressPct, 0))}%"></div>
           </div>
           <div class="hero-badge" style="margin-top:6px"><div class="hero-dot"></div>${num(progressPct, 0)} %</div>
+          ${/* Arrêt d'urgence : rendu SEULEMENT dans ce bandeau, donc seulement quand un cycle
+               tourne. Pas de confirmation — un arrêt d'urgence qui demande « êtes-vous sûr ? »
+               n'en est pas un, et le geste est réversible (on peut relancer). L'intégration
+               ferme la vanne, enregistre l'eau déjà versée et libère le cycle. */''}
+          <button class="hero-stop" data-action="stop-irrigation">${this._t('btn_stop_watering')}</button>
         </div>
       ` : nextBlocked ? `
         ${/* Même règle que la Synthèse : l'orange est une ALERTE, pas un état d'attente.
@@ -1466,11 +1599,36 @@ class GazonIntelligentCard extends HTMLElement {
           <div class="hero-title">${num(nextQty, 1)} ${this._t('planned')}</div>
           ${nextWindow ? `<div class="hero-badge"><div class="hero-dot"></div>${nextWindow}</div>` : ''}
         </div>
+      ` : nextBudgetOver ? `
+        ${/* Le garde-fou retient l'arrosage : annoncer « imminent » en gros promettrait un
+             arrosage qui n'aura pas lieu. Le titre porte le MOTIF.
+             ⚠️ J'avais d'abord laissé l'estimation en sous-titre (« estimé imminent · sous
+             réserve du budget ») en croyant la nuancer : l'œil lit « imminent », point. Et
+             l'estimation répond à une question que personne ne pose — « quand le sol aura
+             soif » — pendant que le titre répond à « est-ce que j'arrose ». Le sous-titre dit
+             maintenant la MÊME chose que la jauge de budget, dans les MÊMES mots : un seul
+             vocabulaire pour un seul fait. Constaté par Kévin le 31/07/2026, deux fois. */''}
+        <div class="hero ${this._blocageMeriteAlerte() ? 'warn' : ''}">
+          <div class="hero-eyebrow">${this._t('next_watering')}</div>
+          <div class="hero-title">⏳ ${esc(nextAttr.block_reason_label || this._t('blocked'))}</div>
+          <div class="hero-sub">${this._t('budget_hold_sub')}</div>
+          ${/* BESOIN ≠ DOSE. L'entité « Objectif d'arrosage » affiche 0 pendant un blocage —
+               c'est juste, rien ne sera versé. Mais le sol, lui, réclame toujours. Sans ce
+               chiffre, la carte laissait croire que le gazon n'avait besoin de rien alors que
+               la réserve était sous le seuil (constaté par Kévin le 01/08/2026). Publié par
+               l'intégration 0.35.0 ; absent avant, la ligne ne s'affiche simplement pas. */''}
+          ${(() => {
+            const besoin = parseFloat(attrOf(h, c.entity_objectif_arrosage, 'besoin_mm'));
+            return Number.isFinite(besoin) && besoin > 0
+              ? `<div class="hero-sub">${this._t('need_still')} <b>${num(besoin, 1)} mm</b></div>` : '';
+          })()}
+          ${nextWindow ? `<div class="hero-badge"><div class="hero-dot"></div>${nextWindow}</div>` : ''}
+        </div>
       ` : nextDayEst ? `
         <div class="hero">
           <div class="hero-eyebrow">${this._t('next_watering')}</div>
           <div class="hero-title">💧 ${nextDayEst}</div>
-          <div class="hero-sub">${this._t('estimated_dawn')}${nextBudgetOver ? ` · ${this._t('budget_caveat')}` : ''}</div>
+          <div class="hero-sub">${this._t('estimated_dawn')}</div>
           ${nextWindow ? `<div class="hero-badge"><div class="hero-dot"></div>${nextWindow}</div>` : ''}
         </div>
       ` : ''}
@@ -1616,9 +1774,14 @@ class GazonIntelligentCard extends HTMLElement {
         return Math.round((todayMid - d) / 86400000) <= 6;
       });
     const logHtml = derniersArrosages.map(e => {
-      const d       = new Date(e.recorded_at);
-      const dayStr  = d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
-      const timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      // ⚠️ LE DÉBUT DU CYCLE, pas sa fin. `recorded_at` est l'instant où l'intégration
+      // enregistre la session — donc la fermeture de la dernière vanne. La liste annonçait
+      // « 05:18 » pour un arrosage parti à 03:45:13 (04/08/2026, vérifié sur les vannes).
+      // `started_at` est publié depuis l'intégration 0.41.0 ; repli sur l'ancien champ pour
+      // les sessions plus anciennes, qui ne l'ont pas.
+      const d       = new Date(e.started_at || e.recorded_at);
+      const dayStr  = d.toLocaleDateString(this._t('_locale'), { weekday: 'short', day: 'numeric', month: 'short' });
+      const timeStr = d.toLocaleTimeString(this._t('_locale'), { hour: '2-digit', minute: '2-digit' });
       const srcLabel = SOURCE_LABELS[e.source] || e.source;
       const causeLabel = (e.watering_cause && e.watering_cause !== e.source) ? ` · ${CAUSE_LABELS[e.watering_cause] || e.watering_cause}` : '';
       // Un cycle fractionné répète les mêmes zones (1 entrée par zone ET par passage). On cumule
@@ -1644,7 +1807,7 @@ class GazonIntelligentCard extends HTMLElement {
       // Les arrosages TECHNIQUES (rafraîchissement du soir, incorporation post-produit) sont
       // exclus du budget hebdomadaire : on les marque pour que le total reste lisible.
       const isTech = TECHNICAL_CAUSES.includes(String(e.watering_cause || '').toLowerCase());
-      const mmStr = e.total_mm >= 0.1 ? `${e.total_mm} mm` : '< 0.1 mm';
+      const mmStr = e.total_mm >= 0.1 ? `${num(e.total_mm, 1)} mm` : `< ${num(0.1, 1)} mm`;
       return `<div class="tl-log-entry${isTech ? ' tech' : ''}">
         <div class="tl-log-row1">
           <span class="tl-log-src">${srcLabel}${causeLabel}${
@@ -1683,12 +1846,27 @@ class GazonIntelligentCard extends HTMLElement {
     const budgetUsed = parseFloat(resAttrs.arrosage_recent_7j);
     const applied    = parseFloat(resAttrs.arrosage_applique_7j);
     const budgetMax  = parseFloat(ent(h, c.entity_fenetre_optimale)?.attributes?.weekly_guardrail_mm_max);
+    // ⚠️ Le PLAFOND n'est pas le seuil qui décide. L'intégration retient l'arrosage dès le
+    // PLANCHER (`weekly_guardrail_mm_min`) : à 22,1 mm pour un plancher à 21 et un plafond à
+    // 31,6, la jauge affichait « 70 %, vert » comme s'il restait de la marge, alors que
+    // l'arrosage était déjà bloqué. Constaté par Kévin le 31/07/2026. On matérialise donc le
+    // plancher sur la barre et on colore dès qu'il est franchi.
+    const budgetMin  = parseFloat(ent(h, c.entity_fenetre_optimale)?.attributes?.weekly_guardrail_mm_min);
     let budgetHtml = '';
     if (Number.isFinite(budgetUsed) && Number.isFinite(budgetMax) && budgetMax > 0) {
       const pct    = Math.round((budgetUsed / budgetMax) * 100);
       const over   = budgetUsed >= budgetMax;
+      const held   = Number.isFinite(budgetMin) && budgetMin > 0 && budgetUsed >= budgetMin;
+      const minPct = Number.isFinite(budgetMin) && budgetMin > 0
+        ? Math.min(100, Math.round((budgetMin / budgetMax) * 100)) : null;
       const barPct = Math.min(100, pct);
-      const barCol = over ? 'var(--gi-danger)' : pct >= 80 ? 'var(--gi-warn)' : 'var(--gi-accent)';
+      // ⚠️ « Semaine couverte » N'EST PAS une alerte. La règle de la carte, écrite plus bas
+      // dans le hero (« l'orange est une ALERTE, pas un état d'attente »), était violée ici :
+      // `held` peignait la barre en orange pendant que le hero du MÊME écran restait vert pour
+      // le fait identique. Un seul fait, deux couleurs. L'orange est rendu à ce qu'il signale
+      // vraiment — on s'approche du plafond DUR (≥ 80 %). La retenue, elle, se lit au repère
+      // de plancher sur la barre et à la ligne « ⏸ Semaine couverte ».
+      const barCol = over ? 'var(--gi-danger)' : (pct >= 80) ? 'var(--gi-warn)' : 'var(--gi-accent)';
       const tech   = Number.isFinite(applied) ? Math.max(0, applied - budgetUsed) : null;
       budgetHtml = `
         <div class="budget-box">
@@ -1696,10 +1874,20 @@ class GazonIntelligentCard extends HTMLElement {
             <span class="budget-lbl">${this._t('weekly_budget')}</span>
             <span class="budget-val${over ? ' over' : ''}">${num(budgetUsed, 1)} / ${num(budgetMax, 1)} mm · ${pct} %</span>
           </div>
-          <div class="budget-track"><div class="budget-bar" style="width:${barPct}%;background:${barCol}"></div></div>
-          ${Number.isFinite(applied) ? `<div class="budget-sub">${tech > 0
-            ? `+ <b>${num(tech, 1)} mm</b> ${this._t('technical_not_counted')} · `
-            : ''}${this._t('total_received')} <b>${num(applied, 1)} mm</b></div>` : ''}
+          <div class="budget-track">
+            <div class="budget-bar" style="width:${barPct}%;background:${barCol}"></div>
+            ${minPct !== null ? `<div class="budget-floor" style="left:${minPct}%" title="${this._t('budget_floor')} ${num(budgetMin, 1)} mm"></div>` : ''}
+          </div>
+          ${/* « au-delà de X mm » se lisait comme un plafond franchi. La retenue est en fait
+                CONDITIONNELLE : il faut 3 arrosages, X mm reçus ET un besoin faible. Elle se lève
+                d'elle-même dès que le gazon a de nouveau soif — c'est ce que le libellé doit dire. */''}
+          ${held && !over ? `<div class="budget-held">${this._t('budget_held')} (${num(budgetMin, 1)} mm) · ${this._t('budget_held_end')}</div>` : ''}
+          ${/* Affiché UNIQUEMENT s'il y a de l'eau technique (rafraîchissement du soir,
+                incorporation après produit) : sans elle, « total reçu » répète mot pour mot le
+                chiffre déjà lisible dans la jauge juste au-dessus. */''}
+          ${Number.isFinite(applied) && tech > 0
+            ? `<div class="budget-sub">+ <b>${num(tech, 1)} mm</b> ${this._t('technical_not_counted')} · ${this._t('total_received')} <b>${num(applied, 1)} mm</b></div>`
+            : ''}
         </div>`;
     }
 
@@ -1722,8 +1910,13 @@ class GazonIntelligentCard extends HTMLElement {
         ${emptyToday}
         ${stats ? `<div class="tl-stats">${stats}</div>` : ''}
       </div>
-      <div class="section-title" style="margin-top:12px">${this._t('section_history')}</div>
+      ${/* « Dernières sessions » chapeautait la JAUGE DE BUDGET, pas les sessions : le titre
+           s'appliquait au mauvais bloc, et le compteur « 3 h 15 · 3 sessions » se retrouvait
+           orphelin, sans période lisible. Chaque bloc a désormais son titre, et le compteur
+           tombe directement sous le sien. Constaté le 31/07/2026. */''}
+      ${budgetHtml ? `<div class="section-title" style="margin-top:12px">${this._t('section_budget')}</div>` : ''}
       ${budgetHtml}
+      <div class="section-title" style="margin-top:12px">${this._t('section_history')}</div>
       ${header7}
       ${logHtml ? `<div class="tl-log">${logHtml}</div>` : `<div class="tl-empty">${this._t('no_session_7d')}</div>`}`;
   }
@@ -1824,7 +2017,16 @@ class GazonIntelligentCard extends HTMLElement {
     const statutLib  = tonteAttr.tondeuse_statut_libelle || '';
     const coordOn    = isOn(h, c.entity_switch_tondeuse);
 
+    // ⚠️ DEUX AXES, DEUX BADGES. `tonte_statut` juge LA TONTE (donc surtout le GAZON) ;
+    // `machine_permet_tonte` juge LA MACHINE. Ils étaient fusionnés : le badge du verdict de
+    // tonte était collé sur la ligne de la tondeuse. Résultat lu sur l'install le 31/07/2026 —
+    // « Esperance Jr · À la station · 100 % — À surveiller » : la machine avait l'air en défaut
+    // alors qu'elle était à la station, chargée, et déclarée disponible (`machine_permet_tonte:
+    // true`). C'est le gazon qui n'était pas prêt. Ne jamais recoller ces deux axes.
     const statusClass = tonteStatut === 'autorisee' ? '' : tonteStatut === 'a_surveiller' ? 'warn' : 'blocked';
+    const machineClass = mPermet === false ? 'blocked' : '';
+    const machineLbl   = mPermet === undefined
+      ? '' : this._t(mPermet ? 'mower_available' : 'mower_unavailable');
 
     const nextAttr   = ent(h, c.entity_prochaine_tonte)?.attributes || {};
     const nextDate   = nextAttr.target_date || stateOf(h, c.entity_prochaine_tonte);
@@ -1840,26 +2042,43 @@ class GazonIntelligentCard extends HTMLElement {
           <div class="mow-name">${nomTonde}</div>
           <div class="mow-detail">${statutLib}${bat !== undefined ? ' · ' + bat + ' %' : ''}</div>
         </div>
-        <div class="mow-status ${statusClass}">${this._lblt(TONTE_LABELS, tonteStatut)}</div>
+        ${machineLbl ? `<div class="mow-status ${machineClass}">${machineLbl}</div>` : ''}
       </div>
 
-      ${blockLbl ? `
+      ${/* Le verdict de tonte, explicitement ÉTIQUETÉ « Tonte » : sans ce mot, « À surveiller »
+           se lisait comme un état de la machine juste au-dessus. */''}
+      ${(tonteStatut || blockLbl || gPermet !== undefined) ? `
         <div class="chip-row">
-          <div class="chip"><div class="chip-dot" style="background:${blockRain ? '#3b82f6' : 'var(--gi-warn)'}"></div>${blockRain ? '🌧️ ' : ''}${esc(blockLbl)}</div>
+          ${gPermet !== undefined ? `<div class="chip"><div class="chip-dot" style="background:${gPermet ? 'var(--gi-accent)' : 'var(--gi-muted)'}"></div>${this._t('chip_lawn')} ${this._t(gPermet ? 'chip_ready' : 'chip_not_ready')}</div>` : ''}
+          ${tonteStatut ? `<div class="chip"><div class="chip-dot" style="background:${
+            statusClass === '' ? 'var(--gi-accent)' : statusClass === 'warn' ? 'var(--gi-warn)' : 'var(--gi-muted)'
+          }"></div>${this._t('mowing_lbl')} : ${this._lblt(TONTE_LABELS, tonteStatut)}</div>` : ''}
+          ${/* `mowing_window_state` / `_label` : l'intégration dit si le CRÉNEAU actuel est bon
+               (« À éviter » à 31 °C, par exemple) et rien ne l'affichait. Le flow Node-RED s'en
+               sert déjà pour ne pas lancer la tondeuse ; la carte l'ignorait. */''}
+          ${tonteAttr.mowing_window_label ? `<div class="chip" title="${esc(tonteAttr.mowing_window_reason || '')}"><div class="chip-dot" style="background:${
+            tonteAttr.mowing_window_state === 'discouraged' ? 'var(--gi-warn)'
+              : tonteAttr.mowing_window_state === 'blocked' ? 'var(--gi-muted)' : 'var(--gi-accent)'
+          }"></div>${this._t('mow_window_lbl')} : ${esc(tonteAttr.mowing_window_label)}</div>` : ''}
+          ${blockLbl ? `<div class="chip"><div class="chip-dot" style="background:${blockRain ? '#3b82f6' : 'var(--gi-warn)'}"></div>${blockRain ? '🌧️ ' : ''}${esc(blockLbl)}</div>` : ''}
         </div>` : ''}
 
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-label">${this._t('next_mow')}</div>
           <div class="stat-value sm">${nextDate ? fmtDate(nextDate, k => this._t(k)) : '—'}</div>
-          ${nextSummary ? `<div class="stat-sub">${nextSummary}</div>` : ''}
+          ${/* `summary` = « Tonte à reconsidérer le 01/08/2026 » : la MÊME date que la valeur
+               juste au-dessus, en numérique. Avec la pastille de motif qui la répète encore,
+               l'onglet affichait trois fois le même jour (31/07/2026). On ne la garde que si
+               la tuile n'a pas su humaniser la date. */''}
+          ${(nextSummary && !nextDate) ? `<div class="stat-sub">${esc(nextSummary)}</div>` : ''}
         </div>
         <div class="stat-card">
           <div class="stat-label">${this._t('mow_height')}</div>
           <div class="stat-value sm accent">${hauteur ? num(hauteur, 1) + ' cm' : '—'}</div>
           ${(hautAttr.hauteur_tonte_min_cm && hautAttr.hauteur_tonte_max_cm)
             ? `<div class="stat-sub"${hautAttr.hauteur_tonte_garde_fou_label
-                  ? ` title="${esc(hautAttr.hauteur_tonte_garde_fou_label)}"` : ''}>Min ${hautAttr.hauteur_tonte_min_cm} · Max ${hautAttr.hauteur_tonte_max_cm} cm${
+                  ? ` title="${esc(hautAttr.hauteur_tonte_garde_fou_label)}"` : ''}>Min ${num(hautAttr.hauteur_tonte_min_cm, 1)} · Max ${num(hautAttr.hauteur_tonte_max_cm, 1)} cm${
                   hautAttr.hauteur_tonte_garde_fou_label ? ' <span class="guard-mark">⚑</span>' : ''}</div>`
             : ''}
           ${hautAttr.hauteur_tonte_garde_fou_label
@@ -1897,6 +2116,16 @@ class GazonIntelligentCard extends HTMLElement {
               : (!isNaN(cible) && cible - e > 0.05)
                 ? `<div class="pousse-sub">il lui reste ${num(cible - e, 1)} cm à pousser avant la cible de ${num(cible, 1)} cm</div>`
                 : `<div class="pousse-sub">pile à la hauteur voulue</div>`}
+            ${/* `gazon_pousse_jour_cm` : l'intégration la calcule heure par heure (pic à 3 h,
+                 la feuille s'allonge sur la turgescence, pas sur la lumière) et la carte ne
+                 l'affichait NULLE PART. C'est pourtant la seule preuve visible que le modèle
+                 de pousse tourne — sans elle, la hauteur a l'air figée. Deux décimales : au
+                 dixième, une journée entière de pousse s'affiche « 0,2 cm » ou « 0,0 cm ». */''}
+            ${(() => {
+              const jour = parseFloat(attrOf(h, c.entity_hauteur_gazon_estimee, 'gazon_pousse_jour_cm'));
+              return Number.isFinite(jour) && jour > 0
+                ? `<div class="pousse-sub">+ ${num(jour, 2)} cm ${this._t('growth_today')}</div>` : '';
+            })()}
           </div>
         </div>`;
       })()}
@@ -1912,11 +2141,10 @@ class GazonIntelligentCard extends HTMLElement {
         return this._actionsRapides([{ id: 'declare_mowing', icone: '✂️', libelle: "J'ai tondu" }]);
       })()}
 
-      ${(gPermet !== undefined || mPermet !== undefined) ? `
-        <div class="chip-row">
-          ${gPermet !== undefined ? `<div class="chip"><div class="chip-dot" style="background:${gPermet ? 'var(--gi-accent)' : 'var(--gi-muted)'}"></div>Gazon ${gPermet ? 'prêt' : 'pas prêt'}</div>` : ''}
-          ${mPermet !== undefined ? `<div class="chip"><div class="chip-dot" style="background:${mPermet ? 'var(--gi-accent)' : 'var(--gi-muted)'}"></div>Tondeuse ${mPermet ? 'prête' : 'indisponible'}</div>` : ''}
-        </div>` : ''}
+      ${/* La pastille « Tondeuse prête/indisponible » disait exactement ce que porte désormais
+           le badge de la carte machine, en haut de l'onglet : retirée. Et « Gazon prêt/pas
+           prêt » est remontée dans la rangée du haut — seule en bas de page, après le bouton
+           « J'ai tondu », elle était orpheline et se lisait comme une info sans rapport. */''}
       ${(() => {
         // Doublon constaté sur l'install le 30/07/2026 : le motif était déjà affiché en
         // pastille sous la tondeuse. On ne le répète donc que s'il n'y est pas.
@@ -1932,8 +2160,8 @@ class GazonIntelligentCard extends HTMLElement {
 
       <div class="toggle-row">
         <div class="toggle-info">
-          <div class="toggle-name">Coordination tondeuse</div>
-          <div class="toggle-sub">Bloque la tonte si arrosage en cours</div>
+          <div class="toggle-name">${this._t('coord_name')}</div>
+          <div class="toggle-sub">${this._t('coord_sub')}</div>
         </div>
         <button class="toggle-sw${coordOn ? ' on' : ''}" data-action="toggle" data-entity="${c.entity_switch_tondeuse || ''}">
           <div class="toggle-knob"></div>
@@ -1984,11 +2212,21 @@ class GazonIntelligentCard extends HTMLElement {
         </div>
       </div>
 
+      ${/* La jauge répétait mot pour mot « 63 % · 7,6 mm », déjà lisible dans la tuile Réserve
+           150 px plus haut (constaté le 31/07/2026). À la place, elle porte maintenant les deux
+           nombres qui DÉCIDENT et qui n'apparaissaient nulle part sur la carte : la déplétion
+           réelle et le seuil MAD à partir duquel l'intégration déclenche. */''}
       ${fillPct !== null ? `
         <div class="reserve-bar-wrap">
           <div class="reserve-bar-label">
             <span>${this._t('reserve_lbl')}</span>
-            <span>${fillPct} % · ${num(reserveMm, 1)} mm</span>
+            <span>${(() => {
+              const dep = parseFloat(hydrAttr.depletion_mm);
+              const mad = parseFloat(hydrAttr.reserve_minimale_mm);
+              if (!Number.isFinite(dep)) return `${fillPct} % · ${num(reserveMm, 1)} mm`;
+              return `${this._t('depletion_lbl')} ${num(dep, 1)} mm${
+                Number.isFinite(mad) ? ` · ${this._t('mad_lbl')} ${num(mad, 1)} mm` : ''}`;
+            })()}</span>
           </div>
           <div class="reserve-bar-track">
             <div class="reserve-bar-fill ${fillClass}" style="width:${Math.min(fillPct, 100)}%"></div>
@@ -2001,8 +2239,11 @@ class GazonIntelligentCard extends HTMLElement {
         <div class="mow-info">
           <div class="mow-name">${hydrique}</div>
           <div class="mow-detail">
+            ${/* `pluie_efficace` s'affichait en « · 0,0 mm » nu : rien ne disait que c'était
+                 de la pluie, et à zéro la mention n'apprend rien. Étiquetée, et masquée à zéro. */''}
             ${arros7j !== undefined ? this._t('watering_7d') + ' : ' + num(arros7j, 1) + ' mm' : ''}
-            ${pluie    !== undefined ? ' · ' + num(pluie, 1)   + ' mm' : ''}
+            ${(Number.isFinite(parseFloat(pluie)) && parseFloat(pluie) > 0)
+              ? ' · ' + this._t('rain_effective') + ' ' + num(pluie, 1) + ' mm' : ''}
           </div>
         </div>
       </div>
@@ -2025,8 +2266,17 @@ class GazonIntelligentCard extends HTMLElement {
     // alors que l'intégration fournit le POURQUOI (`why_now`) et le détail des conditions
     // (`reason`, en segments séparés par « · »). Constaté en le regardant, le 30/07/2026.
     const pourquoi = iAttr.why_now || '';
-    const conditions = String(iAttr.reason || '')
-      .split('·').map(x => x.trim()).filter(Boolean);
+    // ⚠️ `reason` est la concaténation de TOUS les critères : les quatre puces s'affichaient à
+    // l'identique et rien ne disait laquelle retenait l'intervention (Kick Pro, 31/07/2026 —
+    // seule la date de réapplication bloquait). L'intégration publie désormais la polarité
+    // (`application_constraints`, 0.33.0). Repli sur la chaîne si l'intégration est plus ancienne.
+    const conditions = Array.isArray(iAttr.application_constraints) && iAttr.application_constraints.length
+      ? iAttr.application_constraints.map(x => ({
+          label: String(x.label || ''),
+          cls: x.met ? 'ok' : (x.blocking ? 'hold' : ''),
+        })).filter(x => x.label)
+      : String(iAttr.reason || '')
+          .split('·').map(x => ({ label: x.trim(), cls: '' })).filter(x => x.label);
 
     const isRecommended = iState === 'recommande' || iState === 'recommended';
     const heroTone = isRecommended ? 'purple' : 'warn';
@@ -2048,12 +2298,19 @@ class GazonIntelligentCard extends HTMLElement {
           <div class="hero-eyebrow">${this._t('next_intervention')}</div>
           <div class="hero-title">${esc(produit)}</div>
           ${hint ? `<div class="hero-sub">${esc(hint)}</div>` : ''}
-          ${score !== null ? `<div class="hero-badge"><div class="hero-dot"></div>${esc(score)} % · ${esc(iState)}</div>` : ''}
+          ${/* ⚠️ Ce badge affichait « 0 % · blocked » : l'état INTERNE de l'intégration, en
+               anglais, collé à un score qui ne veut rien dire quand rien n'est recommandé.
+               Vu le 31/07/2026 en rendant le banc sur la charge réelle — mon jeu d'essai
+               précédent n'avait pas de `score`, le badge ne s'affichait donc jamais.
+               Le score n'apparaît que s'il porte une information (> 0), et l'état est traduit. */''}
+          ${(score !== null && Number(score) > 0)
+            ? `<div class="hero-badge"><div class="hero-dot"></div>${esc(score)} % · ${esc(this._lblt(INTERVENTION_LABELS, iState))}</div>`
+            : (iState ? `<div class="hero-badge"><div class="hero-dot"></div>${esc(this._lblt(INTERVENTION_LABELS, iState))}</div>` : '')}
         </div>` : ''}
       ${pourquoi ? `<div class="pourquoi"><span class="pourquoi-mark">📅</span>${esc(pourquoi)}</div>` : ''}
       ${conditions.length ? `
         <div class="cond-list">
-          ${conditions.map(c2 => `<div class="cond-item">${esc(c2)}</div>`).join('')}
+          ${conditions.map(c2 => `<div class="cond-item ${c2.cls}">${esc(c2.label)}</div>`).join('')}
         </div>` : ''}
 
       ${/* HISTORIQUE — `application_history` contient toutes les applications déclarées
@@ -2070,7 +2327,7 @@ class GazonIntelligentCard extends HTMLElement {
         };
         return `
         <div class="sep"></div>
-        <div class="section-title">Ce que tu as appliqué${hist.length ? ` · ${hist.length}` : ''}</div>
+        <div class="section-title">${this._t('applied_history')}${hist.length ? ` · ${hist.length}` : ''}</div>
         <div class="hist-list">
           ${hist.slice(0, n).map(e => `
             <div class="hist-row">
@@ -2081,25 +2338,34 @@ class GazonIntelligentCard extends HTMLElement {
                 ${/* Les notes de Kévin sont détaillées (dosage, pression, surface, pourquoi la
                      date a bougé) : précieuses, mais quatre lignes par entrée noient la liste.
                      On les replie à deux lignes, dépliables au clic. Rien n'est perdu. */''}
-                ${e.note ? `<div class="hist-note" data-action="note-toggle" title="Toucher pour tout lire">${esc(e.note)}</div>` : ''}
+                ${e.note ? `<div class="hist-note" data-action="note-toggle" title="${this._t('tap_to_expand')}">${esc(e.note)}</div>` : ''}
               </div>
             </div>`).join('')}
         </div>
         ${hist.length > 6 ? `<button class="hist-plus" data-action="hist-toggle">${
-          this._histTout ? 'Réduire' : `Voir les ${hist.length - 6} plus anciennes`}</button>` : ''}`;
+          this._histTout ? this._t('show_less') : `${this._t('show_older_a')} ${hist.length - 6} ${this._t('show_older_b')}`}</button>` : ''}`;
       })()}
 
       <div class="sep"></div>
-      <button class="btn-declare" data-action="declare-open">➕ Déclarer un produit appliqué</button>
+      <button class="btn-declare" data-action="declare-open">➕ ${this._t('declare_product')}</button>
       ${/* L'annulation n'a de sens QUE s'il y a une application à annuler : sans historique,
            le bouton proposerait une action impossible. Carte dynamique = ce qui s'affiche
            dépend de l'état réel, pas d'une liste figée. */''}
       ${(laAttr.application_history || []).length
         ? this._actionsRapides([{ id: 'remove_last_application', icone: '🗑️',
-            libelle: 'Annuler la dernière application', danger: true }])
+            libelle: this._t('undo_last_application'), danger: true }])
         : ''}
 
-      ${summary ? `
+      ${/* DEUX TUILES MORTES retirées ici (constatées le 31/07/2026 en regardant l'onglet
+           entier) — toutes deux ajoutées à des moments différents, puis rendues inutiles par
+           l'historique ajouté le 30/07 :
+           - `summary` : « Intervention bloquée : Kick Pro » répétait le hero, deux écrans plus
+             haut, qui dit déjà le produit ET le motif ;
+           - `laActive` : « Dernière application · Humuslight · 23/07/2026 » recopiait
+             mot pour mot la première ligne de l'historique, note comprise.
+           On ne garde la tuile `summary` que si le hero est absent — sinon l'onglet n'aurait
+           plus rien à dire du tout. */''}
+      ${(!showHero && summary) ? `
         <div class="zone-card">
           <div class="zone-dot purple"></div>
           <div class="zone-info">
@@ -2110,7 +2376,9 @@ class GazonIntelligentCard extends HTMLElement {
 
       ${(!showHero && !summary) ? `<div class="empty">${this._t('no_intervention')}</div>` : ''}
 
-      ${laActive ? `
+      ${/* Idem : la tuile « dernière application » ne sert que si l'historique est vide
+           (intégration plus ancienne, ou tout premier produit déclaré). */''}
+      ${(laActive && !(laAttr.application_history || []).length) ? `
         <div class="zone-card" style="margin-top:10px">
           <div class="zone-dot on"></div>
           <div class="zone-info">
@@ -2144,13 +2412,44 @@ class GazonIntelligentCard extends HTMLElement {
 
       <div class="toggle-row">
         <div class="toggle-info">
-          <div class="toggle-name">Coordination tondeuse</div>
-          <div class="toggle-sub">Bloque la tonte pendant l'arrosage</div>
+          <div class="toggle-name">${this._t('coord_name')}</div>
+          <div class="toggle-sub">${this._t('coord_sub')}</div>
         </div>
         <button class="toggle-sw${coordOn ? ' on' : ''}" data-action="toggle" data-entity="${c.entity_switch_tondeuse || ''}">
           <div class="toggle-knob"></div>
         </button>
       </div>
+
+      ${/* HAUTEUR DE COUPE — réglable ici parce que beaucoup de robots (dont celui de Kévin)
+           ne l'exposent pas : elle est saisie à la main. Or c'est le POINT ZÉRO du modèle de
+           pousse (`hauteur du gazon = hauteur de coupe + ce qui a poussé`). La régler ailleurs
+           qu'à l'endroit où on lit la hauteur, c'est garantir qu'on l'oubliera après avoir
+           tourné la molette — et toute l'estimation part alors de travers, sans qu'aucun
+           capteur puisse le détecter. */''}
+      ${(() => {
+        const e = ent(h, c.entity_hauteur_coupe);
+        if (!e) return '';
+        const val = parseFloat(e.state);
+        if (!Number.isFinite(val)) return '';
+        const a = e.attributes || {};
+        const min = Number.isFinite(parseFloat(a.min)) ? parseFloat(a.min) : 20;
+        const max = Number.isFinite(parseFloat(a.max)) ? parseFloat(a.max) : 100;
+        const pas = Number.isFinite(parseFloat(a.step)) ? parseFloat(a.step) : 5;
+        return `
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">${this._t('cut_height')}</div>
+            <div class="toggle-sub">${this._t('cut_height_sub')}</div>
+          </div>
+          <div class="cut-stepper">
+            <button class="cut-btn" data-action="cut-height" data-value="${Math.max(min, val - pas)}"
+                    ${val <= min ? 'disabled' : ''} aria-label="−${pas} mm">−</button>
+            <span class="cut-val">${num(val / 10, 1)} cm</span>
+            <button class="cut-btn" data-action="cut-height" data-value="${Math.min(max, val + pas)}"
+                    ${val >= max ? 'disabled' : ''} aria-label="+${pas} mm">+</button>
+          </div>
+        </div>`;
+      })()}
 
       ${zones.length ? `
         <div class="sep"></div>
@@ -2339,12 +2638,28 @@ class GazonIntelligentCard extends HTMLElement {
           this._manualOpen = false;
           this._render();
 
+        } else if (action === 'cut-height') {
+          // `number.set_value` et non un incrément local : l'entité reste la source de vérité,
+          // et la valeur survit au rechargement de la carte.
+          const v = parseFloat(el.dataset.value);
+          if (Number.isFinite(v)) {
+            this._call('number', 'set_value', {
+              entity_id: this._config.entity_hauteur_coupe, value: v,
+            });
+          }
+
         } else if (action === 'toggle' && entity) {
           this._call('switch', 'toggle', { entity_id: entity });
 
         } else if (action === 'zone-on' && sw) {
           if (pompe) this._call('switch', 'turn_on', { entity_id: pompe });
           this._call('switch', 'turn_on', { entity_id: sw });
+
+        } else if (action === 'stop-irrigation') {
+          this._call('gazon_intelligent', 'stop_irrigation', {
+            entity_id: this._config.entity_objectif_arrosage,
+            raison: 'Arrêt depuis la carte.',
+          });
 
         } else if (action === 'zone-off' && sw) {
           this._call('switch', 'turn_off', { entity_id: sw });

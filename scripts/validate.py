@@ -138,4 +138,25 @@ if _debut >= 0:
             "Reformuler le commentaire sans backtick."
         )
 
+# ── SYNTAXE JAVASCRIPT ──────────────────────────────────────────────────────
+# `node --check` ne voit pas tout (cf. le contrôle des accents graves ci-dessus), mais il voit
+# ce qu'un build ne voit pas : une virgule manquante dans le dictionnaire de chaînes suffit à
+# rendre la carte inchargeable — écran blanc, pas de message. Cas réel le 01/08/2026 : le build
+# et la validation passaient au vert sur un fichier qui ne parsait pas.
+import shutil
+import subprocess
+
+_bundle = ROOT / "gazon-intelligent-card.js"
+if _bundle.exists():
+    _node = shutil.which("node")
+    if _node is None:
+        print("⚠️  node introuvable : contrôle de syntaxe JavaScript IGNORÉ")
+    else:
+        _res = subprocess.run([_node, "--check", str(_bundle)], capture_output=True, text=True)
+        if _res.returncode != 0:
+            raise SystemExit(
+                "le fichier construit ne parse pas — la carte ne se chargerait pas :\n"
+                + (_res.stderr or _res.stdout).strip()
+            )
+
 print("Validation OK")

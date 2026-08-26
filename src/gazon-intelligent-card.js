@@ -844,6 +844,7 @@ class GazonIntelligentCard extends HTMLElement {
     if (!this._shadow) {
       this._shadow = this.attachShadow({ mode: 'open' });
       this._shadow.innerHTML = `<style>${STYLES}</style><div class="card" id="gi-card"></div>`;
+      this._lastHtml = null;   // coquille neuve : le rendu mémorisé ne vaut plus rien
     }
     // Pas de re-rendu tant que le popup d'arrosage manuel est ouvert. `set hass` est appelé à
     // CHAQUE changement d'état dans tout Home Assistant (plusieurs fois par seconde) ; un
@@ -937,7 +938,32 @@ class GazonIntelligentCard extends HTMLElement {
   _render() {
     const card = this._shadow && this._shadow.getElementById('gi-card');
     if (!card) return;
-    card.innerHTML = this._html();
+    const html = this._html();
+
+    // ⚠️ NE PAS RECONSTRUIRE LE DOM POUR RIEN. `set hass` est appelé à CHAQUE changement
+    // d'état dans tout Home Assistant, plusieurs fois par seconde — et la quasi-totalité de
+    // ces changements ne concerne pas cette carte. Redessiner à l'identique n'affiche rien de
+    // neuf mais DÉTRUIT la barre d'onglets, qui défile horizontalement sur téléphone : son
+    // `scrollLeft` repart à zéro, et remplacer l'élément en plein geste tue l'inertie du
+    // doigt. Symptôme signalé le 26/08/2026 : « j'arrive pas à la faire défiler, elle revient
+    // sans cesse au début ».
+    //
+    // On compare la sortie RÉELLE plutôt que de deviner quelles entités comptent : si le
+    // rendu diffère on redessine, sinon on ne touche à rien. Aucune mise à jour ne peut donc
+    // être ratée — c'est la sortie qui décide, pas une liste d'entités à tenir à jour.
+    if (html === this._lastHtml) return;
+    this._lastHtml = html;
+
+    // Un rendu qui change VRAIMENT remplace la barre malgré tout : on lui rend sa position.
+    const barreAvant = card.querySelector('.tabs');
+    const defilement = barreAvant ? barreAvant.scrollLeft : 0;
+
+    card.innerHTML = html;
+
+    if (defilement) {
+      const barreApres = card.querySelector('.tabs');
+      if (barreApres) barreApres.scrollLeft = defilement;
+    }
     this._bindEvents(card);
     this._suivreDefilementOnglets(card);
   }

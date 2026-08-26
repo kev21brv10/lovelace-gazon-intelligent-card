@@ -126,3 +126,45 @@ test("le rendu n'utilise pas les anciennes classes de navigation", () => {
   assert.equal(root.querySelector(".tab-nav"),    null, ".tab-nav absent");
   assert.equal(root.querySelector(".section-nav"), null, ".section-nav absent");
 });
+
+// ── Défilement des onglets sur téléphone ──────────────────────────────────────
+// ⚠️ `set hass` est appelé à CHAQUE changement d'état de Home Assistant, plusieurs fois par
+// seconde. Reconstruire le DOM à l'identique détruisait la barre d'onglets, qui défile
+// horizontalement sur mobile : son `scrollLeft` repartait à zéro et l'inertie du doigt était
+// tuée en plein geste. Signalé le 26/08/2026 : « elle revient sans cesse au début ».
+
+test("un hass identique ne reconstruit pas le DOM", () => {
+  const { el, window } = makeCard();
+  const avant = el.shadowRoot.getElementById("gi-card").firstElementChild;
+  el.hass = el._hass;               // même état : rien de neuf à afficher
+  const apres = el.shadowRoot.getElementById("gi-card").firstElementChild;
+  assert.equal(avant, apres, "le DOM a été reconstruit alors que rien n'a changé");
+  assert.ok(window, "fenêtre disponible");
+});
+
+test("un état qui change reconstruit bien le DOM", () => {
+  const { el } = makeCard();
+  const avant = el.shadowRoot.getElementById("gi-card").firstElementChild;
+  const copie = JSON.parse(JSON.stringify(el._hass));
+  copie.states["sensor.gazon_intelligent_assistant"].state = "arrosage";
+  copie.states["sensor.gazon_intelligent_assistant"].attributes.action = "arrosage";
+  el.hass = copie;
+  const apres = el.shadowRoot.getElementById("gi-card").firstElementChild;
+  assert.notEqual(avant, apres, "un vrai changement doit redessiner");
+});
+
+test("le défilement des onglets survit à un vrai re-rendu", () => {
+  const { el } = makeCard();
+  const barre = el.shadowRoot.querySelector(".tabs");
+  assert.ok(barre, "barre d'onglets présente");
+  barre.scrollLeft = 120;           // l'utilisateur a fait défiler
+  const copie = JSON.parse(JSON.stringify(el._hass));
+  copie.states["sensor.gazon_intelligent_assistant"].state = "arrosage";
+  copie.states["sensor.gazon_intelligent_assistant"].attributes.action = "arrosage";
+  el.hass = copie;
+  const apresBarre = el.shadowRoot.querySelector(".tabs");
+  // ⚠️ Sans cette assertion, le test passait sur un élément JAMAIS remplacé : il ne prouvait
+  // rien, et la mutation qui supprime la restauration y survivait.
+  assert.notEqual(apresBarre, barre, "le re-rendu n'a pas eu lieu, le test ne prouve rien");
+  assert.equal(apresBarre.scrollLeft, 120, "la position de défilement a été perdue");
+});

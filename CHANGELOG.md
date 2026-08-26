@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.26.1
+
+**La barre d'onglets ne défile plus sur téléphone — corrigé.** Signalé le 26/08/2026 :
+« j'arrive pas à la faire défiler, elle revient sans cesse au début ».
+
+`set hass` est appelé à **chaque changement d'état dans tout Home Assistant**, plusieurs fois
+par seconde, et `_render()` faisait `card.innerHTML = …` à chaque appel. La quasi-totalité de
+ces changements ne concerne pas la carte : on reconstruisait un DOM identique en boucle.
+
+Or la barre d'onglets défile horizontalement sur écran étroit. La détruire et la recréer
+remet son `scrollLeft` à zéro — et sur mobile, remplacer l'élément **en plein geste tue
+l'inertie du doigt**, d'où l'impression qu'elle ne défile pas du tout.
+
+- **On compare la sortie RÉELLE** avant de toucher au DOM : si le HTML rendu est identique,
+  on ne redessine pas. Comparer la sortie plutôt que deviner quelles entités comptent garantit
+  qu'aucune mise à jour ne peut être ratée — c'est le rendu qui décide, pas une liste à tenir.
+- **La position de défilement est restaurée** quand le rendu change vraiment.
+- Trois tests, quatre mutations vérifiées — dont celle qui lit la position *après* le
+  remplacement, et celle qui ne redessine plus jamais.
+
+⚠️ Le premier test écrit ne mordait pas : il ne déclenchait pas de vrai re-rendu, donc il
+validait un élément jamais remplacé. Il assure désormais que la barre a bien été recréée
+avant de vérifier que sa position a survécu.
+
+
 ## [0.26.0] - 2026-08-06
 
 ### Corrigé

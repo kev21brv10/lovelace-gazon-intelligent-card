@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.26.3
+
+**La carte ne se redessine plus en entier — « c'est comme si ça s'actualisait ».**
+
+La 0.26.2 avait sauvé la barre d'onglets, mais tout le reste — en-tête, barre météo, contenu —
+était encore remplacé d'un bloc. Or la carte affiche **l'heure courante** : chaque minute, tout
+le contenu disparaissait et réapparaissait alors que **seule la barre météo** avait changé.
+
+- **Remplacement bloc par bloc** : chaque bloc de premier niveau est comparé à son
+  remplaçant, et seuls ceux qui diffèrent sont échangés. Un tic d'horloge ne touche plus au
+  contenu ; le défilement de la page reste intact.
+- Si la structure change (barre météo qui apparaît, popup qui s'ouvre), rendu complet — mais
+  la barre d'onglets est toujours réinjectée vivante.
+- **16 tests, 6 mutations** vérifiées.
+
+⚠️ Le banc a montré que la comparaison globale du rendu (0.26.1) était devenue **redondante
+pour le comportement** : le remplacement bloc par bloc ne toucherait à rien de toute façon.
+Elle est conservée comme raccourci de **coût** — `set hass` arrive plusieurs fois par seconde
+et sans elle on analyserait le HTML dans un tampon pour ne rien faire — et elle est désormais
+testée pour ce qu'elle est : l'absence de travail, pas l'absence de changement à l'écran.
+
+⚠️ Deuxième test à réécrire en deux versions : « un état qui change reconstruit bien le DOM »
+exigeait que la carte ENTIÈRE soit reconstruite. Il décrivait le défaut, pas l'objectif.
+
+
 ## 0.26.2
 
 **La barre d'onglets n'est plus jamais recréée.** La 0.26.1 restaurait sa position après

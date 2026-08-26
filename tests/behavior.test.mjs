@@ -156,15 +156,52 @@ test("un état qui change reconstruit bien le DOM", () => {
 test("le défilement des onglets survit à un vrai re-rendu", () => {
   const { el } = makeCard();
   const barre = el.shadowRoot.querySelector(".tabs");
-  assert.ok(barre, "barre d'onglets présente");
   barre.scrollLeft = 120;           // l'utilisateur a fait défiler
   const copie = JSON.parse(JSON.stringify(el._hass));
   copie.states["sensor.gazon_intelligent_assistant"].state = "arrosage";
   copie.states["sensor.gazon_intelligent_assistant"].attributes.action = "arrosage";
   el.hass = copie;
+  // ⚠️ La garantie est plus forte qu'une restauration : la barre n'est pas recréée du tout,
+  // donc ni sa position ni le geste en cours ne peuvent être perdus. Une version précédente
+  // de ce test exigeait au contraire qu'elle SOIT recréée — elle décrivait l'ancien correctif,
+  // celui qui ne marchait qu'à moitié.
   const apresBarre = el.shadowRoot.querySelector(".tabs");
-  // ⚠️ Sans cette assertion, le test passait sur un élément JAMAIS remplacé : il ne prouvait
-  // rien, et la mutation qui supprime la restauration y survivait.
-  assert.notEqual(apresBarre, barre, "le re-rendu n'a pas eu lieu, le test ne prouve rien");
+  assert.equal(apresBarre, barre, "la barre a été recréée");
   assert.equal(apresBarre.scrollLeft, 120, "la position de défilement a été perdue");
+});
+
+test("la barre d'onglets n'est JAMAIS recréée", () => {
+  const { el } = makeCard();
+  const barre = el.shadowRoot.querySelector(".tabs");
+  const copie = JSON.parse(JSON.stringify(el._hass));
+  copie.states["sensor.gazon_intelligent_assistant"].state = "arrosage";
+  copie.states["sensor.gazon_intelligent_assistant"].attributes.action = "arrosage";
+  el.hass = copie;
+  assert.equal(el.shadowRoot.querySelector(".tabs"), barre,
+    "la barre a été recréée : le geste de défilement sera cassé sur mobile");
+  // Le contenu, lui, doit bien avoir été redessiné.
+  assert.ok(el.shadowRoot.querySelector(".content"), "contenu présent après rendu");
+});
+
+test("changer d'onglet met à jour la classe active sans recréer la barre", () => {
+  const { el } = makeCard();
+  const barre = el.shadowRoot.querySelector(".tabs");
+  el.shadowRoot.querySelector('.tab[data-tab="tonte"]').click();
+  assert.equal(el._tab, "tonte");
+  assert.equal(el.shadowRoot.querySelector(".tabs"), barre, "barre préservée au changement d'onglet");
+  assert.equal(el.shadowRoot.querySelector(".tab.active").dataset.tab, "tonte");
+});
+
+test("un clic ne déclenche qu'un seul rendu, même après plusieurs mises à jour", () => {
+  const { el } = makeCard();
+  for (let i = 0; i < 5; i++) {
+    const c = JSON.parse(JSON.stringify(el._hass));
+    c.states["sensor.gazon_intelligent_assistant"].attributes.reason = `raison ${i}`;
+    el.hass = c;
+  }
+  let rendus = 0;
+  const vrai = el._render.bind(el);
+  el._render = () => { rendus++; return vrai(); };
+  el.shadowRoot.querySelector('.tab[data-tab="gazon"]').click();
+  assert.equal(rendus, 1, `écouteurs accumulés : ${rendus} rendus pour un seul clic`);
 });

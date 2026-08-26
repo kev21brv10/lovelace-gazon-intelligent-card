@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.26.2
+
+**La barre d'onglets n'est plus jamais recréée.** La 0.26.1 restaurait sa position après
+coup ; retour de Kévin : « c'est un peu mieux ». Un peu, pas assez — et pour une raison que
+la restauration ne pouvait pas couvrir.
+
+Recréer l'élément **au milieu d'un geste** tue l'inertie du doigt. Quand on lui rend son
+`scrollLeft`, le geste est déjà cassé. Et la carte affiche l'heure courante (`meteo-time`),
+donc son rendu change **au moins chaque minute** : la barre était reconstruite en boucle quoi
+qu'il arrive.
+
+- **Le nouveau rendu est bâti dans un tampon, puis la barre VIVANTE y est réinjectée** — un
+  vrai déplacement de nœud, pas une sérialisation — avant que l'ensemble ne rejoigne la carte.
+  La barre traverse l'opération sans jamais être recréée : position **et** geste intacts.
+- Seule chose qui change en elle : quel onglet porte la classe `active`.
+- **Le branchement des clics devient idempotent.** Sans ce garde, une barre préservée
+  accumulait un écouteur par rendu — un seul clic aurait fini par déclencher des dizaines de
+  re-rendus. Une mutation le vérifie.
+- 14 tests, **5 mutations** vérifiées.
+
+⚠️ Un test de la 0.26.1 est devenu faux et a dû être remplacé : il exigeait que la barre
+**soit** recréée, puisqu'il décrivait l'ancien correctif. Il vérifie désormais l'inverse.
+
+
 ## 0.26.1
 
 **La barre d'onglets ne défile plus sur téléphone — corrigé.** Signalé le 26/08/2026 :

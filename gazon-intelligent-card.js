@@ -954,15 +954,28 @@ class GazonIntelligentCard extends HTMLElement {
     if (html === this._lastHtml) return;
     this._lastHtml = html;
 
-    // Un rendu qui change VRAIMENT remplace la barre malgré tout : on lui rend sa position.
-    const barreAvant = card.querySelector('.tabs');
-    const defilement = barreAvant ? barreAvant.scrollLeft : 0;
-
-    card.innerHTML = html;
-
-    if (defilement) {
-      const barreApres = card.querySelector('.tabs');
-      if (barreApres) barreApres.scrollLeft = defilement;
+    // ⚠️ ON NE DÉTRUIT JAMAIS LA BARRE D'ONGLETS. Lui rendre son `scrollLeft` après coup ne
+    // suffisait pas — « c'est un peu mieux », 26/08/2026 : recréer l'élément AU MILIEU d'un
+    // geste tue l'inertie du doigt, et le geste est déjà cassé quand on restaure la position.
+    // Or la carte affiche l'heure courante (`meteo-time`), donc son rendu change au moins
+    // chaque minute : la barre était recréée en boucle quoi qu'il arrive.
+    //
+    // On bâtit le nouveau rendu dans un tampon, on y RÉINJECTE la barre vivante — un vrai
+    // déplacement de nœud, pas une sérialisation — puis on déplace le tout dans la carte.
+    // La barre traverse l'opération sans jamais être recréée : position ET geste intacts.
+    const barre = card.querySelector('.tabs');
+    if (!barre) {
+      card.innerHTML = html;
+    } else {
+      const doc = this.ownerDocument || document;
+      const tampon = doc.createElement('div');
+      tampon.innerHTML = html;
+      const remplacante = tampon.querySelector('.tabs');
+      if (remplacante) remplacante.replaceWith(barre);
+      card.replaceChildren(...tampon.childNodes);
+      // Seule chose qui change dans la barre : quel onglet est actif.
+      barre.querySelectorAll('.tab').forEach(b =>
+        b.classList.toggle('active', b.dataset.tab === this._tab));
     }
     this._bindEvents(card);
     this._suivreDefilementOnglets(card);
@@ -2524,7 +2537,12 @@ class GazonIntelligentCard extends HTMLElement {
         }
       });
     });
+    // ⚠️ La barre d'onglets n'est plus recréée à chaque rendu (cf. `_render`) : sans ce
+    // garde, chaque bouton accumulerait un écouteur de plus par rendu, et un seul clic
+    // finirait par déclencher des dizaines de re-rendus.
     card.querySelectorAll('.tab').forEach(btn => {
+      if (btn.dataset.lie) return;
+      btn.dataset.lie = '1';
       btn.addEventListener('click', () => {
         this._tab = btn.dataset.tab;
         this._render();

@@ -142,15 +142,19 @@ test("un hass identique ne reconstruit pas le DOM", () => {
   assert.ok(window, "fenêtre disponible");
 });
 
-test("un état qui change reconstruit bien le DOM", () => {
+test("un état qui change redessine le contenu", () => {
   const { el } = makeCard();
-  const avant = el.shadowRoot.getElementById("gi-card").firstElementChild;
+  // ⚠️ Ce test exigeait autrefois que TOUT le DOM soit reconstruit (`firstElementChild`
+  // différent). Il décrivait le défaut, pas l'objectif : le rendu ne remplace plus que les
+  // blocs qui ont changé, et l'en-tête ne bouge pas ici. Ce qui compte, c'est que le contenu
+  // suive l'état — pas que la carte entière clignote.
+  const contenu = el.shadowRoot.querySelector(".content");
   const copie = JSON.parse(JSON.stringify(el._hass));
   copie.states["sensor.gazon_intelligent_assistant"].state = "arrosage";
   copie.states["sensor.gazon_intelligent_assistant"].attributes.action = "arrosage";
   el.hass = copie;
-  const apres = el.shadowRoot.getElementById("gi-card").firstElementChild;
-  assert.notEqual(avant, apres, "un vrai changement doit redessiner");
+  assert.notEqual(el.shadowRoot.querySelector(".content"), contenu,
+    "un vrai changement doit redessiner le contenu");
 });
 
 test("le défilement des onglets survit à un vrai re-rendu", () => {
@@ -204,4 +208,26 @@ test("un clic ne déclenche qu'un seul rendu, même après plusieurs mises à jo
   el._render = () => { rendus++; return vrai(); };
   el.shadowRoot.querySelector('.tab[data-tab="gazon"]').click();
   assert.equal(rendus, 1, `écouteurs accumulés : ${rendus} rendus pour un seul clic`);
+});
+
+test("un changement de contenu ne remplace pas l'en-tête", () => {
+  const { el } = makeCard();
+  const entete = el.shadowRoot.querySelector(".header");
+  const contenu = el.shadowRoot.querySelector(".content");
+  const copie = JSON.parse(JSON.stringify(el._hass));
+  copie.states["sensor.gazon_intelligent_assistant"].attributes.reason = "Herbe mouillée.";
+  el.hass = copie;
+  assert.equal(el.shadowRoot.querySelector(".header"), entete,
+    "l'en-tête a été remplacé alors qu'il n'a pas changé");
+  assert.notEqual(el.shadowRoot.querySelector(".content"), contenu,
+    "le contenu aurait dû être redessiné");
+});
+
+test("un hass identique ne refait aucun travail de rendu", () => {
+  const { el } = makeCard();
+  let travail = 0;
+  const vrai = el._bindEvents.bind(el);
+  el._bindEvents = (c) => { travail++; return vrai(c); };
+  el.hass = el._hass;               // même état : rien à redessiner
+  assert.equal(travail, 0, "le rendu a travaillé alors que rien n'avait changé");
 });

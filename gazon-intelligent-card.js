@@ -951,6 +951,11 @@ class GazonIntelligentCard extends HTMLElement {
     // On compare la sortie RÉELLE plutôt que de deviner quelles entités comptent : si le
     // rendu diffère on redessine, sinon on ne touche à rien. Aucune mise à jour ne peut donc
     // être ratée — c'est la sortie qui décide, pas une liste d'entités à tenir à jour.
+    // Raccourci de COÛT, pas de correction : le remplacement bloc par bloc ci-dessous ne
+    // toucherait de toute façon à rien si rien n'a changé. Mais `set hass` arrive plusieurs
+    // fois par seconde, et sans ce test on analyserait le HTML dans un tampon à chaque appel
+    // pour finir par ne rien faire. Le banc de mutation l'a montré : aucune mutation ne le
+    // rend visible à l'écran, seul le travail inutile disparaît.
     if (html === this._lastHtml) return;
     this._lastHtml = html;
 
@@ -970,9 +975,26 @@ class GazonIntelligentCard extends HTMLElement {
       const doc = this.ownerDocument || document;
       const tampon = doc.createElement('div');
       tampon.innerHTML = html;
-      const remplacante = tampon.querySelector('.tabs');
-      if (remplacante) remplacante.replaceWith(barre);
-      card.replaceChildren(...tampon.childNodes);
+      const neufs = [...tampon.children];
+      const actuels = [...card.children];
+
+      if (neufs.length !== actuels.length) {
+        // La structure elle-même a changé (barre météo qui apparaît, popup qui s'ouvre) :
+        // rendu complet, mais la barre vivante est réinjectée pour ne pas être détruite.
+        const remplacante = tampon.querySelector('.tabs');
+        if (remplacante) remplacante.replaceWith(barre);
+        card.replaceChildren(...tampon.childNodes);
+      } else {
+        // ⚠️ ON NE REMPLACE QUE LES BLOCS QUI ONT CHANGÉ. La carte affiche l'heure courante :
+        // à chaque minute, tout le contenu était remplacé alors que seule la barre météo
+        // différait. Retour de Kévin, 26/08/2026 : « c'est comme si ça s'actualisait ».
+        // Comparer bloc par bloc laisse le contenu — et le défilement de la page — intacts.
+        neufs.forEach((neuf, i) => {
+          const actuel = actuels[i];
+          if (actuel.classList.contains('tabs')) return;   // jamais recréée
+          if (actuel.outerHTML !== neuf.outerHTML) actuel.replaceWith(neuf);
+        });
+      }
       // Seule chose qui change dans la barre : quel onglet est actif.
       barre.querySelectorAll('.tab').forEach(b =>
         b.classList.toggle('active', b.dataset.tab === this._tab));

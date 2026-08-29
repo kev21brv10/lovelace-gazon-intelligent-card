@@ -261,3 +261,49 @@ test("une seule session ne s'écrit pas « 1 sessions »", () => {
   assert.ok(BUNDLE.includes("sessCount > 1 ? 'sessions_n' : 'session_n'"),
     "le compteur de sessions n'accorde pas");
 });
+
+// ── Entités déduites ─────────────────────────────────────────────────────────
+// Trois entités n'ont pas de défaut à elles : elles se déduisent d'une autre pour
+// suivre le préfixe de l'instance. La déduction lisait `config.entity_…` — la valeur
+// BRUTE — au lieu du défaut résolu : une carte qui ne déclarait pas la source les
+// laissait à `undefined`, donc silencieusement muettes (hauteur du jour, catalogue,
+// dernière application), alors que toutes les autres entités avaient un défaut.
+
+test("les entités déduites tombent sur le défaut quand rien n'est déclaré", () => {
+  const window = setupWindow();
+  const el = window.document.createElement(CARD_TAG);
+  el.setConfig({ type: `custom:${CARD_TAG}` });
+  assert.equal(el._config.entity_hauteur_gazon_estimee,
+    "sensor.gazon_intelligent_hauteur_gazon_estimee");
+  assert.equal(el._config.entity_catalogue_produits,
+    "sensor.gazon_intelligent_catalogue_produits");
+  assert.equal(el._config.entity_derniere_application,
+    "sensor.gazon_intelligent_derniere_application");
+});
+
+test("les entités déduites suivent le préfixe d'une seconde instance", () => {
+  const window = setupWindow();
+  const el = window.document.createElement(CARD_TAG);
+  el.setConfig({
+    type: `custom:${CARD_TAG}`,
+    entity_hauteur_conseillee:     "sensor.gi_potager_hauteur_de_tonte_conseillee",
+    entity_prochaine_intervention: "sensor.gi_potager_prochaine_intervention",
+  });
+  assert.equal(el._config.entity_hauteur_gazon_estimee,
+    "sensor.gi_potager_hauteur_gazon_estimee");
+  assert.equal(el._config.entity_catalogue_produits,
+    "sensor.gi_potager_catalogue_produits");
+  assert.equal(el._config.entity_derniere_application,
+    "sensor.gi_potager_derniere_application");
+});
+
+test("une entité déduite déclarée explicitement gagne", () => {
+  const window = setupWindow();
+  const el = window.document.createElement(CARD_TAG);
+  el.setConfig({
+    type: `custom:${CARD_TAG}`,
+    entity_prochaine_intervention: "sensor.gi_potager_prochaine_intervention",
+    entity_derniere_application:   "sensor.choisi_a_la_main",
+  });
+  assert.equal(el._config.entity_derniere_application, "sensor.choisi_a_la_main");
+});

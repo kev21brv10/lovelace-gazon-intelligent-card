@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.26.5
+
+**Trois entités se déduisaient de la config brute, pas du défaut** — 22 tests verts.
+
+`entity_hauteur_gazon_estimee`, `entity_catalogue_produits` et `entity_derniere_application`
+n'ont pas de défaut à elles : elles se déduisent d'une autre entité pour suivre le préfixe de
+l'instance (une seconde instance porte un autre préfixe, un `gazon_intelligent_` figé la ferait
+lire les valeurs de la première). Mais la déduction lisait `config.entity_…`, la valeur **brute**,
+au lieu du défaut résolu. Une carte qui ne déclarait pas la source les laissait donc à
+`undefined` — muettes en silence : pas de hauteur du jour dans l'onglet Tonte, pas de dernière
+application dans Produits, pas de catalogue dans le popup de déclaration — alors que toutes les
+autres entités de la carte, elles, avaient un défaut.
+
+- La source est résolue **une seule fois** avant l'objet de config, défaut compris, et les trois
+  déductions partent de là. Une carte sans aucune entité déclarée retombe désormais sur les
+  bonnes entités ; une carte qui déclare un autre préfixe le garde.
+- `entity_derniere_application` était déclarée **deux fois** dans le même littéral : la seconde
+  écrasait la première en silence, et son défaut explicite était mort. Une seule déclaration.
+- Trois tests, dont les deux mutations qui comptent : défaut retiré de la déduction, et préfixe
+  figé en dur.
+
+Les deux cartes de l'installation déclarent déjà leurs sources : leur rendu est inchangé,
+vérifié onglet par onglet sur les valeurs réelles avant et après.
+
 ## 0.26.4
 
 **Tour de carte complet du 29/08/2026** — les six onglets rendus avec les valeurs RÉELLES de

@@ -1,7 +1,7 @@
 // gazon-intelligent-card.js
 // Carte Lovelace dédiée à l'intégration Gazon Intelligent
 
-const GI_VERSION = '0.26.4';  // tenu par scripts/build.py depuis package.json — il affichait
+const GI_VERSION = '0.26.5';  // tenu par scripts/build.py depuis package.json — il affichait
                           // « v1.0.0 » en Réglages depuis toujours, donc impossible de
                           // savoir quelle version tournait vraiment dans le navigateur.
 
@@ -796,6 +796,11 @@ class GazonIntelligentCard extends HTMLElement {
     config.zones?.forEach((z, i) => {
       if (!z.switch) console.warn(`gazon-intelligent-card: zone[${i}] is missing a "switch" entity`);
     });
+    // Entités dont d'autres se déduisent : on résout le défaut ici, une seule fois.
+    const hauteurSource      = String(config.entity_hauteur_conseillee
+      || 'sensor.gazon_intelligent_hauteur_de_tonte_conseillee');
+    const interventionSource = String(config.entity_prochaine_intervention
+      || 'sensor.gazon_intelligent_prochaine_intervention');
     this._config = {
       title:    config.title    || 'Gazon Intelligent',
       subtitle: config.subtitle || null,
@@ -810,27 +815,21 @@ class GazonIntelligentCard extends HTMLElement {
       entity_risque:                 config.entity_risque                 || 'sensor.gazon_intelligent_risque_gazon',
       entity_reserve:                config.entity_reserve                || 'sensor.gazon_intelligent_reserve_actuelle',
       entity_etat_hydrique:          config.entity_etat_hydrique          || 'sensor.gazon_intelligent_etat_hydrique',
-      entity_hauteur_conseillee:     config.entity_hauteur_conseillee     || 'sensor.gazon_intelligent_hauteur_de_tonte_conseillee',
+      entity_hauteur_conseillee:     hauteurSource,
       entity_switch_arrosage_auto:   config.entity_switch_arrosage_auto   || 'switch.gazon_intelligent_arrosage_automatique_autorise',
       entity_switch_tondeuse:        config.entity_switch_tondeuse        || 'switch.gazon_intelligent_coordination_tondeuse',
-      entity_prochaine_intervention: config.entity_prochaine_intervention || 'sensor.gazon_intelligent_prochaine_intervention',
-      entity_derniere_application:   config.entity_derniere_application   || 'sensor.gazon_intelligent_derniere_application',
+      entity_prochaine_intervention: interventionSource,
       entity_meteo:                  config.entity_meteo,
-      // Le catalogue produits alimente le popup de déclaration. Absent de la config d'origine
-      // (seule la carte « Potager » le déclarait) : on le devine à partir de l'entité
-      // « prochaine intervention », qui suit toujours le même préfixe.
+      // Ces trois entités se déduisent d'une entité déjà connue plutôt que d'un préfixe figé :
+      // une seconde instance porte un autre préfixe, et pointer « gazon_intelligent_ » en dur
+      // la ferait lire les valeurs de la première. On déduit du défaut RÉSOLU, pas de la config
+      // brute : sinon une carte qui ne déclare pas la source les laisse à undefined.
       entity_hauteur_gazon_estimee:  config.entity_hauteur_gazon_estimee
-        || (config.entity_hauteur_conseillee
-            ? String(config.entity_hauteur_conseillee).replace(/hauteur_de_tonte_conseillee$/, 'hauteur_gazon_estimee')
-            : undefined),
+        || hauteurSource.replace(/hauteur_de_tonte_conseillee$/, 'hauteur_gazon_estimee'),
       entity_catalogue_produits:     config.entity_catalogue_produits
-        || (config.entity_prochaine_intervention
-            ? String(config.entity_prochaine_intervention).replace(/prochaine_intervention$/, 'catalogue_produits')
-            : undefined),
+        || interventionSource.replace(/prochaine_intervention$/, 'catalogue_produits'),
       entity_derniere_application:   config.entity_derniere_application
-        || (config.entity_prochaine_intervention
-            ? String(config.entity_prochaine_intervention).replace(/prochaine_intervention$/, 'derniere_application')
-            : undefined),
+        || interventionSource.replace(/prochaine_intervention$/, 'derniere_application'),
       entity_dernier_arrosage:       config.entity_dernier_arrosage       || 'sensor.gazon_intelligent_dernier_arrosage_detecte',
       entity_objectif_arrosage:      config.entity_objectif_arrosage      || 'sensor.gazon_intelligent_objectif_d_arrosage',
       entity_hauteur_coupe:          config.entity_hauteur_coupe          || 'number.gazon_intelligent_hauteur_coupe_tondeuse',

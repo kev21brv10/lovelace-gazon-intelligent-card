@@ -1,7 +1,7 @@
 // gazon-intelligent-card.js
 // Carte Lovelace dédiée à l'intégration Gazon Intelligent
 
-const GI_VERSION = '0.26.5';  // tenu par scripts/build.py depuis package.json — il affichait
+const GI_VERSION = '0.26.6';  // tenu par scripts/build.py depuis package.json — il affichait
                           // « v1.0.0 » en Réglages depuis toujours, donc impossible de
                           // savoir quelle version tournait vraiment dans le navigateur.
 
@@ -140,7 +140,7 @@ const STYLES = `
    un ton seul ne suffit pas en niveaux de gris ni pour un daltonien. */
 .cond-item.ok::before   { content: '✓'; color: var(--gi-accent); opacity: 1; font-size: 11px; }
 .cond-item.hold::before { content: '⏳'; opacity: 1; font-size: 10px; left: 3px; }
-.cond-item.hold { color: var(--gi-ink); font-weight: 600; }
+.cond-item.hold { color: var(--gi-text); font-weight: 600; }
 /* Hauteur réelle du gazon : une petite jauge vaut mieux qu'un nombre isolé — on voit d'un coup
    ce qu'il y a à couper. Le trait clair est la hauteur visée. */
 .pousse { display: flex; gap: 14px; align-items: center; margin: 12px 0 4px; padding: 12px 14px;
@@ -315,7 +315,7 @@ button.btn-pulse {
 .budget-track { height: 6px; border-radius: 4px; background: var(--gi-border); overflow: hidden; margin: 6px 0 5px; }
 .budget-track { position: relative; }
 .budget-floor { position: absolute; top: 0; bottom: 0; width: 2px;
-                background: var(--gi-ink); opacity: .55; }
+                background: var(--gi-text); opacity: .55; }
 /* Attente saine, pas alerte : même raison que la couleur de la barre (voir barCol). */
 .budget-held  { margin-top: 5px; font-size: 11px; font-weight: 600; color: var(--gi-muted); }
 .budget-bar { height: 100%; border-radius: 4px; }
@@ -324,8 +324,8 @@ button.btn-pulse {
    (paliers de 5 mm) et se fait au retour de la tonte, souvent sur mobile. */
 .cut-stepper { display: flex; align-items: center; gap: 10px; }
 .cut-btn {
-  width: 34px; height: 34px; border-radius: 10px; border: 1.5px solid var(--gi-line);
-  background: var(--gi-card); color: var(--gi-ink); font-size: 19px; line-height: 1;
+  width: 34px; height: 34px; border-radius: 10px; border: 1.5px solid var(--gi-border);
+  background: var(--gi-bg); color: var(--gi-text); font-size: 19px; line-height: 1;
   cursor: pointer; font-family: inherit;
 }
 .cut-btn:disabled { opacity: .35; cursor: default; }
@@ -1921,7 +1921,14 @@ class GazonIntelligentCard extends HTMLElement {
     if (Number.isFinite(budgetUsed) && Number.isFinite(budgetMax) && budgetMax > 0) {
       const pct    = Math.round((budgetUsed / budgetMax) * 100);
       const over   = budgetUsed >= budgetMax;
-      const held   = Number.isFinite(budgetMin) && budgetMin > 0 && budgetUsed >= budgetMin;
+      // ⚠️ La retenue se LIT, elle ne se recalcule pas — même règle que `_budgetOver`, dont
+      // le commentaire l'écrit déjà noir sur blanc. Comparer le cumul au seul plancher
+      // annonçait « ⏸ Semaine couverte · reprise dès que le besoin remonte » alors que
+      // l'arrosage restait autorisé : la retenue est CONDITIONNELLE (trois arrosages, le
+      // plancher franchi ET un besoin faible), et le commentaire ci-dessous le dit lui-même
+      // trois lignes plus bas. Un seul fait, deux sources : la carte finissait par contredire
+      // le motif de blocage affiché dans le hero du même écran.
+      const held   = this._budgetOver();
       const minPct = Number.isFinite(budgetMin) && budgetMin > 0
         ? Math.min(100, Math.round((budgetMin / budgetMax) * 100)) : null;
       const barPct = Math.min(100, pct);
@@ -2551,6 +2558,8 @@ class GazonIntelligentCard extends HTMLElement {
   _bindEvents(card) {
     // Un <select> ne déclenche pas de clic exploitable : on écoute son changement.
     card.querySelectorAll('select[data-action]').forEach(sel => {
+      if (sel._giChangeLie) return;
+      sel._giChangeLie = true;
       sel.addEventListener('change', () => {
         if (sel.dataset.action === 'declare-produit') {
           this._declareProduit = sel.value;
@@ -2595,11 +2604,24 @@ class GazonIntelligentCard extends HTMLElement {
           }
         }
       };
-      mmInput.addEventListener('input', refresh);
-      mmInput.addEventListener('click', e => e.stopPropagation());
+      if (!mmInput._giSaisieLiee) {
+        mmInput._giSaisieLiee = true;
+        mmInput.addEventListener('input', refresh);
+        mmInput.addEventListener('click', e => e.stopPropagation());
+      }
     }
 
+    // ⚠️ MÊME PIÈGE QUE LA BARRE D'ONGLETS, et il coûte bien plus cher ici. Depuis que
+    // `_render` PRÉSERVE les blocs dont le HTML n'a pas changé (0.26.2), un élément
+    // d'action survit aux rendus — et sans ce garde il recevait un écouteur de plus à
+    // chacun. Un seul clic finissait par émettre N `switch.toggle`, N arrosages manuels,
+    // N déclarations de produit. Le marqueur est une propriété JS et NON un `data-*` :
+    // un attribut apparaîtrait dans `outerHTML`, que `_render` compare pour décider de
+    // préserver — le bloc serait alors reconstruit à chaque rendu, ce qui annulerait
+    // justement l'optimisation qu'on est en train de protéger.
     card.querySelectorAll('[data-action]').forEach(el => {
+      if (el._giClicLie) return;
+      el._giClicLie = true;
       el.addEventListener('click', e => {
         e.stopPropagation();
         const { action, entity } = el.dataset;

@@ -307,3 +307,125 @@ test("une entité déduite déclarée explicitement gagne", () => {
   });
   assert.equal(el._config.entity_derniere_application, "sensor.choisi_a_la_main");
 });
+
+// ── Écouteurs et rendus préservés ────────────────────────────────────────────
+// Depuis que `_render` PRÉSERVE les blocs dont le HTML n'a pas changé, un élément d'action
+// survit aux rendus. Sans garde, `_bindEvents` lui rajoutait un écouteur à CHAQUE rendu :
+// un seul clic finissait par émettre autant d'appels de service que de rendus subis —
+// autant de `switch.toggle`, d'arrosages manuels ou de déclarations de produit.
+// `set hass` étant appelé plusieurs fois par seconde, l'addition est rapide.
+
+function carteAvecActions() {
+  const window = setupWindow();
+  const el = window.document.createElement(CARD_TAG);
+  window.document.body.appendChild(el);
+  el.setConfig({
+    type: `custom:${CARD_TAG}`,
+    entity_assistant: "sensor.gazon_intelligent_assistant",
+    entity_switch_arrosage_auto: "switch.gi_arrosage_auto",
+    zones: [{ name: "Zone A", switch: "switch.gi_zone_1", debit: 14 }],
+  });
+  el._tab = "reglages";
+  return { window, el };
+}
+
+test("un élément d'action préservé ne reçoit qu'UN seul écouteur", () => {
+  const { el } = carteAvecActions();
+  const appels = [];
+  const hass = (raison) => ({
+    ...HASS,
+    states: {
+      ...HASS.states,
+      "switch.gi_arrosage_auto": {
+        entity_id: "switch.gi_arrosage_auto", state: "on",
+        attributes: { friendly_name: "Arrosage automatique" },
+      },
+      "switch.gi_zone_1": {
+        entity_id: "switch.gi_zone_1", state: "off", attributes: { friendly_name: "Zone A" },
+      },
+      "sensor.gazon_intelligent_assistant": {
+        entity_id: "sensor.gazon_intelligent_assistant",
+        state: "tonte",
+        attributes: { action: "tonte", status: "blocked", reason: raison },
+      },
+    },
+    callService: (...args) => appels.push(args),
+  });
+
+  // Cinq rendus successifs. `_lastHtml = null` reproduit exactement ce qui se passe dès
+  // qu'une partie QUELCONQUE de la carte change (l'heure courante suffit) : le rendu
+  // repart, le diff préserve les blocs identiques — et `_bindEvents` repasse dessus.
+  // Sans le garde, ce scénario produit SIX appels de service pour un seul clic.
+  el.hass = hass("Nuit : attendre le lever du soleil.");
+  for (let i = 0; i < 5; i++) { el._lastHtml = null; el._render(); }
+
+  const cible = el.shadowRoot.querySelector('[data-action]');
+  assert.ok(cible, "aucun élément [data-action] rendu — le test ne mordrait pas");
+  const avant = appels.length;
+  cible.click();
+  const declenches = appels.length - avant;
+  assert.equal(declenches, 1,
+    `un clic a déclenché ${declenches} appels de service au lieu d'un : les écouteurs se sont accumulés sur 5 rendus`);
+});
+
+test("les variables CSS utilisées par la carte existent toutes", () => {
+  // Trois propriétés (`--gi-line`, `--gi-card`, `--gi-ink`) étaient référencées sans jamais
+  // être définies : le navigateur jette la déclaration, et le stepper retombait sur les
+  // couleurs par défaut de l'agent — illisibles en thème sombre. Le repère de plancher du
+  // budget, lui, devenait carrément transparent.
+  const utilisees = new Set([...BUNDLE.matchAll(/var\((--gi-[a-z0-9-]+)/g)].map(m => m[1]));
+  const definies  = new Set([...BUNDLE.matchAll(/^\s*(--gi-[a-z0-9-]+)\s*:/gm)].map(m => m[1]));
+  const fantomes  = [...utilisees].filter(v => !definies.has(v));
+  assert.deepEqual(fantomes, [], `variables utilisées mais jamais définies : ${fantomes.join(", ")}`);
+});
+
+test("« Semaine couverte » suit la décision de l'intégration, pas le seul plancher", () => {
+  // Franchir `weekly_guardrail_mm_min` ne suffit PAS à retenir l'arrosage : la retenue est
+  // conditionnelle (trois arrosages, le plancher franchi ET un besoin faible). La carte
+  // annonçait « ⏸ Semaine couverte · reprise dès que le besoin remonte » sur le seul montant,
+  // pendant que le hero du même écran, lui, ne montrait aucun blocage. Un fait, deux sources.
+  const window = setupWindow();
+  const el = window.document.createElement(CARD_TAG);
+  window.document.body.appendChild(el);
+  el.setConfig({
+    type: `custom:${CARD_TAG}`,
+    entity_reserve: "sensor.gi_reserve",
+    entity_fenetre_optimale: "sensor.gi_fenetre",
+    entity_prochain_arrosage: "sensor.gi_prochain",
+    zones: [{ name: "Zone A", switch: "switch.gi_z1", debit: 14 }],
+  });
+
+  const etat = (blockReason) => ({
+    ...HASS,
+    states: {
+      ...HASS.states,
+      "sensor.gi_reserve": {
+        entity_id: "sensor.gi_reserve", state: "8",
+        // 22,1 mm consommés : au-dessus du plancher (21), sous le plafond (31,6).
+        attributes: { arrosage_recent_7j: 22.1, arrosage_applique_7j: 22.1 },
+      },
+      "sensor.gi_fenetre": {
+        entity_id: "sensor.gi_fenetre", state: "ideal",
+        attributes: { weekly_guardrail_mm_min: 21, weekly_guardrail_mm_max: 31.6 },
+      },
+      "sensor.gi_prochain": {
+        entity_id: "sensor.gi_prochain", state: "2026-08-30T06:00:00+02:00",
+        attributes: { block_reason: blockReason },
+      },
+      "switch.gi_z1": {
+        entity_id: "switch.gi_z1", state: "off", attributes: { friendly_name: "Zone A" },
+      },
+    },
+  });
+
+  el._tab = "arrosage";
+  el.hass = etat("");                        // l'intégration ne bloque PAS
+  el._lastHtml = null; el._render();
+  assert.ok(!el.shadowRoot.querySelector(".budget-held"),
+    "« Semaine couverte » affiché alors que l'intégration n'annonce aucun garde-fou");
+
+  el.hass = etat("garde_fou_hebdomadaire");  // l'intégration bloque
+  el._lastHtml = null; el._render();
+  assert.ok(el.shadowRoot.querySelector(".budget-held"),
+    "« Semaine couverte » absent alors que l'intégration annonce le garde-fou");
+});

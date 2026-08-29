@@ -231,3 +231,33 @@ test("un hass identique ne refait aucun travail de rendu", () => {
   el.hass = el._hass;               // même état : rien à redessiner
   assert.equal(travail, 0, "le rendu a travaillé alors que rien n'avait changé");
 });
+
+// ── Version affichée et accords ───────────────────────────────────────────────
+// ⚠️ `GI_VERSION` est restée figée à 0.26.0 pendant les 0.26.1, 0.26.2 et 0.26.3, alors que
+// son commentaire affirmait que le build la tenait à jour. Or l'onglet Réglages est
+// précisément l'endroit où l'on vérifie quelle version le navigateur a chargée après avoir
+// vidé son cache : une version qui ment y est pire que pas de version du tout.
+
+test("la version affichée est celle de package.json", async () => {
+  const pkg = JSON.parse(readFileSync(join(here, "..", "package.json"), "utf-8"));
+  assert.match(BUNDLE, new RegExp(`const GI_VERSION = '${pkg.version.replace(/\./g, "\\.")}';`),
+    `le bundle n'annonce pas ${pkg.version} — le build n'injecte plus la version`);
+});
+
+test("la version annoncée apparaît dans l'onglet Réglages", () => {
+  const pkg = JSON.parse(readFileSync(join(here, "..", "package.json"), "utf-8"));
+  const { el } = makeCard();
+  el._tab = "reglages";
+  el._render();
+  assert.ok(el.shadowRoot.textContent.includes(`v${pkg.version}`),
+    `Réglages n'affiche pas v${pkg.version}`);
+});
+
+test("une seule session ne s'écrit pas « 1 sessions »", () => {
+  const { el } = makeCard();
+  const un = el._t("session_n");
+  const plusieurs = el._t("sessions_n");
+  assert.notEqual(un, plusieurs, "le singulier et le pluriel sont identiques");
+  assert.ok(BUNDLE.includes("sessCount > 1 ? 'sessions_n' : 'session_n'"),
+    "le compteur de sessions n'accorde pas");
+});

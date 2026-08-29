@@ -1,7 +1,7 @@
 // gazon-intelligent-card.js
 // Carte Lovelace dédiée à l'intégration Gazon Intelligent
 
-const GI_VERSION = '0.26.0';  // tenu par scripts/build.py depuis package.json — il affichait
+const GI_VERSION = '0.26.4';  // tenu par scripts/build.py depuis package.json — il affichait
                           // « v1.0.0 » en Réglages depuis toujours, donc impossible de
                           // savoir quelle version tournait vraiment dans le navigateur.
 
@@ -505,7 +505,7 @@ const STRINGS = {
     // Timeline
     loading: 'Chargement…', no_watering_24h: 'Aucun arrosage sur 24 h',
     no_session_7d: 'Aucune session récente', days_7: '7 jours', sessions: 'sess.',
-    sessions_n: 'sessions', runtime_watered: "d'arrosage",
+    sessions_n: 'sessions', session_n: 'session', runtime_watered: "d'arrosage",
     tomorrow: 'demain', imminent: 'imminent', estimated: 'estimé', estimated_dawn: "estimé · à l'aube", days_unit: 'j',
     // Hero / status
     next_watering: 'Prochain arrosage', session_active: 'Session en cours',
@@ -590,7 +590,7 @@ const STRINGS = {
     cut_height: 'Cutting height', cut_height_sub: 'Update it when you turn the dial',
     loading: 'Loading…', no_watering_24h: 'No watering in 24 h',
     no_session_7d: 'No recent session', days_7: '7 days', sessions: 'sess.',
-    sessions_n: 'sessions', runtime_watered: 'of watering',
+    sessions_n: 'sessions', session_n: 'session', runtime_watered: 'of watering',
     tomorrow: 'tomorrow', imminent: 'imminent', estimated: 'estimated', estimated_dawn: 'estimated · at dawn', days_unit: 'd',
     next_watering: 'Next watering', session_active: 'Active session',
     btn_stop_watering: '\u23F9 Stop watering',
@@ -1898,7 +1898,7 @@ class GazonIntelligentCard extends HTMLElement {
     const header7 = sessCount > 0 ? `
       <div class="tl-header">
         <div><span class="tl-h-big">${fmtDuration(runtimeMin)}</span> <span class="tl-h-sub">${this._t('runtime_watered')}</span></div>
-        <div class="tl-h-pill">${sessCount} ${this._t('sessions_n')}</div>
+        <div class="tl-h-pill">${sessCount} ${this._t(sessCount > 1 ? 'sessions_n' : 'session_n')}</div>
       </div>` : '';
 
     // ── Budget hebdomadaire ────────────────────────────────────────────────────────────────

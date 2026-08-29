@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.26.6
+
+**Trois défauts remontés par la revue automatique de la PR, tous réels.** 25 tests verts.
+
+**⚠️ Un clic pouvait déclencher SIX appels de service — régression introduite par la 0.26.2.**
+Depuis que `_render` **préserve** les blocs dont le HTML n'a pas changé, un élément d'action
+survit aux rendus. Or `_bindEvents` lui rajoutait un écouteur à **chacun** : mesuré sur cinq
+rendus, un seul clic émettait **six** `switch.toggle`. Même chose pour un arrosage manuel ou
+une déclaration de produit. Le garde posé sur la barre d'onglets en 0.26.2 n'avait pas été
+étendu aux éléments d'action — le correctif à moitié appliqué, encore une fois.
+
+- Le marqueur est une **propriété JS**, pas un `data-*` : un attribut apparaîtrait dans
+  `outerHTML`, que `_render` compare pour décider de préserver — le bloc serait reconstruit à
+  chaque rendu, ce qui annulerait justement l'optimisation qu'on protège.
+- ⚠️ **Le premier test écrit ne mordait pas** : cinq `set hass` d'affilée produisent un HTML
+  identique, donc `_render` sortait par son raccourci de coût et `_bindEvents` ne repassait
+  jamais. Le test réécrit reproduit le vrai mécanisme — un rendu relancé pendant que le bloc
+  reste identique — et compte **six** appels sans le garde, un avec.
+
+**Trois variables CSS n'existaient pas.** `--gi-line`, `--gi-card` et `--gi-ink` étaient
+référencées sans être définies nulle part ; les vraies sont `--gi-border`, `--gi-bg` et
+`--gi-text`. Le navigateur jette ces déclarations : le sélecteur de hauteur de coupe retombait
+sur les couleurs par défaut de l'agent — illisibles en thème sombre — et le repère de plancher
+du budget était carrément **transparent**. Un test compare désormais les variables utilisées à
+celles définies.
+
+**« ⏸ Semaine couverte » se calculait au lieu de se lire.** Franchir `weekly_guardrail_mm_min`
+ne suffit pas à retenir l'arrosage : la retenue est **conditionnelle** (trois arrosages, le
+plancher franchi ET un besoin faible) — le commentaire de la carte le dit lui-même trois lignes
+plus bas. La ligne s'affichait donc pendant que l'arrosage restait autorisé, et contredisait le
+motif de blocage du hero du même écran. `held` lit maintenant `_budgetOver()`, dont le
+commentaire écrivait déjà la règle : **on lit la décision de l'intégration, on ne la recalcule
+pas.**
+
+Les **4 mutations ciblées** sont détectées par le test visé. Le garde du `<select>`, posé par
+symétrie, n'a **pas** de test dédié : il suit le même patron que celui du clic, qui, lui, est
+verrouillé.
+
 ## 0.26.5
 
 **Trois entités se déduisaient de la config brute, pas du défaut** — 22 tests verts.

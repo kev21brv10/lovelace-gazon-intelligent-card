@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.26.4
+
+**Tour de carte complet du 29/08/2026** — les six onglets rendus avec les valeurs RÉELLES de
+l'installation, puis chaque anomalie vérifiée dans le code avant d'être retenue. Deux défauts.
+
+**La version affichée en Réglages était figée à `0.26.0`** pendant les 0.26.1, 0.26.2 et
+0.26.3. Son commentaire affirmait pourtant qu'elle était « tenue par `scripts/build.py` depuis
+`package.json` » — c'était faux, le script ne l'a jamais touchée. Or l'onglet Réglages est
+exactement l'endroit où l'on regarde quelle version le navigateur a réellement chargée après
+avoir vidé son cache : **une version qui ment y est pire que pas de version.**
+
+- Le build **injecte** désormais la version de `package.json`, dans la source comme dans le
+  bundle, et échoue bruyamment s'il ne trouve pas la constante.
+- Deux tests : le bundle doit annoncer la version de `package.json`, et l'onglet Réglages doit
+  l'afficher. Les mutations qui comptent sont vérifiées — bump sans rebuild, et build qui
+  n'injecte plus rien.
+
+**« 1 sessions »** — le compteur de sessions ne s'accordait pas au singulier. Nouvelle clé
+`session_n` dans les deux langues.
+
+⚠️ **Deux fausses pistes écartées avant d'être annoncées**, faute d'être vérifiées : la carte
+rendue en anglais (mon banc n'avait pas de langue) et « aucune session récente » (mon jeu de
+données était vide). Et une troisième, plus vicieuse : une extraction hâtive annonçait
+**42 clés de traduction manquantes** — l'expression régulière ne lisait qu'une indentation
+sur deux. Il n'en manque aucune.
+
+
 ## 0.26.3
 
 **La carte ne se redessine plus en entier — « c'est comme si ça s'actualisait ».**

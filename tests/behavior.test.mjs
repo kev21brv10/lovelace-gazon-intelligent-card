@@ -435,19 +435,30 @@ test("« Semaine couverte » suit la décision de l'intégration, pas le seul pl
 // journée ; la carte n'en lisait AUCUN. On venait donc y chercher « est-ce qu'elle a
 // fini ? » sans pouvoir le savoir.
 
-function carteTonte(extra = {}) {
+// ⚠️ LE TRAVAIL EST PUBLIÉ SUR `sensor.…_etat_de_tonte`, PAS sur le binaire
+// `tonte_autorisee`. Une première version de ces tests posait les attributs sur le binaire :
+// ils passaient tous, et le bloc restait invisible en production. Le montage part donc
+// maintenant du capteur réel, et un test vérifie explicitement que l'autre ne suffit pas.
+const ETAT_TONTE = "sensor.gazon_intelligent_etat_de_tonte";
+const TONTE_AUTORISEE = "binary_sensor.gazon_intelligent_tonte_autorisee";
+
+function carteTonte(extra = {}, { surLeBinaire = false } = {}) {
   const window = setupWindow();
   const el = window.document.createElement(CARD_TAG);
   window.document.body.appendChild(el);
   el.setConfig({ type: `custom:${CARD_TAG}`, zones: [{ name: "Z", switch: "switch.z1", debit: 14 }] });
+  const cible = surLeBinaire ? TONTE_AUTORISEE : ETAT_TONTE;
   el.hass = {
     ...HASS,
     states: {
       ...HASS.states,
-      "binary_sensor.gazon_intelligent_tonte_autorisee": {
-        entity_id: "binary_sensor.gazon_intelligent_tonte_autorisee",
-        state: "off",
-        attributes: { tonte_statut: "a_surveiller", ...extra },
+      [TONTE_AUTORISEE]: {
+        entity_id: TONTE_AUTORISEE, state: "off",
+        attributes: { tonte_statut: "a_surveiller", ...(surLeBinaire ? extra : {}) },
+      },
+      [ETAT_TONTE]: {
+        entity_id: ETAT_TONTE, state: "a_surveiller",
+        attributes: surLeBinaire ? {} : { ...extra },
       },
     },
   };
@@ -456,6 +467,16 @@ function carteTonte(extra = {}) {
   el._render();
   return el;
 }
+
+test("le travail est lu sur le capteur d'état de tonte, pas sur le binaire", () => {
+  // Le défaut vécu : attributs cherchés sur `tonte_autorisee`, bloc invisible en production.
+  // Le garde d'absence masquait proprement — donc rien ne signalait l'erreur.
+  const attrs = { mower_job_progress_pct: 55, mower_auto_declaration_state: "travail_en_cours" };
+  assert.ok(carteTonte(attrs).shadowRoot.querySelector(".travail"),
+    "le bloc ne lit pas sensor.…_etat_de_tonte");
+  assert.equal(carteTonte(attrs, { surLeBinaire: true }).shadowRoot.querySelector(".travail"), null,
+    "le bloc lit le binaire tonte_autorisee — ce n'est pas là que l'intégration publie");
+});
 
 test("le travail de tonte affiche sa progression et son état", () => {
   const el = carteTonte({

@@ -490,9 +490,31 @@ test("le travail de tonte affiche sa progression et son état", () => {
   assert.ok(bloc, "le bloc « travail de tonte » ne s'affiche pas");
   const txt = bloc.textContent.replace(/\s+/g, " ");
   assert.match(txt, /55 %/, "la progression n'apparaît pas");
-  assert.match(txt, /108 min/, "les minutes du jour n'apparaissent pas");
+  // ⚠️ En HEURES : un travail complet dure 4 à 5 h, « 108 min » demandait une conversion
+  // mentale à chaque lecture. 107,6 min → « 1 h 48 ».
+  assert.match(txt, /1 h 48/, "la durée du jour n'est pas affichée en heures");
+  assert.ok(!/108 min/.test(txt), "la durée est encore affichée en minutes brutes");
   assert.match(txt, /2 passes/, "le nombre de passes n'apparaît pas");
   assert.match(el.shadowRoot.querySelector(".travail-bar").getAttribute("style"), /width:55%/);
+});
+
+test("les durées de tonte sont affichées en heures", () => {
+  const el = carteTonte({
+    mower_job_progress_pct: 55,
+    mower_mowing_minutes_today: 107.6,
+    mower_full_pass_minutes_median: 86.2,
+  });
+  const txt = el.shadowRoot.querySelector(".travail").textContent.replace(/\s+/g, " ");
+  assert.match(txt, /1 h 48/, "107,6 min doit s'écrire 1 h 48");
+  assert.match(txt, /1 h 26/, "la médiane 86,2 min doit s'écrire 1 h 26");
+});
+
+test("sous l'heure, la durée reste en minutes", () => {
+  // Une sortie avortée de 12 min ne doit pas devenir « 0 h 12 ».
+  const el = carteTonte({ mower_job_progress_pct: 5, mower_mowing_minutes_today: 12 });
+  const txt = el.shadowRoot.querySelector(".travail").textContent.replace(/\s+/g, " ");
+  assert.match(txt, /12 min/);
+  assert.ok(!/0 h/.test(txt), "une durée sous l'heure s'affiche avec un « 0 h » inutile");
 });
 
 test("la déclaration n'est verte QUE si une tonte a été inscrite", () => {
@@ -533,4 +555,74 @@ test("une seule passe ne s'écrit pas « 1 passes »", () => {
   const txt = el.shadowRoot.querySelector(".travail").textContent.replace(/\s+/g, " ");
   assert.match(txt, /1 passe(?! s)/);
   assert.ok(!/1 passes/.test(txt), "le compteur de passes ne s'accorde pas");
+});
+
+// ── Hauteur de coupe : la lame réelle fait référence ──────────────────────────
+// `hauteur_tonte_recommandee_cm` est ce que l'intégration CONSEILLE de régler sur la lame
+// (« ne pas descendre sous X cm »), pas une hauteur que l'herbe doit atteindre. La carte
+// l'affichait en « hauteur cible » puis annonçait qu'il restait au gazon 0,5 cm « à pousser »
+// pour l'atteindre. Et comme la lame de Kévin coupe SOUS la recommandation (5,5 vs 6,0),
+// l'herbe repartant de 5,5 après chaque tonte, la phrase se réaffichait indéfiniment : une
+// cible inatteignable par construction. Arbitré le 30/08/2026 — la lame réelle fait foi.
+
+function carteHauteur({ coupeMm = 55, reco = "6.0", herbe = "5.5" } = {}) {
+  const window = setupWindow();
+  const el = window.document.createElement(CARD_TAG);
+  window.document.body.appendChild(el);
+  el.setConfig({ type: `custom:${CARD_TAG}`, zones: [{ name: "Z", switch: "switch.z1", debit: 14 }] });
+  el.hass = {
+    ...HASS,
+    states: {
+      ...HASS.states,
+      [ETAT_TONTE]: {
+        entity_id: ETAT_TONTE, state: "a_surveiller",
+        attributes: { tondeuse_hauteur_coupe_mm: coupeMm },
+      },
+      "sensor.gazon_intelligent_hauteur_de_tonte_conseillee": {
+        entity_id: "sensor.gazon_intelligent_hauteur_de_tonte_conseillee", state: reco,
+        attributes: { hauteur_tonte_min_cm: 3, hauteur_tonte_max_cm: 6 },
+      },
+      "sensor.gazon_intelligent_hauteur_gazon_estimee": {
+        entity_id: "sensor.gazon_intelligent_hauteur_gazon_estimee", state: herbe,
+        attributes: { gazon_pousse_jour_cm: 0.24 },
+      },
+    },
+  };
+  el._tab = "tonte";
+  el._lastHtml = null;
+  el._render();
+  return el;
+}
+
+test("la hauteur affichée est celle réglée sur la lame, pas la recommandation", () => {
+  const el = carteHauteur({ coupeMm: 55, reco: "6.0" });
+  const tuile = [...el.shadowRoot.querySelectorAll(".stat-card")]
+    .find(x => /hauteur/i.test(x.textContent));
+  const txt = tuile.textContent.replace(/\s+/g, " ");
+  assert.match(txt, /5,5 cm/, "la hauteur réelle de la lame n'est pas la valeur affichée");
+  assert.match(txt, /recommandé 6,0 cm/, "la recommandation n'est pas signalée comme telle");
+});
+
+test("le gazon à la hauteur de coupe ne « doit » plus pousser pour atteindre une cible", () => {
+  // Le cas exact de l'écran de Kévin : herbe 5,5 · lame 5,5 · recommandation 6,0.
+  const el = carteHauteur({ coupeMm: 55, reco: "6.0", herbe: "5.5" });
+  const txt = el.shadowRoot.querySelector(".pousse").textContent.replace(/\s+/g, " ");
+  assert.ok(!/à pousser/.test(txt),
+    "la carte demande encore au gazon de pousser pour atteindre un réglage de lame");
+  assert.match(txt, /pile à la hauteur de coupe/);
+});
+
+test("au-dessus de la lame, la carte dit combien il y a à couper", () => {
+  const el = carteHauteur({ coupeMm: 55, herbe: "7.0" });
+  const txt = el.shadowRoot.querySelector(".pousse").textContent.replace(/\s+/g, " ");
+  assert.match(txt, /1,5 cm à couper/, "la hauteur à couper n'est pas calculée sur la lame réelle");
+  assert.match(txt, /5,5 cm/, "elle ne ramène pas à la hauteur de coupe réelle");
+});
+
+test("lame et recommandation identiques : pas de mention redondante", () => {
+  const el = carteHauteur({ coupeMm: 60, reco: "6.0" });
+  const tuile = [...el.shadowRoot.querySelectorAll(".stat-card")]
+    .find(x => /hauteur/i.test(x.textContent));
+  assert.ok(!/recommandé/.test(tuile.textContent),
+    "la recommandation est répétée alors qu'elle est identique au réglage");
 });

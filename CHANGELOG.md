@@ -1,5 +1,53 @@
 # Changelog
 
+## 0.28.0
+
+**La hauteur de coupe RÉELLE fait référence, et les durées passent en heures.** 36 tests verts.
+
+### La cible était un réglage de lame déguisé en objectif de pousse
+
+`hauteur_tonte_recommandee_cm` est ce que l'intégration **conseille de régler sur la lame** —
+le code l'écrit mot pour mot : « ne pas descendre sous X cm ». Ce n'est pas une hauteur que
+l'herbe doit atteindre. La carte l'affichait pourtant en « HAUTEUR CIBLE », puis annonçait :
+
+```
+5,5 cm de haut aujourd'hui
+il lui reste 0,5 cm à pousser avant la cible de 6,0 cm
+```
+
+⚠️ **Et cette phrase ne pouvait jamais disparaître.** La lame est réglée à 5,5 cm
+(`tondeuse_hauteur_coupe_mm` = 55) et c'est de cette hauteur que l'herbe repart après chaque
+tonte. Le gazon était donc **structurellement** à 0,5 cm sous une cible inatteignable, et le
+message se réaffichait après chaque tonte, indéfiniment.
+
+⚠️ Le commentaire du code montre que ce cas précis avait déjà été vu le 30/07/2026 — il
+affichait alors « déjà à la hauteur voulue », ce qui était faux. Le correctif d'alors a
+introduit la formule « il lui reste à pousser ». **Le correctif à moitié appliqué, une fois
+de plus.**
+
+**Arbitré par Kévin le 30/08/2026 : la hauteur réelle de la lame fait foi, la recommandation
+reste une recommandation.**
+
+- La tuile affiche `5,5 cm · réglée sur la lame · recommandé 6,0 cm`. L'écart devient **visible
+  et actionnable** au lieu d'être masqué — et la mention disparaît quand les deux coïncident.
+- Le bloc de pousse se compare à la **lame réelle** : « pile à la hauteur de coupe » juste après
+  une tonte, « X cm à couper pour revenir à 5,5 cm » quand l'herbe a repoussé.
+- La phrase « il lui reste … à pousser avant la cible » est supprimée. Un test vérifie qu'elle
+  ne revient pas sur le cas exact de l'écran (herbe 5,5 · lame 5,5 · recommandation 6,0).
+
+### Les durées de tonte en heures
+
+« Tondu aujourd'hui 108 min » et « passe médiane 86 min » demandaient une conversion mentale à
+chaque lecture, alors qu'un travail complet dure 4 à 5 h. Elles s'écrivent désormais
+**1 h 48** et **1 h 26**. Sous l'heure, les minutes restent (« 12 min »), et l'heure pile ne
+s'écrit jamais « 2 h 00 ».
+
+⚠️ **J'avais commencé par écrire un second formateur** avant de voir que `fmtDuration` existait
+déjà et faisait exactement la même chose. Doublon supprimé — c'est le défaut n°1 de ce projet,
+et il a failli passer dans le correctif qui le documente.
+
+Les **4 mutations** du banc sont détectées par le test visé.
+
 ## 0.27.1
 
 **Le bloc « travail de tonte » lisait le mauvais capteur — il ne s'affichait pas.** 30 tests verts.

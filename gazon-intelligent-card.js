@@ -1,7 +1,7 @@
 // gazon-intelligent-card.js
 // Carte Lovelace dédiée à l'intégration Gazon Intelligent
 
-const GI_VERSION = '0.27.1';  // tenu par scripts/build.py depuis package.json — il affichait
+const GI_VERSION = '0.28.0';  // tenu par scripts/build.py depuis package.json — il affichait
                           // « v1.0.0 » en Réglages depuis toujours, donc impossible de
                           // savoir quelle version tournait vraiment dans le navigateur.
 
@@ -542,7 +542,9 @@ const STRINGS = {
     manual_cancel: 'Annuler',
     // Stats
     soil_reserve: 'Réserve sol', lawn_risk: 'Risque gazon', phase: 'Phase',
-    next_mow: 'Prochaine tonte', mow_height: 'Hauteur cible', mow_height_lbl: 'Hauteur tonte',
+    next_mow: 'Prochaine tonte', mow_height: 'Hauteur de coupe', mow_height_lbl: 'Hauteur tonte',
+    mow_height_reco: 'recommand\u00e9', mow_height_set: 'r\u00e9gl\u00e9e sur la lame',
+    at_cut_height: 'pile \u00e0 la hauteur de coupe',
     risk_lbl: 'Risque', reserve_lbl: 'Réserve',
     watering_7d: 'Arrosage 7j', auto_on: 'Auto activé', auto_off: 'Auto désactivé',
     rain_effective: 'pluie',
@@ -639,7 +641,9 @@ const STRINGS = {
     manual_peak_sun: 'Peak sun: high evaporation. Prefer early morning.',
     manual_cancel: 'Cancel',
     soil_reserve: 'Soil reserve', lawn_risk: 'Lawn risk', phase: 'Phase',
-    next_mow: 'Next mow', mow_height: 'Target height', mow_height_lbl: 'Mow height',
+    next_mow: 'Next mow', mow_height: 'Cutting height', mow_height_lbl: 'Mow height',
+    mow_height_reco: 'recommended', mow_height_set: 'set on the blade',
+    at_cut_height: 'exactly at cutting height',
     risk_lbl: 'Risk', reserve_lbl: 'Reserve',
     watering_7d: 'Watering 7d', auto_on: 'Auto on', auto_off: 'Auto off',
     rain_effective: 'rain',
@@ -819,6 +823,9 @@ function esc(s) {
 }
 
 // Durée lisible : « 12 min », « 1 h 05 ». Null/0 → tiret.
+// ⚠️ SOURCE UNIQUE. Les durées de tonte se comptent en heures — un travail complet dure 4 à
+// 5 h — et « 108 min » demandait une conversion mentale à chaque lecture. En écrire une
+// seconde version pour le bloc de tonte aurait été le doublon que ce projet documente.
 function fmtDuration(minutes) {
   if (!Number.isFinite(minutes) || minutes <= 0) return '—';
   const total = Math.round(minutes);
@@ -2167,6 +2174,21 @@ class GazonIntelligentCard extends HTMLElement {
 
     const hauteur    = stateOf(h, c.entity_hauteur_conseillee);
     const hautAttr   = ent(h, c.entity_hauteur_conseillee)?.attributes || {};
+    // ⚠️ DEUX HAUTEURS, ET C'EST LA RÉELLE QUI FAIT FOI. `hauteur_tonte_recommandee_cm` est
+    // ce que l'intégration CONSEILLE de régler sur la lame — le code le dit mot pour mot
+    // (« ne pas descendre sous X cm »). La lame, elle, est réglée à `tondeuse_hauteur_coupe_mm`,
+    // et c'est de CETTE hauteur que l'herbe repart après chaque tonte.
+    // La carte présentait la recommandation comme « hauteur cible » puis annonçait qu'il
+    // restait au gazon 0,5 cm « à pousser » pour l'atteindre : un réglage de lame transformé
+    // en objectif de pousse. Et comme la lame coupe SOUS la recommandation, la phrase se
+    // réaffichait après chaque tonte, indéfiniment — la cible était inatteignable par
+    // construction. Arbitré par Kévin le 30/08/2026 : la hauteur réelle fait référence,
+    // la recommandation est affichée comme telle.
+    const coupeMm    = attrOf(h, c.entity_etat_tonte, 'tondeuse_hauteur_coupe_mm');
+    const coupeReel  = Number.isFinite(parseFloat(coupeMm)) ? parseFloat(coupeMm) / 10 : null;
+    const reco       = parseFloat(hauteur);
+    const ecartReco  = (coupeReel !== null && Number.isFinite(reco) && Math.abs(reco - coupeReel) > 0.05)
+      ? reco : null;
 
     return `
       <div class="mow-card">
@@ -2239,12 +2261,12 @@ class GazonIntelligentCard extends HTMLElement {
           </div>` : ''}
           ${declLbl ? `<div class="travail-decl${declOk ? ' ok' : ''}">${this._t('job_decl')} : ${declLbl}${
             (!declOk && decl === 'travail_trop_court' && Number.isFinite(parseFloat(plancher)))
-              ? ` (${this._t('job_floor')} ${num(plancher, 0)} min)` : ''}</div>` : ''}
+              ? ` (${this._t('job_floor')} ${fmtDuration(parseFloat(plancher))})` : ''}</div>` : ''}
           <div class="travail-sub">
-            ${Number.isFinite(parseFloat(minutes)) ? `${this._t('job_today')} <b>${num(minutes, 0)} min</b>` : ''}
+            ${Number.isFinite(parseFloat(minutes)) ? `${this._t('job_today')} <b>${fmtDuration(parseFloat(minutes))}</b>` : ''}
             ${Number.isFinite(nbP) && nbP > 0 ? ` · ${num(nbP, 0)} ${this._t(nbP > 1 ? 'job_passes_p' : 'job_passes_n')}` : ''}
             ${finLbl ? ` · ${finLbl}` : ''}
-            ${Number.isFinite(parseFloat(mediane)) ? ` · ${this._t('job_median')} ${num(mediane, 0)} min` : ''}
+            ${Number.isFinite(parseFloat(mediane)) ? ` · ${this._t('job_median')} ${fmtDuration(parseFloat(mediane))}` : ''}
           </div>
         </div>`;
       })()}
@@ -2261,7 +2283,10 @@ class GazonIntelligentCard extends HTMLElement {
         </div>
         <div class="stat-card">
           <div class="stat-label">${this._t('mow_height')}</div>
-          <div class="stat-value sm accent">${hauteur ? num(hauteur, 1) + ' cm' : '—'}</div>
+          <div class="stat-value sm accent">${
+            coupeReel !== null ? num(coupeReel, 1) + ' cm' : (hauteur ? num(hauteur, 1) + ' cm' : '—')}</div>
+          ${coupeReel !== null ? `<div class="stat-sub">${this._t('mow_height_set')}${
+            ecartReco !== null ? ` · ${this._t('mow_height_reco')} ${num(ecartReco, 1)} cm` : ''}</div>` : ''}
           ${(hautAttr.hauteur_tonte_min_cm && hautAttr.hauteur_tonte_max_cm)
             ? `<div class="stat-sub"${hautAttr.hauteur_tonte_garde_fou_label
                   ? ` title="${esc(hautAttr.hauteur_tonte_garde_fou_label)}"` : ''}>Min ${num(hautAttr.hauteur_tonte_min_cm, 1)} · Max ${num(hautAttr.hauteur_tonte_max_cm, 1)} cm${
@@ -2282,7 +2307,8 @@ class GazonIntelligentCard extends HTMLElement {
            part. C'est pourtant elle qui explique la consigne — la règle du tiers s'y adosse. */''}
       ${(() => {
         const est = stateOf(h, c.entity_hauteur_gazon_estimee);
-        const cible = parseFloat(stateOf(h, c.entity_hauteur_conseillee));
+        // La référence est la lame réelle : c'est à elle que la tonte ramène le gazon.
+        const cible = coupeReel !== null ? coupeReel : parseFloat(stateOf(h, c.entity_hauteur_conseillee));
         if (est === null || est === undefined || est === '' || isNaN(parseFloat(est))) return '';
         const e = parseFloat(est);
         const aCouper = (!isNaN(cible) && e > cible) ? (e - cible) : 0;
@@ -2299,9 +2325,7 @@ class GazonIntelligentCard extends HTMLElement {
                  5,5 cm pour une cible de 6,0, annoncé « déjà à la hauteur voulue ». */''}
             ${aCouper > 0.05
               ? `<div class="pousse-sub">soit ${num(aCouper, 1)} cm à couper pour revenir à ${num(cible, 1)} cm</div>`
-              : (!isNaN(cible) && cible - e > 0.05)
-                ? `<div class="pousse-sub">il lui reste ${num(cible - e, 1)} cm à pousser avant la cible de ${num(cible, 1)} cm</div>`
-                : `<div class="pousse-sub">pile à la hauteur voulue</div>`}
+              : `<div class="pousse-sub">${this._t('at_cut_height')}</div>`}
             ${/* `gazon_pousse_jour_cm` : l'intégration la calcule heure par heure (pic à 3 h,
                  la feuille s'allonge sur la turgescence, pas sur la lumière) et la carte ne
                  l'affichait NULLE PART. C'est pourtant la seule preuve visible que le modèle

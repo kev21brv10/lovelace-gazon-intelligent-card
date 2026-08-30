@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.27.0
+
+**La carte montre enfin le TRAVAIL de tonte.** 29 tests verts.
+
+L'intégration publiait la progression du travail, l'état de la déclaration et le bilan de la
+journée. La carte n'en lisait **aucun** — on venait y chercher « est-ce qu'elle a fini ? » sans
+pouvoir le savoir. Nouveau bloc dans l'onglet Tonte, sous les pastilles :
+
+```
+Travail de tonte                        55 % · en cours
+████████████░░░░░░░░░░░
+Déclaration : Pas encore — travail inachevé
+Tondu aujourd'hui 108 min · 2 passes · batterie vide · passe médiane 86 min
+```
+
+- **La barre suit `mower_job_progress_pct`**, et l'état dit ce que le chiffre veut dire :
+  *en cours*, *terminé*, ou *aucun travail en cours* — parce que 100 % est l'état de **repos**
+  entre deux travaux, pas un événement (cf. intégration 0.61.0).
+- **La déclaration dit POURQUOI rien n'est inscrit**, pas seulement que rien ne l'est : travail
+  inachevé, trop court (avec le plancher en minutes), déjà inscrite, déclaration coupée. ⚠️ Le
+  vert est réservé à une tonte **réellement inscrite** — un test vérifie que « travail inachevé »
+  ne passe pas pour une réussite alors même que les minutes dépassent l'ancien seuil.
+- **Le bilan du jour** : minutes tondues, nombre de passes accordé au singulier, motif de fin de
+  la dernière passe, et la médiane du carnet pour situer la journée.
+- **⚠️ Absence ≠ zéro.** Sans aucune mesure — tondeuse injoignable — le bloc ne s'affiche pas du
+  tout, plutôt qu'une rangée de tirets qui se lirait comme des zéros mesurés.
+- Libellés en français et en anglais. Les **6 mutations** du banc sont détectées par le test visé.
+
 ## 0.26.6
 
 **Trois défauts remontés par la revue automatique de la PR, tous réels.** 25 tests verts.

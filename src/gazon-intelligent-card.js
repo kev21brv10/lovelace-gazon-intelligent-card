@@ -1,7 +1,7 @@
 // gazon-intelligent-card.js
 // Carte Lovelace dédiée à l'intégration Gazon Intelligent
 
-const GI_VERSION = '0.26.6';  // tenu par scripts/build.py depuis package.json — il affichait
+const GI_VERSION = '0.27.0';  // tenu par scripts/build.py depuis package.json — il affichait
                           // « v1.0.0 » en Réglages depuis toujours, donc impossible de
                           // savoir quelle version tournait vraiment dans le navigateur.
 
@@ -304,6 +304,15 @@ button.btn-pulse {
 }
 
 /* ── Budget hebdomadaire ── */
+.travail       { margin-top: 12px; padding: 10px 12px; border: 1px solid var(--gi-border); border-radius: 10px; }
+.travail-head  { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.travail-lbl   { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--gi-muted); }
+.travail-pct   { font-size: 13px; font-weight: 700; color: var(--gi-text); font-variant-numeric: tabular-nums; }
+.travail-track { margin-top: 7px; height: 6px; border-radius: 3px; background: var(--gi-border); overflow: hidden; }
+.travail-bar   { height: 100%; border-radius: 3px; transition: width .4s ease; }
+.travail-decl  { margin-top: 7px; font-size: 12px; font-weight: 600; color: var(--gi-muted); }
+.travail-decl.ok { color: var(--gi-accent); }
+.travail-sub   { margin-top: 4px; font-size: 11px; color: var(--gi-muted); font-variant-numeric: tabular-nums; }
 .budget-box {
   background: var(--gi-surface); border: 0.5px solid var(--gi-border);
   border-radius: 10px; padding: 9px 11px; margin-bottom: 8px;
@@ -565,6 +574,20 @@ const STRINGS = {
     need_still: 'le sol r\u00e9clame toujours',
     // Tonte : deux axes distincts (machine / gazon), \u00e0 ne jamais fusionner dans un libell\u00e9
     mower_available: 'Disponible', mower_unavailable: 'Indisponible',
+    job_title: 'Travail de tonte', job_progress: 'Progression',
+    job_today: 'Tondu aujourd\u2019hui', job_passes_n: 'passe', job_passes_p: 'passes',
+    job_median: 'passe m\u00e9diane', job_decl: 'D\u00e9claration',
+    job_state_en_cours: 'en cours', job_state_termine: 'termin\u00e9',
+    job_state_repos: 'aucun travail en cours',
+    decl_declaree: 'Tonte inscrite', decl_deja_declaree: 'D\u00e9j\u00e0 inscrite aujourd\u2019hui',
+    decl_travail_en_cours: 'Pas encore \u2014 travail inachev\u00e9',
+    decl_travail_au_repos: 'Pas de travail \u00e0 inscrire',
+    decl_travail_trop_court: 'Trop court pour compter',
+    decl_sans_mesure: 'Pas de mesure', decl_desactivee: 'D\u00e9claration auto coup\u00e9e',
+    decl_erreur: 'Erreur de d\u00e9claration',
+    fin_batterie_vide: 'batterie vide', fin_rappelee: 'rappel\u00e9e',
+    fin_terminee: 'travail fini', fin_hors_coordination: 'hors coordination',
+    job_floor: 'plancher',
     mowing_lbl: 'Tonte', chip_lawn: 'Gazon', chip_ready: 'pr\u00eat', chip_not_ready: 'pas pr\u00eat',
     growth_today: 'pouss\u00e9 aujourd\'hui', mow_window_lbl: 'Cr\u00e9neau',
     depletion_lbl: 'd\u00e9pl\u00e9tion', mad_lbl: 'seuil de d\u00e9clenchement',
@@ -641,6 +664,20 @@ const STRINGS = {
     budget_hold_sub: 'week covered \u00B7 resumes when the need rises',
     need_still: 'the soil still needs',
     mower_available: 'Available', mower_unavailable: 'Unavailable',
+    job_title: 'Mowing job', job_progress: 'Progress',
+    job_today: 'Mowed today', job_passes_n: 'run', job_passes_p: 'runs',
+    job_median: 'median run', job_decl: 'Declaration',
+    job_state_en_cours: 'in progress', job_state_termine: 'complete',
+    job_state_repos: 'no job running',
+    decl_declaree: 'Mowing recorded', decl_deja_declaree: 'Already recorded today',
+    decl_travail_en_cours: 'Not yet \u2014 job unfinished',
+    decl_travail_au_repos: 'No job to record',
+    decl_travail_trop_court: 'Too short to count',
+    decl_sans_mesure: 'No measurement', decl_desactivee: 'Auto-declaration off',
+    decl_erreur: 'Declaration error',
+    fin_batterie_vide: 'battery empty', fin_rappelee: 'recalled',
+    fin_terminee: 'job finished', fin_hors_coordination: 'outside coordination',
+    job_floor: 'floor',
     mowing_lbl: 'Mowing', chip_lawn: 'Lawn', chip_ready: 'ready', chip_not_ready: 'not ready',
     growth_today: 'grown today', mow_window_lbl: 'Window',
     depletion_lbl: 'depletion', mad_lbl: 'trigger threshold',
@@ -678,6 +715,21 @@ const ACTION_LABELS = {
 const HYDRIC_LABELS = {
   plein: 'hyd_plein', confort: 'hyd_confort',
   depletion: 'hyd_depletion', critique: 'hyd_critique',
+};
+
+// États de la déclaration automatique (0.61.0) : ils disent POURQUOI rien n'est inscrit,
+// pas seulement que rien ne l'est. Un automatisme muet est indiscernable d'un automatisme cassé.
+const DECL_LABELS = {
+  declaree: 'decl_declaree', deja_declaree: 'decl_deja_declaree',
+  travail_en_cours: 'decl_travail_en_cours', travail_au_repos: 'decl_travail_au_repos',
+  travail_trop_court: 'decl_travail_trop_court', sans_mesure: 'decl_sans_mesure',
+  desactivee: 'decl_desactivee', erreur: 'decl_erreur',
+};
+
+// Motif de fin de la dernière passe, tenu par le carnet.
+const FIN_PASSE_LABELS = {
+  batterie_vide: 'fin_batterie_vide', rappelee: 'fin_rappelee',
+  terminee: 'fin_terminee', hors_coordination: 'fin_hors_coordination',
 };
 
 const TONTE_LABELS = {
@@ -2134,6 +2186,59 @@ class GazonIntelligentCard extends HTMLElement {
           }"></div>${this._t('mow_window_lbl')} : ${esc(tonteAttr.mowing_window_label)}</div>` : ''}
           ${blockLbl ? `<div class="chip"><div class="chip-dot" style="background:${blockRain ? '#3b82f6' : 'var(--gi-warn)'}"></div>${blockRain ? '🌧️ ' : ''}${esc(blockLbl)}</div>` : ''}
         </div>` : ''}
+
+      ${/* TRAVAIL DE TONTE (0.61.0). L'intégration publiait tout ça et la carte n'en lisait
+           RIEN : ni la progression, ni pourquoi la tonte n'était pas inscrite, ni ce que la
+           journée avait réellement produit. Or c'est exactement ce qu'on vient regarder quand
+           on se demande « est-ce qu'elle a fini ? ». ⚠️ Chaque valeur est affichée seulement
+           si elle EXISTE : `null` = tondeuse injoignable, ce n'est pas zéro. */''}
+      ${(() => {
+        const a = tonteAttr;
+        const prog     = a.mower_job_progress_pct;
+        const etat     = a.mower_job_completion_state;
+        const decl     = a.mower_auto_declaration_state;
+        const minutes  = a.mower_mowing_minutes_today;
+        const passes   = a.mower_pass_count_today;
+        const mediane  = a.mower_full_pass_minutes_median;
+        const finPasse = a.mower_last_pass_end_reason;
+        const plancher = a.mower_auto_declaration_threshold_minutes;
+        const aProg    = Number.isFinite(parseFloat(prog));
+        if (!aProg && !decl && !Number.isFinite(parseFloat(minutes))) return '';
+
+        const pct = aProg ? Math.max(0, Math.min(100, parseFloat(prog))) : null;
+        // Terminé = vert, en cours = accent, repos = gris. Le repos n'est pas une alerte.
+        const couleur = etat === 'termine' ? 'var(--gi-accent)'
+          : etat === 'repos' ? 'var(--gi-muted)' : 'var(--gi-accent)';
+        const etatLbl = etat === 'termine' ? this._t('job_state_termine')
+          : etat === 'repos' ? this._t('job_state_repos')
+          : etat === 'en_cours' ? this._t('job_state_en_cours') : '';
+        const declLbl = decl ? this._lblt(DECL_LABELS, decl) : '';
+        // La déclaration n'est verte QUE lorsqu'elle a réellement inscrit quelque chose.
+        const declOk  = decl === 'declaree' || decl === 'deja_declaree';
+        const finLbl  = finPasse ? this._lblt(FIN_PASSE_LABELS, finPasse) : '';
+        const nbP     = parseFloat(passes);
+
+        return `
+        <div class="travail">
+          <div class="travail-head">
+            <span class="travail-lbl">${this._t('job_title')}</span>
+            ${pct !== null ? `<span class="travail-pct">${num(pct, 0)} %${etatLbl ? ` · ${etatLbl}` : ''}</span>` : ''}
+          </div>
+          ${pct !== null ? `
+          <div class="travail-track" role="progressbar" aria-valuenow="${num(pct, 0)}" aria-valuemin="0" aria-valuemax="100">
+            <div class="travail-bar" style="width:${pct}%;background:${couleur}"></div>
+          </div>` : ''}
+          ${declLbl ? `<div class="travail-decl${declOk ? ' ok' : ''}">${this._t('job_decl')} : ${declLbl}${
+            (!declOk && decl === 'travail_trop_court' && Number.isFinite(parseFloat(plancher)))
+              ? ` (${this._t('job_floor')} ${num(plancher, 0)} min)` : ''}</div>` : ''}
+          <div class="travail-sub">
+            ${Number.isFinite(parseFloat(minutes)) ? `${this._t('job_today')} <b>${num(minutes, 0)} min</b>` : ''}
+            ${Number.isFinite(nbP) && nbP > 0 ? ` · ${num(nbP, 0)} ${this._t(nbP > 1 ? 'job_passes_p' : 'job_passes_n')}` : ''}
+            ${finLbl ? ` · ${finLbl}` : ''}
+            ${Number.isFinite(parseFloat(mediane)) ? ` · ${this._t('job_median')} ${num(mediane, 0)} min` : ''}
+          </div>
+        </div>`;
+      })()}
 
       <div class="stats-grid">
         <div class="stat-card">

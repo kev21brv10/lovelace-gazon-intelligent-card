@@ -429,3 +429,87 @@ test("« Semaine couverte » suit la décision de l'intégration, pas le seul pl
   assert.ok(el.shadowRoot.querySelector(".budget-held"),
     "« Semaine couverte » absent alors que l'intégration annonce le garde-fou");
 });
+
+// ── Travail de tonte ─────────────────────────────────────────────────────────
+// L'intégration publiait la progression, l'état de la déclaration et le bilan de la
+// journée ; la carte n'en lisait AUCUN. On venait donc y chercher « est-ce qu'elle a
+// fini ? » sans pouvoir le savoir.
+
+function carteTonte(extra = {}) {
+  const window = setupWindow();
+  const el = window.document.createElement(CARD_TAG);
+  window.document.body.appendChild(el);
+  el.setConfig({ type: `custom:${CARD_TAG}`, zones: [{ name: "Z", switch: "switch.z1", debit: 14 }] });
+  el.hass = {
+    ...HASS,
+    states: {
+      ...HASS.states,
+      "binary_sensor.gazon_intelligent_tonte_autorisee": {
+        entity_id: "binary_sensor.gazon_intelligent_tonte_autorisee",
+        state: "off",
+        attributes: { tonte_statut: "a_surveiller", ...extra },
+      },
+    },
+  };
+  el._tab = "tonte";
+  el._lastHtml = null;
+  el._render();
+  return el;
+}
+
+test("le travail de tonte affiche sa progression et son état", () => {
+  const el = carteTonte({
+    mower_job_progress_pct: 55,
+    mower_job_completion_state: "en_cours",
+    mower_auto_declaration_state: "travail_en_cours",
+    mower_mowing_minutes_today: 107.6,
+    mower_pass_count_today: 2,
+  });
+  const bloc = el.shadowRoot.querySelector(".travail");
+  assert.ok(bloc, "le bloc « travail de tonte » ne s'affiche pas");
+  const txt = bloc.textContent.replace(/\s+/g, " ");
+  assert.match(txt, /55 %/, "la progression n'apparaît pas");
+  assert.match(txt, /108 min/, "les minutes du jour n'apparaissent pas");
+  assert.match(txt, /2 passes/, "le nombre de passes n'apparaît pas");
+  assert.match(el.shadowRoot.querySelector(".travail-bar").getAttribute("style"), /width:55%/);
+});
+
+test("la déclaration n'est verte QUE si une tonte a été inscrite", () => {
+  // ⚠️ 107,6 min dépassent l'ancien seuil de 90 : c'est précisément le cas où l'ancienne
+  // règle déclarait à 49 % de travail. Le vert ne doit pas revenir par la bande.
+  const enCours = carteTonte({
+    mower_job_progress_pct: 55,
+    mower_auto_declaration_state: "travail_en_cours",
+    mower_mowing_minutes_today: 107.6,
+  });
+  assert.ok(!enCours.shadowRoot.querySelector(".travail-decl.ok"),
+    "« travail inachevé » est affiché comme une réussite");
+
+  const inscrite = carteTonte({
+    mower_job_progress_pct: 100,
+    mower_job_completion_state: "termine",
+    mower_auto_declaration_state: "declaree",
+  });
+  assert.ok(inscrite.shadowRoot.querySelector(".travail-decl.ok"),
+    "une tonte réellement inscrite n'est pas signalée comme telle");
+});
+
+test("sans aucune mesure, le bloc ne s'affiche pas du tout", () => {
+  // `null` = tondeuse injoignable. Mieux vaut rien qu'une rangée de tirets qui ressemble
+  // à des zéros mesurés — c'est la règle « absence ≠ zéro » de tout le projet.
+  const el = carteTonte({
+    mower_job_progress_pct: null,
+    mower_job_completion_state: null,
+    mower_auto_declaration_state: null,
+    mower_mowing_minutes_today: null,
+  });
+  assert.equal(el.shadowRoot.querySelector(".travail"), null,
+    "un bloc vide s'affiche alors qu'aucune valeur n'est mesurée");
+});
+
+test("une seule passe ne s'écrit pas « 1 passes »", () => {
+  const el = carteTonte({ mower_job_progress_pct: 20, mower_mowing_minutes_today: 40, mower_pass_count_today: 1 });
+  const txt = el.shadowRoot.querySelector(".travail").textContent.replace(/\s+/g, " ");
+  assert.match(txt, /1 passe(?! s)/);
+  assert.ok(!/1 passes/.test(txt), "le compteur de passes ne s'accorde pas");
+});

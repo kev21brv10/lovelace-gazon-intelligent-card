@@ -1,7 +1,7 @@
 // gazon-intelligent-card.js
 // Carte Lovelace dédiée à l'intégration Gazon Intelligent
 
-const GI_VERSION = '0.27.0';  // tenu par scripts/build.py depuis package.json — il affichait
+const GI_VERSION = '0.27.1';  // tenu par scripts/build.py depuis package.json — il affichait
                           // « v1.0.0 » en Réglages depuis toujours, donc impossible de
                           // savoir quelle version tournait vraiment dans le navigateur.
 
@@ -586,6 +586,7 @@ const STRINGS = {
     decl_sans_mesure: 'Pas de mesure', decl_desactivee: 'D\u00e9claration auto coup\u00e9e',
     decl_erreur: 'Erreur de d\u00e9claration',
     fin_batterie_vide: 'batterie vide', fin_rappelee: 'rappel\u00e9e',
+    fin_retour_autonome: 'retour autonome',
     fin_terminee: 'travail fini', fin_hors_coordination: 'hors coordination',
     job_floor: 'plancher',
     mowing_lbl: 'Tonte', chip_lawn: 'Gazon', chip_ready: 'pr\u00eat', chip_not_ready: 'pas pr\u00eat',
@@ -676,6 +677,7 @@ const STRINGS = {
     decl_sans_mesure: 'No measurement', decl_desactivee: 'Auto-declaration off',
     decl_erreur: 'Declaration error',
     fin_batterie_vide: 'battery empty', fin_rappelee: 'recalled',
+    fin_retour_autonome: 'autonomous return',
     fin_terminee: 'job finished', fin_hors_coordination: 'outside coordination',
     job_floor: 'floor',
     mowing_lbl: 'Mowing', chip_lawn: 'Lawn', chip_ready: 'ready', chip_not_ready: 'not ready',
@@ -729,6 +731,7 @@ const DECL_LABELS = {
 // Motif de fin de la dernière passe, tenu par le carnet.
 const FIN_PASSE_LABELS = {
   batterie_vide: 'fin_batterie_vide', rappelee: 'fin_rappelee',
+  retour_autonome: 'fin_retour_autonome',
   terminee: 'fin_terminee', hors_coordination: 'fin_hors_coordination',
 };
 
@@ -878,6 +881,12 @@ class GazonIntelligentCard extends HTMLElement {
       // brute : sinon une carte qui ne déclare pas la source les laisse à undefined.
       entity_hauteur_gazon_estimee:  config.entity_hauteur_gazon_estimee
         || hauteurSource.replace(/hauteur_de_tonte_conseillee$/, 'hauteur_gazon_estimee'),
+      // ⚠️ Le travail de tonte est publié sur le capteur d'ÉTAT DE TONTE, pas sur le binaire
+      // « tonte autorisée ». Les avoir cherchées sur le mauvais capteur a rendu le bloc
+      // invisible en production — le garde d'absence l'a masqué en silence, ce qui était le
+      // bon comportement mais cachait l'erreur.
+      entity_etat_tonte:             config.entity_etat_tonte
+        || hauteurSource.replace(/hauteur_de_tonte_conseillee$/, 'etat_de_tonte'),
       entity_catalogue_produits:     config.entity_catalogue_produits
         || interventionSource.replace(/prochaine_intervention$/, 'catalogue_produits'),
       entity_derniere_application:   config.entity_derniere_application
@@ -2193,7 +2202,7 @@ class GazonIntelligentCard extends HTMLElement {
            on se demande « est-ce qu'elle a fini ? ». ⚠️ Chaque valeur est affichée seulement
            si elle EXISTE : `null` = tondeuse injoignable, ce n'est pas zéro. */''}
       ${(() => {
-        const a = tonteAttr;
+        const a = ent(h, c.entity_etat_tonte)?.attributes || {};
         const prog     = a.mower_job_progress_pct;
         const etat     = a.mower_job_completion_state;
         const decl     = a.mower_auto_declaration_state;

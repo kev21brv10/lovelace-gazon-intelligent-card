@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.27.1
+
+**Le bloc « travail de tonte » lisait le mauvais capteur — il ne s'affichait pas.** 30 tests verts.
+
+Livré en 0.27.0, vérifié en rendu, testé… et **invisible sur l'installation**. Les attributs du
+travail sont publiés sur `sensor.…_etat_de_tonte`, pas sur le binaire `…_tonte_autorisee` que
+le bloc interrogeait.
+
+⚠️ **Mes tests encodaient mon hypothèse, pas la réalité** : ils posaient les attributs sur le
+binaire, donc ils passaient tous pendant que la production restait muette. Et le garde
+« absence ≠ zéro » a fait exactement son travail — il a masqué le bloc au lieu d'afficher une
+rangée de tirets — ce qui était le bon comportement mais **cachait l'erreur**.
+
+- Nouvelle entrée `entity_etat_tonte`, déduite du défaut **résolu** comme les autres (même
+  patron qu'en 0.26.5), donc elle suit le préfixe de l'instance.
+- **Un test vérifie désormais les deux sens** : le bloc s'affiche avec les attributs sur le
+  capteur d'état, et **ne s'affiche pas** quand ils sont sur le binaire. C'est le fait réel
+  qui est encodé, plus mon hypothèse.
+- Rendu vérifié sur les attributs **copiés tels quels depuis Home Assistant**, pas sur une
+  fixture écrite à la main.
+- `retour_autonome` ajouté aux motifs de fin de passe — vu en production, il manquait.
+
 ## 0.27.0
 
 **La carte montre enfin le TRAVAIL de tonte.** 29 tests verts.

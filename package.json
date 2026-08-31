@@ -1,6 +1,6 @@
 {
   "name": "lovelace-gazon-intelligent-card",
-  "version": "0.28.0",
+  "version": "0.28.1",
   "description": "Lovelace card for Home Assistant integration Gazon Intelligent",
   "license": "MIT",
   "private": false,

@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.28.1
+
+**Deux phrases qui affirmaient le faux, relevées par la revue de la PR #44.** 40 tests verts.
+
+### « Pile à la hauteur de coupe » s'affichait aussi SOUS la lame
+Le commentaire du code annonçait « trois cas, et non deux » — au-dessus d'un ternaire qui
+n'en implémentait que **deux**. `aCouper` vaut 0 quand l'herbe est *à* la lame **comme**
+quand elle est *dessous* : les deux tombaient dans la même branche. Le cas se produit dès
+que la lame est remontée (5,5 → 6,0 cm) — l'herbe repart de 5,5 et la carte annonce « pile
+à 6,0 ». Troisième branche ajoutée : « 0,5 cm sous la lame, réglée à 6,0 cm ». ⚠️ La
+formulation ne suggère **pas** que l'herbe doive rejoindre la lame : c'est un réglage, pas
+un objectif de pousse — l'arbitrage du 30/08/2026 tient.
+
+### « Tondu aujourd'hui — » alors que l'intégration avait répondu « zéro »
+`fmtDuration` rend « — » à zéro : c'est sa convention de valeur **absente**, faite pour les
+durées d'arrosage. Mais le compteur du jour vaut légitimement 0 tous les matins, et le bloc
+s'affiche quand même dès qu'une progression existe. Le zéro **mesuré** se lit désormais
+« 0 min ». ⚠️ Un test garde l'autre sens : une tondeuse injoignable n'affiche toujours rien.
+
 ## 0.28.0
 
 **La hauteur de coupe RÉELLE fait référence, et les durées passent en heures.** 36 tests verts.

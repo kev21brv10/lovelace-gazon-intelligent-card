@@ -509,6 +509,26 @@ test("les durées de tonte sont affichées en heures", () => {
   assert.match(txt, /1 h 26/, "la médiane 86,2 min doit s'écrire 1 h 26");
 });
 
+test("zéro minute tondue est une MESURE, pas une valeur absente", () => {
+  // Revue Codex sur la PR #44 : `fmtDuration` rend « — » à zéro — c'est sa convention de
+  // valeur manquante, juste pour la durée d'arrosage. Mais le compteur du jour vaut
+  // légitimement 0 tous les matins avant la première sortie, et le bloc s'affiche quand
+  // même (la progression existe). « Tondu aujourd'hui — » disait donc « je ne sais pas »
+  // alors que l'intégration avait répondu « zéro ».
+  const txt = carteTonte({ mower_job_progress_pct: 100, mower_mowing_minutes_today: 0 })
+    .shadowRoot.querySelector(".travail").textContent.replace(/\s+/g, " ");
+  assert.match(txt, /Tondu aujourd.hui 0 min/,
+    "un zéro mesuré s'affiche comme une valeur absente");
+});
+
+test("l'absence de mesure reste une absence : rien ne s'affiche", () => {
+  // L'autre sens du même garde — la tondeuse injoignable ne doit pas devenir « 0 min ».
+  const txt = carteTonte({ mower_job_progress_pct: 100, mower_mowing_minutes_today: null })
+    .shadowRoot.querySelector(".travail").textContent.replace(/\s+/g, " ");
+  assert.ok(!/Tondu aujourd.hui/.test(txt),
+    "une mesure absente est présentée comme un zéro tondu");
+});
+
 test("sous l'heure, la durée reste en minutes", () => {
   // Une sortie avortée de 12 min ne doit pas devenir « 0 h 12 ».
   const el = carteTonte({ mower_job_progress_pct: 5, mower_mowing_minutes_today: 12 });
@@ -610,6 +630,30 @@ test("le gazon à la hauteur de coupe ne « doit » plus pousser pour atteindre 
   assert.ok(!/à pousser/.test(txt),
     "la carte demande encore au gazon de pousser pour atteindre un réglage de lame");
   assert.match(txt, /pile à la hauteur de coupe/);
+});
+
+test("sous la lame, la carte ne dit pas que le gazon est « pile » à la hauteur", () => {
+  // Revue Codex sur la PR #44 : le commentaire du code annonçait « trois cas, et non deux »
+  // au-dessus d'un ternaire qui n'en implémentait que DEUX. `aCouper` vaut 0 aussi bien
+  // quand l'herbe est À la lame que quand elle est DESSOUS — le cas vécu dès que Kévin
+  // remonte la lame de 5,5 à 6,0 : l'herbe repart de 5,5 et la carte annonçait « pile ».
+  const el = carteHauteur({ coupeMm: 60, reco: "6.0", herbe: "5.5" });
+  const txt = el.shadowRoot.querySelector(".pousse").textContent.replace(/\s+/g, " ");
+  assert.ok(!/pile à la hauteur de coupe/.test(txt),
+    "un gazon SOUS la lame est annoncé « pile à la hauteur de coupe »");
+  assert.match(txt, /0,5 cm sous la lame/, "l'écart sous la lame n'est pas dit");
+  assert.match(txt, /6,0 cm/, "la hauteur de lame n'est pas rappelée");
+  // ⚠️ Le mot ne doit pas suggérer que l'herbe DOIT rejoindre un objectif : la lame est un
+  // réglage, pas une cible de pousse. C'est tout le sens de l'arbitrage du 30/08/2026.
+  assert.ok(!/à pousser|atteindre/.test(txt),
+    "la carte redemande au gazon de pousser vers un réglage de lame");
+});
+
+test("l'égalité stricte reste « pile », elle ne bascule pas dans le cas « sous »", () => {
+  const txt = carteHauteur({ coupeMm: 55, reco: "6.0", herbe: "5.5" })
+    .shadowRoot.querySelector(".pousse").textContent.replace(/\s+/g, " ");
+  assert.match(txt, /pile à la hauteur de coupe/);
+  assert.ok(!/sous la lame/.test(txt), "l'égalité est comptée comme « sous la lame »");
 });
 
 test("au-dessus de la lame, la carte dit combien il y a à couper", () => {

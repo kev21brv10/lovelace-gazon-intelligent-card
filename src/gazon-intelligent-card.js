@@ -1,7 +1,7 @@
 // gazon-intelligent-card.js
 // Carte Lovelace dédiée à l'intégration Gazon Intelligent
 
-const GI_VERSION = '0.28.0';  // tenu par scripts/build.py depuis package.json — il affichait
+const GI_VERSION = '0.28.1';  // tenu par scripts/build.py depuis package.json — il affichait
                           // « v1.0.0 » en Réglages depuis toujours, donc impossible de
                           // savoir quelle version tournait vraiment dans le navigateur.
 
@@ -545,6 +545,7 @@ const STRINGS = {
     next_mow: 'Prochaine tonte', mow_height: 'Hauteur de coupe', mow_height_lbl: 'Hauteur tonte',
     mow_height_reco: 'recommand\u00e9', mow_height_set: 'r\u00e9gl\u00e9e sur la lame',
     at_cut_height: 'pile \u00e0 la hauteur de coupe',
+    below_blade: 'sous la lame, r\u00e9gl\u00e9e \u00e0',
     risk_lbl: 'Risque', reserve_lbl: 'Réserve',
     watering_7d: 'Arrosage 7j', auto_on: 'Auto activé', auto_off: 'Auto désactivé',
     rain_effective: 'pluie',
@@ -644,6 +645,7 @@ const STRINGS = {
     next_mow: 'Next mow', mow_height: 'Cutting height', mow_height_lbl: 'Mow height',
     mow_height_reco: 'recommended', mow_height_set: 'set on the blade',
     at_cut_height: 'exactly at cutting height',
+    below_blade: 'below the blade, set at',
     risk_lbl: 'Risk', reserve_lbl: 'Reserve',
     watering_7d: 'Watering 7d', auto_on: 'Auto on', auto_off: 'Auto off',
     rain_effective: 'rain',
@@ -2248,6 +2250,13 @@ class GazonIntelligentCard extends HTMLElement {
         const declOk  = decl === 'declaree' || decl === 'deja_declaree';
         const finLbl  = finPasse ? this._lblt(FIN_PASSE_LABELS, finPasse) : '';
         const nbP     = parseFloat(passes);
+        // `fmtDuration` rend « — » à zéro : c'est sa convention de valeur ABSENTE. Ici
+        // zéro est une MESURE — la tondeuse n'a pas encore tourné aujourd'hui — et le bloc
+        // peut être affiché pour une autre raison (progression, déclaration). Sans ce
+        // détour, « Tondu aujourd'hui — » confond le zéro mesuré et l'injoignable.
+        const minJour = parseFloat(minutes);
+        const minJourLbl = !Number.isFinite(minJour) ? null
+          : minJour > 0 ? fmtDuration(minJour) : '0 min';
 
         return `
         <div class="travail">
@@ -2263,7 +2272,7 @@ class GazonIntelligentCard extends HTMLElement {
             (!declOk && decl === 'travail_trop_court' && Number.isFinite(parseFloat(plancher)))
               ? ` (${this._t('job_floor')} ${fmtDuration(parseFloat(plancher))})` : ''}</div>` : ''}
           <div class="travail-sub">
-            ${Number.isFinite(parseFloat(minutes)) ? `${this._t('job_today')} <b>${fmtDuration(parseFloat(minutes))}</b>` : ''}
+            ${minJourLbl ? `${this._t('job_today')} <b>${minJourLbl}</b>` : ''}
             ${Number.isFinite(nbP) && nbP > 0 ? ` · ${num(nbP, 0)} ${this._t(nbP > 1 ? 'job_passes_p' : 'job_passes_n')}` : ''}
             ${finLbl ? ` · ${finLbl}` : ''}
             ${Number.isFinite(parseFloat(mediane)) ? ` · ${this._t('job_median')} ${fmtDuration(parseFloat(mediane))}` : ''}
@@ -2325,7 +2334,9 @@ class GazonIntelligentCard extends HTMLElement {
                  5,5 cm pour une cible de 6,0, annoncé « déjà à la hauteur voulue ». */''}
             ${aCouper > 0.05
               ? `<div class="pousse-sub">soit ${num(aCouper, 1)} cm à couper pour revenir à ${num(cible, 1)} cm</div>`
-              : `<div class="pousse-sub">${this._t('at_cut_height')}</div>`}
+              : (!isNaN(cible) && e < cible - 0.05)
+                ? `<div class="pousse-sub">${num(cible - e, 1)} cm ${this._t('below_blade')} ${num(cible, 1)} cm</div>`
+                : `<div class="pousse-sub">${this._t('at_cut_height')}</div>`}
             ${/* `gazon_pousse_jour_cm` : l'intégration la calcule heure par heure (pic à 3 h,
                  la feuille s'allonge sur la turgescence, pas sur la lumière) et la carte ne
                  l'affichait NULLE PART. C'est pourtant la seule preuve visible que le modèle

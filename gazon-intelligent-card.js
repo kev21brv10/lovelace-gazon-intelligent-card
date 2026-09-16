@@ -1,7 +1,7 @@
 // gazon-intelligent-card.js
 // Carte Lovelace dédiée à l'intégration Gazon Intelligent
 
-const GI_VERSION = '0.28.1';  // tenu par scripts/build.py depuis package.json — il affichait
+const GI_VERSION = '0.30.0';  // tenu par scripts/build.py depuis package.json — il affichait
                           // « v1.0.0 » en Réglages depuis toujours, donc impossible de
                           // savoir quelle version tournait vraiment dans le navigateur.
 
@@ -100,6 +100,17 @@ const STYLES = `
                 transition: background .15s ease, border-color .15s ease; }
 .hero-stop:hover  { background: rgba(255,255,255,.28); border-color: rgba(255,255,255,.8); }
 .hero-stop:active { background: rgba(255,255,255,.36); }
+/* ⚠️ TOUT BOUTON ACCUSE RÉCEPTION DE L'APPUI. Kévin, 10/09/2026 : « que ce soit instantané
+   quand je clique ». Une bonne moitié des boutons appelle un SERVICE : leur effet visible
+   n'arrive qu'au retour d'état de Home Assistant — un aller-retour, quelques centaines de
+   millisecondes en local, davantage à travers l'appli. Sans retour à l'appui, cette attente
+   se lit « le bouton n'a pas marché », et on reclique. Une seule règle :active existait
+   (celle du bouton d'arrêt du hero) : tous les autres étaient muets sous le doigt.
+   On éclaircit plutôt qu'on ne déplace : la carte porte des blocs positionnés en absolu
+   (frise, repère « maintenant »), et une transformation sur un ancêtre créerait un nouveau
+   référentiel de positionnement. */
+button:active { filter: brightness(1.18); }
+@media (prefers-reduced-motion: reduce) { button:active { filter: none; } }
 .hero-stop:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .hero-dot     { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.7); }
 .hero-status  { font-size: 10px; opacity: 0.75; display: flex; align-items: center; gap: 4px; }
@@ -520,6 +531,7 @@ const STRINGS = {
     next_watering: 'Prochain arrosage', session_active: 'Session en cours',
     btn_stop_watering: "\u23F9 Arr\u00eater l'arrosage",
     blocked: 'Bloqué', planned: 'mm planifiés', window_lbl: 'Fenêtre',
+    launch_at: 'départ', end_around: 'fin vers',
     progress: 'Avancement', watering_active: 'Arrosage actif',
     next_intervention: 'Prochaine intervention', no_intervention: 'Aucune intervention recommandée',
     last_application: 'Dernière application',
@@ -562,8 +574,8 @@ const STRINGS = {
     hyd_plein: 'Réserve pleine', hyd_confort: 'Confort',
     hyd_depletion: 'Réserve entamée', hyd_critique: 'Critique',
     // Mow labels
-    tonte_autorisee: 'Autorisée', tonte_bloquee: 'Bloquée',
-    tonte_a_surveiller: 'À surveiller', tonte_non_pertinent: 'Non applicable',
+    tonte_autorisee: 'Autorisée', tonte_autorisee_avec_precaution: 'Autorisée avec précaution',
+    tonte_a_surveiller: 'À surveiller', tonte_deconseillee: 'Déconseillée', tonte_interdite: 'Interdite',
     // Risk labels
     risk_faible: 'Faible', risk_modere: 'Modéré', risk_eleve: 'Élevé', risk_critique: 'Critique',
     // Session log source labels
@@ -622,6 +634,7 @@ const STRINGS = {
     next_watering: 'Next watering', session_active: 'Active session',
     btn_stop_watering: '\u23F9 Stop watering',
     blocked: 'Blocked', planned: 'mm planned', window_lbl: 'Window',
+    launch_at: 'start', end_around: 'ends around',
     progress: 'Progress', watering_active: 'Watering active',
     next_intervention: 'Next intervention', no_intervention: 'No intervention recommended',
     last_application: 'Last application',
@@ -659,8 +672,8 @@ const STRINGS = {
     act_attendre: 'Waiting', act_attente_conditions: 'Waiting', act_bloquer: 'Blocked',
     hyd_plein: 'Reserve full', hyd_confort: 'Comfortable',
     hyd_depletion: 'Reserve drawn down', hyd_critique: 'Critical',
-    tonte_autorisee: 'Allowed', tonte_bloquee: 'Blocked',
-    tonte_a_surveiller: 'Monitor', tonte_non_pertinent: 'N/A',
+    tonte_autorisee: 'Allowed', tonte_autorisee_avec_precaution: 'Allowed with caution',
+    tonte_a_surveiller: 'Monitor', tonte_deconseillee: 'Not recommended', tonte_interdite: 'Forbidden',
     risk_faible: 'Low', risk_modere: 'Moderate', risk_eleve: 'High', risk_critique: 'Critical',
     src_auto: 'Auto', src_manuel: 'Manual', src_rafraich: 'Evening cool.',
     cause_hydrique: 'hydric', cause_soir: 'evening',
@@ -741,9 +754,27 @@ const FIN_PASSE_LABELS = {
   terminee: 'fin_terminee', hors_coordination: 'fin_hors_coordination',
 };
 
+// ⚠️ ALIGNÉE SUR CE QUE L'INTÉGRATION ÉMET RÉELLEMENT : `POSSIBLE_TONTE_STATUT_VALUES`
+// (decision_models.py), cinq valeurs, toute autre ramenée à `a_surveiller` par normalisation.
+// La table couvrait `bloquee` et `non_pertinent` — que personne n'a jamais émis (nés avec la refonte
+// de juin 2026, écrite contre un vocabulaire supposé) — et PAS `autorisee_avec_precaution`,
+// `deconseillee` ni `interdite`, qui tombaient dans le repli : « Deconseillee » sans accent, et du
+// français sur une interface anglaise (27 passages à `deconseillee` du 01 au 11/09). Même défaut
+// que l'ancienne HYDRIC_LABELS. Libellés repris des traductions de l'intégration (0.86.0).
 const TONTE_LABELS = {
-  autorisee: 'tonte_autorisee', bloquee: 'tonte_bloquee',
-  a_surveiller: 'tonte_a_surveiller', non_pertinent: 'tonte_non_pertinent',
+  autorisee: 'tonte_autorisee', autorisee_avec_precaution: 'tonte_autorisee_avec_precaution',
+  a_surveiller: 'tonte_a_surveiller', deconseillee: 'tonte_deconseillee', interdite: 'tonte_interdite',
+};
+
+// Couleur du point de la pastille « Tonte », même convention que la pastille « Créneau » :
+// autorisé = accent, à éviter = orange, bloqué = gris. `autorisee_avec_precaution` EST une tonte
+// autorisée (l'intégration ne la rend que si `tonte_autorisee` est vrai) : grise jusqu'ici comme
+// `interdite`, elle faisait clignoter le point vert/gris — 11 bascules le 09/09 entre 10 h et 15 h.
+// `deconseillee` rejoint `a_surveiller` en orange (19 bascules gris/orange le 07/09).
+const TONTE_TONS = {
+  autorisee: '', autorisee_avec_precaution: '',
+  a_surveiller: 'warn', deconseillee: 'warn',
+  interdite: 'blocked',
 };
 
 // États publiés par `sensor.prochaine_intervention` (`status`). Ils étaient affichés BRUTS.
@@ -785,10 +816,12 @@ function fmtDate(raw, t) {
     if (isNaN(d)) return String(raw);
     const today = new Date(); today.setHours(0,0,0,0);
     const target = new Date(d); target.setHours(0,0,0,0);
-    const diff = target - today;
+    // En JOURS CALENDAIRES, pas en millisecondes : le jour d'un changement d'heure dure 23 ou
+    // 25 h, et le soir du 25/10 « Demain » s'affichait « lun. 26 oct. » (revue du 15/09/2026).
+    const diff = Math.round((target - today) / 86400000);
     const loc = (t && t('_locale')) || 'fr-FR';
     if (diff === 0)         return t ? t('today')     : "Aujourd'hui";
-    if (diff === 86400000)  return t ? t('tomorrow')  : 'Demain';
+    if (diff === 1)         return t ? t('tomorrow')  : 'Demain';
     if (diff < 0)           return t ? t('yesterday') : 'Passé';
     return d.toLocaleDateString(loc, { weekday: 'short', day: 'numeric', month: 'short' });
   } catch { return String(raw); }
@@ -815,6 +848,22 @@ function tonePct(ratio) {
   if (p < 0.5)   return 'warn';
   return 'accent';
 }
+// Date LOCALE du navigateur (AAAA-MM-JJ). `toISOString()` rend la date UTC : de minuit à 2 h
+// (heure d'été à Paris), elle donnait la VEILLE — produit déclaré daté d'hier (sa fenêtre d'un
+// jour déjà expirée côté intégration), et « J'ai tondu » reproposé après une tonte du jour.
+// Trois copies de ce calcul existaient ; une seule désormais.
+function jourLocalIso(d = new Date()) {
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+
+// Le POURQUOI de la hauteur conseillée (`hauteur_tonte_motif`, intégration 0.87.0+), ou '' :
+// une chaîne non vide seulement — un attribut d'une autre nature afficherait « [object Object] ».
+// Lu aux deux endroits (onglets Tonte et Gazon) par cette seule fonction, pour qu'ils ne divergent pas.
+function motifHauteur(attrs) {
+  const m = attrs && attrs.hauteur_tonte_motif;
+  return (typeof m === 'string' && m.trim()) ? m.trim() : '';
+}
+
 function esc(s) {
   return String(s ?? '')
     .replace(/&/g, '&amp;')
@@ -968,6 +1017,19 @@ class GazonIntelligentCard extends HTMLElement {
     return mot.charAt(0).toUpperCase() + mot.slice(1);
   }
 
+  // Heure du prochain lancement (intégration 0.90.0+) : l'arrosage du matin part pour finir 15 min
+  // avant le lever du soleil. `departure_time` / `end_time` (« HH:MM ») ne sont publiés que pour un
+  // départ réellement attendu, aujourd'hui ou demain et encore à venir : leur absence veut dire
+  // « rien de calé », et la carte garde la fenêtre. Le JOUR se lit sur `target_datetime`, qui porte
+  // alors ce départ, jamais sur le nom de la fenêtre (« ce matin » se publie aussi la veille au soir).
+  _prochainLancement(attrs) {
+    const hhmm = v => (typeof v === 'string' && /^\d{2}:\d{2}$/.test(v.trim())) ? v.trim() : '';
+    const depart = hhmm(attrs?.departure_time);
+    if (!depart) return null;
+    const jour = attrs.target_datetime ? fmtDate(attrs.target_datetime, k => this._t(k)) : '';
+    return { depart, fin: hhmm(attrs.end_time), jour };
+  }
+
   // Libellé humain du prochain jour d'arrosage ESTIMÉ par l'intégration (déplétion réserve → MAD).
   // jours : entier (0 = imminent, 1 = demain, …) ; isoDate : 'YYYY-MM-DD'. Renvoie '' si absent.
   _nextWateringDayLabel(jours, isoDate) {
@@ -1007,6 +1069,22 @@ class GazonIntelligentCard extends HTMLElement {
   _render() {
     const card = this._shadow && this._shadow.getElementById('gi-card');
     if (!card) return;
+
+    // ⚠️ ON NE REMPLACE RIEN SOUS LE DOIGT. Un `click` n'est émis que si l'appui et le
+    // relâchement tombent sur le MÊME élément : si un rendu remplace le bloc entre les deux,
+    // le clic n'existe tout simplement pas. C'est la cause des boutons « durs à actionner »
+    // signalés le 10/09/2026 — voir aussi l'ancrage de la frise dans `_timeline`.
+    //
+    // Corriger la seule frise ne suffit pas : n'importe quelle valeur affichée qui bouge
+    // (minutes restantes, réserve au dixième, rafale d'états après une action) reproduit le
+    // même effet. On diffère donc TOUT rendu tant qu'un doigt est posé, et on le rejoue au
+    // relâchement. Le rendu déclenché PAR le clic n'est pas concerné : `click` arrive après
+    // `pointerup`, donc le geste est déjà terminé quand le gestionnaire s'exécute.
+    if (this._gesteEnCours) {
+      this._renduDiffere = true;
+      return;
+    }
+
     const html = this._html();
 
     // ⚠️ NE PAS RECONSTRUIRE LE DOM POUR RIEN. `set hass` est appelé à CHAQUE changement
@@ -1070,6 +1148,68 @@ class GazonIntelligentCard extends HTMLElement {
     }
     this._bindEvents(card);
     this._suivreDefilementOnglets(card);
+    this._suivreGestePointeur(card);
+  }
+
+  _suivreGestePointeur(card) {
+    // Posé UNE fois sur la carte, qui survit à tous les rendus (`#gi-card` n'est jamais
+    // recréé : `_render` ne remplace que ses enfants).
+    if (card._giGesteLie) return;
+    card._giGesteLie = true;
+
+    const relacher = () => {
+      if (!this._gesteEnCours) return;
+      this._gesteEnCours = false;
+      clearTimeout(this._gesteFilet);
+      clearTimeout(this._gesteApres);
+      if (!this._renduDiffere) return;
+      this._renduDiffere = false;
+      // ⚠️ PAS TOUT DE SUITE, ET C'EST TOUT L'INTÉRÊT DE CETTE LIGNE. Le navigateur émet
+      // `click` APRÈS `pointerup`, dans la même salve d'événements. Rendre ici, en synchrone,
+      // remplacerait le bouton entre les deux — et supprimerait le clic. Le premier jet de ce
+      // correctif faisait exactement ça : il ne marchait QUE dans le cas où aucune mise à jour
+      // n'était arrivée pendant l'appui, c'est-à-dire précisément le cas qui n'avait besoin de
+      // rien. Le défaut n'était pas corrigé, il était déplacé d'un cran.
+      //
+      // `setTimeout(0)` renvoie le rendu à la tâche suivante : la salve pointerup → click est
+      // alors terminée, le clic a été émis et traité, et on peut remplacer sans rien casser.
+      setTimeout(() => this._render(), 0);
+    };
+
+    card.addEventListener('pointerdown', () => {
+      this._gesteEnCours = true;
+      // ⚠️ FILET DE SÉCURITÉ, ET IL N'EST PAS DÉCORATIF. Un `pointerup` peut ne jamais
+      // arriver — doigt sorti de la fenêtre, onglet masqué en plein geste, événement avalé
+      // par un autre composant. Sans ce garde le drapeau resterait levé et la carte serait
+      // FIGÉE pour de bon : plus aucune mise à jour, ce qui est bien pire que le défaut
+      // qu'on corrige. Deux secondes couvrent largement un clic, même lent.
+      clearTimeout(this._gesteFilet);
+      this._gesteFilet = setTimeout(relacher, 2000);
+    }, true);
+
+    // ⚠️ C'EST LE `click` QUI LIBÈRE, PAS LE `pointerup` — vérifié au banc, avec de VRAIS
+    // clics souris, le 10/09/2026. Le premier jet relâchait au `pointerup` en différant d'une
+    // tâche : insuffisant. Le navigateur n'émet pas toujours `pointerup` et `click` dans la
+    // MÊME tâche ; quand il les sépare, le rendu différé s'intercalait entre les deux et
+    // détruisait le bouton avant que son clic n'existe. Au banc simulé le défaut était
+    // invisible — j'y émettais moi-même les événements, donc la règle du navigateur ne
+    // s'appliquait pas. Seul le clic réel l'a montré.
+    //
+    // En capture : ce gestionnaire passe AVANT celui du bouton. D'où le report d'une tâche —
+    // libérer ici, en synchrone, remplacerait le bouton avant que SON gestionnaire ne tourne.
+    card.addEventListener('click', () => { setTimeout(relacher, 0); }, true);
+
+    // ⚠️ SUR LE DOCUMENT, pas sur la carte : un appui qui commence sur un bouton et se
+    // relâche À CÔTÉ ne ferait jamais remonter `pointerup` jusqu'ici.
+    // Et on ne libère pas tout de suite : on laisse au `click` le temps d'arriver. S'il
+    // arrive, il libère le premier et ce filet ne fait plus rien ; s'il n'arrive jamais
+    // (glissement, appui annulé), c'est lui qui débloque.
+    const doc = this.ownerDocument || document;
+    doc.addEventListener('pointerup', () => {
+      clearTimeout(this._gesteApres);
+      this._gesteApres = setTimeout(relacher, 150);
+    }, true);
+    doc.addEventListener('pointercancel', relacher, true);
   }
 
   // ── Shell ─────────────────────────────────────────────────────────────────
@@ -1213,7 +1353,7 @@ class GazonIntelligentCard extends HTMLElement {
     const h = this._hass, c = this._config;
     const cat = (attrOf(h, c.entity_catalogue_produits, 'products_summary')
       || attrOf(h, c.entity_prochaine_intervention, 'products_summary') || []);
-    const aujourdhui = new Date().toISOString().slice(0, 10);
+    const aujourdhui = jourLocalIso();
     const choisi = this._declareProduit || (cat[0] && cat[0].id) || '';
     const fiche = cat.find(x => x.id === choisi) || null;
     return `
@@ -1259,7 +1399,7 @@ class GazonIntelligentCard extends HTMLElement {
     const id = this._svcOuvert;
     if (!id) return '';
     const c = this._config;
-    const auj = new Date().toISOString().slice(0, 10);
+    const auj = jourLocalIso();
     const D = {
       'declare_mowing': {
         titre: '✂️ Déclarer une tonte', aide: "Enregistre une tonte que tu viens de faire.",
@@ -1483,17 +1623,27 @@ class GazonIntelligentCard extends HTMLElement {
     // Constaté par Kévin le 31/07/2026. Le titre porte alors le MOTIF ; l'estimation reste
     // visible en sous-titre, à sa juste valeur : « quand le sol aura soif », pas « quand j'arrose ».
     const nextArrBudgetOver = this._budgetOver();
+    // Arrosage dû : l'HEURE du lancement prime sur la fenêtre (« 06:15 → 07:19 » plutôt que
+    // « 03:45–10:00 », qui laissait croire à un départ dès l'ouverture).
+    const nextArrLaunch = nextArrDue ? this._prochainLancement(nextArrAttr) : null;
     const nextArrVal = nextArrBlocked
       ? (nextArrBlockLbl || nextArrState || '—')
       : nextArrDue
-        ? (nextArrWindow || '—')
+        ? (nextArrLaunch
+            ? `${nextArrLaunch.depart}${nextArrLaunch.fin ? ` → ${nextArrLaunch.fin}` : ''}`
+            : (nextArrWindow || '—'))
         : nextArrBudgetOver
           ? (nextArrBlockLbl || nextArrState || '—')
           : (nextArrDayEst || nextArrWindow || '—');
     const nextArrSub = nextArrBlocked
       ? ''
       : nextArrDue
-        ? (nextArrQty ? `<div class="stat-sub">${num(nextArrQty, 1)} mm</div>` : '')
+        ? ((nextArrQty || nextArrLaunch?.jour)
+            ? `<div class="stat-sub">${[
+                nextArrQty ? `${num(nextArrQty, 1)} mm` : '',
+                nextArrLaunch?.jour || '',
+              ].filter(Boolean).join(' · ')}</div>`
+            : '')
         // Retenu par le garde-fou : même règle que le hero de l'onglet Arrosage — pas
         // d'estimation, le sous-titre explique la RETENUE, dans les mots de la jauge.
         : nextArrBudgetOver
@@ -1642,6 +1792,7 @@ class GazonIntelligentCard extends HTMLElement {
       nextAttr.date_prochain_arrosage_estime,
     );
     const nextBudgetOver = this._budgetOver();
+    const nextLaunch     = this._prochainLancement(nextAttr);
 
     const zones = c.zones || [];
     const zoneCards = zones.length ? zones.map((z, i) => {
@@ -1732,7 +1883,14 @@ class GazonIntelligentCard extends HTMLElement {
         <div class="hero">
           <div class="hero-eyebrow">${this._t('next_watering')}</div>
           <div class="hero-title">${num(nextQty, 1)} ${this._t('planned')}</div>
-          ${nextWindow ? `<div class="hero-badge"><div class="hero-dot"></div>${nextWindow}</div>` : ''}
+          ${nextLaunch ? `<div class="hero-sub gi-launch">${[
+            nextLaunch.jour,
+            `${this._t('launch_at')} ${nextLaunch.depart}`,
+            nextLaunch.fin ? `${this._t('end_around')} ${nextLaunch.fin}` : '',
+          ].filter(Boolean).join(' · ')}</div>` : ''}
+          ${/* Avec l'heure de départ au-dessus, la plage nue « 03:45–10:00 » se lirait comme un
+               horaire d'arrosage : elle reprend son libellé de fenêtre. */''}
+          ${nextWindow ? `<div class="hero-badge"><div class="hero-dot"></div>${nextLaunch ? `${this._t('window_lbl')} : ` : ''}${nextWindow}</div>` : ''}
         </div>
       ` : nextBudgetOver ? `
         ${/* Le garde-fou retient l'arrosage : annoncer « imminent » en gros promettrait un
@@ -1781,9 +1939,26 @@ class GazonIntelligentCard extends HTMLElement {
     if (!zones.length) return '';
     const h          = this._hass;
     const c          = this._config;
-    const now        = Date.now();
+    // ⚠️ LA FENÊTRE EST ANCRÉE À LA MINUTE, PAS À L'INSTANT — et c'est ce qui rendait
+    // certains boutons de la carte durs à cliquer. Signalé par Kévin le 10/09/2026.
+    //
+    // Les barres sont positionnées en pourcentage de la fenêtre de 24 h, à deux décimales :
+    // 0,01 % de 24 h fait **8,64 secondes**. Avec `Date.now()` brut, `left:` et `width:`
+    // changeaient donc de valeur toutes les 8,6 s SANS qu'aucun état ne bouge. Or `_render`
+    // compare le HTML bloc par bloc et TOUS les boutons d'un onglet vivent dans le même bloc
+    // `.content` : il était détruit et reconstruit toutes les 8,6 s. Un clic dont l'appui et
+    // le relâchement tombent de part et d'autre d'un remplacement ne produit AUCUN événement
+    // `click` — le navigateur ne le remonte que si les deux touchent le même élément.
+    // Deux à trois pour cent des clics passaient à la trappe sur l'onglet Arrosage, davantage
+    // en tapant lentement, et bien davantage juste après une action (rafale de mises à jour).
+    //
+    // Une frise de 24 h n'a aucun besoin d'une précision à la seconde. Ancrée à la minute,
+    // elle change quand ses propres graduations changent — pas plus souvent. C'est la même
+    // leçon que la barre d'onglets (0.26.2) : ne pas recréer un élément sous le doigt.
+    const PAS_FENETRE_MS = 60 * 1000;
+    const now        = Math.floor(Date.now() / PAS_FENETRE_MS) * PAS_FENETRE_MS;
     const DAY        = 24 * 60 * 60 * 1000;
-    const windowStart = now - DAY;  // rolling 24h window
+    const windowStart = now - DAY;  // fenêtre glissante de 24 h, ancrée à la minute
 
     // Trigger history fetch if stale (>5 min) — async, re-renders when done
     if (now - this._historyTs > 5 * 60 * 1000) this._fetchHistory(zones);
@@ -2165,7 +2340,7 @@ class GazonIntelligentCard extends HTMLElement {
     // « Esperance Jr · À la station · 100 % — À surveiller » : la machine avait l'air en défaut
     // alors qu'elle était à la station, chargée, et déclarée disponible (`machine_permet_tonte:
     // true`). C'est le gazon qui n'était pas prêt. Ne jamais recoller ces deux axes.
-    const statusClass = tonteStatut === 'autorisee' ? '' : tonteStatut === 'a_surveiller' ? 'warn' : 'blocked';
+    const statusClass = TONTE_TONS[tonteStatut] ?? 'blocked';
     const machineClass = mPermet === false ? 'blocked' : '';
     const machineLbl   = mPermet === undefined
       ? '' : this._t(mPermet ? 'mower_available' : 'mower_unavailable');
@@ -2296,6 +2471,11 @@ class GazonIntelligentCard extends HTMLElement {
             coupeReel !== null ? num(coupeReel, 1) + ' cm' : (hauteur ? num(hauteur, 1) + ' cm' : '—')}</div>
           ${coupeReel !== null ? `<div class="stat-sub">${this._t('mow_height_set')}${
             ecartReco !== null ? ` · ${this._t('mow_height_reco')} ${num(ecartReco, 1)} cm` : ''}</div>` : ''}
+          ${/* Le POURQUOI de la recommandation (intégration 0.87.0, `hauteur_tonte_motif`). Il explique
+               la RECOMMANDATION publiée, pas la lame : juste après « recommandé X cm », ou sous la
+               valeur quand la lame est inconnue (la valeur affichée EST alors la recommandation).
+               Ne pas le déplacer dans la jauge « pousse » : sa cible est la lame (arbitrage 30/08). */''}
+          ${motifHauteur(hautAttr) ? `<div class="stat-note mow-motif">${esc(motifHauteur(hautAttr))}</div>` : ''}
           ${(hautAttr.hauteur_tonte_min_cm && hautAttr.hauteur_tonte_max_cm)
             ? `<div class="stat-sub"${hautAttr.hauteur_tonte_garde_fou_label
                   ? ` title="${esc(hautAttr.hauteur_tonte_garde_fou_label)}"` : ''}>Min ${num(hautAttr.hauteur_tonte_min_cm, 1)} · Max ${num(hautAttr.hauteur_tonte_max_cm, 1)} cm${
@@ -2356,7 +2536,7 @@ class GazonIntelligentCard extends HTMLElement {
            On ne le montre donc pas quand la dernière tonte est d'aujourd'hui. */''}
       ${(() => {
         const proch = attrOf(h, c.entity_prochaine_tonte, 'target_date');
-        const auj = new Date().toISOString().slice(0, 10);
+        const auj = jourLocalIso();
         const tonteAuj = String(tonteAttr.derniere_tonte_date || '') === auj;
         if (tonteAuj) return '';
         return this._actionsRapides([{ id: 'declare_mowing', icone: '✂️', libelle: "J'ai tondu" }]);
@@ -2427,7 +2607,10 @@ class GazonIntelligentCard extends HTMLElement {
           <div class="stat-value ${fillClass}">${fillPct !== null ? fillPct + ' %' : (reserveMm ? num(reserveMm, 1) + ' mm' : '—')}</div>
           ${reserveMm ? `<div class="stat-sub">${num(reserveMm, 1)} mm</div>` : ''}
         </div>
-        <div class="stat-card">
+        <div class="stat-card"${(() => {
+          const motif = motifHauteur(ent(h, c.entity_hauteur_conseillee)?.attributes);
+          return motif ? ` title="${esc(motif)}"` : '';
+        })()}>
           <div class="stat-label">${this._t('mow_height_lbl')}</div>
           <div class="stat-value sm">${hauteur ? num(hauteur, 1) + ' cm' : '—'}</div>
         </div>

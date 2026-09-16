@@ -1,5 +1,129 @@
 # Changelog
 
+## 0.30.0
+
+64 tests verts. **La carte affiche l'heure du prochain lancement de l'arrosage, plus seulement sa fenêtre.**
+
+### Le départ calé sur le lever du soleil
+
+L'intégration 0.90.0 ne lance plus l'arrosage du matin à l'ouverture de la fenêtre (03:45) : il part pour finir 15 min avant le lever du soleil. La carte continuait d'afficher la fenêtre « 03:45–10:00 », qui laissait croire à un départ dès 03:45. Kévin voulait voir l'heure du lancement.
+
+- **Synthèse, tuile « Prochain arrosage »** : « 06:15 → 07:19 » (départ → fin) au lieu de la fenêtre, avec le jour en sous-titre : « 5,3 mm · Demain ».
+- **Onglet Arrosage** : sous « 5,3 mm planifiés », la ligne « Demain · départ 06:15 · fin vers 07:19 ». La plage reprend alors son libellé, « Fenêtre : 03:45–10:00 », pour ne pas se lire comme un horaire.
+- **Source** : `departure_time` et `end_time` sur « Prochain arrosage ». L'intégration ne les publie que pour un départ réellement attendu, aujourd'hui ou demain et encore à venir. Sans eux, la carte garde exactement l'affichage d'avant.
+- **Le jour** se lit sur `target_datetime`, qui porte alors ce départ, jamais sur le nom de la fenêtre : la veille au soir, l'intégration peut publier `ce_matin` pour le lendemain.
+- **Heure illisible ignorée** : seule une chaîne « HH:MM » est affichée ; « 6h15 », un nombre ou un objet laissent la fenêtre.
+
+### « Demain » le soir d'un changement d'heure
+
+`fmtDate` comparait les jours en millisecondes (86 400 000). Le jour d'un changement d'heure dure 23 ou 25 h : le soir du 25/10 ou du 28/03, le départ du lendemain s'affichait « lun. 26 oct. » au lieu de « Demain ». La différence se compte désormais en jours calendaires. Trouvé par la revue indépendante, avant tout déploiement ; le défaut existait avant, la ligne de lancement le rendait visible.
+
+### Tests
+
+- Cinq tests : la tuile donne l'heure et le jour ; sans attribut, la tuile garde la fenêtre ; une heure illisible est ignorée ; l'onglet Arrosage annonce départ et fin, et la fenêtre garde son libellé ; « Demain » les soirs du 25/10/2026 et du 28/03/2027, fuseau de Paris.
+- **Preuve.** Huit mutations du bundle (lancement jamais lu, heure non validée, tuile qui garde la fenêtre, badge sans libellé, jour absent, fin absente, jour compté en millisecondes, arrondi retiré) : toutes détectées, sur une référence vérifiée verte.
+
+## 0.29.0
+
+59 tests verts. **Les cinq états de tonte ont leur nom, la hauteur conseillée dit pourquoi, et les boutons ne se dérobent plus sous le doigt.**
+
+> La 0.28.2 a été déployée en local le 10/09 sans jamais être publiée : son contenu est livré ici, dans sa section plus bas.
+
+### Trois états sur cinq s'affichaient sans accents
+
+L'intégration publie exactement cinq valeurs de `tonte_statut` : `autorisee`, `autorisee_avec_precaution`, `a_surveiller`, `deconseillee`, `interdite`. La table de la carte n'en connaissait que deux, plus `bloquee` et `non_pertinent`, que personne n'a jamais émis. Les trois autres passaient par le repli : « Deconseillee », « Autorisee avec precaution », et du français sur une interface anglaise. Ce n'était pas théorique : du 01 au 11/09, on compte 27 passages à `deconseillee` et 14 à `autorisee_avec_precaution`.
+
+- **Libellés** repris des traductions de l'intégration (0.86.0) : Autorisée, Autorisée avec précaution, À surveiller, Déconseillée, Interdite, et en anglais Allowed, Allowed with caution, Monitor, Not recommended, Forbidden.
+- **Les entrées mortes `bloquee` et `non_pertinent` sont retirées** : la table dit exactement ce que l'intégration émet.
+
+### La couleur du point clignotait
+
+La couleur tenait en trois issues : vert pour `autorisee`, orange pour `a_surveiller`, gris pour tout le reste. Une tonte **autorisée** avec précaution s'affichait donc grise comme une tonte interdite : 11 allers-retours vert/gris le 09/09 entre 10 h 35 et 15 h 10, et 19 allers-retours gris/orange le 07/09 entre `deconseillee` et `a_surveiller`. Nouvelle table `TONTE_TONS`, avec la même convention que la pastille « Créneau » voisine : les deux « autorisée » en vert, « à surveiller » et « déconseillée » en orange, « interdite » en gris. Un état inconnu reste gris et lisible (« Nouvel etat »).
+
+### Le pourquoi de la hauteur conseillée
+
+L'intégration 0.87.0 publie `hauteur_tonte_motif`, par exemple « Septembre : base 4,0 cm (hauteur de pousse). ». La carte l'affiche désormais :
+
+- **dans la tuile Hauteur de l'onglet Tonte**, juste après « recommandé X cm » et avant les bornes. Il explique la **recommandation**, pas la lame, et reste donc hors de la jauge de pousse, dont la cible est la lame (arbitrage du 30/08). Sans l'attribut, le rendu est identique à avant ;
+- **en infobulle** sur la tuile Hauteur de l'onglet Gazon. Elle est invisible au doigt sur téléphone : le motif en clair vit dans l'onglet Tonte.
+
+Le motif est échappé, et lu par une seule fonction (`motifHauteur`) : seule une chaîne non vide s'affiche. Il reste en français, comme les autres libellés rédigés par l'intégration.
+
+### La date par défaut des formulaires était celle de Greenwich
+
+`new Date().toISOString()` rend la date **UTC**. De minuit à 2 h (heure d'été à Paris), les formulaires proposaient donc la **veille**. Un produit « sol » déclaré à 00 h 30, daté d'hier, voyait son arrosage d'incorporation **présumé fait**, et il n'était jamais déclenché.
+
+Trois copies de ce calcul existaient. Il n'en reste qu'une, `jourLocalIso()`, qui donne la date locale.
+
+### « J'ai tondu » était proposé en permanence
+
+Le bouton se masque le jour d'une tonte déjà enregistrée, en lisant `derniere_tonte_date` sur « Tonte autorisée ». **Rien ne publiait cet attribut** depuis la 0.21.2 : le bouton restait donc toujours affiché. L'intégration 0.88.0 le publie désormais.
+
+### Tests
+
+17 nouveaux :
+- libellés exacts des cinq états en français et en anglais, le test anglais étant le seul à voir « Interdite » sur une interface anglaise ;
+- couleurs, et état inconnu ;
+- motif : présence, place, absence et texte vide, échappement (tuile et infobulle), attribut qui n'est pas une chaîne, lame inconnue, absent de la jauge, coexistence avec le garde-fou, infobulle ;
+- date locale à 00 h 30 avec le fuseau de Paris forcé, sur la fonction **et** sur le vrai formulaire rendu, l'horloge du DOM étant figée avant le chargement de la carte. Le fuseau étant forcé, le test mord aussi sur une CI en UTC ;
+- « J'ai tondu » masqué le jour d'une tonte.
+
+`package-lock.json` est réaligné sur la version (il annonçait 0.10.6).
+
+### Les boutons ne se dérobent plus sous le doigt, et ils accusent réception (ex-0.28.2)
+
+#### Le symptôme
+
+Kévin, 10/09/2026 : « certains boutons de la carte ont du mal à s'actionner au clic ».
+
+#### La cause, mécanique
+
+Un navigateur n'émet un `click` **que si l'appui et le relâchement tombent sur le même élément**. Si l'élément est remplacé entre les deux, il ne se passe rien du tout — pas d'erreur, pas de trace, juste un clic qui n'existe pas.
+
+Or **tous les boutons d'un onglet vivent dans le même bloc `.content`**, et `_render` remplace ce bloc dès que son HTML change. Il change souvent : la carte affiche des valeurs vivantes (minutes restantes, réserve au dixième), et une action déclenche une rafale de mises à jour d'état — précisément au moment où l'on s'apprête à cliquer une deuxième fois.
+
+C'est la même leçon que la barre d'onglets en 0.26.2 — « recréer l'élément au milieu d'un geste tue l'inertie du doigt » — mais un niveau plus bas, et cette fois ce n'est pas le défilement qui casse, c'est le clic.
+
+#### Le correctif
+
+**Aucun bloc n'est remplacé tant qu'un doigt est posé.** Le rendu est différé dès le `pointerdown`. **C'est le `click` qui libère le verrou**, en rejouant le rendu à la tâche suivante : un rendu synchrone supprimerait le clic lui-même. Un `pointerup` sans `click` libère après 150 ms.
+
+⚠️ Un filet de deux secondes relâche le verrou si le `pointerup` n'arrive jamais — doigt sorti de la fenêtre, onglet masqué en plein geste. Sans lui, la carte resterait **figée pour de bon**, ce qui serait bien pire que le défaut corrigé.
+
+#### ⚠️ Deux premiers jets déplaçaient le défaut d'un cran
+
+1. Le premier rendait **en synchrone** au `pointerup`. Or le navigateur émet `click` **après** `pointerup`, dans la même salve : remplacer le bloc là supprimait le clic tout autant.
+2. Le second relâchait au `pointerup` en différant d'une tâche. Vérifié au banc avec de vrais clics souris, c'était insuffisant : le navigateur n'émet pas toujours `pointerup` et `click` dans la même tâche.
+
+D'où la libération au `click`, avec les deux filets.
+
+#### Tout bouton accuse réception de l'appui
+
+La moitié des boutons appelle un **service** : leur effet visible n'arrive qu'au retour d'état de Home Assistant — un aller-retour de quelques centaines de millisecondes en local, davantage à travers l'appli. Sans retour à l'appui, cette attente se lit « le bouton n'a pas marché », et on reclique.
+
+**Une seule règle `:active` existait** sur toute la carte (le bouton d'arrêt du hero) ; tous les autres étaient muets sous le doigt. Ils s'éclaircissent désormais à l'appui — `filter` et non `transform`, la carte portant des blocs positionnés en absolu qu'un nouveau référentiel casserait. Neutralisé si le système demande moins d'animations.
+
+#### Mesuré sur banc, avec le vrai bundle et la vraie configuration
+
+Un banc local charge la carte hors de Home Assistant, avec la configuration réelle (3 zones, 22 entités) et un flux d'états qui change un attribut **par onglet**, quatre fois par seconde. Chaque appui est tenu **200 ms**, puis on vérifie si le bouton a quitté le document entre l'appui et le relâchement — auquel cas le navigateur n'émet aucun `click`.
+
+| onglet | boutons | clics perdus **0.28.1** | clics perdus **0.28.2** |
+|---|---|---|---|
+| Synthèse | 0 | — | — |
+| **Arrosage** | 8 | **9 / 12** | **0 / 12** |
+| **Tonte** | 2 | **9 / 12** | **0 / 12** |
+| Gazon | 0 | — | — |
+| **Produits** | 1 | **10 / 12** | **0 / 12** |
+| **Réglages** | 4 | **10 / 12** | **0 / 12** |
+
+Sur une campagne de 40 appuis en Arrosage : **32 perdus sur 0.28.1, 0 sur 0.28.2**. Et quatre **vrais clics souris** — un par onglet porteur de boutons — ouvrent bien leur popup sur 0.28.2.
+
+#### Et une source de travail inutile en moins
+
+La frise d'arrosage positionnait ses barres en pourcentage d'une fenêtre de 24 h ancrée sur `Date.now()`, à deux décimales. **0,01 % de 24 h = 8,64 secondes** : dès qu'un arrosage figure dans les dernières 24 h, `left:` et `width:` changeaient de valeur toutes les 8,6 s sans qu'aucun état ne bouge — et le bloc entier était reconstruit à ce rythme. La fenêtre est désormais ancrée à la minute, comme ses propres graduations.
+
+⚠️ Établi par l'arithmétique du code, **pas reproduit en test** : un fixture fidèle demande un historique de vannes que `_fetchHistory` écrase, et le montage bricolé rendait une barre insensible au temps — le test passait à vide dans les deux sens. Il a été retiré plutôt que gardé pour la forme. Le correctif qui traite le symptôme, lui, est sous test et sous mutation.
+
 ## 0.28.1
 
 **Deux phrases qui affirmaient le faux, relevées par la revue de la PR #44.** 40 tests verts.

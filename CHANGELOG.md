@@ -1,5 +1,44 @@
 # Changelog
 
+## 0.30.1
+
+85 tests verts (84 en CI, qui saute la confrontation au dépôt de l'intégration). **« Déclarer un arrosage » fonctionne enfin, et un appel refusé se voit.**
+
+### « J'ai arrosé à la main » échouait à chaque fois
+
+La fenêtre « 💧 Déclarer un arrosage » envoyait `quantite_mm`. Or le service `gazon_intelligent.declare_watering` n'accepte que `date_action` et `objectif_mm`, et son schéma voluptuous refuse toute clé inconnue (« extra keys not allowed »). Depuis la 0.21.2 (30/07/2026), aucune de ces déclarations n'a donc atteint l'intégration, qui n'a jamais eu ce champ.
+
+- La dose part désormais dans `objectif_mm`, avec les bornes du service : 0 à 30 mm.
+- « Recaler la réserve du sol » reçoit aussi les bornes du service : 0 à 100 mm.
+- La cible de chaque action en popup est lue dans la même table que la fenêtre. Elle existait en double, et la copie de la fenêtre ne servait à rien : une action ajoutée d'un seul côté serait partie sans `entity_id`, ce qui échoue dès que deux gazons existent.
+
+### Un appel refusé se voit
+
+`_call()` ignorait la promesse de `hass.callService`. Un refus finissait en « Uncaught (in promise) » dans la console, et la popup se refermait comme si tout allait bien. Le frontend de Home Assistant (20260826.7) affiche bien un toast générique, mais il désigne le service par son nom technique (`gazon_intelligent/declare_watering`) avant de recopier le message du serveur.
+
+- Un échec produit désormais **un** toast de 10 s, qui nomme l'action cliquée et donne la raison. Exemple avec une dose tapée au-delà de la borne : « Gazon Intelligent : « 💧 Déclarer un arrosage » a échoué — value must be at most 30 for dictionary value @ data['objectif_mm'] ». Sans libellé (bascules, zones), le toast nomme l'entité. Le cadre du message suit la langue de l'interface ; les titres des fenêtres restent en français, comme dans la carte.
+- Le toast générique de Home Assistant est coupé (`notifyOnError`), pour ne pas en afficher deux. Ce qu'il faisait de plus est repris :
+  - une erreur qui porte une clé de traduction (« action introuvable »…) s'affiche dans la langue de l'interface ;
+  - la vibration d'échec est conservée ;
+  - le toast part de la racine `<home-assistant>` quand la carte a quitté la page. C'est le cas de l'arrêt différé du bouton « 5 min » si l'on a changé de page entre-temps : sans ce repli, un échec de cet arrêt passait inaperçu, et la vanne restait ouverte.
+- Une socket déjà fermée au moment du clic (rejet avec le nombre `3`) se dit « connexion perdue ». Une socket fermée pendant l'appel donne son propre message. L'échec reste aussi écrit dans la console, avec le service et les données envoyées.
+
+Limite connue : la popup se referme dès l'envoi. Si l'appel est refusé, par exemple parce que la réserve, obligatoire, a été vidée, le toast le dit, mais il faut rouvrir la popup pour corriger.
+
+### Les autres services vérifiés
+
+`declare_mowing`, `recalibrate_reserve`, `reset_mode`, `remove_last_application`, `declare_intervention`, `start_manual_irrigation` et `stop_irrigation` : les champs, les champs obligatoires et les bornes sont conformes au schéma de l'intégration (0.91.0) et à son `services.yaml`.
+
+Réserve : `declare_intervention` envoie le type du produit comme `intervention`. Le service n'accepte que 8 valeurs, alors qu'un produit enregistré hors de l'interface peut porter n'importe quel type. Un tel produit serait refusé ; le refus s'affiche désormais.
+
+### Tests
+
+- Nouveau fichier `tests/contrat-services.test.mjs`, 21 tests. La carte est rendue sous des shadow roots, comme dans Home Assistant. Chaque action est cliquée par son vrai bouton, et ce qui part vers `hass.callService` est confronté au contrat de l'intégration : clés inconnues, champs obligatoires, types, bornes, cible de la bonne instance, et dates. Une date saisie doit repartir au bon format : le jour choisi est inférieur à 13, pour qu'une inversion jour/mois se voie. La table des actions en popup est comparée à la liste du test, et chaque `this._call(` de la carte doit être reconnu.
+- Les toasts sont écoutés sur `<home-assistant>`, pour ces cas : refus, message traduit, socket fermée (sous ses deux formes), exception immédiate, bascule sans libellé, carte détachée de la page, et succès sans toast.
+- Le contrat est recopié du schéma de l'intégration 0.91.0. Quand le dépôt de l'intégration est présent à côté, un test le confronte à `__init__.py` (champs, bornes, validateur de cible), à `const.py` et à `services.yaml` ; une clé qu'il ne sait pas lire le fait échouer. Ailleurs, en CI notamment, ce test est sauté et le signale.
+- **Preuve.** Sur le bundle 0.30.0, 12 des 21 tests échouent, dont celui-ci : `extra keys not allowed @ data['quantite_mm']`. Banc de 45 mutations (34 dans la carte, 11 dans le contrat ou l'intégration), y compris les faux verts relevés par une revue adversariale : toutes détectées, sur une référence vérifiée verte.
+- **Contre-épreuve, hors du test.** Ce que les deux bundles envoient réellement a été rejoué contre les schémas de `__init__.py`, extraits tels quels, avec voluptuous 0.15.2 et 0.16.0. Le 0.30.0 est refusé sur `declare_watering` et nulle part ailleurs ; le 0.30.1 est accepté partout.
+
 ## 0.30.0
 
 64 tests verts. **La carte affiche l'heure du prochain lancement de l'arrosage, plus seulement sa fenêtre.**

@@ -1,7 +1,7 @@
 // gazon-intelligent-card.js
 // Carte Lovelace dédiée à l'intégration Gazon Intelligent
 
-const GI_VERSION = '0.30.0';  // tenu par scripts/build.py depuis package.json — il affichait
+const GI_VERSION = '0.30.1';  // tenu par scripts/build.py depuis package.json — il affichait
                           // « v1.0.0 » en Réglages depuis toujours, donc impossible de
                           // savoir quelle version tournait vraiment dans le navigateur.
 
@@ -614,6 +614,9 @@ const STRINGS = {
     started_at: 'D\u00e9marr\u00e9 \u00e0', started_on: 'D\u00e9marr\u00e9 le', at_time: '\u00e0',
     technical_not_counted: 'techniques, non décomptés', total_received: 'total reçu',
     technical: 'technique', passes: 'passages',
+    action_failed: 'Gazon Intelligent : « {action} » a échoué — {detail}',
+    action_failed_unknown: 'erreur inconnue',
+    action_failed_connection: 'connexion perdue',
     // Editor
     editor_msg: 'Configurez la carte via l\'éditeur YAML.',
     today: "Aujourd'hui", tomorrow: 'Demain', yesterday: 'Hier',
@@ -709,6 +712,9 @@ const STRINGS = {
     started_at: 'Started at', started_on: 'Started on', at_time: 'at',
     technical_not_counted: 'technical, not counted', total_received: 'total received',
     technical: 'technical', passes: 'passes',
+    action_failed: 'Gazon Intelligent: “{action}” failed — {detail}',
+    action_failed_unknown: 'unknown error',
+    action_failed_connection: 'connection lost',
     editor_msg: 'Configure the card via the YAML editor.',
     today: 'Today', tomorrow: 'Tomorrow', yesterday: 'Yesterday',
     _locale: 'en-US',
@@ -1395,12 +1401,21 @@ class GazonIntelligentCard extends HTMLElement {
     ).join('')}</div>`;
   }
 
-  _modalService() {
-    const id = this._svcOuvert;
-    if (!id) return '';
+  /* Les actions ouvertes en popup. SOURCE UNIQUE : la fenêtre ET l'envoi (`svc-run`) lisent
+     cette table. La cible y figurait sans servir à rien, pendant qu'une seconde table la
+     redonnait au moment de l'envoi : une action ajoutée d'un seul côté serait partie sans
+     `entity_id`, ce qui échoue dès que deux gazons existent.
+     ⚠️ `k` est le NOM DU CHAMP côté service, pas un libellé : le schéma voluptuous de
+     l'intégration refuse toute clé qu'il ne connaît pas. « Déclarer un arrosage » envoyait
+     `quantite_mm`, un champ que l'intégration n'a jamais eu : l'appel échouait à CHAQUE fois
+     depuis la 0.21.2 (constaté le 16/09/2026). Les bornes `min`/`max` sont celles du service.
+     Toutes les actions y figurent SANS condition : c'est le bouton qui décide de l'affichage.
+     Contrôlé par tests/contrat-services.test.mjs, qui compare cette table à sa propre liste,
+     clique chaque action et confronte ce qui part au contrat de l'intégration. */
+  _servicesCarte() {
     const c = this._config;
     const auj = jourLocalIso();
-    const D = {
+    return {
       'declare_mowing': {
         titre: '✂️ Déclarer une tonte', aide: "Enregistre une tonte que tu viens de faire.",
         champs: [{ k: 'date_action', l: 'Quand ?', t: 'date', v: auj }],
@@ -1409,13 +1424,13 @@ class GazonIntelligentCard extends HTMLElement {
       'declare_watering': {
         titre: '💧 Déclarer un arrosage', aide: "Un arrosage manuel que l'intégration n'a pas vu.",
         champs: [{ k: 'date_action', l: 'Quand ?', t: 'date', v: auj },
-                 { k: 'quantite_mm', l: 'Combien de mm ?', t: 'number', v: '5', pas: '0.5' }],
+                 { k: 'objectif_mm', l: 'Combien de mm ?', t: 'number', v: '5', pas: '0.5', min: 0, max: 30 }],
         cible: c.entity_objectif_arrosage,
       },
       'recalibrate_reserve': {
         titre: '🪣 Recaler la réserve du sol',
         aide: "À utiliser après une mesure au tournevis, ou pour corriger une comptabilité faussée.",
-        champs: [{ k: 'reserve_mm', l: 'Réserve mesurée (mm)', t: 'number', v: '10', pas: '0.1' },
+        champs: [{ k: 'reserve_mm', l: 'Réserve mesurée (mm)', t: 'number', v: '10', pas: '0.1', min: 0, max: 100 },
                  { k: 'figer_la_journee', l: 'Figer la valeur jusqu\'à minuit', t: 'bool', v: true }],
         cible: c.entity_reserve,
       },
@@ -1429,7 +1444,14 @@ class GazonIntelligentCard extends HTMLElement {
         aide: "Retire la dernière application déclarée. À utiliser en cas d'erreur de saisie.",
         champs: [], cible: c.entity_prochaine_intervention, danger: true,
       },
-    }[id];
+    };
+  }
+
+  _modalService() {
+    const id = this._svcOuvert;
+    if (!id) return '';
+    const auj = jourLocalIso();
+    const D = this._servicesCarte()[id];
     if (!D) return '';
     return `
       <div class="modal-back" data-action="svc-close">
@@ -1443,7 +1465,8 @@ class GazonIntelligentCard extends HTMLElement {
             ? `<label class="champ-bool"><input type="checkbox" id="gi-svc-${f.k}"${f.v ? ' checked' : ''}> ${esc(f.l)}</label>`
             : `<label class="champ-lbl" for="gi-svc-${f.k}">${esc(f.l)}</label>
                <input class="champ" id="gi-svc-${f.k}" type="${f.t}" value="${f.v}"${
-                 f.pas ? ` step="${f.pas}"` : ''}${f.t === 'date' ? ` max="${auj}"` : ''}>`).join('')}
+                 f.pas ? ` step="${f.pas}"` : ''}${f.min !== undefined ? ` min="${f.min}"` : ''}${
+                 f.max !== undefined ? ` max="${f.max}"` : ''}${f.t === 'date' ? ` max="${auj}"` : ''}>`).join('')}
           <button class="btn-run${D.danger ? ' btn-danger' : ''}" data-action="svc-run">
             ${D.danger ? 'Confirmer la suppression' : 'Enregistrer'}</button>
         </div>
@@ -2973,14 +2996,9 @@ class GazonIntelligentCard extends HTMLElement {
 
         } else if (action === 'svc-run') {
           const id = this._svcOuvert;
-          const cibles = {
-            declare_mowing:            this._config.entity_tonte_autorisee,
-            declare_watering:          this._config.entity_objectif_arrosage,
-            recalibrate_reserve:       this._config.entity_reserve,
-            reset_mode:                this._config.entity_phase,
-            remove_last_application:   this._config.entity_prochaine_intervention,
-          };
-          const data = { entity_id: cibles[id] };
+          const def = this._servicesCarte()[id];
+          if (!def) return;
+          const data = { entity_id: def.cible };
           card.querySelectorAll('[id^="gi-svc-"]').forEach(inp => {
             const cle = inp.id.replace('gi-svc-', '');
             if (inp.type === 'checkbox') { data[cle] = inp.checked; return; }
@@ -2989,7 +3007,7 @@ class GazonIntelligentCard extends HTMLElement {
             data[cle] = (inp.type === 'date') ? inp.value.split('-').reverse().join('/')
                       : (inp.type === 'number') ? parseFloat(inp.value) : inp.value;
           });
-          this._call('gazon_intelligent', id, data);
+          this._call('gazon_intelligent', id, data, def.titre);
           this._svcOuvert = null;
           this._render();
 
@@ -3032,7 +3050,7 @@ class GazonIntelligentCard extends HTMLElement {
             produit_id: fiche.id,
             ...(d ? { date_action: d } : {}),
             ...(note && note.value ? { note: note.value } : {}),
-          });
+          }, this._t('declare_product'));
           this._declareOpen = false;
           this._render();
 
@@ -3058,7 +3076,7 @@ class GazonIntelligentCard extends HTMLElement {
           this._call('gazon_intelligent', 'start_manual_irrigation', {
             entity_id: this._config.entity_objectif_arrosage,
             objectif_mm: mm,
-          });
+          }, this._t('manual_watering'));
           this._manualOpen = false;
           this._render();
 
@@ -3083,7 +3101,7 @@ class GazonIntelligentCard extends HTMLElement {
           this._call('gazon_intelligent', 'stop_irrigation', {
             entity_id: this._config.entity_objectif_arrosage,
             raison: 'Arrêt depuis la carte.',
-          });
+          }, this._t('btn_stop_watering'));
 
         } else if (action === 'zone-off' && sw) {
           this._call('switch', 'turn_off', { entity_id: sw });
@@ -3192,8 +3210,68 @@ class GazonIntelligentCard extends HTMLElement {
       </div>`;
   }
 
-  _call(domain, service, data) {
-    if (this._hass) this._hass.callService(domain, service, data);
+  /* ⚠️ UN APPEL QUI ÉCHOUE DOIT SE VOIR. `hass.callService` rend une promesse, que la carte
+     laissait tomber : un refus de l'intégration (champ inconnu, date illisible, deux gazons
+     sans cible…) finissait en « Uncaught (in promise) » dans la console, alors que la popup
+     s'était déjà refermée comme si tout allait bien. « Déclarer un arrosage » a échoué ainsi à
+     chaque appel du 30/07 au 16/09/2026.
+     Le frontend servi par Home Assistant (20260826.7, relu sur le serveur le 16/09/2026) affiche
+     bien un toast générique, qui nomme le service technique (« …gazon_intelligent/declare_watering »)
+     puis recopie le message du serveur. On le coupe par le 5ᵉ argument, `notifyOnError` (un
+     frontend qui ne le connaît pas ignore un argument en trop), et `_signalerEchec` publie le
+     nôtre, qui nomme l'action cliquée : un seul toast. Ce que faisait le toast natif est repris
+     à l'identique : message traduit, vibration d'échec, affichage même hors de la page.
+     Ne rejette jamais : la promesse vaut vrai si l'appel a abouti, faux sinon. */
+  _call(domain, service, data, libelle) {
+    const h = this._hass;
+    if (!h) return Promise.resolve(false);
+    let envoi;
+    try {
+      envoi = h.callService(domain, service, data, undefined, false);
+    } catch (err) {
+      envoi = Promise.reject(err);   // défensif : le `callService` de HA est asynchrone
+    }
+    return Promise.resolve(envoi).then(
+      () => true,
+      err => this._signalerEchec(domain, service, data, libelle, err).then(() => false, () => false));
+  }
+
+  async _signalerEchec(domain, service, data, libelle, err) {
+    console.error(`gazon-intelligent-card : échec de ${domain}.${service}`, data, err);
+    const h = this._hass;
+    // Même source que le toast natif : une erreur qui porte une clé de traduction se lit
+    // dans la langue de l'interface (« action introuvable »…), pas dans l'anglais du serveur.
+    let detail = '';
+    try {
+      if (err && err.translation_domain && err.translation_key && h && h.loadBackendTranslation) {
+        const localize = await h.loadBackendTranslation('exceptions', err.translation_domain);
+        detail = localize(`component.${err.translation_domain}.exceptions.${err.translation_key}.message`,
+          err.translation_placeholders) || '';
+      }
+    } catch (_) { /* repli sur le message brut */ }
+    // Refus du serveur : `{ code, message }`. Socket fermée pendant l'appel :
+    // `{ error: { code: 3, message } }`. Socket déjà fermée au clic : le nombre 3 tout seul.
+    detail = detail
+      || (err && (err.message || err.error?.message))
+      || (err === 3 && this._t('action_failed_connection'))
+      || (typeof err === 'string' && err)
+      || this._t('action_failed_unknown');
+    const nom = libelle
+      || ent(h, data && data.entity_id)?.attributes?.friendly_name
+      || `${domain}.${service}`;
+    // Fonctions de remplacement : un `$` dans le message du serveur serait sinon interprété.
+    const message = this._t('action_failed')
+      .replace('{action}', () => nom)
+      .replace('{detail}', () => detail);
+    // ⚠️ Une carte retirée de la page ne transmet plus rien. L'arrêt différé du bouton « 5 min »
+    // peut échouer APRÈS un changement de page, quand le routeur de HA a déjà détaché la carte.
+    // Le toast natif partait de la racine `<home-assistant>` : on y revient dans ce cas.
+    const doc = this.ownerDocument || document;
+    const source = this.isConnected ? this : (doc.querySelector('home-assistant') || this);
+    const emettre = (type, contenu) => source.dispatchEvent(
+      new CustomEvent(type, { detail: contenu, bubbles: true, composed: true }));
+    emettre('haptic', 'failure');
+    emettre('hass-notification', { message, duration: 10000 });
   }
 }
 

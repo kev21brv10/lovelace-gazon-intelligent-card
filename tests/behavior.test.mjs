@@ -670,3 +670,488 @@ test("lame et recommandation identiques : pas de mention redondante", () => {
   assert.ok(!/recommandé/.test(tuile.textContent),
     "la recommandation est répétée alors qu'elle est identique au réglage");
 });
+
+// ── Les boutons durs à cliquer (10/09/2026) ──────────────────────────────────
+//
+// ⚠️ CE QUE CES DEUX TESTS PROTÈGENT. Kévin : « certains boutons de la carte ont du mal à
+// s'actionner au clic ». Cause mécanique : un `click` n'est émis QUE si l'appui et le
+// relâchement tombent sur le même élément. Tous les boutons d'un onglet vivent dans le seul
+// bloc `.content`, que `_render` remplace dès que son HTML change — et la frise d'arrosage
+// positionnait ses barres en pourcentage d'une fenêtre ancrée sur `Date.now()`, à deux
+// décimales : 0,01 % de 24 h = 8,64 s. Le bloc, donc tous ses boutons, était détruit et
+// reconstruit toutes les 8,6 secondes sans qu'aucun état ne bouge.
+
+function cardArrosage() {
+  const window = setupWindow();
+  const el = window.document.createElement(CARD_TAG);
+  window.document.body.appendChild(el);
+  el.setConfig({
+    type: `custom:${CARD_TAG}`,
+    entity_assistant: "sensor.gazon_intelligent_assistant",
+    zones: [{ name: "Zone 1", switch: "switch.zone1" }],
+  });
+  el.hass = {
+    ...HASS,
+    states: { ...HASS.states,
+              "switch.zone1": { entity_id: "switch.zone1", state: "off", attributes: {} } },
+  };
+  // ⚠️ AVANT tout rendu de l'onglet : `_timeline` déclenche sinon une récupération
+  // d'historique asynchrone qui écrase le fixture entre l'appel et l'assertion.
+  el._historyTs = Date.now();
+  el._tab = "arrosage";
+  return { window, el };
+}
+
+// ⚠️ PAS DE TEST SUR L'ANCRAGE DE LA FRISE, ET C'EST DÉLIBÉRÉ. Le cas est établi par
+// l'arithmétique du code — `leftPct.toFixed(2)` sur une fenêtre de 24 h ancrée sur
+// `Date.now()` : 0,01 % = 8,64 s, donc la chaîne change toutes les 8,6 s pour une session
+// passée figée. Mais reproduire une barre FIDÈLE dans jsdom demande un historique de vannes
+// que `_fetchHistory` écrase, et le fixture bricolé rendait une barre time-invariante : le
+// test passait à vide, dans les deux sens. Un test qui ne mord pas est pire que pas de test
+// (leçon du projet). L'ancrage à la minute est conservé comme réduction de travail inutile ;
+// le correctif qui traite VRAIMENT le symptôme est le suivant, et lui est testé.
+
+test("aucun bloc n'est remplacé tant qu'un doigt est posé", () => {
+  const { window, el } = makeCard();          // onglet Synthèse : il affiche l'assistant
+  const card = el.shadowRoot.getElementById("gi-card");
+  const avant = card.querySelector(".content");
+  assert.ok(avant, "prémisse : le bloc .content doit exister");
+
+  const nouvelEtat = {
+    ...HASS,
+    states: { ...HASS.states,
+      "sensor.gazon_intelligent_assistant": {
+        entity_id: "sensor.gazon_intelligent_assistant",
+        state: "arrosage",
+        attributes: { action: "arrosage", status: "action_required",
+                      reason: "Arrosage requis ce matin." },
+      } },
+  };
+
+  // Le doigt se pose, PUIS l'état change : le rendu doit attendre.
+  card.dispatchEvent(new window.Event("pointerdown", { bubbles: true }));
+  el.hass = nouvelEtat;
+  assert.equal(card.querySelector(".content"), avant,
+    "le bloc a été remplacé sous le doigt : le clic n'émettra aucun événement");
+  assert.equal(el._renduDiffere, true, "le rendu n'a pas été mémorisé pour plus tard");
+
+  // ⚠️ LE DOIGT SE LÈVE — ET LE RENDU NE DOIT TOUJOURS PAS PARTIR. `click` est émis APRÈS
+  // `pointerup`, dans la même salve : remplacer le bloc ici supprimerait le clic, exactement
+  // le défaut qu'on corrige. Le premier jet de ce correctif rendait en synchrone et ne
+  // marchait donc QUE si aucune mise à jour n'était arrivée pendant l'appui — le seul cas qui
+  // n'avait besoin de rien.
+  window.document.dispatchEvent(new window.Event("pointerup", { bubbles: true }));
+  assert.equal(card.querySelector(".content"), avant,
+    "le bloc est remplacé entre pointerup et click : le clic est supprimé");
+
+  // ⚠️ VÉRIFIÉ AU BANC AVEC DE VRAIS CLICS SOURIS, le 10/09/2026 : le navigateur n'émet pas
+  // toujours `pointerup` et `click` dans la MÊME tâche. Différer d'une seule tâche après le
+  // pointerup ne suffit donc pas — le rendu s'intercalait entre les deux et le clic n'existait
+  // pas. C'est le `click` qui libère ; le pointerup ne pose qu'un filet de 150 ms.
+  return new Promise(resolve => setTimeout(() => {
+    assert.equal(card.querySelector(".content"), avant,
+      "le rendu part entre pointerup et click : c'est le défaut, pas le correctif");
+    card.dispatchEvent(new window.Event("click", { bubbles: true }));
+    setTimeout(() => {
+      assert.notEqual(card.querySelector(".content"), avant,
+        "le rendu différé n'a jamais été rejoué : la carte reste figée");
+      window.close();
+      resolve();
+    }, 60);
+  }, 30));   // 30 + 60 restent SOUS le filet de 150 ms : c'est bien le clic qu'on teste
+});
+
+test("sans clic, un filet libère quand même le rendu", () => {
+  const { window, el } = makeCard();
+  const card = el.shadowRoot.getElementById("gi-card");
+  const avant = card.querySelector(".content");
+
+  card.dispatchEvent(new window.Event("pointerdown", { bubbles: true }));
+  el.hass = {
+    ...HASS,
+    states: { ...HASS.states,
+      "sensor.gazon_intelligent_assistant": {
+        entity_id: "sensor.gazon_intelligent_assistant", state: "arrosage",
+        attributes: { action: "arrosage", status: "action_required", reason: "Filet." } } },
+  };
+  // Glissement : le doigt se lève ailleurs, aucun `click` ne suivra jamais. Sans filet, la
+  // carte resterait figée pour de bon — bien pire que le défaut corrigé.
+  window.document.dispatchEvent(new window.Event("pointerup", { bubbles: true }));
+  return new Promise(resolve => setTimeout(() => {
+    assert.notEqual(card.querySelector(".content"), avant,
+      "aucun clic n'est venu et le filet n'a pas libéré : la carte est figée");
+    window.close();
+    resolve();
+  }, 250));
+});
+
+// ─── 0.29.0 — les cinq états de tonte et le motif de la hauteur conseillée ─────────────────
+// Copie littérale de POSSIBLE_TONTE_STATUT_VALUES (intégration, decision_models.py) : la table de la
+// carte ne couvrait que 2 des 5 valeurs réelles, les 3 autres tombaient dans le repli sans accents.
+const STATUTS_TONTE = ["autorisee", "autorisee_avec_precaution", "a_surveiller", "deconseillee", "interdite"];
+
+function carteStatut(statut, langue = "fr") {
+  const window = setupWindow();
+  const el = window.document.createElement(CARD_TAG);
+  window.document.body.appendChild(el);
+  el.setConfig({ type: `custom:${CARD_TAG}`, zones: [{ name: "Z", switch: "switch.z1", debit: 14 }] });
+  el.hass = {
+    ...HASS,
+    locale: { language: langue },
+    states: {
+      ...HASS.states,
+      [TONTE_AUTORISEE]: { entity_id: TONTE_AUTORISEE, state: "off", attributes: { tonte_statut: statut } },
+    },
+  };
+  el._tab = "tonte";
+  el._lastHtml = null;
+  el._render();
+  return el;
+}
+
+function pastilleTonte(el, prefixe) {
+  return [...el.shadowRoot.querySelectorAll(".chip")].find((c) => c.textContent.trim().startsWith(prefixe));
+}
+
+test("les cinq états de tonte ont leur libellé exact, accents compris", () => {
+  const attendus = ["Autorisée", "Autorisée avec précaution", "À surveiller", "Déconseillée", "Interdite"];
+  STATUTS_TONTE.forEach((statut, i) => {
+    const chip = pastilleTonte(carteStatut(statut), "Tonte :");
+    assert.ok(chip, `pas de pastille Tonte pour ${statut}`);
+    assert.equal(chip.textContent.trim(), `Tonte : ${attendus[i]}`);
+  });
+});
+
+test("en anglais, plus un mot de français dans la pastille de tonte", () => {
+  // `_t` retombe SILENCIEUSEMENT sur le français quand une clé anglaise manque : ce test est le seul
+  // à voir « Interdite » affiché sur une interface anglaise.
+  const attendus = ["Allowed", "Allowed with caution", "Monitor", "Not recommended", "Forbidden"];
+  STATUTS_TONTE.forEach((statut, i) => {
+    const chip = pastilleTonte(carteStatut(statut, "en"), "Mowing :");
+    assert.ok(chip, `pas de pastille Mowing pour ${statut}`);
+    assert.equal(chip.textContent.trim(), `Mowing : ${attendus[i]}`);
+  });
+});
+
+test("couleur : même convention que la pastille Créneau, sans clignotement vert/gris", () => {
+  const couleur = (statut) => pastilleTonte(carteStatut(statut), "Tonte :").querySelector(".chip-dot").style.background;
+  // autorisé = accent ; à éviter = orange ; bloqué = gris.
+  assert.equal(couleur("autorisee"), "var(--gi-accent)");
+  assert.equal(couleur("autorisee_avec_precaution"), couleur("autorisee"), "une tonte autorisée ne se grise pas");
+  assert.equal(couleur("a_surveiller"), "var(--gi-warn)");
+  assert.equal(couleur("deconseillee"), couleur("a_surveiller"));
+  assert.equal(couleur("interdite"), "var(--gi-muted)");
+});
+
+test("un état inconnu reste présentable : sans tiret bas, point gris", () => {
+  const chip = pastilleTonte(carteStatut("nouvel_etat"), "Tonte :");
+  assert.equal(chip.textContent.trim(), "Tonte : Nouvel etat");
+  assert.equal(chip.querySelector(".chip-dot").style.background, "var(--gi-muted)");
+});
+
+function carteMotif({ coupeMm = 40, reco = "4.0", motif, garde, onglet = "tonte" } = {}) {
+  const window = setupWindow();
+  const el = window.document.createElement(CARD_TAG);
+  window.document.body.appendChild(el);
+  el.setConfig({ type: `custom:${CARD_TAG}`, zones: [{ name: "Z", switch: "switch.z1", debit: 14 }] });
+  const attrs = { hauteur_tonte_min_cm: 3, hauteur_tonte_max_cm: 6 };
+  if (motif !== undefined) attrs.hauteur_tonte_motif = motif;
+  if (garde !== undefined) attrs.hauteur_tonte_garde_fou_label = garde;
+  el.hass = {
+    ...HASS,
+    states: {
+      ...HASS.states,
+      [ETAT_TONTE]: { entity_id: ETAT_TONTE, state: "a_surveiller", attributes: { tondeuse_hauteur_coupe_mm: coupeMm } },
+      "sensor.gazon_intelligent_hauteur_de_tonte_conseillee": {
+        entity_id: "sensor.gazon_intelligent_hauteur_de_tonte_conseillee", state: reco, attributes: attrs,
+      },
+      "sensor.gazon_intelligent_hauteur_gazon_estimee": {
+        entity_id: "sensor.gazon_intelligent_hauteur_gazon_estimee", state: "5.5", attributes: { gazon_pousse_jour_cm: 0.24 },
+      },
+    },
+  };
+  el._tab = onglet;
+  el._lastHtml = null;
+  el._render();
+  return el;
+}
+
+function tuileHauteur(el) {
+  return [...el.shadowRoot.querySelectorAll(".stat-card")].find((t) => /Hauteur de coupe/.test(t.textContent));
+}
+
+test("le motif de la hauteur conseillée s'affiche dans la tuile Hauteur", () => {
+  const motif = "Septembre : base 4,0 cm (hauteur de pousse).";
+  const note = tuileHauteur(carteMotif({ motif })).querySelector(".mow-motif");
+  assert.ok(note, "le motif n'est pas affiché");
+  assert.equal(note.textContent, motif);
+});
+
+test("le motif suit « recommandé X cm » et précède les bornes Min/Max", () => {
+  const tuile = tuileHauteur(carteMotif({ coupeMm: 55, reco: "6.0", motif: "Juillet : base 5,0 cm, forte chaleur (34,0 °C) +1,0." }));
+  const enfants = [...tuile.children];
+  const iReco = enfants.findIndex((e) => /recommandé 6,0 cm/.test(e.textContent));
+  const iMotif = enfants.findIndex((e) => e.classList.contains("mow-motif"));
+  const iBornes = enfants.findIndex((e) => /^Min /.test(e.textContent.trim()));
+  assert.ok(iReco >= 0 && iMotif > iReco && iBornes > iMotif, `ordre : reco ${iReco}, motif ${iMotif}, bornes ${iBornes}`);
+});
+
+test("sans motif (intégration plus ancienne), rien de nouveau ni de vide", () => {
+  for (const motif of [undefined, "", "   "]) {
+    const tuile = tuileHauteur(carteMotif({ motif }));
+    assert.equal(tuile.querySelector(".mow-motif"), null, `note rendue pour ${JSON.stringify(motif)}`);
+    assert.equal(tuile.querySelector(".stat-note"), null);
+  }
+});
+
+test("le motif est échappé", () => {
+  const tuile = tuileHauteur(carteMotif({ motif: "<b>x</b>" }));
+  assert.equal(tuile.querySelector("b"), null);
+  assert.equal(tuile.querySelector(".mow-motif").textContent, "<b>x</b>");
+});
+
+test("le motif n'explique pas la jauge de pousse (sa cible est la lame)", () => {
+  const el = carteMotif({ motif: "Septembre : base 4,0 cm (hauteur de pousse)." });
+  const jauge = el.shadowRoot.querySelector(".pousse");
+  assert.ok(jauge, "prémisse : la jauge de pousse est rendue");
+  assert.ok(!/Septembre/.test(jauge.textContent), "motif rattaché à la jauge");
+});
+
+test("motif et garde-fou coexistent : le pourquoi d'abord, puis les chiffres du tiers", () => {
+  const tuile = tuileHauteur(carteMotif({
+    motif: "Septembre : base 4,0 cm (hauteur de pousse) ; relevée par la règle du tiers.",
+    garde: "Règle du tiers : gazon à 7 cm → ne pas descendre sous 4.7 cm.",
+  }));
+  const notes = [...tuile.querySelectorAll(".stat-note")].map((n) => n.textContent);
+  assert.equal(notes.length, 2);
+  assert.match(notes[0], /^Septembre/);
+  assert.match(notes[1], /^Règle du tiers/);
+});
+
+test("onglet Gazon : la tuile Hauteur porte le motif en infobulle, et rien sans motif", () => {
+  const motif = "Septembre : base 4,0 cm (hauteur de pousse).";
+  const tuileGazon = (el) => [...el.shadowRoot.querySelectorAll(".stat-card")].find((t) => /Hauteur tonte/.test(t.textContent));
+  const avec = tuileGazon(carteMotif({ motif, onglet: "gazon" }));
+  assert.ok(avec, "tuile Hauteur tonte introuvable dans l'onglet Gazon");
+  assert.equal(avec.getAttribute("title"), motif);
+  const sans = tuileGazon(carteMotif({ onglet: "gazon" }));
+  assert.equal(sans.hasAttribute("title"), false);
+});
+
+test("lame inconnue : le motif s'affiche sous la valeur, qui EST alors la recommandation", () => {
+  const motif = "Octobre : base 4,0 cm ; semis en stabilisation (J+40) : plancher 5,0 cm.";
+  const tuile = tuileHauteur(carteMotif({ coupeMm: null, reco: "5.0", motif }));
+  assert.match(tuile.querySelector(".stat-value").textContent, /5,0 cm/);
+  assert.equal(tuile.querySelector(".mow-motif")?.textContent, motif);
+});
+
+test("onglet Gazon : l'infobulle est échappée, aucun attribut injecté", () => {
+  const motif = 'a" onmouseover="x <b>';
+  const el = carteMotif({ motif, onglet: "gazon" });
+  const tuile = [...el.shadowRoot.querySelectorAll(".stat-card")].find((t) => /Hauteur tonte/.test(t.textContent));
+  assert.equal(tuile.getAttribute("title"), motif);
+  assert.equal(tuile.hasAttribute("onmouseover"), false);
+  assert.equal(tuile.querySelector("b"), null);
+});
+
+test("un motif qui n'est pas une chaîne n'affiche rien (ni « [object Object] »)", () => {
+  for (const motif of [{}, ["a", "b"], 5, true]) {
+    const el = carteMotif({ motif });
+    assert.equal(tuileHauteur(el).querySelector(".mow-motif"), null, `rendu pour ${JSON.stringify(motif)}`);
+    assert.ok(!/object Object/.test(el.shadowRoot.innerHTML));
+  }
+  const gazon = carteMotif({ motif: {}, onglet: "gazon" });
+  const tuile = [...gazon.shadowRoot.querySelectorAll(".stat-card")].find((t) => /Hauteur tonte/.test(t.textContent));
+  assert.equal(tuile.hasAttribute("title"), false);
+});
+
+test("la date par défaut des formulaires est la date LOCALE, pas la date UTC", () => {
+  // À 00:30 à Paris (UTC+2 l'été), `toISOString()` donnait la VEILLE.
+  const tzAvant = process.env.TZ;
+  process.env.TZ = "Europe/Paris";
+  try {
+    const window = setupWindow();
+    const minuitTrente = new window.Date(2026, 8, 12, 0, 30);
+    assert.equal(window.jourLocalIso(minuitTrente), "2026-09-12");
+    assert.equal(window.jourLocalIso(new window.Date(2026, 8, 12, 23, 59)), "2026-09-12");
+  } finally {
+    if (tzAvant === undefined) delete process.env.TZ; else process.env.TZ = tzAvant;
+  }
+});
+
+test("le formulaire « Déclarer un produit » propose la date LOCALE à 00:30", () => {
+  // Le test précédent ne vérifie que la fonction : on peut revenir à `toISOString()` sur un site
+  // sans le voir. Ici l'horloge du DOM est figée AVANT le chargement de la carte, puis on rend
+  // le vrai formulaire (contre-revue du 11/09/2026).
+  const tzAvant = process.env.TZ;
+  process.env.TZ = "Europe/Paris";
+  try {
+    const dom = new JSDOM("<!DOCTYPE html><body></body>", { runScripts: "outside-only", pretendToBeVisual: true });
+    const { window } = dom;
+    window.requestAnimationFrame ??= (cb) => window.setTimeout(() => cb(0), 0);
+    window.matchMedia ??= () => ({ matches: false, media: "", addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
+    window.ResizeObserver ??= class { observe() {} unobserve() {} disconnect() {} };
+    window.eval(`(() => {
+      const R = Date; const T = new R(2026, 8, 12, 0, 30).getTime();
+      class D extends R { constructor(...a) { super(...(a.length ? a : [T])); } static now() { return T; } }
+      globalThis.Date = D;
+    })()`);
+    window.eval(BUNDLE);
+    const el = window.document.createElement(CARD_TAG);
+    window.document.body.appendChild(el);
+    el.setConfig({ type: `custom:${CARD_TAG}`, zones: [{ name: "Z", switch: "switch.z1", debit: 14 }] });
+    el._declareOpen = true;  // ouvert AVANT le premier rendu (déclenché par l'affectation de hass)
+    el.hass = {
+      ...HASS,
+      states: {
+        ...HASS.states,
+        // Le champ date n'est rendu que si le catalogue contient au moins un produit.
+        "sensor.gazon_intelligent_catalogue_produits": {
+          entity_id: "sensor.gazon_intelligent_catalogue_produits", state: "1",
+          attributes: { products_summary: [{ id: "floranid", nom: "Floranid", type: "Fertilisation" }] },
+        },
+      },
+    };
+    el._lastHtml = null;
+    el._render();
+    const champ = el.shadowRoot.querySelector("#gi-decl-date");
+    assert.ok(champ, "formulaire non rendu");
+    assert.equal(champ.getAttribute("value"), "2026-09-12");
+    assert.equal(champ.getAttribute("max"), "2026-09-12");
+  } finally {
+    if (tzAvant === undefined) delete process.env.TZ; else process.env.TZ = tzAvant;
+  }
+});
+
+test("« J'ai tondu » n'est plus proposé le jour d'une tonte enregistrée", () => {
+  // L'attribut `derniere_tonte_date` (intégration 0.88.0) n'était publié par personne : le bouton
+  // restait proposé en permanence depuis la 0.21.2.
+  const aujourdhui = (() => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); })();
+  const avec = carteTonte({ derniere_tonte_date: aujourdhui }, { surLeBinaire: true });
+  assert.ok(!/J'ai tondu/.test(avec.shadowRoot.textContent), "bouton proposé après une tonte du jour");
+  const hier = carteTonte({ derniere_tonte_date: "2000-01-01" }, { surLeBinaire: true });
+  assert.ok(/J'ai tondu/.test(hier.shadowRoot.textContent));
+});
+
+// ── Heure du prochain lancement (intégration 0.90.0) ─────────────────────────
+// L'arrosage du matin ne part plus à l'ouverture de la fenêtre (03:45) : il part pour finir
+// 15 min avant le lever du soleil. Kévin veut voir L'HEURE du lancement, pas la fenêtre.
+
+function carteProchainArrosage(attrs, onglet) {
+  const window = setupWindow();
+  const el = window.document.createElement(CARD_TAG);
+  window.document.body.appendChild(el);
+  el.setConfig({ type: `custom:${CARD_TAG}`, zones: [{ name: "Z", switch: "switch.z1", debit: 14 }] });
+  el._historyTs = Date.now();  // pas de récupération d'historique asynchrone pendant le test
+  el.hass = {
+    ...HASS,
+    states: {
+      ...HASS.states,
+      "sensor.gazon_intelligent_prochain_arrosage": {
+        entity_id: "sensor.gazon_intelligent_prochain_arrosage", state: "16/09/2026",
+        attributes: { objective_mm: 5.3, watering_window_display: "03:45–10:00", ...attrs },
+      },
+      "switch.z1": { entity_id: "switch.z1", state: "off", attributes: {} },
+    },
+  };
+  el._tab = onglet;
+  el._lastHtml = null;
+  el._render();
+  return el;
+}
+
+function demainA(hhmm) {
+  const d = new Date(Date.now() + 86400000);
+  const jour = new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  return `${jour}T${hhmm}:00`;
+}
+
+function tuileProchainArrosage(el) {
+  return [...el.shadowRoot.querySelectorAll(".stat-card")]
+    .find(c => c.querySelector(".stat-label")?.textContent.trim() === "Prochain arrosage");
+}
+
+test("la tuile « Prochain arrosage » donne l'heure du lancement, pas la fenêtre", () => {
+  const el = carteProchainArrosage(
+    { departure_time: "06:15", end_time: "07:19", target_datetime: demainA("06:15") }, "synthese");
+  const tuile = tuileProchainArrosage(el);
+  assert.ok(tuile, "tuile introuvable");
+  assert.equal(tuile.querySelector(".stat-value").textContent.trim(), "06:15 → 07:19");
+  const sous = tuile.querySelector(".stat-sub").textContent;
+  assert.match(sous, /5,3 mm/);
+  assert.match(sous, /Demain/);
+});
+
+test("sans heure de lancement publiée, la tuile garde la fenêtre", () => {
+  const el = carteProchainArrosage({}, "synthese");
+  assert.equal(tuileProchainArrosage(el).querySelector(".stat-value").textContent.trim(), "03:45–10:00");
+});
+
+test("une heure de lancement illisible est ignorée", () => {
+  for (const departure_time of ["6h15", "", 615, { h: 6 }]) {
+    const el = carteProchainArrosage({ departure_time, end_time: "07:19" }, "synthese");
+    assert.equal(tuileProchainArrosage(el).querySelector(".stat-value").textContent.trim(), "03:45–10:00",
+      `heure acceptée à tort : ${JSON.stringify(departure_time)}`);
+  }
+});
+
+test("l'onglet Arrosage annonce le départ et la fin, la fenêtre garde son libellé", () => {
+  const el = carteProchainArrosage(
+    { departure_time: "06:15", end_time: "07:19", target_datetime: demainA("06:15") }, "arrosage");
+  const ligne = el.shadowRoot.querySelector(".gi-launch");
+  assert.ok(ligne, "ligne de lancement absente");
+  assert.equal(ligne.textContent.trim(), "Demain · départ 06:15 · fin vers 07:19");
+  const badge = [...el.shadowRoot.querySelectorAll(".hero-badge")].map(b => b.textContent.trim());
+  assert.ok(badge.includes("Fenêtre : 03:45–10:00"), `badge inattendu : ${badge}`);
+  // Et sans départ calé, rien de neuf : pas de ligne, la plage reste nue comme avant.
+  const sans = carteProchainArrosage({}, "arrosage");
+  assert.equal(sans.shadowRoot.querySelector(".gi-launch"), null);
+  assert.ok([...sans.shadowRoot.querySelectorAll(".hero-badge")].some(b => b.textContent.trim() === "03:45–10:00"));
+});
+
+test("le soir d'un changement d'heure, le départ de demain s'affiche « Demain »", () => {
+  // Le 25/10/2026 dure 25 h : « demain » comparé en millisecondes (86 400 000) ne tombait plus
+  // juste, et la ligne de lancement affichait « lun. 26 oct. » au lieu de « Demain ».
+  const tzAvant = process.env.TZ;
+  process.env.TZ = "Europe/Paris";
+  try {
+    for (const [soir, demain] of [["2026, 9, 25, 20, 0", "2026-10-26"], ["2027, 2, 28, 20, 0", "2027-03-29"]]) {
+      const dom = new JSDOM("<!DOCTYPE html><body></body>", { runScripts: "outside-only", pretendToBeVisual: true });
+      const { window } = dom;
+      window.requestAnimationFrame ??= (cb) => window.setTimeout(() => cb(0), 0);
+      window.matchMedia ??= () => ({ matches: false, media: "", addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
+      window.ResizeObserver ??= class { observe() {} unobserve() {} disconnect() {} };
+      window.eval(`(() => {
+        const R = Date; const T = new R(${soir}).getTime();
+        class D extends R { constructor(...a) { super(...(a.length ? a : [T])); } static now() { return T; } }
+        globalThis.Date = D;
+      })()`);
+      window.eval(BUNDLE);
+      const el = window.document.createElement(CARD_TAG);
+      window.document.body.appendChild(el);
+      el.setConfig({ type: `custom:${CARD_TAG}`, zones: [{ name: "Z", switch: "switch.z1", debit: 14 }] });
+      el._historyTs = Date.now();
+      el.hass = {
+        ...HASS,
+        states: {
+          ...HASS.states,
+          "sensor.gazon_intelligent_prochain_arrosage": {
+            entity_id: "sensor.gazon_intelligent_prochain_arrosage", state: demain,
+            attributes: { objective_mm: 5.3, watering_window_display: "03:45–10:00",
+                          departure_time: "06:15", end_time: "07:19", target_datetime: `${demain}T06:15:00` },
+          },
+          "switch.z1": { entity_id: "switch.z1", state: "off", attributes: {} },
+        },
+      };
+      el._tab = "arrosage";
+      el._lastHtml = null;
+      el._render();
+      const ligne = el.shadowRoot.querySelector(".gi-launch");
+      assert.ok(ligne, `ligne de lancement absente (${demain})`);
+      assert.equal(ligne.textContent.trim(), "Demain · départ 06:15 · fin vers 07:19", `soir du ${soir}`);
+      window.close();
+    }
+  } finally {
+    if (tzAvant === undefined) delete process.env.TZ; else process.env.TZ = tzAvant;
+  }
+});
